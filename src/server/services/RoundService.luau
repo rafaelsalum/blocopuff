@@ -7,13 +7,16 @@ local GameConfig = require(ReplicatedStorage.Shared.config.GameConfig)
 local RoundTypes = require(ReplicatedStorage.Shared.types.RoundTypes)
 local RoundMessages = require(ReplicatedStorage.Shared.modules.RoundMessages)
 local StateAttributeNames = require(ReplicatedStorage.Shared.types.StateAttributeNames)
+local EliminationTypes = require(ReplicatedStorage.Shared.types.EliminationTypes)
 local ArenaService = require(script.Parent.ArenaService)
 local LobbyService = require(script.Parent.LobbyService)
 local ReplicatedState = require(script.Parent.ReplicatedStateService)
 local PuffadorService = require(script.Parent.PuffadorService)
+local EliminationService = require(script.Parent.EliminationService)
 
 type RoundState = RoundTypes.RoundState
 type RoundTimings = GameConfig.RoundTimings
+type EliminationReason = EliminationTypes.EliminationReason
 
 type Participant = {
 	player: Player,
@@ -32,10 +35,14 @@ local TICK_INTERVAL = 1
 -- cliente para saber se participa da rodada atual sem inferir pela posição.
 -- IsRoundParticipant: true enquanto o jogador integra a rodada em andamento.
 -- ParticipatingRoundId: RoundId da rodada em que participa (0 = nenhuma).
--- IsEliminated: true se o Humanoid do participante morreu durante Active.
+-- IsEliminated: true se o participante foi eliminado durante Active.
+-- EliminationReason: causa da eliminação (None enquanto ativo).
+-- EliminatedAtRoundId: RoundId em que a eliminação ocorreu (0 = nenhuma).
 local ATTR_IS_PARTICIPANT = StateAttributeNames.PlayerIsParticipant
 local ATTR_PARTICIPATING_ROUND_ID = StateAttributeNames.PlayerParticipatingRoundId
 local ATTR_IS_ELIMINATED = StateAttributeNames.PlayerIsEliminated
+local ATTR_ELIMINATION_REASON = StateAttributeNames.PlayerEliminationReason
+local ATTR_ELIMINATED_AT_ROUND_ID = StateAttributeNames.PlayerEliminatedAtRoundId
 
 local RoundService = {}
 
@@ -145,31 +152,51 @@ local function resetParticipantAttributes(player: Player)
 	player:SetAttribute(ATTR_IS_PARTICIPANT, false)
 	player:SetAttribute(ATTR_PARTICIPATING_ROUND_ID, 0)
 	player:SetAttribute(ATTR_IS_ELIMINATED, false)
+	player:SetAttribute(ATTR_ELIMINATION_REASON, EliminationTypes.None)
+	player:SetAttribute(ATTR_ELIMINATED_AT_ROUND_ID, 0)
 end
 
 local function markParticipantAttributes(player: Player, roundId: number)
 	player:SetAttribute(ATTR_IS_PARTICIPANT, true)
 	player:SetAttribute(ATTR_PARTICIPATING_ROUND_ID, roundId)
 	player:SetAttribute(ATTR_IS_ELIMINATED, false)
-end
-
-local function markEliminated(player: Player)
-	player:SetAttribute(ATTR_IS_ELIMINATED, true)
+	player:SetAttribute(ATTR_ELIMINATION_REASON, EliminationTypes.None)
+	player:SetAttribute(ATTR_ELIMINATED_AT_ROUND_ID, 0)
 end
 
 local function onPlayerAdded(player: Player)
 	resetParticipantAttributes(player)
 end
 
-local function onParticipantDied(player: Player)
+-- Ponto único e idempotente de eliminação: usado tanto pelo handler de morte
+-- (Humanoid.Died) quanto pelo callback fornecido ao EliminationService para
+-- a zona de queda. Marca o participante inativo antes de zerar o Humanoid,
+-- para que um Died disparado por essa própria chamada não sobrescreva a causa.
+local function eliminateParticipant(player: Player, reason: EliminationReason)
 	local participant = participants[player]
-	if participant == nil then
+	if participant == nil or not participant.alive then
 		return
 	end
 
 	participant.alive = false
-	markEliminated(player)
+	player:SetAttribute(ATTR_IS_ELIMINATED, true)
+	player:SetAttribute(ATTR_ELIMINATION_REASON, reason)
+	player:SetAttribute(ATTR_ELIMINATED_AT_ROUND_ID, currentRoundId)
 	PuffadorService.revokeFrom(player)
+
+	local character = player.Character
+	if character ~= nil then
+		local humanoid = character:FindFirstChildOfClass("Humanoid")
+		if humanoid ~= nil and humanoid.Health > 0 then
+			humanoid.Health = 0
+		end
+	end
+
+	print(string.format("[BlocoPuff] %s eliminated: %s", player.Name, reason))
+end
+
+local function onParticipantDied(player: Player)
+	eliminateParticipant(player, EliminationTypes.CharacterDied)
 end
 
 local function connectParticipantDeathHandlers(players: { Player })
@@ -222,7 +249,12 @@ local function evaluateActiveParticipants(): (number, Participant?)
 end
 
 local function onPlayerRemoving(player: Player)
-	if participants[player] ~= nil then
+	local participant = participants[player]
+	if participant ~= nil then
+		if participant.alive then
+			print(string.format("[BlocoPuff] %s eliminated: %s", player.Name, EliminationTypes.PlayerLeft))
+		end
+
 		participants[player] = nil
 		for index, participantPlayer in ipairs(participantOrder) do
 			if participantPlayer == player then
@@ -302,6 +334,10 @@ local function beginRound(timings: RoundTimings)
 	connectParticipantDeathHandlers(participantOrder)
 	PuffadorService.beginRound(participantOrder, currentRoundId)
 
+	-- Só inicia o monitoramento da zona depois que os participantes já
+	-- estão posicionados na arena, evitando eliminar alguém ainda no lobby.
+	EliminationService.beginRound(participantOrder, currentRoundId)
+
 	setState(RoundTypes.Active)
 	ReplicatedState.setRoundId(currentRoundId)
 	ReplicatedState.setParticipantCount(#participantOrder)
@@ -340,6 +376,7 @@ end
 
 local function runEnding(timings: RoundTimings)
 	setState(RoundTypes.Ending)
+	EliminationService.endRound()
 	ArenaService.endRound()
 	PuffadorService.endRound()
 	disconnectParticipantDeathHandlers()
@@ -424,6 +461,7 @@ function RoundService.stop()
 	end
 
 	disconnectParticipantDeathHandlers()
+	EliminationService.stop()
 	ArenaService.endRound()
 	PuffadorService.stop()
 	ArenaService.restoreAllBlocks()
@@ -446,5 +484,9 @@ function RoundService.getParticipants(): { Player }
 
 	return copy
 end
+
+-- Exposto para ser passado como callback tipado ao EliminationService.start,
+-- evitando que EliminationService precise depender de RoundService.
+RoundService.eliminateParticipant = eliminateParticipant
 
 return table.freeze(RoundService)

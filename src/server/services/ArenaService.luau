@@ -448,4 +448,12 @@ function ArenaService.getTotalBlockCount(): number
 	return #arenaBlocks
 end
 
+function ArenaService.getEliminationY(): number
+	if currentArenaConfig == nil then
+		error(`Cannot compute elimination height before {SERVICE_NAME}.create has been called`)
+	end
+
+	return currentArenaConfig.Position.Y - GameConfig.EliminationZone.DepthBelowArena
+end
+
 return table.freeze(ArenaService)

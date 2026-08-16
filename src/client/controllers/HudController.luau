@@ -9,6 +9,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local RoundTypes = require(ReplicatedStorage.Shared.types.RoundTypes)
 local StateAttributeNames = require(ReplicatedStorage.Shared.types.StateAttributeNames)
+local EliminationTypes = require(ReplicatedStorage.Shared.types.EliminationTypes)
 local HudView = require(script.Parent.Parent.ui.HudView)
 
 type RoundState = RoundTypes.RoundState
@@ -34,6 +35,7 @@ local cached = {
 	totalBlockCount = 0,
 	isParticipant = false,
 	isEliminated = false,
+	eliminationReason = "",
 }
 
 local function readRoundState(instance: Instance): RoundState
@@ -126,7 +128,13 @@ local function render()
 		currentView.setSubMessageText("Você participará da próxima rodada")
 		currentView.setSubMessageVisible(true)
 	elseif isRoundInProgress and cached.isParticipant and cached.isEliminated then
-		currentView.setSubMessageText("Você foi eliminado\nAguarde a próxima rodada")
+		if cached.eliminationReason == EliminationTypes.FellFromArena then
+			currentView.setSubMessageText("VOCÊ CAIU DA ARENA\nAguarde a próxima rodada")
+		elseif cached.eliminationReason == EliminationTypes.CharacterDied then
+			currentView.setSubMessageText("VOCÊ FOI ELIMINADO\nAguarde a próxima rodada")
+		else
+			currentView.setSubMessageText("Você foi eliminado\nAguarde a próxima rodada")
+		end
 		currentView.setSubMessageVisible(true)
 	else
 		currentView.setSubMessageVisible(false)
@@ -188,6 +196,7 @@ function HudController.start()
 	local function refreshFromPlayer()
 		cached.isParticipant = readBooleanAttribute(localPlayer, StateAttributeNames.PlayerIsParticipant)
 		cached.isEliminated = readBooleanAttribute(localPlayer, StateAttributeNames.PlayerIsEliminated)
+		cached.eliminationReason = readStringAttribute(localPlayer, StateAttributeNames.PlayerEliminationReason)
 	end
 
 	refreshFromContainer()
@@ -215,6 +224,7 @@ function HudController.start()
 	local playerAttributeNames = {
 		StateAttributeNames.PlayerIsParticipant,
 		StateAttributeNames.PlayerIsEliminated,
+		StateAttributeNames.PlayerEliminationReason,
 	}
 	for _, attributeName in ipairs(playerAttributeNames) do
 		connectAttribute(localPlayer, attributeName, function()

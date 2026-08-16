@@ -133,6 +133,7 @@ Para um teste simples, abra **View > Output** e clique em **Play**. Sem erros, d
 [BlocoPuff] Replicated state initialized
 [BlocoPuff] Arena created with 225 blocks
 [BlocoPuff] Puffador system started
+[BlocoPuff] Elimination zone armed
 [BlocoPuff] Round cycle started
 [BlocoPuff] Client initialized
 ```
@@ -155,6 +156,10 @@ O servidor gera em runtime uma primeira versão visual do mundo, com lobby, pont
 
 Cada participante recebe, ao entrar em `Active`, o **Puffador**: uma ferramenta cartunesca construída inteiramente com instâncias nativas (sem assets externos). O jogador mira e dispara com mouse, toque ou gamepad — o `Tool.Activated` padrão do Roblox já unifica os três; o cliente só calcula a direção de mira e envia um único `Vector3` normalizado pelo `RemoteEvent RequestPuff`. O servidor é a única autoridade: valida participação, elegibilidade, cadência e origem antes de simular o projétil por raycast determinístico.
 
-Quando um projétil atinge diretamente um bloco válido e ativo da arena (tag `ArenaBlock`), o `ArenaService` o remove **temporariamente**: fica invisível, sem colisão e sem ser atingível por novos raycasts, permitindo que personagens caiam pelo espaço aberto. O bloco não é destruído de fato — todos os 225 são restaurados integralmente (posição, tamanho, cor, atributos e tags) antes de cada nova rodada. O Puffador continua **sem causar dano direto**: a queda usa apenas a física normal e o ciclo de morte já existente (ex.: `FallenPartsDestroyHeight`), sem impulso, sem eliminação atribuída ao disparo. As contagens `TotalBlockCount`, `RemainingBlockCount` e `DestroyedBlockCount` são replicadas em `BlocoPuffState` e exibidas no HUD como `Blocos: 217/225` durante `Active`/`Ending`.
+Quando um projétil atinge diretamente um bloco válido e ativo da arena (tag `ArenaBlock`), o `ArenaService` o remove **temporariamente**: fica invisível, sem colisão e sem ser atingível por novos raycasts, permitindo que personagens caiam pelo espaço aberto. O bloco não é destruído de fato — todos os 225 são restaurados integralmente (posição, tamanho, cor, atributos e tags) antes de cada nova rodada. O Puffador continua **sem causar dano direto**: a queda usa apenas a física normal, sem impulso, sem eliminação atribuída ao disparo. As contagens `TotalBlockCount`, `RemainingBlockCount` e `DestroyedBlockCount` são replicadas em `BlocoPuffState` e exibidas no HUD como `Blocos: 217/225` durante `Active`/`Ending`.
 
-Ainda não há dano direto, eliminação pelo Puffador, resistência de blocos, regeneração durante a rodada, persistência ou monetização.
+Abaixo da arena existe uma **zona de eliminação** autoritativa: o servidor monitora, a cada 0,1s, a posição vertical dos participantes ativos e os elimina assim que cruzam um limite calculado a partir da própria posição da arena (não é um valor fixo do mundo, nem depende exclusivamente de `Workspace.FallenPartsDestroyHeight`, que continua existindo apenas como rede de segurança global). A eliminação registra a causa (`FellFromArena`, `CharacterDied` para outras mortes durante `Active`, ou `PlayerLeft` ao sair), revoga o Puffador, limpa os projéteis do jogador e permite o respawn normal no lobby — sem impulso, sem teleporte especial e sem crédito de eliminação atribuído a outro jogador.
+
+Ainda não há dano direto, resistência de blocos, regeneração durante a rodada, persistência ou monetização.
+
+Para testar a zona de eliminação manualmente: entre em `Active` com 2+ jogadores, destrua o bloco sob um participante e confirme que ele cai e é eliminado com a mensagem "Você caiu da arena" no HUD, sem perda de vida instantânea no momento do disparo. Os atributos `IsEliminated`, `EliminationReason` e `EliminatedAtRoundId` no `Player` refletem a causa e a rodada.

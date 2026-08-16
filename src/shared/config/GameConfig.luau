@@ -40,6 +40,12 @@ export type PuffadorConfig = {
 	MaximumOriginDistance: number,
 }
 
+export type EliminationZoneConfig = {
+	DepthBelowArena: number,
+	CheckInterval: number,
+	VisualizeInStudio: boolean,
+}
+
 export type GameConfig = {
 	GameName: string,
 	MinimumPlayers: number,
@@ -54,6 +60,7 @@ export type GameConfig = {
 	Lobby: LobbyConfig,
 	Palette: WorldPalette,
 	Puffador: PuffadorConfig,
+	EliminationZone: EliminationZoneConfig,
 	getRoundTimings: () -> RoundTimings,
 }
 
@@ -91,6 +98,15 @@ local Puffador: PuffadorConfig = table.freeze({
 	MaximumOriginDistance = 12,
 })
 
+-- DepthBelowArena fica bem acima de |FallenPartsDestroyHeight| (ver
+-- default.project.json) para que a eliminação autoritativa sempre aconteça
+-- antes do limite global de destruição de partes.
+local EliminationZone: EliminationZoneConfig = table.freeze({
+	DepthBelowArena = 30,
+	CheckInterval = 0.1,
+	VisualizeInStudio = false,
+})
+
 local GameConfig = {} :: GameConfig
 
 GameConfig.GameName = "BlocoPuff"
@@ -109,6 +125,7 @@ GameConfig.Arena = Arena
 GameConfig.Lobby = Lobby
 GameConfig.Palette = Palette
 GameConfig.Puffador = Puffador
+GameConfig.EliminationZone = EliminationZone
 
 function GameConfig.getRoundTimings(): RoundTimings
 	if RunService:IsStudio() then

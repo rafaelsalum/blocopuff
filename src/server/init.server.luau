@@ -8,6 +8,7 @@ local ArenaService = require(script.services.ArenaService)
 local LobbyService = require(script.services.LobbyService)
 local ReplicatedStateService = require(script.services.ReplicatedStateService)
 local PuffadorService = require(script.services.PuffadorService)
+local EliminationService = require(script.services.EliminationService)
 local RoundService = require(script.services.RoundService)
 
 local WORLD_NAME = "BlocoPuffWorld"
@@ -53,6 +54,11 @@ print(string.format("[BlocoPuff] Arena created with %d blocks", #ArenaService.ge
 
 PuffadorService.start(world)
 print("[BlocoPuff] Puffador system started")
+
+-- Precisa da Arena já criada (usa ArenaService.getEliminationY) e do
+-- RoundService.eliminateParticipant como callback, para não depender dele.
+EliminationService.start(world, RoundService.eliminateParticipant)
+print("[BlocoPuff] Elimination zone armed")
 
 RoundService.start()
 print("[BlocoPuff] Round cycle started")
