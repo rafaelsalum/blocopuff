@@ -13,8 +13,10 @@ BlocoPuff! é um jogo multiplayer infantil, colorido e cartunesco para 2 a 10 jo
 
 ```text
 src/
-├── client/   # Scripts executados no cliente
-├── server/   # Scripts executados no servidor
+├── client/
+│   ├── controllers/  # Lê o estado replicado e alimenta a interface
+│   └── ui/            # Constrói e atualiza a interface (HUD)
+├── server/   # Scripts e serviços autoritativos do servidor
 └── shared/   # Configurações, tipos e módulos compartilhados
 tests/        # Testes futuros
 ```
@@ -129,10 +131,12 @@ Para um teste simples, abra **View > Output** e clique em **Play**. Sem erros, d
 [BlocoPuff] Server initialized
 [BlocoPuff] Lobby created
 [BlocoPuff] Arena created with 225 blocks
+[BlocoPuff] Replicated state initialized
+[BlocoPuff] Round cycle started
 [BlocoPuff] Client initialized
 ```
 
-Durante o teste, o servidor também cria `Workspace/BlocoPuffWorld` com o lobby e a arena. Encerre o teste pelo botão **Stop**; os objetos gerados em runtime desaparecem ao finalizar o Play.
+Durante o teste, o servidor também cria `Workspace/BlocoPuffWorld` com o lobby e a arena, além de `ReplicatedStorage/BlocoPuffState`, que expõe o estado da rodada por atributos. O cliente lê exclusivamente esses atributos para desenhar o HUD; a cada mudança real de estado, o servidor registra `[BlocoPuff] Round state: <Estado>`. Encerre o teste pelo botão **Stop**; os objetos gerados em runtime desaparecem ao finalizar o Play.
 
 ## Build local
 
@@ -146,4 +150,4 @@ Arquivos `.rbxl` e `.rbxlx` são artefatos locais e não fazem parte da fonte pr
 
 ## Estado atual
 
-O servidor gera em runtime uma primeira versão visual do mundo, com lobby, ponto de nascimento e uma arena suspensa de 225 blocos identificados. Ainda não há mecânicas de rodada, lançador, remoção de blocos, eliminação, interface, persistência ou monetização.
+O servidor gera em runtime uma primeira versão visual do mundo, com lobby, ponto de nascimento e uma arena suspensa de 225 blocos identificados. Um ciclo de partidas autoritativo (`WaitingForPlayers → Countdown → Active → Ending`) seleciona participantes, teleporta-os para posições distintas na arena e replica o estado para o cliente somente por atributos em `ReplicatedStorage/BlocoPuffState`. O cliente exibe esse estado em um HUD simples (mensagem, cronômetro, participantes e vencedor). Ainda não há lançador, remoção de blocos, persistência ou monetização.

@@ -6,6 +6,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local GameConfig = require(ReplicatedStorage.Shared.config.GameConfig)
 local RoundTypes = require(ReplicatedStorage.Shared.types.RoundTypes)
 local RoundMessages = require(ReplicatedStorage.Shared.modules.RoundMessages)
+local StateAttributeNames = require(ReplicatedStorage.Shared.types.StateAttributeNames)
 local ArenaService = require(script.Parent.ArenaService)
 local LobbyService = require(script.Parent.LobbyService)
 local ReplicatedState = require(script.Parent.ReplicatedStateService)
@@ -26,6 +27,15 @@ type Winner = {
 local POLL_INTERVAL = 1
 local TICK_INTERVAL = 1
 
+-- Atributos autoritativos escritos pelo servidor em cada Player, usados pelo
+-- cliente para saber se participa da rodada atual sem inferir pela posição.
+-- IsRoundParticipant: true enquanto o jogador integra a rodada em andamento.
+-- ParticipatingRoundId: RoundId da rodada em que participa (0 = nenhuma).
+-- IsEliminated: true se o Humanoid do participante morreu durante Active.
+local ATTR_IS_PARTICIPANT = StateAttributeNames.PlayerIsParticipant
+local ATTR_PARTICIPATING_ROUND_ID = StateAttributeNames.PlayerParticipatingRoundId
+local ATTR_IS_ELIMINATED = StateAttributeNames.PlayerIsEliminated
+
 local RoundService = {}
 
 local isRunning = false
@@ -36,6 +46,7 @@ local participants: { [Player]: Participant } = {}
 local participantOrder: { Player } = {}
 local deathConnections: { [Player]: RBXScriptConnection } = {}
 local playerRemovingConnection: RBXScriptConnection? = nil
+local playerAddedConnection: RBXScriptConnection? = nil
 local winner: Winner? = nil
 
 local function countConnectedPlayers(): number
@@ -129,6 +140,26 @@ local function returnParticipantsToLobby(players: { Player })
 	end
 end
 
+local function resetParticipantAttributes(player: Player)
+	player:SetAttribute(ATTR_IS_PARTICIPANT, false)
+	player:SetAttribute(ATTR_PARTICIPATING_ROUND_ID, 0)
+	player:SetAttribute(ATTR_IS_ELIMINATED, false)
+end
+
+local function markParticipantAttributes(player: Player, roundId: number)
+	player:SetAttribute(ATTR_IS_PARTICIPANT, true)
+	player:SetAttribute(ATTR_PARTICIPATING_ROUND_ID, roundId)
+	player:SetAttribute(ATTR_IS_ELIMINATED, false)
+end
+
+local function markEliminated(player: Player)
+	player:SetAttribute(ATTR_IS_ELIMINATED, true)
+end
+
+local function onPlayerAdded(player: Player)
+	resetParticipantAttributes(player)
+end
+
 local function onParticipantDied(player: Player)
 	local participant = participants[player]
 	if participant == nil then
@@ -136,6 +167,7 @@ local function onParticipantDied(player: Player)
 	end
 
 	participant.alive = false
+	markEliminated(player)
 end
 
 local function connectParticipantDeathHandlers(players: { Player })
@@ -207,13 +239,14 @@ end
 
 local function runWaitingForPlayers()
 	setState(RoundTypes.WaitingForPlayers)
-	ReplicatedState.setParticipantCount(0)
 	ReplicatedState.setTimeRemaining(0)
 	ReplicatedState.clearWinner()
 	ReplicatedState.setStatusMessage(RoundMessages.WaitingForPlayers)
+	ReplicatedState.setParticipantCount(countConnectedPlayers())
 
 	while isRunning and countConnectedPlayers() < GameConfig.MinimumPlayers do
 		task.wait(POLL_INTERVAL)
+		ReplicatedState.setParticipantCount(countConnectedPlayers())
 	end
 end
 
@@ -223,6 +256,7 @@ local function runCountdown(timings: RoundTimings): boolean
 	local remaining = timings.LobbyCountdown
 	ReplicatedState.setTimeRemaining(remaining)
 	ReplicatedState.setStatusMessage(RoundMessages.countdown(remaining))
+	ReplicatedState.setParticipantCount(countConnectedPlayers())
 
 	while isRunning and remaining > 0 do
 		task.wait(TICK_INTERVAL)
@@ -238,6 +272,7 @@ local function runCountdown(timings: RoundTimings): boolean
 		remaining -= 1
 		ReplicatedState.setTimeRemaining(remaining)
 		ReplicatedState.setStatusMessage(RoundMessages.countdown(remaining))
+		ReplicatedState.setParticipantCount(countConnectedPlayers())
 	end
 
 	return isRunning
@@ -251,6 +286,7 @@ local function beginRound(timings: RoundTimings)
 	for _, player in ipairs(selected) do
 		participants[player] = { player = player, alive = true }
 		table.insert(participantOrder, player)
+		markParticipantAttributes(player, currentRoundId)
 	end
 
 	teleportParticipantsToArena(participantOrder)
@@ -316,6 +352,9 @@ local function runEnding(timings: RoundTimings)
 	end
 
 	returnParticipantsToLobby(participantOrder)
+	for _, player in ipairs(participantOrder) do
+		resetParticipantAttributes(player)
+	end
 	clearRoundParticipants()
 	winner = nil
 end
@@ -349,6 +388,10 @@ function RoundService.start()
 
 	isRunning = true
 	playerRemovingConnection = Players.PlayerRemoving:Connect(onPlayerRemoving)
+	playerAddedConnection = Players.PlayerAdded:Connect(onPlayerAdded)
+	for _, player in ipairs(Players:GetPlayers()) do
+		onPlayerAdded(player)
+	end
 	task.spawn(runRoundLifecycle)
 end
 
@@ -360,7 +403,15 @@ function RoundService.stop()
 		playerRemovingConnection = nil
 	end
 
+	if playerAddedConnection ~= nil then
+		playerAddedConnection:Disconnect()
+		playerAddedConnection = nil
+	end
+
 	disconnectParticipantDeathHandlers()
+	for _, player in ipairs(participantOrder) do
+		resetParticipantAttributes(player)
+	end
 	clearRoundParticipants()
 	winner = nil
 end

@@ -4,22 +4,23 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local GameConfig = require(ReplicatedStorage.Shared.config.GameConfig)
 local RoundTypes = require(ReplicatedStorage.Shared.types.RoundTypes)
+local StateAttributeNames = require(ReplicatedStorage.Shared.types.StateAttributeNames)
 
 type RoundState = RoundTypes.RoundState
 
-local STATE_NAME = "BlocoPuffState"
+local STATE_NAME = StateAttributeNames.ContainerName
 local GENERATED_BY_ATTRIBUTE = "GeneratedBy"
 local SERVICE_NAME = "ReplicatedStateService"
 
-local ATTR_ROUND_STATE = "RoundState"
-local ATTR_TIME_REMAINING = "TimeRemaining"
-local ATTR_ROUND_ID = "RoundId"
-local ATTR_PARTICIPANT_COUNT = "ParticipantCount"
-local ATTR_MINIMUM_PLAYERS = "MinimumPlayers"
-local ATTR_MAXIMUM_PLAYERS = "MaximumPlayers"
-local ATTR_WINNER_USER_ID = "WinnerUserId"
-local ATTR_WINNER_NAME = "WinnerName"
-local ATTR_STATUS_MESSAGE = "StatusMessage"
+local ATTR_ROUND_STATE = StateAttributeNames.RoundState
+local ATTR_TIME_REMAINING = StateAttributeNames.TimeRemaining
+local ATTR_ROUND_ID = StateAttributeNames.RoundId
+local ATTR_PARTICIPANT_COUNT = StateAttributeNames.ParticipantCount
+local ATTR_MINIMUM_PLAYERS = StateAttributeNames.MinimumPlayers
+local ATTR_MAXIMUM_PLAYERS = StateAttributeNames.MaximumPlayers
+local ATTR_WINNER_USER_ID = StateAttributeNames.WinnerUserId
+local ATTR_WINNER_NAME = StateAttributeNames.WinnerName
+local ATTR_STATUS_MESSAGE = StateAttributeNames.StatusMessage
 
 local ReplicatedStateService = {}
 
