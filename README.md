@@ -41,10 +41,24 @@ Instale o Rokit com o instalador oficial:
 curl -sSf https://raw.githubusercontent.com/rojo-rbx/rokit/main/scripts/install.sh | bash
 ```
 
-Reinicie o terminal para carregar o PATH. Se necessário na sessão atual, carregue-o manualmente:
+### Configuração do PATH por shell
+
+Para Bash ou Zsh, reinicie o terminal para carregar o PATH. Se necessário na sessão atual, carregue o ambiente POSIX do Rokit:
 
 ```sh
 source "$HOME/.rokit/env"
+```
+
+O arquivo `~/.rokit/env` não deve ser carregado no Fish, pois usa sintaxe POSIX. Para Fish, crie uma configuração nativa e idempotente em `~/.config/fish/conf.d/rokit.fish`:
+
+```fish
+fish_add_path --path "$HOME/.rokit/bin"
+```
+
+Depois de abrir um novo Fish, acesse a raiz do projeto e execute normalmente:
+
+```fish
+rojo serve
 ```
 
 Na raiz deste repositório, confie no pacote oficial e instale a versão fixada:
