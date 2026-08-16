@@ -127,10 +127,12 @@ Para um teste simples, abra **View > Output** e clique em **Play**. Sem erros, d
 
 ```text
 [BlocoPuff] Server initialized
+[BlocoPuff] Lobby created
+[BlocoPuff] Arena created with 225 blocks
 [BlocoPuff] Client initialized
 ```
 
-Encerre o teste pelo botão **Stop**. Essa verificação confirma somente que os contextos de servidor e cliente foram carregados; ainda não há mecânicas de jogo.
+Durante o teste, o servidor também cria `Workspace/BlocoPuffWorld` com o lobby e a arena. Encerre o teste pelo botão **Stop**; os objetos gerados em runtime desaparecem ao finalizar o Play.
 
 ## Build local
 
@@ -144,4 +146,4 @@ Arquivos `.rbxl` e `.rbxlx` são artefatos locais e não fazem parte da fonte pr
 
 ## Estado atual
 
-O projeto contém somente a estrutura técnica inicial. Nenhuma mecânica de rodada, arena, blocos, lançador, interface, persistência ou monetização foi implementada.
+O servidor gera em runtime uma primeira versão visual do mundo, com lobby, ponto de nascimento e uma arena suspensa de 225 blocos identificados. Ainda não há mecânicas de rodada, lançador, remoção de blocos, eliminação, interface, persistência ou monetização.
