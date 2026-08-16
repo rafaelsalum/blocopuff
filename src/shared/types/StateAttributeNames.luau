@@ -16,6 +16,10 @@ export type StateAttributeNames = {
 	WinnerName: string,
 	StatusMessage: string,
 
+	TotalBlockCount: string,
+	RemainingBlockCount: string,
+	DestroyedBlockCount: string,
+
 	PlayerIsParticipant: string,
 	PlayerParticipatingRoundId: string,
 	PlayerIsEliminated: string,
@@ -33,6 +37,10 @@ local StateAttributeNames: StateAttributeNames = {
 	WinnerUserId = "WinnerUserId",
 	WinnerName = "WinnerName",
 	StatusMessage = "StatusMessage",
+
+	TotalBlockCount = "TotalBlockCount",
+	RemainingBlockCount = "RemainingBlockCount",
+	DestroyedBlockCount = "DestroyedBlockCount",
 
 	PlayerIsParticipant = "IsRoundParticipant",
 	PlayerParticipatingRoundId = "ParticipatingRoundId",

@@ -43,11 +43,13 @@ print("[BlocoPuff] Server initialized")
 LobbyService.create(world, GameConfig.Lobby, GameConfig.Palette)
 print("[BlocoPuff] Lobby created")
 
-ArenaService.create(world, GameConfig.Arena, GameConfig.Palette)
-print(string.format("[BlocoPuff] Arena created with %d blocks", #ArenaService.getBlocks()))
-
+-- Precisa existir antes da Arena: ArenaService publica as contagens de
+-- blocos assim que os cria, sem esperar por um ciclo de replicação futuro.
 ReplicatedStateService.create()
 print("[BlocoPuff] Replicated state initialized")
+
+ArenaService.create(world, GameConfig.Arena, GameConfig.Palette)
+print(string.format("[BlocoPuff] Arena created with %d blocks", #ArenaService.getBlocks()))
 
 PuffadorService.start(world)
 print("[BlocoPuff] Puffador system started")

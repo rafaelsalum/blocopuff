@@ -130,8 +130,8 @@ Para um teste simples, abra **View > Output** e clique em **Play**. Sem erros, d
 ```text
 [BlocoPuff] Server initialized
 [BlocoPuff] Lobby created
-[BlocoPuff] Arena created with 225 blocks
 [BlocoPuff] Replicated state initialized
+[BlocoPuff] Arena created with 225 blocks
 [BlocoPuff] Puffador system started
 [BlocoPuff] Round cycle started
 [BlocoPuff] Client initialized
@@ -153,6 +153,8 @@ Arquivos `.rbxl` e `.rbxlx` são artefatos locais e não fazem parte da fonte pr
 
 O servidor gera em runtime uma primeira versão visual do mundo, com lobby, ponto de nascimento e uma arena suspensa de 225 blocos identificados. Um ciclo de partidas autoritativo (`WaitingForPlayers → Countdown → Active → Ending`) seleciona participantes, teleporta-os para posições distintas na arena e replica o estado para o cliente somente por atributos em `ReplicatedStorage/BlocoPuffState`. O cliente exibe esse estado em um HUD simples (mensagem, cronômetro, participantes e vencedor).
 
-Cada participante recebe, ao entrar em `Active`, o **Puffador**: uma ferramenta cartunesca construída inteiramente com instâncias nativas (sem assets externos). O jogador mira e dispara com mouse, toque ou gamepad — o `Tool.Activated` padrão do Roblox já unifica os três; o cliente só calcula a direção de mira e envia um único `Vector3` normalizado pelo `RemoteEvent RequestPuff`. O servidor é a única autoridade: valida participação, elegibilidade, cadência e origem antes de simular o projétil por raycast determinístico. Nesta etapa o projétil **não causa dano, não destrói blocos e não interfere no resultado da rodada** — o objetivo é validar controle, direção, cadência, alcance e a arquitetura de rede antes de conectar o disparo à destruição da arena.
+Cada participante recebe, ao entrar em `Active`, o **Puffador**: uma ferramenta cartunesca construída inteiramente com instâncias nativas (sem assets externos). O jogador mira e dispara com mouse, toque ou gamepad — o `Tool.Activated` padrão do Roblox já unifica os três; o cliente só calcula a direção de mira e envia um único `Vector3` normalizado pelo `RemoteEvent RequestPuff`. O servidor é a única autoridade: valida participação, elegibilidade, cadência e origem antes de simular o projétil por raycast determinístico.
 
-Ainda não há destruição de blocos, dano, eliminação pelo Puffador, persistência ou monetização.
+Quando um projétil atinge diretamente um bloco válido e ativo da arena (tag `ArenaBlock`), o `ArenaService` o remove **temporariamente**: fica invisível, sem colisão e sem ser atingível por novos raycasts, permitindo que personagens caiam pelo espaço aberto. O bloco não é destruído de fato — todos os 225 são restaurados integralmente (posição, tamanho, cor, atributos e tags) antes de cada nova rodada. O Puffador continua **sem causar dano direto**: a queda usa apenas a física normal e o ciclo de morte já existente (ex.: `FallenPartsDestroyHeight`), sem impulso, sem eliminação atribuída ao disparo. As contagens `TotalBlockCount`, `RemainingBlockCount` e `DestroyedBlockCount` são replicadas em `BlocoPuffState` e exibidas no HUD como `Blocos: 217/225` durante `Active`/`Ending`.
+
+Ainda não há dano direto, eliminação pelo Puffador, resistência de blocos, regeneração durante a rodada, persistência ou monetização.

@@ -30,6 +30,8 @@ local cached = {
 	winnerUserId = 0,
 	winnerName = "",
 	statusMessage = "",
+	remainingBlockCount = 0,
+	totalBlockCount = 0,
 	isParticipant = false,
 	isEliminated = false,
 }
@@ -111,6 +113,14 @@ local function render()
 		currentView.setParticipantsVisible(false)
 	end
 
+	local showBlockCount = cached.roundState == RoundTypes.Active or cached.roundState == RoundTypes.Ending
+	if showBlockCount then
+		currentView.setBlockCountText(string.format("Blocos: %d/%d", cached.remainingBlockCount, cached.totalBlockCount))
+		currentView.setBlockCountVisible(true)
+	else
+		currentView.setBlockCountVisible(false)
+	end
+
 	local isRoundInProgress = cached.roundState == RoundTypes.Active or cached.roundState == RoundTypes.Ending
 	if isRoundInProgress and not cached.isParticipant then
 		currentView.setSubMessageText("Você participará da próxima rodada")
@@ -171,6 +181,8 @@ function HudController.start()
 		cached.winnerUserId = readNumberAttribute(stateContainer, StateAttributeNames.WinnerUserId)
 		cached.winnerName = readStringAttribute(stateContainer, StateAttributeNames.WinnerName)
 		cached.statusMessage = readStringAttribute(stateContainer, StateAttributeNames.StatusMessage)
+		cached.remainingBlockCount = readNumberAttribute(stateContainer, StateAttributeNames.RemainingBlockCount)
+		cached.totalBlockCount = readNumberAttribute(stateContainer, StateAttributeNames.TotalBlockCount)
 	end
 
 	local function refreshFromPlayer()
@@ -190,6 +202,8 @@ function HudController.start()
 		StateAttributeNames.WinnerUserId,
 		StateAttributeNames.WinnerName,
 		StateAttributeNames.StatusMessage,
+		StateAttributeNames.RemainingBlockCount,
+		StateAttributeNames.TotalBlockCount,
 	}
 	for _, attributeName in ipairs(containerAttributeNames) do
 		connectAttribute(stateContainer, attributeName, function()

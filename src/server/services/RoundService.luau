@@ -285,6 +285,11 @@ end
 local function beginRound(timings: RoundTimings)
 	currentRoundId += 1
 
+	-- A arena precisa estar totalmente restaurada e com a destruição
+	-- habilitada para a nova rodada antes que qualquer jogador chegue nela.
+	ArenaService.restoreAllBlocks()
+	ArenaService.beginRound(currentRoundId)
+
 	local selected = selectParticipants()
 	clearRoundParticipants()
 	for _, player in ipairs(selected) do
@@ -335,6 +340,7 @@ end
 
 local function runEnding(timings: RoundTimings)
 	setState(RoundTypes.Ending)
+	ArenaService.endRound()
 	PuffadorService.endRound()
 	disconnectParticipantDeathHandlers()
 
@@ -358,6 +364,9 @@ local function runEnding(timings: RoundTimings)
 	end
 
 	returnParticipantsToLobby(participantOrder)
+	-- Restaura depois que os jogadores já saíram da arena, evitando que um
+	-- bloco reapareça dentro de um personagem.
+	ArenaService.restoreAllBlocks()
 	for _, player in ipairs(participantOrder) do
 		resetParticipantAttributes(player)
 	end
@@ -415,7 +424,9 @@ function RoundService.stop()
 	end
 
 	disconnectParticipantDeathHandlers()
+	ArenaService.endRound()
 	PuffadorService.stop()
+	ArenaService.restoreAllBlocks()
 	for _, player in ipairs(participantOrder) do
 		resetParticipantAttributes(player)
 	end

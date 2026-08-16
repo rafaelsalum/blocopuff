@@ -24,6 +24,8 @@ export type HudViewHandle = {
 	setTimerVisible: (visible: boolean) -> (),
 	setParticipantsText: (text: string) -> (),
 	setParticipantsVisible: (visible: boolean) -> (),
+	setBlockCountText: (text: string) -> (),
+	setBlockCountVisible: (visible: boolean) -> (),
 	setSubMessageText: (text: string) -> (),
 	setSubMessageVisible: (visible: boolean) -> (),
 	setStatusHighlighted: (highlighted: boolean) -> (),
@@ -154,7 +156,13 @@ function HudView.new(playerGui: PlayerGui): HudViewHandle
 	participantsLabel.TextSize = 17
 	participantsLabel.LayoutOrder = 3
 
-	local subMessageBadge = createBadge("SubMessageBadge", panel, COLOR_SUBMESSAGE_BACKGROUND, 4)
+	local blockCountLabel = createLabel("BlockCountLabel", panel, 12, 16)
+	blockCountLabel.TextColor3 = COLOR_TEXT_SECONDARY
+	blockCountLabel.TextSize = 15
+	blockCountLabel.LayoutOrder = 4
+	blockCountLabel.Visible = false
+
+	local subMessageBadge = createBadge("SubMessageBadge", panel, COLOR_SUBMESSAGE_BACKGROUND, 5)
 	local subMessageLabel = createLabel("SubMessageLabel", subMessageBadge, 13, 16)
 	subMessageLabel.TextSize = 15
 	subMessageLabel.Size = UDim2.new(0, 0, 0, 0)
@@ -183,6 +191,14 @@ function HudView.new(playerGui: PlayerGui): HudViewHandle
 
 	handle.setParticipantsVisible = function(visible: boolean)
 		participantsLabel.Visible = visible
+	end
+
+	handle.setBlockCountText = function(text: string)
+		blockCountLabel.Text = text
+	end
+
+	handle.setBlockCountVisible = function(visible: boolean)
+		blockCountLabel.Visible = visible
 	end
 
 	handle.setSubMessageText = function(text: string)

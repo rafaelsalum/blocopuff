@@ -14,6 +14,9 @@ local Workspace = game:GetService("Workspace")
 
 local GameConfig = require(ReplicatedStorage.Shared.config.GameConfig)
 local PuffadorConstants = require(ReplicatedStorage.Shared.modules.PuffadorConstants)
+local ArenaService = require(script.Parent.ArenaService)
+
+type BlockDestructionContext = ArenaService.BlockDestructionContext
 
 local GENERATED_BY_ATTRIBUTE = "GeneratedBy"
 local SERVICE_NAME = "ProjectileService"
@@ -25,6 +28,9 @@ local IMPACT_EFFECT_END_SIZE = 2.2
 type ProjectileRecord = {
 	part: BasePart,
 	ownerPlayer: Player,
+	ownerUserId: number,
+	roundId: number,
+	projectileId: number,
 	direction: Vector3,
 	raycastParams: RaycastParams,
 	spawnClock: number,
@@ -107,6 +113,15 @@ local function updateProjectiles(deltaTime: number)
 
 			local raycastResult = Workspace:Raycast(previousPosition, displacement, record.raycastParams)
 			if raycastResult ~= nil then
+				local context: BlockDestructionContext = {
+					position = raycastResult.Position,
+					normal = raycastResult.Normal,
+					ownerPlayer = record.ownerPlayer,
+					ownerUserId = record.ownerUserId,
+					roundId = record.roundId,
+					projectileId = record.projectileId,
+				}
+				ArenaService.tryDestroyBlock(raycastResult.Instance, context)
 				createImpactEffect(raycastResult.Position, raycastResult.Normal)
 				return false
 			end
@@ -201,6 +216,9 @@ function ProjectileService.spawn(player: Player, origin: Vector3, direction: Vec
 	local record: ProjectileRecord = {
 		part = part,
 		ownerPlayer = player,
+		ownerUserId = player.UserId,
+		roundId = roundId,
+		projectileId = projectileId,
 		direction = direction,
 		raycastParams = raycastParams,
 		spawnClock = os.clock(),

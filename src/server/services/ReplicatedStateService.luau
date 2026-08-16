@@ -22,6 +22,10 @@ local ATTR_WINNER_USER_ID = StateAttributeNames.WinnerUserId
 local ATTR_WINNER_NAME = StateAttributeNames.WinnerName
 local ATTR_STATUS_MESSAGE = StateAttributeNames.StatusMessage
 
+local ATTR_TOTAL_BLOCK_COUNT = StateAttributeNames.TotalBlockCount
+local ATTR_REMAINING_BLOCK_COUNT = StateAttributeNames.RemainingBlockCount
+local ATTR_DESTROYED_BLOCK_COUNT = StateAttributeNames.DestroyedBlockCount
+
 local ReplicatedStateService = {}
 
 local stateContainer: Configuration? = nil
@@ -87,6 +91,11 @@ function ReplicatedStateService.create(): Configuration
 	setAttribute(ATTR_WINNER_NAME, "")
 	setAttribute(ATTR_STATUS_MESSAGE, "")
 
+	-- Valores seguros até que ArenaService publique as contagens reais.
+	setAttribute(ATTR_TOTAL_BLOCK_COUNT, 0)
+	setAttribute(ATTR_REMAINING_BLOCK_COUNT, 0)
+	setAttribute(ATTR_DESTROYED_BLOCK_COUNT, 0)
+
 	return container
 end
 
@@ -118,6 +127,12 @@ end
 
 function ReplicatedStateService.setStatusMessage(message: string)
 	setAttribute(ATTR_STATUS_MESSAGE, message)
+end
+
+function ReplicatedStateService.setBlockCounts(total: number, remaining: number, destroyed: number)
+	setAttribute(ATTR_TOTAL_BLOCK_COUNT, total)
+	setAttribute(ATTR_REMAINING_BLOCK_COUNT, remaining)
+	setAttribute(ATTR_DESTROYED_BLOCK_COUNT, destroyed)
 end
 
 function ReplicatedStateService.getContainer(): Configuration?
