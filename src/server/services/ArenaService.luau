@@ -14,11 +14,15 @@ local BLOCK_TAG = "ArenaBlock"
 local GENERATED_BY_ATTRIBUTE = "GeneratedBy"
 local SERVICE_NAME = "ArenaService"
 
+local SPAWN_HEIGHT_OFFSET = 5
+local SPAWN_MARGIN_RATIO = 0.15
+
 local ArenaService = {}
 
 local currentWorldRoot: Model? = nil
 local arenaModel: Model? = nil
 local arenaBlocks: { Part } = {}
+local currentArenaConfig: ArenaConfig? = nil
 
 local function isOwned(instance: Instance): boolean
 	return instance:GetAttribute(GENERATED_BY_ATTRIBUTE) == SERVICE_NAME
@@ -59,6 +63,7 @@ function ArenaService.destroy()
 
 	arenaModel = nil
 	currentWorldRoot = nil
+	currentArenaConfig = nil
 	table.clear(arenaBlocks)
 end
 
@@ -115,6 +120,7 @@ function ArenaService.create(worldRoot: Model, config: ArenaConfig, palette: Wor
 	end
 
 	arenaModel = newArena
+	currentArenaConfig = config
 	return newArena
 end
 
@@ -129,6 +135,47 @@ function ArenaService.getBlocks(): { Part }
 	end
 
 	return blocksCopy
+end
+
+local function computeSpawnCFrames(config: ArenaConfig, count: number): { CFrame }
+	local totalWidth = (config.Columns * config.BlockSize.X) + ((config.Columns - 1) * config.BlockGap)
+	local totalDepth = (config.Rows * config.BlockSize.Z) + ((config.Rows - 1) * config.BlockGap)
+	local topY = config.Position.Y + (config.BlockSize.Y / 2) + SPAWN_HEIGHT_OFFSET
+
+	local marginX = totalWidth * SPAWN_MARGIN_RATIO
+	local marginZ = totalDepth * SPAWN_MARGIN_RATIO
+	local usableWidth = totalWidth - (marginX * 2)
+	local usableDepth = totalDepth - (marginZ * 2)
+	local minX = config.Position.X - (totalWidth / 2) + marginX
+	local minZ = config.Position.Z - (totalDepth / 2) + marginZ
+
+	local gridColumns = math.ceil(math.sqrt(count))
+	local gridRows = math.ceil(count / gridColumns)
+
+	local spawnCFrames: { CFrame } = {}
+	for index = 1, count do
+		local zeroBased = index - 1
+		local gridRow = math.floor(zeroBased / gridColumns)
+		local gridColumn = zeroBased % gridColumns
+
+		local xRatio = if gridColumns > 1 then gridColumn / (gridColumns - 1) else 0.5
+		local zRatio = if gridRows > 1 then gridRow / (gridRows - 1) else 0.5
+
+		local x = minX + (xRatio * usableWidth)
+		local z = minZ + (zRatio * usableDepth)
+
+		table.insert(spawnCFrames, CFrame.new(x, topY, z))
+	end
+
+	return spawnCFrames
+end
+
+function ArenaService.getPlayerSpawnCFrames(): { CFrame }
+	if currentArenaConfig == nil then
+		error(`Cannot compute spawn positions before {SERVICE_NAME}.create has been called`)
+	end
+
+	return computeSpawnCFrames(currentArenaConfig, GameConfig.MaximumPlayers)
 end
 
 return table.freeze(ArenaService)

@@ -6,6 +6,8 @@ local Workspace = game:GetService("Workspace")
 local GameConfig = require(ReplicatedStorage.Shared.config.GameConfig)
 local ArenaService = require(script.services.ArenaService)
 local LobbyService = require(script.services.LobbyService)
+local ReplicatedStateService = require(script.services.ReplicatedStateService)
+local RoundService = require(script.services.RoundService)
 
 local WORLD_NAME = "BlocoPuffWorld"
 local GENERATED_BY_ATTRIBUTE = "GeneratedBy"
@@ -42,3 +44,9 @@ print("[BlocoPuff] Lobby created")
 
 ArenaService.create(world, GameConfig.Arena, GameConfig.Palette)
 print(string.format("[BlocoPuff] Arena created with %d blocks", #ArenaService.getBlocks()))
+
+ReplicatedStateService.create()
+print("[BlocoPuff] Replicated state initialized")
+
+RoundService.start()
+print("[BlocoPuff] Round cycle started")

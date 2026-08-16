@@ -1,5 +1,7 @@
 --!strict
 
+local RunService = game:GetService("RunService")
+
 export type ArenaConfig = {
 	Rows: number,
 	Columns: number,
@@ -21,6 +23,12 @@ export type WorldPalette = {
 	Pink: Color3,
 }
 
+export type RoundTimings = {
+	LobbyCountdown: number,
+	RoundDuration: number,
+	IntermissionDuration: number,
+}
+
 export type GameConfig = {
 	GameName: string,
 	MinimumPlayers: number,
@@ -28,9 +36,13 @@ export type GameConfig = {
 	LobbyCountdown: number,
 	RoundDuration: number,
 	IntermissionDuration: number,
+	StudioLobbyCountdown: number,
+	StudioRoundDuration: number,
+	StudioIntermissionDuration: number,
 	Arena: ArenaConfig,
 	Lobby: LobbyConfig,
 	Palette: WorldPalette,
+	getRoundTimings: () -> RoundTimings,
 }
 
 local Arena: ArenaConfig = table.freeze({
@@ -54,16 +66,40 @@ local Palette: WorldPalette = table.freeze({
 	Pink = Color3.fromRGB(255, 174, 211),
 })
 
-local GameConfig: GameConfig = table.freeze({
-	GameName = "BlocoPuff",
-	MinimumPlayers = 2,
-	MaximumPlayers = 10,
-	LobbyCountdown = 20,
-	RoundDuration = 180,
-	IntermissionDuration = 10,
-	Arena = Arena,
-	Lobby = Lobby,
-	Palette = Palette,
-})
+local GameConfig = {} :: GameConfig
+
+GameConfig.GameName = "BlocoPuff"
+GameConfig.MinimumPlayers = 2
+GameConfig.MaximumPlayers = 10
+GameConfig.LobbyCountdown = 20
+GameConfig.RoundDuration = 180
+GameConfig.IntermissionDuration = 10
+
+-- Tempos reduzidos usados apenas quando RunService:IsStudio() for verdadeiro.
+GameConfig.StudioLobbyCountdown = 5
+GameConfig.StudioRoundDuration = 20
+GameConfig.StudioIntermissionDuration = 5
+
+GameConfig.Arena = Arena
+GameConfig.Lobby = Lobby
+GameConfig.Palette = Palette
+
+function GameConfig.getRoundTimings(): RoundTimings
+	if RunService:IsStudio() then
+		return {
+			LobbyCountdown = GameConfig.StudioLobbyCountdown,
+			RoundDuration = GameConfig.StudioRoundDuration,
+			IntermissionDuration = GameConfig.StudioIntermissionDuration,
+		}
+	end
+
+	return {
+		LobbyCountdown = GameConfig.LobbyCountdown,
+		RoundDuration = GameConfig.RoundDuration,
+		IntermissionDuration = GameConfig.IntermissionDuration,
+	}
+end
+
+table.freeze(GameConfig)
 
 return GameConfig

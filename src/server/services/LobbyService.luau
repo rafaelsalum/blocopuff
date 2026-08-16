@@ -15,6 +15,7 @@ local SERVICE_NAME = "LobbyService"
 local BARRIER_HEIGHT = 4
 local BARRIER_THICKNESS = 1
 local SPAWN_SIZE = Vector3.new(8, 1, 8)
+local RETURN_HEIGHT_OFFSET = 3
 
 local LobbyService = {}
 
@@ -180,6 +181,15 @@ end
 
 function LobbyService.getModel(): Model?
 	return lobbyModel
+end
+
+function LobbyService.getReturnCFrame(): CFrame?
+	if lobbySpawn == nil or lobbySpawn.Parent == nil then
+		return nil
+	end
+
+	local spawnTop = lobbySpawn.Position.Y + (lobbySpawn.Size.Y / 2)
+	return CFrame.new(lobbySpawn.Position.X, spawnTop + RETURN_HEIGHT_OFFSET, lobbySpawn.Position.Z)
 end
 
 return table.freeze(LobbyService)
