@@ -16,6 +16,9 @@ local Workspace = game:GetService("Workspace")
 
 local GameConfig = require(ReplicatedStorage.Shared.config.GameConfig)
 local PuffadorConstants = require(ReplicatedStorage.Shared.modules.PuffadorConstants)
+local CrosshairView = require(script.Parent.Parent.ui.CrosshairView)
+
+type CrosshairViewHandle = CrosshairView.CrosshairViewHandle
 
 local STATE_WAIT_TIMEOUT = 10
 local LOCAL_COOLDOWN_SLACK = 0.02
@@ -26,6 +29,7 @@ local started = false
 local requestPuffRemote: RemoteEvent? = nil
 local connectedTools: { [Tool]: boolean } = {}
 local lastLocalFireClock = 0
+local crosshair: CrosshairViewHandle? = nil
 
 local function isFiniteVector3(vector: Vector3): boolean
 	return vector.X == vector.X and vector.Y == vector.Y and vector.Z == vector.Z
@@ -97,6 +101,16 @@ local function tryConnectTool(instance: Instance)
 
 	connectedTools[instance] = true
 	instance.Activated:Connect(onToolActivated)
+	instance.Equipped:Connect(function()
+		if crosshair ~= nil then
+			crosshair.setVisible(true)
+		end
+	end)
+	instance.Unequipped:Connect(function()
+		if crosshair ~= nil then
+			crosshair.setVisible(false)
+		end
+	end)
 end
 
 local function scanExistingChildren(parent: Instance)
@@ -115,6 +129,15 @@ function PuffadorController.start()
 	if localPlayer == nil then
 		warn("[BlocoPuff] Puffador controller not started: LocalPlayer unavailable")
 		return
+	end
+
+	-- A mira é só um reforço visual; se o PlayerGui não estiver disponível
+	-- por algum motivo, o disparo continua funcionando normalmente sem ela.
+	local playerGuiInstance = localPlayer:WaitForChild("PlayerGui", STATE_WAIT_TIMEOUT)
+	if playerGuiInstance ~= nil and playerGuiInstance:IsA("PlayerGui") then
+		crosshair = CrosshairView.new(playerGuiInstance)
+	else
+		warn("[BlocoPuff] Puffador crosshair not started: PlayerGui unavailable")
 	end
 
 	local remotesInstance = ReplicatedStorage:FindFirstChild(PuffadorConstants.RemotesContainerName)

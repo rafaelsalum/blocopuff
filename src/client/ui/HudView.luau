@@ -20,6 +20,7 @@ local FONT_BODY = Enum.Font.GothamMedium
 export type HudViewHandle = {
 	screenGui: ScreenGui,
 	setStatusText: (text: string) -> (),
+	setStatusVisible: (visible: boolean) -> (),
 	setTimerText: (text: string) -> (),
 	setTimerVisible: (visible: boolean) -> (),
 	setParticipantsText: (text: string) -> (),
@@ -109,39 +110,39 @@ function HudView.new(playerGui: PlayerGui): HudViewHandle
 	local panel = Instance.new("Frame")
 	panel.Name = "RoundPanel"
 	panel.AnchorPoint = Vector2.new(0.5, 0)
-	panel.Position = UDim2.new(0.5, 0, 0.03, 0)
-	panel.Size = UDim2.new(0.62, 0, 0, 0)
+	panel.Position = UDim2.new(0.5, 0, 0.02, 0)
+	panel.Size = UDim2.new(0.4, 0, 0, 0)
 	panel.AutomaticSize = Enum.AutomaticSize.Y
 	panel.BackgroundColor3 = COLOR_PANEL_BACKGROUND
-	panel.BackgroundTransparency = 0.05
+	panel.BackgroundTransparency = 0.1
 	panel.BorderSizePixel = 0
 	panel.Parent = screenGui
 
 	local panelSizeConstraint = Instance.new("UISizeConstraint")
-	panelSizeConstraint.MinSize = Vector2.new(240, 0)
-	panelSizeConstraint.MaxSize = Vector2.new(520, 10000)
+	panelSizeConstraint.MinSize = Vector2.new(200, 0)
+	panelSizeConstraint.MaxSize = Vector2.new(360, 10000)
 	panelSizeConstraint.Parent = panel
 
-	applyCorner(panel, UDim.new(0, 18))
-	local panelStroke = applyStroke(panel, COLOR_PANEL_STROKE, 3)
+	applyCorner(panel, UDim.new(0, 14))
+	local panelStroke = applyStroke(panel, COLOR_PANEL_STROKE, 2)
 
 	local padding = Instance.new("UIPadding")
-	padding.PaddingTop = UDim.new(0, 14)
-	padding.PaddingBottom = UDim.new(0, 14)
-	padding.PaddingLeft = UDim.new(0, 20)
-	padding.PaddingRight = UDim.new(0, 20)
+	padding.PaddingTop = UDim.new(0, 10)
+	padding.PaddingBottom = UDim.new(0, 10)
+	padding.PaddingLeft = UDim.new(0, 16)
+	padding.PaddingRight = UDim.new(0, 16)
 	padding.Parent = panel
 
 	local layout = Instance.new("UIListLayout")
 	layout.FillDirection = Enum.FillDirection.Vertical
 	layout.HorizontalAlignment = Enum.HorizontalAlignment.Center
 	layout.SortOrder = Enum.SortOrder.LayoutOrder
-	layout.Padding = UDim.new(0, 6)
+	layout.Padding = UDim.new(0, 3)
 	layout.Parent = panel
 
-	local statusLabel = createLabel("StatusLabel", panel, 16, 28)
+	local statusLabel = createLabel("StatusLabel", panel, 14, 22)
 	statusLabel.Font = FONT_HEADING
-	statusLabel.TextSize = 26
+	statusLabel.TextSize = 20
 	statusLabel.LayoutOrder = 1
 
 	local timerBadge = createBadge("TimerBadge", panel, COLOR_TIMER_BACKGROUND, 2)
@@ -175,6 +176,10 @@ function HudView.new(playerGui: PlayerGui): HudViewHandle
 
 	handle.setStatusText = function(text: string)
 		statusLabel.Text = text
+	end
+
+	handle.setStatusVisible = function(visible: boolean)
+		statusLabel.Visible = visible
 	end
 
 	handle.setTimerText = function(text: string)

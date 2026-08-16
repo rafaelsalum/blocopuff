@@ -94,6 +94,10 @@ local function render()
 	end
 
 	currentView.setStatusText(cached.statusMessage)
+	-- Durante Active a mensagem é sempre a mesma ("Partida em andamento") e
+	-- não agrega informação nova; escondê-la mantém o painel discreto e
+	-- fora do caminho da mira, mostrando só cronômetro/participantes/blocos.
+	currentView.setStatusVisible(cached.roundState ~= RoundTypes.Active)
 
 	if cached.roundState == RoundTypes.WaitingForPlayers then
 		currentView.setTimerVisible(false)

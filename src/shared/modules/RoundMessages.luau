@@ -13,8 +13,11 @@ local RoundMessages: RoundMessagesModule = {
 	Active = "Partida em andamento",
 	EndedNoWinner = "Partida encerrada",
 
-	countdown = function(secondsRemaining: number): string
-		return string.format("A partida começa em %d", secondsRemaining)
+	-- O número da contagem regressiva já aparece no badge do cronômetro do
+	-- HUD; esta mensagem não o repete para evitar mostrar o mesmo valor
+	-- duas vezes na tela ao mesmo tempo.
+	countdown = function(_secondsRemaining: number): string
+		return "A partida vai começar"
 	end,
 
 	winner = function(winnerName: string): string
