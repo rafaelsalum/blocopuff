@@ -149,6 +149,17 @@ local function grantToolToPlayer(player: Player)
 	local tool = buildPuffadorTool()
 	tool.Parent = backpack
 	grantedTools[player] = tool
+
+	-- Em um jogo infantil, exigir abrir o inventário e clicar no Puffador
+	-- antes de poder jogar é um passo extra desnecessário: equipamos
+	-- automaticamente assim que a ferramenta é concedida. Se o personagem
+	-- ainda não estiver pronto, a ferramenta apenas fica no Backpack (o
+	-- jogador ainda consegue equipá-la manualmente).
+	local character = player.Character
+	local humanoid = if character ~= nil then character:FindFirstChildOfClass("Humanoid") else nil
+	if humanoid ~= nil then
+		humanoid:EquipTool(tool)
+	end
 end
 
 function PuffadorService.grantTo(players: { Player })

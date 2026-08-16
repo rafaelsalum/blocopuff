@@ -4,21 +4,26 @@
 -- Não decide se o disparo é válido, não aplica efeitos e não calcula
 -- origem: apenas envia a direção desejada para o servidor validar.
 --
--- Entrada unificada via Tool.Activated, que o Roblox já aciona a partir de:
--- clique do mouse, botão de ativação padrão em toque, e gatilho de gamepad.
--- Por isso este controlador não precisa de botões próprios nem de lógica
--- de entrada separada por dispositivo.
+-- Disparo por dois caminhos que convergem na mesma função: Tool.Activated
+-- (clique no mundo, toque no mundo ou gatilho de gamepad, já unificados pelo
+-- Roblox) e o botão de disparo dedicado (FireButtonView), útil sobretudo em
+-- toque, onde tocar o mundo também arrasta a câmera. A mira (CrosshairView)
+-- acompanha o mesmo ponto de tela usado no cálculo da direção: a posição do
+-- mouse quando há mouse, ou o centro da tela em toque/gamepad.
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
 local Workspace = game:GetService("Workspace")
 
 local GameConfig = require(ReplicatedStorage.Shared.config.GameConfig)
 local PuffadorConstants = require(ReplicatedStorage.Shared.modules.PuffadorConstants)
 local CrosshairView = require(script.Parent.Parent.ui.CrosshairView)
+local FireButtonView = require(script.Parent.Parent.ui.FireButtonView)
 
 type CrosshairViewHandle = CrosshairView.CrosshairViewHandle
+type FireButtonViewHandle = FireButtonView.FireButtonViewHandle
 
 local STATE_WAIT_TIMEOUT = 10
 local LOCAL_COOLDOWN_SLACK = 0.02
@@ -30,6 +35,8 @@ local requestPuffRemote: RemoteEvent? = nil
 local connectedTools: { [Tool]: boolean } = {}
 local lastLocalFireClock = 0
 local crosshair: CrosshairViewHandle? = nil
+local fireButton: FireButtonViewHandle? = nil
+local crosshairRenderConnection: RBXScriptConnection? = nil
 
 local function isFiniteVector3(vector: Vector3): boolean
 	return vector.X == vector.X and vector.Y == vector.Y and vector.Z == vector.Z
@@ -64,6 +71,46 @@ local function computeAimDirection(): Vector3?
 	end
 
 	return direction
+end
+
+local function updateCrosshairPosition()
+	local currentCrosshair = crosshair
+	if currentCrosshair == nil then
+		return
+	end
+
+	local camera = Workspace.CurrentCamera
+	if camera == nil then
+		return
+	end
+
+	local screenPoint = getAimScreenPoint(camera)
+	currentCrosshair.setPosition(screenPoint.X, screenPoint.Y)
+end
+
+local function startCrosshairTracking()
+	if crosshairRenderConnection ~= nil then
+		return
+	end
+
+	if not UserInputService.MouseEnabled then
+		-- Toque/gamepad: a mira já é sempre pelo centro da câmera, então não
+		-- há necessidade de recalcular a posição quadro a quadro.
+		if crosshair ~= nil then
+			crosshair.setCenteredOnScreen()
+		end
+		return
+	end
+
+	updateCrosshairPosition()
+	crosshairRenderConnection = RunService.RenderStepped:Connect(updateCrosshairPosition)
+end
+
+local function stopCrosshairTracking()
+	if crosshairRenderConnection ~= nil then
+		crosshairRenderConnection:Disconnect()
+		crosshairRenderConnection = nil
+	end
 end
 
 local function onToolActivated()
@@ -105,10 +152,18 @@ local function tryConnectTool(instance: Instance)
 		if crosshair ~= nil then
 			crosshair.setVisible(true)
 		end
+		if fireButton ~= nil then
+			fireButton.setVisible(true)
+		end
+		startCrosshairTracking()
 	end)
 	instance.Unequipped:Connect(function()
+		stopCrosshairTracking()
 		if crosshair ~= nil then
 			crosshair.setVisible(false)
+		end
+		if fireButton ~= nil then
+			fireButton.setVisible(false)
 		end
 	end)
 end
@@ -131,13 +186,15 @@ function PuffadorController.start()
 		return
 	end
 
-	-- A mira é só um reforço visual; se o PlayerGui não estiver disponível
-	-- por algum motivo, o disparo continua funcionando normalmente sem ela.
+	-- Mira e botão de disparo são só reforços de interface; se o PlayerGui
+	-- não estiver disponível por algum motivo, o disparo continua
+	-- funcionando normalmente via Tool.Activated sem eles.
 	local playerGuiInstance = localPlayer:WaitForChild("PlayerGui", STATE_WAIT_TIMEOUT)
 	if playerGuiInstance ~= nil and playerGuiInstance:IsA("PlayerGui") then
 		crosshair = CrosshairView.new(playerGuiInstance)
+		fireButton = FireButtonView.new(playerGuiInstance, onToolActivated)
 	else
-		warn("[BlocoPuff] Puffador crosshair not started: PlayerGui unavailable")
+		warn("[BlocoPuff] Puffador crosshair/fire button not started: PlayerGui unavailable")
 	end
 
 	local remotesInstance = ReplicatedStorage:FindFirstChild(PuffadorConstants.RemotesContainerName)
