@@ -29,6 +29,17 @@ export type RoundTimings = {
 	IntermissionDuration: number,
 }
 
+export type PuffadorConfig = {
+	FireCooldown: number,
+	ProjectileSpeed: number,
+	ProjectileLifetime: number,
+	MaximumRange: number,
+	ProjectileRadius: number,
+	MuzzleForwardOffset: number,
+	MuzzleUpOffset: number,
+	MaximumOriginDistance: number,
+}
+
 export type GameConfig = {
 	GameName: string,
 	MinimumPlayers: number,
@@ -42,6 +53,7 @@ export type GameConfig = {
 	Arena: ArenaConfig,
 	Lobby: LobbyConfig,
 	Palette: WorldPalette,
+	Puffador: PuffadorConfig,
 	getRoundTimings: () -> RoundTimings,
 }
 
@@ -66,6 +78,19 @@ local Palette: WorldPalette = table.freeze({
 	Pink = Color3.fromRGB(255, 174, 211),
 })
 
+-- Valores leves e infantis: alcance e velocidade moderados, sem intenção de
+-- simular uma arma real. Nenhum valor aqui se relaciona a dano ou destruição.
+local Puffador: PuffadorConfig = table.freeze({
+	FireCooldown = 0.65,
+	ProjectileSpeed = 95,
+	ProjectileLifetime = 2.5,
+	MaximumRange = 180,
+	ProjectileRadius = 0.8,
+	MuzzleForwardOffset = 2.5,
+	MuzzleUpOffset = 0.5,
+	MaximumOriginDistance = 12,
+})
+
 local GameConfig = {} :: GameConfig
 
 GameConfig.GameName = "BlocoPuff"
@@ -83,6 +108,7 @@ GameConfig.StudioIntermissionDuration = 5
 GameConfig.Arena = Arena
 GameConfig.Lobby = Lobby
 GameConfig.Palette = Palette
+GameConfig.Puffador = Puffador
 
 function GameConfig.getRoundTimings(): RoundTimings
 	if RunService:IsStudio() then

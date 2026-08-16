@@ -7,6 +7,7 @@ local GameConfig = require(ReplicatedStorage.Shared.config.GameConfig)
 local ArenaService = require(script.services.ArenaService)
 local LobbyService = require(script.services.LobbyService)
 local ReplicatedStateService = require(script.services.ReplicatedStateService)
+local PuffadorService = require(script.services.PuffadorService)
 local RoundService = require(script.services.RoundService)
 
 local WORLD_NAME = "BlocoPuffWorld"
@@ -47,6 +48,9 @@ print(string.format("[BlocoPuff] Arena created with %d blocks", #ArenaService.ge
 
 ReplicatedStateService.create()
 print("[BlocoPuff] Replicated state initialized")
+
+PuffadorService.start(world)
+print("[BlocoPuff] Puffador system started")
 
 RoundService.start()
 print("[BlocoPuff] Round cycle started")

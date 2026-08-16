@@ -10,6 +10,7 @@ local StateAttributeNames = require(ReplicatedStorage.Shared.types.StateAttribut
 local ArenaService = require(script.Parent.ArenaService)
 local LobbyService = require(script.Parent.LobbyService)
 local ReplicatedState = require(script.Parent.ReplicatedStateService)
+local PuffadorService = require(script.Parent.PuffadorService)
 
 type RoundState = RoundTypes.RoundState
 type RoundTimings = GameConfig.RoundTimings
@@ -168,6 +169,7 @@ local function onParticipantDied(player: Player)
 
 	participant.alive = false
 	markEliminated(player)
+	PuffadorService.revokeFrom(player)
 end
 
 local function connectParticipantDeathHandlers(players: { Player })
@@ -235,6 +237,8 @@ local function onPlayerRemoving(player: Player)
 		connection:Disconnect()
 		deathConnections[player] = nil
 	end
+
+	PuffadorService.revokeFrom(player)
 end
 
 local function runWaitingForPlayers()
@@ -291,6 +295,7 @@ local function beginRound(timings: RoundTimings)
 
 	teleportParticipantsToArena(participantOrder)
 	connectParticipantDeathHandlers(participantOrder)
+	PuffadorService.beginRound(participantOrder, currentRoundId)
 
 	setState(RoundTypes.Active)
 	ReplicatedState.setRoundId(currentRoundId)
@@ -330,6 +335,7 @@ end
 
 local function runEnding(timings: RoundTimings)
 	setState(RoundTypes.Ending)
+	PuffadorService.endRound()
 	disconnectParticipantDeathHandlers()
 
 	if winner ~= nil then
@@ -409,6 +415,7 @@ function RoundService.stop()
 	end
 
 	disconnectParticipantDeathHandlers()
+	PuffadorService.stop()
 	for _, player in ipairs(participantOrder) do
 		resetParticipantAttributes(player)
 	end

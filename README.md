@@ -14,7 +14,7 @@ BlocoPuff! é um jogo multiplayer infantil, colorido e cartunesco para 2 a 10 jo
 ```text
 src/
 ├── client/
-│   ├── controllers/  # Lê o estado replicado e alimenta a interface
+│   ├── controllers/  # Lê o estado replicado e trata entrada do jogador
 │   └── ui/            # Constrói e atualiza a interface (HUD)
 ├── server/   # Scripts e serviços autoritativos do servidor
 └── shared/   # Configurações, tipos e módulos compartilhados
@@ -132,11 +132,12 @@ Para um teste simples, abra **View > Output** e clique em **Play**. Sem erros, d
 [BlocoPuff] Lobby created
 [BlocoPuff] Arena created with 225 blocks
 [BlocoPuff] Replicated state initialized
+[BlocoPuff] Puffador system started
 [BlocoPuff] Round cycle started
 [BlocoPuff] Client initialized
 ```
 
-Durante o teste, o servidor também cria `Workspace/BlocoPuffWorld` com o lobby e a arena, além de `ReplicatedStorage/BlocoPuffState`, que expõe o estado da rodada por atributos. O cliente lê exclusivamente esses atributos para desenhar o HUD; a cada mudança real de estado, o servidor registra `[BlocoPuff] Round state: <Estado>`. Encerre o teste pelo botão **Stop**; os objetos gerados em runtime desaparecem ao finalizar o Play.
+Durante o teste, o servidor também cria `Workspace/BlocoPuffWorld` com o lobby, a arena e `Projectiles`, além de `ReplicatedStorage/BlocoPuffState` (estado da rodada por atributos) e `ReplicatedStorage/BlocoPuffRemotes/RequestPuff` (disparo do Puffador). O cliente lê exclusivamente os atributos replicados para desenhar o HUD; a cada mudança real de estado, o servidor registra `[BlocoPuff] Round state: <Estado>`. Encerre o teste pelo botão **Stop**; os objetos gerados em runtime desaparecem ao finalizar o Play.
 
 ## Build local
 
@@ -150,4 +151,8 @@ Arquivos `.rbxl` e `.rbxlx` são artefatos locais e não fazem parte da fonte pr
 
 ## Estado atual
 
-O servidor gera em runtime uma primeira versão visual do mundo, com lobby, ponto de nascimento e uma arena suspensa de 225 blocos identificados. Um ciclo de partidas autoritativo (`WaitingForPlayers → Countdown → Active → Ending`) seleciona participantes, teleporta-os para posições distintas na arena e replica o estado para o cliente somente por atributos em `ReplicatedStorage/BlocoPuffState`. O cliente exibe esse estado em um HUD simples (mensagem, cronômetro, participantes e vencedor). Ainda não há lançador, remoção de blocos, persistência ou monetização.
+O servidor gera em runtime uma primeira versão visual do mundo, com lobby, ponto de nascimento e uma arena suspensa de 225 blocos identificados. Um ciclo de partidas autoritativo (`WaitingForPlayers → Countdown → Active → Ending`) seleciona participantes, teleporta-os para posições distintas na arena e replica o estado para o cliente somente por atributos em `ReplicatedStorage/BlocoPuffState`. O cliente exibe esse estado em um HUD simples (mensagem, cronômetro, participantes e vencedor).
+
+Cada participante recebe, ao entrar em `Active`, o **Puffador**: uma ferramenta cartunesca construída inteiramente com instâncias nativas (sem assets externos). O jogador mira e dispara com mouse, toque ou gamepad — o `Tool.Activated` padrão do Roblox já unifica os três; o cliente só calcula a direção de mira e envia um único `Vector3` normalizado pelo `RemoteEvent RequestPuff`. O servidor é a única autoridade: valida participação, elegibilidade, cadência e origem antes de simular o projétil por raycast determinístico. Nesta etapa o projétil **não causa dano, não destrói blocos e não interfere no resultado da rodada** — o objetivo é validar controle, direção, cadência, alcance e a arquitetura de rede antes de conectar o disparo à destruição da arena.
+
+Ainda não há destruição de blocos, dano, eliminação pelo Puffador, persistência ou monetização.
