@@ -1,0 +1,4 @@
+# Tool versions shared by the project.
+
+[tools]
+rojo = "rojo-rbx/rojo@7.7.0"

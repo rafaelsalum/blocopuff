@@ -1,0 +1,29 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Roblox / Rojo generated files
+*.rbxl
+*.rbxlx
+/build/
+/sourcemap.json
+
+# Logs
+*.log
+/logs/
+
+# Temporary files
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
+/.tmp/
+/tmp/
+
+# Personal editor settings
+/.idea/
+/.vscode/*
+!/.vscode/extensions.json
+!/.vscode/settings.json
