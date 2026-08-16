@@ -36,6 +36,7 @@ local cached = {
 	isParticipant = false,
 	isEliminated = false,
 	eliminationReason = "",
+	roundsUntilTurn = 0,
 }
 
 local function readRoundState(instance: Instance): RoundState
@@ -124,8 +125,14 @@ local function render()
 	end
 
 	local isRoundInProgress = cached.roundState == RoundTypes.Active or cached.roundState == RoundTypes.Ending
+	local isPreRound = cached.roundState == RoundTypes.WaitingForPlayers or cached.roundState == RoundTypes.Countdown
+
 	if isRoundInProgress and not cached.isParticipant then
-		currentView.setSubMessageText("Você participará da próxima rodada")
+		if cached.roundsUntilTurn >= 2 then
+			currentView.setSubMessageText(string.format("Você joga em %d rodadas", cached.roundsUntilTurn))
+		else
+			currentView.setSubMessageText("Você participará da próxima rodada")
+		end
 		currentView.setSubMessageVisible(true)
 	elseif isRoundInProgress and cached.isParticipant and cached.isEliminated then
 		if cached.eliminationReason == EliminationTypes.FellFromArena then
@@ -135,6 +142,9 @@ local function render()
 		else
 			currentView.setSubMessageText("Você foi eliminado\nAguarde a próxima rodada")
 		end
+		currentView.setSubMessageVisible(true)
+	elseif isPreRound and cached.roundsUntilTurn >= 2 then
+		currentView.setSubMessageText(string.format("Você joga em %d rodadas", cached.roundsUntilTurn))
 		currentView.setSubMessageVisible(true)
 	else
 		currentView.setSubMessageVisible(false)
@@ -197,6 +207,7 @@ function HudController.start()
 		cached.isParticipant = readBooleanAttribute(localPlayer, StateAttributeNames.PlayerIsParticipant)
 		cached.isEliminated = readBooleanAttribute(localPlayer, StateAttributeNames.PlayerIsEliminated)
 		cached.eliminationReason = readStringAttribute(localPlayer, StateAttributeNames.PlayerEliminationReason)
+		cached.roundsUntilTurn = readNumberAttribute(localPlayer, StateAttributeNames.PlayerRoundsUntilTurn)
 	end
 
 	refreshFromContainer()
@@ -225,6 +236,7 @@ function HudController.start()
 		StateAttributeNames.PlayerIsParticipant,
 		StateAttributeNames.PlayerIsEliminated,
 		StateAttributeNames.PlayerEliminationReason,
+		StateAttributeNames.PlayerRoundsUntilTurn,
 	}
 	for _, attributeName in ipairs(playerAttributeNames) do
 		connectAttribute(localPlayer, attributeName, function()

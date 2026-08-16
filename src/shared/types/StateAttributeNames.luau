@@ -25,6 +25,7 @@ export type StateAttributeNames = {
 	PlayerIsEliminated: string,
 	PlayerEliminationReason: string,
 	PlayerEliminatedAtRoundId: string,
+	PlayerRoundsUntilTurn: string,
 }
 
 local StateAttributeNames: StateAttributeNames = {
@@ -49,6 +50,7 @@ local StateAttributeNames: StateAttributeNames = {
 	PlayerIsEliminated = "IsEliminated",
 	PlayerEliminationReason = "EliminationReason",
 	PlayerEliminatedAtRoundId = "EliminatedAtRoundId",
+	PlayerRoundsUntilTurn = "RoundsUntilTurn",
 }
 
 return table.freeze(StateAttributeNames)

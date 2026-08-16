@@ -43,6 +43,7 @@ local ATTR_PARTICIPATING_ROUND_ID = StateAttributeNames.PlayerParticipatingRound
 local ATTR_IS_ELIMINATED = StateAttributeNames.PlayerIsEliminated
 local ATTR_ELIMINATION_REASON = StateAttributeNames.PlayerEliminationReason
 local ATTR_ELIMINATED_AT_ROUND_ID = StateAttributeNames.PlayerEliminatedAtRoundId
+local ATTR_ROUNDS_UNTIL_TURN = StateAttributeNames.PlayerRoundsUntilTurn
 
 local RoundService = {}
 
@@ -96,6 +97,17 @@ local function moveCharacterTo(character: Model, cframe: CFrame): boolean
 	return ok
 end
 
+-- Publica, para cada jogador na fila, em quantas rodadas (contando a
+-- próxima como 1) ele deve ser selecionado, assumindo que a fila não mude
+-- até lá. É uma estimativa best-effort: reavaliada a cada entrada, saída ou
+-- seleção, então fica correta sempre que a fila estiver estável.
+local function publishQueuePositions()
+	for index, player in ipairs(rotationQueue) do
+		local roundsUntilTurn = math.ceil(index / GameConfig.MaximumPlayers)
+		player:SetAttribute(ATTR_ROUNDS_UNTIL_TURN, roundsUntilTurn)
+	end
+end
+
 local function enqueuePlayer(player: Player)
 	for _, queued in ipairs(rotationQueue) do
 		if queued == player then
@@ -104,12 +116,14 @@ local function enqueuePlayer(player: Player)
 	end
 
 	table.insert(rotationQueue, player)
+	publishQueuePositions()
 end
 
 local function dequeuePlayer(player: Player)
 	for index, queued in ipairs(rotationQueue) do
 		if queued == player then
 			table.remove(rotationQueue, index)
+			publishQueuePositions()
 			return
 		end
 	end
@@ -134,6 +148,7 @@ local function selectParticipants(): { Player }
 		table.insert(waiting, player)
 	end
 	rotationQueue = waiting
+	publishQueuePositions()
 
 	return selected
 end
