@@ -135,6 +135,14 @@ local function getActiveParticipantList(roundId: number): { Player }
 	return list
 end
 
+local function formatActiveCount(count: number): string
+	if count == 1 then
+		return "1 participante ativo"
+	end
+
+	return string.format("%d participantes ativos", count)
+end
+
 local function refreshSpectator()
 	local player = localPlayer
 	local container = stateContainer
@@ -164,17 +172,19 @@ local function refreshSpectator()
 		return
 	end
 
+	local list = getActiveParticipantList(roundId)
+
 	if currentTarget ~= nil and (not isActiveParticipant(currentTarget, roundId) or getHumanoid(currentTarget) == nil) then
 		currentTarget = nil
 	end
 
 	if currentTarget == nil then
-		currentTarget = getActiveParticipantList(roundId)[1]
+		currentTarget = list[1]
 	end
 
 	if view ~= nil then
 		if currentTarget ~= nil then
-			view.setTargetName(currentTarget.Name)
+			view.setTargetName(string.format("Assistindo: %s\n%s", currentTarget.Name, formatActiveCount(#list)))
 			view.setVisible(true)
 		else
 			view.setVisible(false)
@@ -216,7 +226,7 @@ local function cycleTarget(direction: number)
 	currentTarget = list[nextIndex]
 
 	if view ~= nil and currentTarget ~= nil then
-		view.setTargetName(currentTarget.Name)
+		view.setTargetName(string.format("Assistindo: %s\n%s", currentTarget.Name, formatActiveCount(#list)))
 	end
 end
 

@@ -98,11 +98,13 @@ function SpectatorView.new(playerGui: PlayerGui, onPrevious: () -> (), onNext: (
 	local nameLabel = Instance.new("TextLabel")
 	nameLabel.Name = "TargetNameLabel"
 	nameLabel.BackgroundTransparency = 1
-	nameLabel.AutomaticSize = Enum.AutomaticSize.X
-	nameLabel.Size = UDim2.new(0, 0, 0, 44)
+	nameLabel.AutomaticSize = Enum.AutomaticSize.XY
+	nameLabel.Size = UDim2.new(0, 0, 0, 0)
 	nameLabel.TextColor3 = COLOR_TEXT_PRIMARY
 	nameLabel.Font = FONT_BODY
-	nameLabel.TextSize = 17
+	nameLabel.TextSize = 15
+	nameLabel.TextWrapped = true
+	nameLabel.TextXAlignment = Enum.TextXAlignment.Center
 	nameLabel.Text = ""
 	nameLabel.LayoutOrder = 2
 	nameLabel.Parent = panel
