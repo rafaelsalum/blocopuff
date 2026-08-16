@@ -52,6 +52,7 @@ local currentRoundId = 0
 
 local participants: { [Player]: Participant } = {}
 local participantOrder: { Player } = {}
+local rotationQueue: { Player } = {}
 local deathConnections: { [Player]: RBXScriptConnection } = {}
 local playerRemovingConnection: RBXScriptConnection? = nil
 local playerAddedConnection: RBXScriptConnection? = nil
@@ -95,14 +96,44 @@ local function moveCharacterTo(character: Model, cframe: CFrame): boolean
 	return ok
 end
 
+local function enqueuePlayer(player: Player)
+	for _, queued in ipairs(rotationQueue) do
+		if queued == player then
+			return
+		end
+	end
+
+	table.insert(rotationQueue, player)
+end
+
+local function dequeuePlayer(player: Player)
+	for index, queued in ipairs(rotationQueue) do
+		if queued == player then
+			table.remove(rotationQueue, index)
+			return
+		end
+	end
+end
+
+-- Fila de rotação justa: em vez de sempre pegar os primeiros jogadores
+-- conectados, seleciona a partir da frente da fila e manda quem acabou de
+-- jogar para o fim dela, dando prioridade a quem ainda está esperando.
 local function selectParticipants(): { Player }
 	local selected: { Player } = {}
-	for _, player in ipairs(Players:GetPlayers()) do
-		if #selected >= GameConfig.MaximumPlayers then
-			break
+	local waiting: { Player } = {}
+
+	for _, player in ipairs(rotationQueue) do
+		if #selected < GameConfig.MaximumPlayers then
+			table.insert(selected, player)
+		else
+			table.insert(waiting, player)
 		end
-		table.insert(selected, player)
 	end
+
+	for _, player in ipairs(selected) do
+		table.insert(waiting, player)
+	end
+	rotationQueue = waiting
 
 	return selected
 end
@@ -166,6 +197,7 @@ end
 
 local function onPlayerAdded(player: Player)
 	resetParticipantAttributes(player)
+	enqueuePlayer(player)
 end
 
 -- Ponto único e idempotente de eliminação: usado tanto pelo handler de morte
@@ -271,6 +303,7 @@ local function onPlayerRemoving(player: Player)
 	end
 
 	PuffadorService.revokeFrom(player)
+	dequeuePlayer(player)
 end
 
 local function runWaitingForPlayers()
