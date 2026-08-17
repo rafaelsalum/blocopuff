@@ -243,6 +243,13 @@ local function computeOrigin(rootPart: BasePart, tool: Tool): Vector3
 		+ Vector3.new(0, config.MuzzleUpOffset, 0)
 end
 
+local function incrementRoundBlocksDestroyed(player: Player)
+	local attributeName = StateAttributeNames.PlayerRoundBlocksDestroyed
+	local currentValue = player:GetAttribute(attributeName)
+	local currentScore = if typeof(currentValue) == "number" then math.max(0, math.floor(currentValue)) else 0
+	player:SetAttribute(attributeName, currentScore + 1)
+end
+
 local function onRequestPuff(player: Player, rawAimTarget: unknown)
 	if player.Parent == nil then
 		return
@@ -313,6 +320,7 @@ local function onRequestPuff(player: Player, rawAimTarget: unknown)
 
 	local direction = aimDelta.Unit
 	ProjectileService.spawn(player, origin, direction, currentRoundId, function()
+		incrementRoundBlocksDestroyed(player)
 		local remote = feedbackRemote
 		if remote ~= nil and player.Parent ~= nil then
 			remote:FireClient(player, "Hit")

@@ -21,6 +21,7 @@ export type HudViewHandle = {
 	setCombatTimer: (text: string) -> (),
 	setCombatParticipants: (count: number) -> (),
 	setArenaIntegrity: (remaining: number, total: number) -> (),
+	setPersonalScore: (count: number, visible: boolean) -> (),
 	showAnnouncement: (title: string, subtitle: string, tone: AnnouncementTone, duration: number?) -> (),
 	hideAnnouncement: () -> (),
 	destroy: () -> (),
@@ -44,6 +45,7 @@ function HudView.new(playerGui: PlayerGui): HudViewHandle
 	handle.setCombatTimer = combatHud.setTimer
 	handle.setCombatParticipants = combatHud.setParticipants
 	handle.setArenaIntegrity = combatHud.setArenaIntegrity
+	handle.setPersonalScore = combatHud.setPersonalScore
 	handle.showAnnouncement = announcements.show
 	handle.hideAnnouncement = announcements.hide
 

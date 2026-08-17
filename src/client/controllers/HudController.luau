@@ -38,6 +38,7 @@ local cached = {
 	isEliminated = false,
 	eliminationReason = "",
 	roundsUntilTurn = 0,
+	roundBlocksDestroyed = 0,
 }
 
 local function readRoundState(instance: Instance): RoundState
@@ -135,6 +136,15 @@ local function renderCountdown(currentView: HudViewHandle)
 	clearAnnouncement(currentView)
 end
 
+local function getPersonalScoreSummary(): string
+	if not cached.isParticipant then
+		return "A próxima rodada está chegando"
+	end
+
+	local safeScore = math.max(0, math.floor(cached.roundBlocksDestroyed))
+	return string.format("Você derrubou %d %s", safeScore, if safeScore == 1 then "bloco" else "blocos")
+end
+
 local function renderActive(currentView: HudViewHandle)
 	currentView.setRoundMode("Hidden")
 	currentView.setQueueVisible(false)
@@ -142,6 +152,7 @@ local function renderActive(currentView: HudViewHandle)
 	currentView.setCombatTimer(formatMinutesSeconds(cached.timeRemaining))
 	currentView.setCombatParticipants(cached.participantCount)
 	currentView.setArenaIntegrity(cached.remainingBlockCount, cached.totalBlockCount)
+	currentView.setPersonalScore(cached.roundBlocksDestroyed, cached.isParticipant)
 
 	if not cached.isParticipant then
 		showAnnouncement(
@@ -158,7 +169,7 @@ local function renderActive(currentView: HudViewHandle)
 			currentView,
 			string.format("%d:eliminated:%s", cached.roundId, cached.eliminationReason),
 			if fell then "VOCÊ CAIU!" else "ELIMINADO!",
-			"Agora você pode acompanhar os jogadores restantes",
+			string.format("%s • acompanhe os jogadores restantes", getPersonalScoreSummary()),
 			"Danger",
 			2.6
 		)
@@ -179,6 +190,7 @@ local function renderEnding(currentView: HudViewHandle)
 	currentView.setQueueVisible(false)
 	currentView.setCombatVisible(false)
 
+	local scoreSummary = getPersonalScoreSummary()
 	if cached.winnerUserId ~= 0 and cached.winnerName ~= "" then
 		local localPlayer = Players.LocalPlayer
 		local localPlayerWon = localPlayer ~= nil and localPlayer.UserId == cached.winnerUserId
@@ -186,7 +198,9 @@ local function renderEnding(currentView: HudViewHandle)
 			currentView,
 			string.format("%d:winner:%d", cached.roundId, cached.winnerUserId),
 			if localPlayerWon then "VITÓRIA!" else "FIM DA RODADA",
-			if localPlayerWon then "Você foi o último na arena" else string.format("%s venceu", cached.winnerName),
+			if localPlayerWon
+				then string.format("Último na arena • %s", scoreSummary)
+				else string.format("%s venceu • %s", cached.winnerName, scoreSummary),
 			"Winner",
 			4
 		)
@@ -195,7 +209,7 @@ local function renderEnding(currentView: HudViewHandle)
 			currentView,
 			string.format("%d:no-winner", cached.roundId),
 			"FIM DA RODADA",
-			"Prepare-se para a próxima disputa",
+			scoreSummary,
 			"Info",
 			3
 		)
@@ -271,6 +285,10 @@ function HudController.start()
 		cached.isEliminated = readBooleanAttribute(localPlayer, StateAttributeNames.PlayerIsEliminated)
 		cached.eliminationReason = readStringAttribute(localPlayer, StateAttributeNames.PlayerEliminationReason)
 		cached.roundsUntilTurn = readNumberAttribute(localPlayer, StateAttributeNames.PlayerRoundsUntilTurn)
+		cached.roundBlocksDestroyed = readNumberAttribute(
+			localPlayer,
+			StateAttributeNames.PlayerRoundBlocksDestroyed
+		)
 	end
 
 	refreshFromContainer()
@@ -301,6 +319,7 @@ function HudController.start()
 		StateAttributeNames.PlayerIsEliminated,
 		StateAttributeNames.PlayerEliminationReason,
 		StateAttributeNames.PlayerRoundsUntilTurn,
+		StateAttributeNames.PlayerRoundBlocksDestroyed,
 	}
 	for _, attributeName in ipairs(playerAttributeNames) do
 		connectAttribute(localPlayer, attributeName, function()

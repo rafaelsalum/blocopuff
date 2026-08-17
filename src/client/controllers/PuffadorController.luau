@@ -19,9 +19,11 @@ local ArenaConstants = require(ReplicatedStorage.Shared.modules.ArenaConstants)
 local PuffadorConstants = require(ReplicatedStorage.Shared.modules.PuffadorConstants)
 local CombatCameraController = require(script.Parent.CombatCameraController)
 local CrosshairView = require(script.Parent.Parent.ui.CrosshairView)
+local ControlHintView = require(script.Parent.Parent.ui.ControlHintView)
 local FireButtonView = require(script.Parent.Parent.ui.FireButtonView)
 
 type CrosshairViewHandle = CrosshairView.CrosshairViewHandle
+type ControlHintViewHandle = ControlHintView.ControlHintViewHandle
 type FireButtonViewHandle = FireButtonView.FireButtonViewHandle
 
 local STATE_WAIT_TIMEOUT = 10
@@ -37,8 +39,24 @@ local lastLocalFireClock = 0
 local equippedTool: Tool? = nil
 local crosshair: CrosshairViewHandle? = nil
 local fireButton: FireButtonViewHandle? = nil
+local controlHint: ControlHintViewHandle? = nil
 local backpackWasEnabled: boolean? = nil
 local targetingConnection: RBXScriptConnection? = nil
+local hasShownControlHint = false
+
+local function getControlHintText(): string
+	local inputName = UserInputService:GetLastInputType().Name
+	if
+		string.find(inputName, "Gamepad") ~= nil
+		or (UserInputService.GamepadEnabled and not UserInputService.KeyboardEnabled and not UserInputService.TouchEnabled)
+	then
+		return "MIRE EM UM BLOCO • USE O GATILHO DIREITO"
+	end
+	if UserInputService.TouchEnabled and not UserInputService.KeyboardEnabled then
+		return "MIRE EM UM BLOCO • TOQUE EM ATIRAR"
+	end
+	return "MIRE EM UM BLOCO • CLIQUE PARA ATIRAR"
+end
 
 local function setCombatBackpackHidden(hidden: boolean)
 	if hidden then
@@ -236,6 +254,9 @@ local function onToolActivated()
 	end
 
 	lastLocalFireClock = now
+	if controlHint ~= nil then
+		controlHint.hide()
+	end
 	playLocalShotFeedback(tool)
 	remote:FireServer(aimTarget)
 end
@@ -251,6 +272,10 @@ local function setToolEquipped(tool: Tool)
 		crosshair.setVisible(true)
 	end
 	startTargetingFeedback()
+	if controlHint ~= nil and not hasShownControlHint then
+		hasShownControlHint = true
+		controlHint.show(getControlHintText(), 7)
+	end
 	if fireButton ~= nil then
 		fireButton.setVisible(UserInputService.TouchEnabled)
 	end
@@ -263,6 +288,9 @@ local function clearToolEquipped(tool: Tool)
 
 	equippedTool = nil
 	stopTargetingFeedback()
+	if controlHint ~= nil then
+		controlHint.hide()
+	end
 	setCombatBackpackHidden(false)
 	CombatCameraController.disable()
 	if crosshair ~= nil then
@@ -357,6 +385,7 @@ function PuffadorController.start()
 	if playerGuiInstance ~= nil and playerGuiInstance:IsA("PlayerGui") then
 		crosshair = CrosshairView.new(playerGuiInstance)
 		fireButton = FireButtonView.new(playerGuiInstance, onToolActivated)
+		controlHint = ControlHintView.new(playerGuiInstance)
 	else
 		warn("[BlocoPuff] Puffador UI not started: PlayerGui unavailable")
 	end
@@ -380,6 +409,9 @@ function PuffadorController.start()
 
 	localPlayer.CharacterAdded:Connect(function(character)
 		stopTargetingFeedback()
+		if controlHint ~= nil then
+			controlHint.hide()
+		end
 		setCombatBackpackHidden(false)
 		CombatCameraController.disable()
 		equippedTool = nil

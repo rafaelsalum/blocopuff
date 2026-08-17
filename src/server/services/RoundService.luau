@@ -44,6 +44,7 @@ local ATTR_IS_ELIMINATED = StateAttributeNames.PlayerIsEliminated
 local ATTR_ELIMINATION_REASON = StateAttributeNames.PlayerEliminationReason
 local ATTR_ELIMINATED_AT_ROUND_ID = StateAttributeNames.PlayerEliminatedAtRoundId
 local ATTR_ROUNDS_UNTIL_TURN = StateAttributeNames.PlayerRoundsUntilTurn
+local ATTR_ROUND_BLOCKS_DESTROYED = StateAttributeNames.PlayerRoundBlocksDestroyed
 
 local RoundService = {}
 
@@ -200,6 +201,7 @@ local function resetParticipantAttributes(player: Player)
 	player:SetAttribute(ATTR_IS_ELIMINATED, false)
 	player:SetAttribute(ATTR_ELIMINATION_REASON, EliminationTypes.None)
 	player:SetAttribute(ATTR_ELIMINATED_AT_ROUND_ID, 0)
+	player:SetAttribute(ATTR_ROUND_BLOCKS_DESTROYED, 0)
 end
 
 local function markParticipantAttributes(player: Player, roundId: number)
@@ -208,6 +210,7 @@ local function markParticipantAttributes(player: Player, roundId: number)
 	player:SetAttribute(ATTR_IS_ELIMINATED, false)
 	player:SetAttribute(ATTR_ELIMINATION_REASON, EliminationTypes.None)
 	player:SetAttribute(ATTR_ELIMINATED_AT_ROUND_ID, 0)
+	player:SetAttribute(ATTR_ROUND_BLOCKS_DESTROYED, 0)
 end
 
 local function onPlayerAdded(player: Player)

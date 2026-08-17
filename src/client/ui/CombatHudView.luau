@@ -13,6 +13,7 @@ export type CombatHudViewHandle = {
 	setTimer: (text: string) -> (),
 	setParticipants: (count: number) -> (),
 	setArenaIntegrity: (remaining: number, total: number) -> (),
+	setPersonalScore: (count: number, visible: boolean) -> (),
 	destroy: () -> (),
 }
 
@@ -202,6 +203,43 @@ function CombatHudView.new(playerGui: PlayerGui): CombatHudViewHandle
 	progressFill.Parent = progressTrack
 	UiTheme.addCorner(progressFill, 7)
 
+	local scoreRoot, scoreCard = createPanelRoot(
+		screenGui,
+		"PersonalScorePanel",
+		Vector2.new(0, 0),
+		UDim2.new(0, 18, 0, 96),
+		UDim2.fromOffset(178, 46),
+		UiTheme.Colors.Yellow,
+		scaleHandles
+	)
+	scoreRoot.Visible = false
+
+	local scoreCaption = createLabel(
+		"ScoreCaption",
+		scoreCard,
+		"SEUS BLOCOS",
+		UiTheme.Fonts.BodyBold,
+		11,
+		UiTheme.Colors.InkSoft
+	)
+	scoreCaption.Position = UDim2.new(0, 13, 0, 0)
+	scoreCaption.Size = UDim2.new(1, -60, 1, 0)
+	scoreCaption.TextXAlignment = Enum.TextXAlignment.Left
+
+	local scoreValue = createLabel(
+		"ScoreValue",
+		scoreCard,
+		"0",
+		UiTheme.Fonts.Heading,
+		23,
+		UiTheme.Colors.Ink
+	)
+	scoreValue.AnchorPoint = Vector2.new(1, 0.5)
+	scoreValue.Position = UDim2.new(1, -13, 0.5, 0)
+	scoreValue.Size = UDim2.fromOffset(42, 34)
+	scoreValue.TextXAlignment = Enum.TextXAlignment.Right
+	local lastPersonalScore = 0
+
 	local cameraConnection: RBXScriptConnection? = nil
 	local workspaceConnection: RBXScriptConnection? = nil
 
@@ -209,8 +247,9 @@ function CombatHudView.new(playerGui: PlayerGui): CombatHudViewHandle
 		local camera = Workspace.CurrentCamera
 		local compact = camera ~= nil and camera.ViewportSize.X < 700
 		arenaRoot.Position = UDim2.new(0, if compact then 12 else 18, 0, 16)
+		scoreRoot.Position = UDim2.new(0, if compact then 12 else 18, 0, 96)
 		playersRoot.Position = UDim2.new(1, if compact then -12 else -18, 0, 16)
-		timerRoot.Position = UDim2.new(0.5, 0, 0, if compact then 84 else 16)
+		timerRoot.Position = UDim2.new(0.5, 0, 0, if compact then 150 else 16)
 	end
 
 	local function connectCamera()
@@ -258,6 +297,19 @@ function CombatHudView.new(playerGui: PlayerGui): CombatHudViewHandle
 			Size = UDim2.fromScale(ratio, 1),
 			BackgroundColor3 = fillColor,
 		}):Play()
+	end
+
+	handle.setPersonalScore = function(count: number, visible: boolean)
+		local safeCount = math.max(0, math.floor(count))
+		scoreRoot.Visible = visible
+		scoreValue.Text = tostring(safeCount)
+		if visible and safeCount > lastPersonalScore then
+			scoreValue.TextSize = 28
+			TweenService:Create(scoreValue, TweenInfo.new(0.18, Enum.EasingStyle.Back), {
+				TextSize = 23,
+			}):Play()
+		end
+		lastPersonalScore = safeCount
 	end
 
 	handle.destroy = function()
