@@ -103,9 +103,9 @@ local function getArenaColors(palette: WorldPalette): { Color3 }
 end
 
 local function setArenaEnergy(active: boolean)
-	local nodeTransparency = if active then 0.06 else 0.38
-	local lightBrightness = if active then 2.1 else 0.7
-	local beamTransparency = if active then 0.12 else 0.5
+	local nodeTransparency = if active then 0.22 else 0.58
+	local lightBrightness = if active then 0.85 else 0.18
+	local beamTransparency = if active then 0.38 else 0.72
 
 	for _, node in ipairs(energyNodes) do
 		TweenService:Create(node, TweenInfo.new(0.35, Enum.EasingStyle.Quad), {
@@ -156,7 +156,7 @@ local function createArenaVisuals(
 		node.CastShadow = false
 		node.Material = Enum.Material.Neon
 		node.Color = palette.Purple:Lerp(palette.LightBlue, 0.35)
-		node.Transparency = 0.38
+		node.Transparency = 0.58
 		node.Parent = visuals
 
 		local attachment = Instance.new("Attachment")
@@ -166,8 +166,8 @@ local function createArenaVisuals(
 		local light = Instance.new("PointLight")
 		light.Name = "EnergyLight"
 		light.Color = node.Color
-		light.Brightness = 0.7
-		light.Range = 12
+		light.Brightness = 0.18
+		light.Range = 9
 		light.Shadows = false
 		light.Parent = node
 
@@ -187,9 +187,9 @@ local function createArenaVisuals(
 			beam.Width0 = ENERGY_BEAM_WIDTH
 			beam.Width1 = ENERGY_BEAM_WIDTH
 			beam.FaceCamera = true
-			beam.LightEmission = 0.85
+			beam.LightEmission = 0.45
 			beam.Color = ColorSequence.new(palette.Purple, palette.LightBlue)
-			beam.Transparency = NumberSequence.new(0.5)
+			beam.Transparency = NumberSequence.new(0.72)
 			beam.Parent = visuals
 			table.insert(energyBeams, beam)
 		end
@@ -423,8 +423,8 @@ local function createCollapseEffect(record: BlockRecord, context: BlockDestructi
 	local light = Instance.new("PointLight")
 	light.Name = "CollapseGlow"
 	light.Color = record.originalColor
-	light.Brightness = 1.4
-	light.Range = 8
+	light.Brightness = 0.65
+	light.Range = 6
 	light.Shadows = false
 	light.Parent = visual
 

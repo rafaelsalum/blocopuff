@@ -82,11 +82,11 @@ local Lobby: LobbyConfig = table.freeze({
 })
 
 local Palette: WorldPalette = table.freeze({
-	LightBlue = Color3.fromRGB(151, 211, 255),
-	Yellow = Color3.fromRGB(255, 230, 148),
-	Orange = Color3.fromRGB(255, 181, 132),
-	Purple = Color3.fromRGB(194, 168, 255),
-	Pink = Color3.fromRGB(255, 174, 211),
+	LightBlue = Color3.fromRGB(128, 174, 201),
+	Yellow = Color3.fromRGB(218, 194, 126),
+	Orange = Color3.fromRGB(210, 143, 108),
+	Purple = Color3.fromRGB(154, 132, 188),
+	Pink = Color3.fromRGB(202, 137, 168),
 })
 
 -- Valores leves e infantis: alcance e velocidade moderados, sem intenção de

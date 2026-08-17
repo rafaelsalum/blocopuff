@@ -14,6 +14,13 @@ local SERVICE_NAME = "LobbyService"
 
 local BARRIER_HEIGHT = 4
 local BARRIER_THICKNESS = 1
+local CONTAINMENT_HEIGHT = 18
+local CONTAINMENT_THICKNESS = 2
+local FOUNDATION_DEPTH = 4.5
+local FOUNDATION_MARGIN = 4
+local LOWER_CORE_DEPTH = 3.5
+local CORNER_POST_HEIGHT = 7
+local CORNER_POST_SIZE = 2
 local SPAWN_SIZE = Vector3.new(8, 1, 8)
 local RETURN_HEIGHT_OFFSET = 3
 
@@ -63,6 +70,21 @@ local function createPart(
 	return part
 end
 
+local function createContainmentPart(name: string, size: Vector3, position: Vector3, parent: Instance): Part
+	local part = Instance.new("Part")
+	part.Name = name
+	part.Anchored = true
+	part.CanCollide = true
+	part.CanTouch = false
+	part.CanQuery = false
+	part.CastShadow = false
+	part.Size = size
+	part.Position = position
+	part.Transparency = 1
+	part.Parent = parent
+	return part
+end
+
 local function assignLobbySpawn(player: Player)
 	if lobbySpawn ~= nil and lobbySpawn.Parent ~= nil then
 		player.RespawnLocation = lobbySpawn
@@ -108,8 +130,32 @@ function LobbyService.create(worldRoot: Model, config: LobbyConfig, palette: Wor
 	newLobby:SetAttribute(GENERATED_BY_ATTRIBUTE, SERVICE_NAME)
 	newLobby.Parent = worldRoot
 
-	createPart("Platform", config.PlatformSize, config.Position, palette.LightBlue, newLobby)
+	local platform = createPart("Platform", config.PlatformSize, config.Position, palette.LightBlue, newLobby)
 	local platformTop = config.Position.Y + (config.PlatformSize.Y / 2)
+
+	local foundationColor = palette.Purple:Lerp(Color3.fromRGB(78, 82, 105), 0.42)
+	local foundation = createPart(
+		"Foundation",
+		Vector3.new(
+			config.PlatformSize.X + FOUNDATION_MARGIN,
+			FOUNDATION_DEPTH,
+			config.PlatformSize.Z + FOUNDATION_MARGIN
+		),
+		Vector3.new(config.Position.X, config.Position.Y - (config.PlatformSize.Y / 2) - (FOUNDATION_DEPTH / 2), config.Position.Z),
+		foundationColor,
+		newLobby
+	)
+	foundation.CastShadow = true
+
+	local lowerCore = createPart(
+		"LowerCore",
+		Vector3.new(config.PlatformSize.X - 8, LOWER_CORE_DEPTH, config.PlatformSize.Z - 8),
+		Vector3.new(config.Position.X, foundation.Position.Y - (FOUNDATION_DEPTH / 2) - (LOWER_CORE_DEPTH / 2), config.Position.Z),
+		palette.Purple:Lerp(Color3.fromRGB(58, 61, 82), 0.55),
+		newLobby
+	)
+	lowerCore.CastShadow = true
+	platform.CastShadow = true
 
 	local spawn = Instance.new("SpawnLocation")
 	spawn.Name = "Spawn"
@@ -172,8 +218,63 @@ function LobbyService.create(worldRoot: Model, config: LobbyConfig, palette: Wor
 	)
 
 	for _, barrier in ipairs({ northBarrier, southBarrier, westBarrier, eastBarrier }) do
-		barrier.Transparency = 0.15
+		barrier.Color = barrier.Color:Lerp(Color3.fromRGB(75, 78, 103), 0.24)
+		barrier.Transparency = 0.08
 	end
+
+	local cornerPosts = Instance.new("Folder")
+	cornerPosts.Name = "CornerPosts"
+	cornerPosts.Parent = newLobby
+	local postY = platformTop + (CORNER_POST_HEIGHT / 2)
+	local postInset = CORNER_POST_SIZE / 2
+	for index, offset in ipairs({
+		Vector3.new(-halfWidth + postInset, 0, -halfDepth + postInset),
+		Vector3.new(halfWidth - postInset, 0, -halfDepth + postInset),
+		Vector3.new(halfWidth - postInset, 0, halfDepth - postInset),
+		Vector3.new(-halfWidth + postInset, 0, halfDepth - postInset),
+	}) do
+		local post = createPart(
+			string.format("Post%02d", index),
+			Vector3.new(CORNER_POST_SIZE, CORNER_POST_HEIGHT, CORNER_POST_SIZE),
+			Vector3.new(config.Position.X, postY, config.Position.Z) + offset,
+			foundationColor,
+			cornerPosts
+		)
+		post.CastShadow = true
+	end
+
+	-- A cerca baixa comunica visualmente o limite, enquanto estas paredes
+	-- invisíveis altas garantem que um salto normal não saia do lobby. Elas
+	-- não participam de raycasts nem de eventos de toque.
+	local containment = Instance.new("Folder")
+	containment.Name = "Containment"
+	containment.Parent = newLobby
+	local containmentY = platformTop + (CONTAINMENT_HEIGHT / 2)
+	local containmentHalfThickness = CONTAINMENT_THICKNESS / 2
+	createContainmentPart(
+		"North",
+		Vector3.new(config.PlatformSize.X, CONTAINMENT_HEIGHT, CONTAINMENT_THICKNESS),
+		Vector3.new(config.Position.X, containmentY, config.Position.Z - halfDepth + containmentHalfThickness),
+		containment
+	)
+	createContainmentPart(
+		"South",
+		Vector3.new(config.PlatformSize.X, CONTAINMENT_HEIGHT, CONTAINMENT_THICKNESS),
+		Vector3.new(config.Position.X, containmentY, config.Position.Z + halfDepth - containmentHalfThickness),
+		containment
+	)
+	createContainmentPart(
+		"West",
+		Vector3.new(CONTAINMENT_THICKNESS, CONTAINMENT_HEIGHT, config.PlatformSize.Z),
+		Vector3.new(config.Position.X - halfWidth + containmentHalfThickness, containmentY, config.Position.Z),
+		containment
+	)
+	createContainmentPart(
+		"East",
+		Vector3.new(CONTAINMENT_THICKNESS, CONTAINMENT_HEIGHT, config.PlatformSize.Z),
+		Vector3.new(config.Position.X + halfWidth - containmentHalfThickness, containmentY, config.Position.Z),
+		containment
+	)
 
 	lobbyModel = newLobby
 	return newLobby
