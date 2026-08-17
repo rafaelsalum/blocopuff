@@ -5,10 +5,10 @@
 
 local TweenService = game:GetService("TweenService")
 
+local UiTheme = require(script.Parent.UiTheme)
+
 local FIRE_BUTTON_NAME = "BlocoPuffFireButton"
 local BUTTON_SIZE = 84
-local READY_COLOR = Color3.fromRGB(255, 221, 91)
-local DISABLED_COLOR = Color3.fromRGB(157, 146, 166)
 
 export type FireButtonViewHandle = {
 	screenGui: ScreenGui,
@@ -20,17 +20,7 @@ export type FireButtonViewHandle = {
 local FireButtonView = {}
 
 function FireButtonView.new(playerGui: PlayerGui, onFire: () -> ()): FireButtonViewHandle
-	local existing = playerGui:FindFirstChild(FIRE_BUTTON_NAME)
-	if existing ~= nil then
-		existing:Destroy()
-	end
-
-	local screenGui = Instance.new("ScreenGui")
-	screenGui.Name = FIRE_BUTTON_NAME
-	screenGui.ResetOnSpawn = false
-	screenGui.IgnoreGuiInset = false
-	screenGui.DisplayOrder = 19
-	screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+	local screenGui = UiTheme.createScreenGui(FIRE_BUTTON_NAME, playerGui, 19)
 	screenGui.Enabled = false
 
 	local button = Instance.new("TextButton")
@@ -38,10 +28,13 @@ function FireButtonView.new(playerGui: PlayerGui, onFire: () -> ()): FireButtonV
 	button.AnchorPoint = Vector2.new(1, 1)
 	button.Position = UDim2.new(1, -28, 1, -166)
 	button.Size = UDim2.fromOffset(BUTTON_SIZE, BUTTON_SIZE)
-	button.BackgroundColor3 = READY_COLOR
+	button.BackgroundColor3 = UiTheme.Colors.Yellow
 	button.BackgroundTransparency = 0.08
 	button.AutoButtonColor = true
-	button.Text = ""
+	-- O texto transparente mantém uma descrição semântica no próprio botão;
+	-- o Label filho controla a apresentação acima do overlay de recarga.
+	button.Text = "PUFF!"
+	button.TextTransparency = 1
 	button.Active = true
 	button.Selectable = true
 	button.SelectionOrder = 10
@@ -52,21 +45,15 @@ function FireButtonView.new(playerGui: PlayerGui, onFire: () -> ()): FireButtonV
 	scale.Scale = 1
 	scale.Parent = button
 
-	local buttonCorner = Instance.new("UICorner")
-	buttonCorner.CornerRadius = UDim.new(1, 0)
-	buttonCorner.Parent = button
-
-	local buttonStroke = Instance.new("UIStroke")
-	buttonStroke.Color = Color3.fromRGB(73, 52, 89)
-	buttonStroke.Thickness = 4
-	buttonStroke.Parent = button
+	UiTheme.addCorner(button, BUTTON_SIZE / 2)
+	UiTheme.addStroke(button, UiTheme.Colors.Ink, 4)
 
 	local cooldownOverlay = Instance.new("Frame")
 	cooldownOverlay.Name = "CooldownOverlay"
 	cooldownOverlay.AnchorPoint = Vector2.new(0, 1)
 	cooldownOverlay.Position = UDim2.fromScale(0, 1)
 	cooldownOverlay.Size = UDim2.fromScale(1, 0)
-	cooldownOverlay.BackgroundColor3 = Color3.fromRGB(71, 57, 82)
+	cooldownOverlay.BackgroundColor3 = UiTheme.Colors.Ink
 	cooldownOverlay.BackgroundTransparency = 0.28
 	cooldownOverlay.BorderSizePixel = 0
 	cooldownOverlay.ZIndex = 2
@@ -76,9 +63,9 @@ function FireButtonView.new(playerGui: PlayerGui, onFire: () -> ()): FireButtonV
 	label.Name = "Label"
 	label.Size = UDim2.fromScale(1, 1)
 	label.BackgroundTransparency = 1
-	label.Font = Enum.Font.FredokaOne
+	label.Font = UiTheme.Fonts.Heading
 	label.Text = "PUFF!"
-	label.TextColor3 = Color3.fromRGB(58, 43, 69)
+	label.TextColor3 = UiTheme.Colors.Ink
 	label.TextSize = 19
 	label.ZIndex = 3
 	label.Parent = button
@@ -88,8 +75,6 @@ function FireButtonView.new(playerGui: PlayerGui, onFire: () -> ()): FireButtonV
 			onFire()
 		end
 	end)
-
-	screenGui.Parent = playerGui
 
 	local handle = {} :: FireButtonViewHandle
 	handle.screenGui = screenGui
@@ -102,7 +87,8 @@ function FireButtonView.new(playerGui: PlayerGui, onFire: () -> ()): FireButtonV
 		button.Active = false
 		button.Selectable = false
 		button.AutoButtonColor = false
-		button.BackgroundColor3 = DISABLED_COLOR
+		button.BackgroundColor3 = UiTheme.Colors.InkSoft
+		button.Text = "RECARREGANDO"
 		label.Text = "..."
 		cooldownOverlay.Size = UDim2.fromScale(1, 1)
 		scale.Scale = 0.9
@@ -121,7 +107,8 @@ function FireButtonView.new(playerGui: PlayerGui, onFire: () -> ()): FireButtonV
 			button.Active = true
 			button.Selectable = true
 			button.AutoButtonColor = true
-			button.BackgroundColor3 = READY_COLOR
+			button.BackgroundColor3 = UiTheme.Colors.Yellow
+			button.Text = "PUFF!"
 			label.Text = "PUFF!"
 		end)
 	end

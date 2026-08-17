@@ -6,12 +6,14 @@
 
 local TweenService = game:GetService("TweenService")
 
+local UiTheme = require(script.Parent.UiTheme)
+
 local CROSSHAIR_NAME = "BlocoPuffCrosshair"
 local DEFAULT_RING_SIZE = 26
 local SHOT_RING_SIZE = 38
 local DEFAULT_DOT_SIZE = 6
-local HIT_COLOR = Color3.fromRGB(255, 230, 96)
-local DEFAULT_COLOR = Color3.new(1, 1, 1)
+local HIT_COLOR = UiTheme.Colors.Yellow
+local DEFAULT_COLOR = UiTheme.Colors.White
 
 export type CrosshairViewHandle = {
 	screenGui: ScreenGui,
@@ -44,7 +46,7 @@ local function createHitLine(parent: Instance, position: UDim2, rotation: number
 	addCorner(line)
 
 	local stroke = Instance.new("UIStroke")
-	stroke.Color = Color3.fromRGB(44, 35, 52)
+	stroke.Color = UiTheme.Colors.Ink
 	stroke.Thickness = 1
 	stroke.Parent = line
 
@@ -83,7 +85,7 @@ function CrosshairView.new(playerGui: PlayerGui): CrosshairViewHandle
 	addCorner(shadowRing)
 
 	local shadowStroke = Instance.new("UIStroke")
-	shadowStroke.Color = Color3.fromRGB(44, 35, 52)
+	shadowStroke.Color = UiTheme.Colors.Ink
 	shadowStroke.Thickness = 4
 	shadowStroke.Transparency = 0.15
 	shadowStroke.Parent = shadowRing
@@ -113,7 +115,7 @@ function CrosshairView.new(playerGui: PlayerGui): CrosshairViewHandle
 	addCorner(dot)
 
 	local dotStroke = Instance.new("UIStroke")
-	dotStroke.Color = Color3.fromRGB(44, 35, 52)
+	dotStroke.Color = UiTheme.Colors.Ink
 	dotStroke.Thickness = 2
 	dotStroke.Parent = dot
 

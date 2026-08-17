@@ -1,15 +1,14 @@
 --!strict
 
--- Lê ReplicatedStorage/BlocoPuffState e os atributos do Player local, e
--- traduz esses valores replicados em chamadas ao HudView. Nunca escreve
--- nesses atributos nem toma decisão autoritativa sobre a partida.
+-- Traduz estado replicado em três camadas visuais independentes: rodada,
+-- combate e anúncios. Não escreve atributos nem decide regras da partida.
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
+local EliminationTypes = require(ReplicatedStorage.Shared.types.EliminationTypes)
 local RoundTypes = require(ReplicatedStorage.Shared.types.RoundTypes)
 local StateAttributeNames = require(ReplicatedStorage.Shared.types.StateAttributeNames)
-local EliminationTypes = require(ReplicatedStorage.Shared.types.EliminationTypes)
 local HudView = require(script.Parent.Parent.ui.HudView)
 
 type RoundState = RoundTypes.RoundState
@@ -22,9 +21,11 @@ local HudController = {}
 local started = false
 local view: HudViewHandle? = nil
 local connections: { RBXScriptConnection } = {}
+local lastAnnouncementKey = ""
 
 local cached = {
 	roundState = RoundTypes.WaitingForPlayers :: RoundState,
+	roundId = 0,
 	timeRemaining = 0,
 	participantCount = 0,
 	minimumPlayers = 0,
@@ -58,7 +59,6 @@ local function readNumberAttribute(instance: Instance, name: string): number
 	if typeof(value) == "number" then
 		return value
 	end
-
 	return 0
 end
 
@@ -67,7 +67,6 @@ local function readStringAttribute(instance: Instance, name: string): string
 	if typeof(value) == "string" then
 		return value
 	end
-
 	return ""
 end
 
@@ -76,7 +75,6 @@ local function readBooleanAttribute(instance: Instance, name: string): boolean
 	if typeof(value) == "boolean" then
 		return value
 	end
-
 	return false
 end
 
@@ -87,76 +85,138 @@ local function formatMinutesSeconds(totalSeconds: number): string
 	return string.format("%02d:%02d", minutes, seconds)
 end
 
+local function getQueueMessage(): string
+	if cached.roundsUntilTurn >= 2 then
+		return string.format("Sua vez chega em %d rodadas", cached.roundsUntilTurn)
+	end
+	return "Você participa da próxima rodada"
+end
+
+local function clearAnnouncement(currentView: HudViewHandle)
+	if lastAnnouncementKey == "" then
+		return
+	end
+	lastAnnouncementKey = ""
+	currentView.hideAnnouncement()
+end
+
+local function showAnnouncement(
+	currentView: HudViewHandle,
+	key: string,
+	title: string,
+	subtitle: string,
+	tone: "Info" | "Warning" | "Danger" | "Winner",
+	duration: number?
+)
+	if key == lastAnnouncementKey then
+		return
+	end
+	lastAnnouncementKey = key
+	currentView.showAnnouncement(title, subtitle, tone, duration)
+end
+
+local function renderWaiting(currentView: HudViewHandle)
+	currentView.setRoundMode("Waiting")
+	currentView.setRoundStatus(if cached.statusMessage ~= "" then cached.statusMessage else "Aguardando jogadores")
+	currentView.setRoundParticipants(
+		string.format("%d DE %d JOGADORES", cached.participantCount, cached.minimumPlayers)
+	)
+	currentView.setQueueText(getQueueMessage())
+	currentView.setQueueVisible(cached.roundsUntilTurn >= 2)
+	currentView.setCombatVisible(false)
+	clearAnnouncement(currentView)
+end
+
+local function renderCountdown(currentView: HudViewHandle)
+	currentView.setRoundMode("Countdown")
+	currentView.setCountdown(tostring(math.max(0, math.floor(cached.timeRemaining))))
+	currentView.setQueueVisible(false)
+	currentView.setCombatVisible(false)
+	clearAnnouncement(currentView)
+end
+
+local function renderActive(currentView: HudViewHandle)
+	currentView.setRoundMode("Hidden")
+	currentView.setQueueVisible(false)
+	currentView.setCombatVisible(true)
+	currentView.setCombatTimer(formatMinutesSeconds(cached.timeRemaining))
+	currentView.setCombatParticipants(cached.participantCount)
+	currentView.setArenaIntegrity(cached.remainingBlockCount, cached.totalBlockCount)
+
+	if not cached.isParticipant then
+		showAnnouncement(
+			currentView,
+			string.format("%d:waiting:%d", cached.roundId, cached.roundsUntilTurn),
+			"AGUARDE SUA VEZ",
+			getQueueMessage(),
+			"Warning",
+			3
+		)
+	elseif cached.isEliminated then
+		local fell = cached.eliminationReason == EliminationTypes.FellFromArena
+		showAnnouncement(
+			currentView,
+			string.format("%d:eliminated:%s", cached.roundId, cached.eliminationReason),
+			if fell then "VOCÊ CAIU!" else "ELIMINADO!",
+			"Agora você pode acompanhar os jogadores restantes",
+			"Danger",
+			2.6
+		)
+	else
+		showAnnouncement(
+			currentView,
+			string.format("%d:active", cached.roundId),
+			"VALENDO!",
+			"Mire nos blocos e continue na arena",
+			"Info",
+			1.5
+		)
+	end
+end
+
+local function renderEnding(currentView: HudViewHandle)
+	currentView.setRoundMode("Hidden")
+	currentView.setQueueVisible(false)
+	currentView.setCombatVisible(false)
+
+	if cached.winnerUserId ~= 0 and cached.winnerName ~= "" then
+		local localPlayer = Players.LocalPlayer
+		local localPlayerWon = localPlayer ~= nil and localPlayer.UserId == cached.winnerUserId
+		showAnnouncement(
+			currentView,
+			string.format("%d:winner:%d", cached.roundId, cached.winnerUserId),
+			if localPlayerWon then "VITÓRIA!" else "FIM DA RODADA",
+			if localPlayerWon then "Você foi o último na arena" else string.format("%s venceu", cached.winnerName),
+			"Winner",
+			4
+		)
+	else
+		showAnnouncement(
+			currentView,
+			string.format("%d:no-winner", cached.roundId),
+			"FIM DA RODADA",
+			"Prepare-se para a próxima disputa",
+			"Info",
+			3
+		)
+	end
+end
+
 local function render()
 	local currentView = view
 	if currentView == nil then
 		return
 	end
 
-	currentView.setStatusText(cached.statusMessage)
-	-- Durante Active a mensagem é sempre a mesma ("Partida em andamento") e
-	-- não agrega informação nova; escondê-la mantém o painel discreto e
-	-- fora do caminho da mira, mostrando só cronômetro/participantes/blocos.
-	currentView.setStatusVisible(cached.roundState ~= RoundTypes.Active)
-
 	if cached.roundState == RoundTypes.WaitingForPlayers then
-		currentView.setTimerVisible(false)
-		currentView.setParticipantsText(
-			string.format("%d/%d jogadores", cached.participantCount, cached.minimumPlayers)
-		)
-		currentView.setParticipantsVisible(true)
+		renderWaiting(currentView)
 	elseif cached.roundState == RoundTypes.Countdown then
-		currentView.setTimerText(tostring(math.max(0, math.floor(cached.timeRemaining))))
-		currentView.setTimerVisible(true)
-		currentView.setParticipantsText(string.format("%d jogadores", cached.participantCount))
-		currentView.setParticipantsVisible(true)
+		renderCountdown(currentView)
 	elseif cached.roundState == RoundTypes.Active then
-		currentView.setTimerText(formatMinutesSeconds(cached.timeRemaining))
-		currentView.setTimerVisible(true)
-		currentView.setParticipantsText(string.format("%d participantes", cached.participantCount))
-		currentView.setParticipantsVisible(true)
+		renderActive(currentView)
 	else
-		currentView.setTimerVisible(false)
-		currentView.setParticipantsVisible(false)
+		renderEnding(currentView)
 	end
-
-	local showBlockCount = cached.roundState == RoundTypes.Active or cached.roundState == RoundTypes.Ending
-	if showBlockCount then
-		currentView.setBlockCountText(string.format("Blocos: %d/%d", cached.remainingBlockCount, cached.totalBlockCount))
-		currentView.setBlockCountVisible(true)
-	else
-		currentView.setBlockCountVisible(false)
-	end
-
-	local isRoundInProgress = cached.roundState == RoundTypes.Active or cached.roundState == RoundTypes.Ending
-	local isPreRound = cached.roundState == RoundTypes.WaitingForPlayers or cached.roundState == RoundTypes.Countdown
-
-	if isRoundInProgress and not cached.isParticipant then
-		if cached.roundsUntilTurn >= 2 then
-			currentView.setSubMessageText(string.format("Você joga em %d rodadas", cached.roundsUntilTurn))
-		else
-			currentView.setSubMessageText("Você participará da próxima rodada")
-		end
-		currentView.setSubMessageVisible(true)
-	elseif isRoundInProgress and cached.isParticipant and cached.isEliminated then
-		if cached.eliminationReason == EliminationTypes.FellFromArena then
-			currentView.setSubMessageText("VOCÊ CAIU DA ARENA\nAguarde a próxima rodada")
-		elseif cached.eliminationReason == EliminationTypes.CharacterDied then
-			currentView.setSubMessageText("VOCÊ FOI ELIMINADO\nAguarde a próxima rodada")
-		else
-			currentView.setSubMessageText("Você foi eliminado\nAguarde a próxima rodada")
-		end
-		currentView.setSubMessageVisible(true)
-	elseif isPreRound and cached.roundsUntilTurn >= 2 then
-		currentView.setSubMessageText(string.format("Você joga em %d rodadas", cached.roundsUntilTurn))
-		currentView.setSubMessageVisible(true)
-	else
-		currentView.setSubMessageVisible(false)
-	end
-
-	currentView.setStatusHighlighted(
-		cached.roundState == RoundTypes.Ending and cached.winnerUserId ~= 0 and cached.winnerName ~= ""
-	)
 end
 
 local function connectAttribute(instance: Instance, attributeName: string, handler: () -> ())
@@ -181,7 +241,6 @@ function HudController.start()
 		warn("[BlocoPuff] HUD not started: PlayerGui unavailable")
 		return
 	end
-	local playerGui: PlayerGui = playerGuiInstance
 
 	local containerInstance = ReplicatedStorage:FindFirstChild(StateAttributeNames.ContainerName)
 	if containerInstance == nil then
@@ -191,20 +250,20 @@ function HudController.start()
 		warn("[BlocoPuff] HUD not started: BlocoPuffState not found within timeout")
 		return
 	end
-	local stateContainer: Instance = containerInstance
 
-	view = HudView.new(playerGui)
+	view = HudView.new(playerGuiInstance)
 
 	local function refreshFromContainer()
-		cached.roundState = readRoundState(stateContainer)
-		cached.timeRemaining = readNumberAttribute(stateContainer, StateAttributeNames.TimeRemaining)
-		cached.participantCount = readNumberAttribute(stateContainer, StateAttributeNames.ParticipantCount)
-		cached.minimumPlayers = readNumberAttribute(stateContainer, StateAttributeNames.MinimumPlayers)
-		cached.winnerUserId = readNumberAttribute(stateContainer, StateAttributeNames.WinnerUserId)
-		cached.winnerName = readStringAttribute(stateContainer, StateAttributeNames.WinnerName)
-		cached.statusMessage = readStringAttribute(stateContainer, StateAttributeNames.StatusMessage)
-		cached.remainingBlockCount = readNumberAttribute(stateContainer, StateAttributeNames.RemainingBlockCount)
-		cached.totalBlockCount = readNumberAttribute(stateContainer, StateAttributeNames.TotalBlockCount)
+		cached.roundState = readRoundState(containerInstance)
+		cached.roundId = readNumberAttribute(containerInstance, StateAttributeNames.RoundId)
+		cached.timeRemaining = readNumberAttribute(containerInstance, StateAttributeNames.TimeRemaining)
+		cached.participantCount = readNumberAttribute(containerInstance, StateAttributeNames.ParticipantCount)
+		cached.minimumPlayers = readNumberAttribute(containerInstance, StateAttributeNames.MinimumPlayers)
+		cached.winnerUserId = readNumberAttribute(containerInstance, StateAttributeNames.WinnerUserId)
+		cached.winnerName = readStringAttribute(containerInstance, StateAttributeNames.WinnerName)
+		cached.statusMessage = readStringAttribute(containerInstance, StateAttributeNames.StatusMessage)
+		cached.remainingBlockCount = readNumberAttribute(containerInstance, StateAttributeNames.RemainingBlockCount)
+		cached.totalBlockCount = readNumberAttribute(containerInstance, StateAttributeNames.TotalBlockCount)
 	end
 
 	local function refreshFromPlayer()
@@ -220,6 +279,7 @@ function HudController.start()
 
 	local containerAttributeNames = {
 		StateAttributeNames.RoundState,
+		StateAttributeNames.RoundId,
 		StateAttributeNames.TimeRemaining,
 		StateAttributeNames.ParticipantCount,
 		StateAttributeNames.MinimumPlayers,
@@ -230,7 +290,7 @@ function HudController.start()
 		StateAttributeNames.TotalBlockCount,
 	}
 	for _, attributeName in ipairs(containerAttributeNames) do
-		connectAttribute(stateContainer, attributeName, function()
+		connectAttribute(containerInstance, attributeName, function()
 			refreshFromContainer()
 			render()
 		end)

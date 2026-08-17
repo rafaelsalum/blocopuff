@@ -1,138 +1,161 @@
 --!strict
 
--- Constrói os controles visuais do modo espectador (nome do alvo observado e
--- botões de alternância). Não decide quem observar: apenas expõe callbacks
--- para o SpectatorController reagir a cliques/toques nos botões.
+local TweenService = game:GetService("TweenService")
 
-local GUI_NAME = "BlocoPuffSpectatorHud"
-
-local COLOR_PANEL_BACKGROUND = Color3.fromRGB(255, 250, 240)
-local COLOR_PANEL_STROKE = Color3.fromRGB(194, 168, 255)
-local COLOR_TEXT_PRIMARY = Color3.fromRGB(64, 48, 76)
-local COLOR_BUTTON_BACKGROUND = Color3.fromRGB(151, 211, 255)
-
-local FONT_HEADING = Enum.Font.FredokaOne
-local FONT_BODY = Enum.Font.GothamMedium
+local ResponsiveScale = require(script.Parent.ResponsiveScale)
+local UiTheme = require(script.Parent.UiTheme)
 
 export type SpectatorViewHandle = {
-	screenGui: ScreenGui,
 	setVisible: (visible: boolean) -> (),
-	setTargetName: (name: string) -> (),
+	setTargetInfo: (name: string, activeCount: number) -> (),
 	destroy: () -> (),
 }
 
+local GUI_NAME = "BlocoPuffSpectatorHud"
+
 local SpectatorView = {}
 
-local function applyCorner(instance: Instance, radius: UDim)
-	local corner = Instance.new("UICorner")
-	corner.CornerRadius = radius
-	corner.Parent = instance
-end
-
-local function createButton(name: string, text: string, parent: Instance, layoutOrder: number): TextButton
+local function createButton(
+	name: string,
+	text: string,
+	parent: Instance,
+	layoutOrder: number,
+	selectionOrder: number
+): TextButton
 	local button = Instance.new("TextButton")
 	button.Name = name
 	button.Text = text
-	button.Font = FONT_HEADING
-	button.TextSize = 22
-	button.TextColor3 = COLOR_TEXT_PRIMARY
-	button.BackgroundColor3 = COLOR_BUTTON_BACKGROUND
+	button.Font = UiTheme.Fonts.Heading
+	button.TextSize = 25
+	button.TextColor3 = UiTheme.Colors.Ink
+	button.BackgroundColor3 = UiTheme.Colors.Blue
 	button.AutoButtonColor = true
-	button.Size = UDim2.new(0, 44, 0, 44)
+	button.Size = UDim2.fromOffset(54, 54)
 	button.LayoutOrder = layoutOrder
+	button.Selectable = true
+	button.SelectionOrder = selectionOrder
 	button.Parent = parent
-
-	applyCorner(button, UDim.new(1, 0))
-
+	UiTheme.addCorner(button, 15)
+	UiTheme.addStroke(button, UiTheme.Colors.Ink, 3)
 	return button
 end
 
 function SpectatorView.new(playerGui: PlayerGui, onPrevious: () -> (), onNext: () -> ()): SpectatorViewHandle
-	local existing = playerGui:FindFirstChild(GUI_NAME)
-	if existing ~= nil then
-		existing:Destroy()
-	end
-
-	local screenGui = Instance.new("ScreenGui")
-	screenGui.Name = GUI_NAME
-	screenGui.ResetOnSpawn = false
-	screenGui.IgnoreGuiInset = false
-	screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+	local screenGui = UiTheme.createScreenGui(GUI_NAME, playerGui, 20)
 	screenGui.Enabled = false
+
+	local responsiveRoot = Instance.new("Frame")
+	responsiveRoot.Name = "ResponsiveRoot"
+	responsiveRoot.AnchorPoint = Vector2.new(0.5, 1)
+	responsiveRoot.Position = UDim2.new(0.5, 0, 1, -22)
+	responsiveRoot.Size = UDim2.fromOffset(430, 76)
+	responsiveRoot.BackgroundTransparency = 1
+	responsiveRoot.Parent = screenGui
+	local responsiveHandle = ResponsiveScale.attach(responsiveRoot, Vector2.new(1280, 720), 0.76, 1.08)
+
+	local animationScale = Instance.new("UIScale")
+	animationScale.Name = "AnimationScale"
+
+	local animationGroup = Instance.new("Frame")
+	animationGroup.Name = "AnimationGroup"
+	animationGroup.Size = UDim2.fromScale(1, 1)
+	animationGroup.BackgroundTransparency = 1
+	animationGroup.Parent = responsiveRoot
+	animationScale.Parent = animationGroup
+
+	UiTheme.createShadow(animationGroup, UDim2.fromScale(0.5, 0.5), UDim2.fromScale(1, 1), 20)
 
 	local panel = Instance.new("Frame")
 	panel.Name = "SpectatorPanel"
-	panel.AnchorPoint = Vector2.new(0.5, 1)
-	panel.Position = UDim2.new(0.5, 0, 0.97, 0)
-	panel.Size = UDim2.new(0, 0, 0, 0)
-	panel.AutomaticSize = Enum.AutomaticSize.XY
-	panel.BackgroundColor3 = COLOR_PANEL_BACKGROUND
-	panel.BackgroundTransparency = 0.05
+	panel.Size = UDim2.fromScale(1, 1)
+	panel.BackgroundColor3 = UiTheme.Colors.Panel
+	panel.BackgroundTransparency = 0.03
 	panel.BorderSizePixel = 0
-	panel.Parent = screenGui
-
-	applyCorner(panel, UDim.new(0, 16))
-
-	local stroke = Instance.new("UIStroke")
-	stroke.Color = COLOR_PANEL_STROKE
-	stroke.Thickness = 3
-	stroke.Transparency = 0.1
-	stroke.Parent = panel
-
-	local padding = Instance.new("UIPadding")
-	padding.PaddingTop = UDim.new(0, 10)
-	padding.PaddingBottom = UDim.new(0, 10)
-	padding.PaddingLeft = UDim.new(0, 12)
-	padding.PaddingRight = UDim.new(0, 12)
-	padding.Parent = panel
+	panel.ZIndex = 1
+	panel.Parent = animationGroup
+	UiTheme.addCorner(panel, 20)
+	UiTheme.addStroke(panel, UiTheme.Colors.Purple, 4)
+	UiTheme.addPadding(panel, 10, 10)
 
 	local layout = Instance.new("UIListLayout")
 	layout.FillDirection = Enum.FillDirection.Horizontal
+	layout.HorizontalAlignment = Enum.HorizontalAlignment.Center
 	layout.VerticalAlignment = Enum.VerticalAlignment.Center
 	layout.SortOrder = Enum.SortOrder.LayoutOrder
-	layout.Padding = UDim.new(0, 10)
+	layout.Padding = UDim.new(0, 12)
 	layout.Parent = panel
 
-	local previousButton = createButton("PreviousButton", "<", panel, 1)
+	local previousButton = createButton("PreviousButton", "ANT.", panel, 1, 20)
+	previousButton.TextSize = 12
+
+	local information = Instance.new("Frame")
+	information.Name = "Information"
+	information.Size = UDim2.fromOffset(270, 54)
+	information.BackgroundTransparency = 1
+	information.LayoutOrder = 2
+	information.Parent = panel
+
+	local captionLabel = Instance.new("TextLabel")
+	captionLabel.Name = "CaptionLabel"
+	captionLabel.Size = UDim2.new(1, 0, 0, 17)
+	captionLabel.BackgroundTransparency = 1
+	captionLabel.Font = UiTheme.Fonts.BodyBold
+	captionLabel.Text = "ASSISTINDO"
+	captionLabel.TextSize = 11
+	captionLabel.TextColor3 = UiTheme.Colors.InkSoft
+	captionLabel.Parent = information
 
 	local nameLabel = Instance.new("TextLabel")
 	nameLabel.Name = "TargetNameLabel"
+	nameLabel.Position = UDim2.new(0, 0, 0, 14)
+	nameLabel.Size = UDim2.new(1, 0, 0, 24)
 	nameLabel.BackgroundTransparency = 1
-	nameLabel.AutomaticSize = Enum.AutomaticSize.XY
-	nameLabel.Size = UDim2.new(0, 0, 0, 0)
-	nameLabel.TextColor3 = COLOR_TEXT_PRIMARY
-	nameLabel.Font = FONT_BODY
-	nameLabel.TextSize = 15
-	nameLabel.TextWrapped = true
-	nameLabel.TextXAlignment = Enum.TextXAlignment.Center
+	nameLabel.Font = UiTheme.Fonts.Heading
 	nameLabel.Text = ""
-	nameLabel.LayoutOrder = 2
-	nameLabel.Parent = panel
+	nameLabel.TextSize = 20
+	nameLabel.TextColor3 = UiTheme.Colors.Ink
+	nameLabel.TextTruncate = Enum.TextTruncate.AtEnd
+	nameLabel.Parent = information
 
-	local sizeConstraint = Instance.new("UISizeConstraint")
-	sizeConstraint.MinSize = Vector2.new(80, 0)
-	sizeConstraint.MaxSize = Vector2.new(240, 10000)
-	sizeConstraint.Parent = nameLabel
+	local countLabel = Instance.new("TextLabel")
+	countLabel.Name = "ActiveCountLabel"
+	countLabel.Position = UDim2.new(0, 0, 0, 37)
+	countLabel.Size = UDim2.new(1, 0, 0, 16)
+	countLabel.BackgroundTransparency = 1
+	countLabel.Font = UiTheme.Fonts.Body
+	countLabel.Text = ""
+	countLabel.TextSize = 11
+	countLabel.TextColor3 = UiTheme.Colors.InkSoft
+	countLabel.Parent = information
 
-	local nextButton = createButton("NextButton", ">", panel, 3)
-
-	screenGui.Parent = playerGui
+	local nextButton = createButton("NextButton", "PRÓX.", panel, 3, 21)
+	nextButton.TextSize = 11
 
 	previousButton.Activated:Connect(onPrevious)
 	nextButton.Activated:Connect(onNext)
 
+	local currentlyVisible = false
 	local handle = {} :: SpectatorViewHandle
-	handle.screenGui = screenGui
 
 	handle.setVisible = function(visible: boolean)
+		if visible == currentlyVisible then
+			return
+		end
+		currentlyVisible = visible
 		screenGui.Enabled = visible
+		if visible then
+			animationScale.Scale = 0.84
+			TweenService:Create(animationScale, TweenInfo.new(0.22, Enum.EasingStyle.Back), { Scale = 1 }):Play()
+		end
 	end
 
-	handle.setTargetName = function(name: string)
-		nameLabel.Text = string.format("Assistindo: %s", name)
+	handle.setTargetInfo = function(name: string, activeCount: number)
+		nameLabel.Text = name
+		countLabel.Text = if activeCount == 1 then "1 jogador restante" else string.format("%d jogadores restantes", activeCount)
 	end
 
 	handle.destroy = function()
+		responsiveHandle.destroy()
 		screenGui:Destroy()
 	end
 
