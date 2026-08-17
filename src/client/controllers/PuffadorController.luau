@@ -5,13 +5,17 @@
 -- partir da origem autoritativa e continua decidindo alcance e impacto.
 
 local Debris = game:GetService("Debris")
+local CollectionService = game:GetService("CollectionService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
+local StarterGui = game:GetService("StarterGui")
 local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
 local Workspace = game:GetService("Workspace")
 
 local GameConfig = require(ReplicatedStorage.Shared.config.GameConfig)
+local ArenaConstants = require(ReplicatedStorage.Shared.modules.ArenaConstants)
 local PuffadorConstants = require(ReplicatedStorage.Shared.modules.PuffadorConstants)
 local CombatCameraController = require(script.Parent.CombatCameraController)
 local CrosshairView = require(script.Parent.Parent.ui.CrosshairView)
@@ -33,6 +37,32 @@ local lastLocalFireClock = 0
 local equippedTool: Tool? = nil
 local crosshair: CrosshairViewHandle? = nil
 local fireButton: FireButtonViewHandle? = nil
+local backpackWasEnabled: boolean? = nil
+local targetingConnection: RBXScriptConnection? = nil
+
+local function setCombatBackpackHidden(hidden: boolean)
+	if hidden then
+		if backpackWasEnabled == nil then
+			local readOk, wasEnabled = pcall(function(): boolean
+				return StarterGui:GetCoreGuiEnabled(Enum.CoreGuiType.Backpack)
+			end)
+			if readOk then
+				backpackWasEnabled = wasEnabled
+			end
+		end
+
+		pcall(function()
+			StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.Backpack, false)
+		end)
+		return
+	end
+
+	local restoreEnabled = if backpackWasEnabled ~= nil then backpackWasEnabled else true
+	backpackWasEnabled = nil
+	pcall(function()
+		StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.Backpack, restoreEnabled)
+	end)
+end
 
 local function isFiniteNumber(value: number): boolean
 	return value == value and value ~= math.huge and value ~= -math.huge
@@ -42,16 +72,16 @@ local function isFiniteVector3(vector: Vector3): boolean
 	return isFiniteNumber(vector.X) and isFiniteNumber(vector.Y) and isFiniteNumber(vector.Z)
 end
 
-local function getAimTarget(): Vector3?
+local function getAimResult(): (RaycastResult?, Vector3?)
 	local camera = Workspace.CurrentCamera
 	if camera == nil then
-		return nil
+		return nil, nil
 	end
 
 	local screenPoint = Vector2.new(camera.ViewportSize.X / 2, camera.ViewportSize.Y / 2)
 	local cameraRay = camera:ViewportPointToRay(screenPoint.X, screenPoint.Y)
 	if cameraRay.Direction.Magnitude < 1e-4 then
-		return nil
+		return nil, nil
 	end
 
 	local raycastParams = RaycastParams.new()
@@ -69,10 +99,46 @@ local function getAimTarget(): Vector3?
 	local result = Workspace:Raycast(cameraRay.Origin, direction, raycastParams)
 	local target = if result ~= nil then result.Position else cameraRay.Origin + direction
 	if not isFiniteVector3(target) then
-		return nil
+		return result, nil
 	end
 
+	return result, target
+end
+
+local function getAimTarget(): Vector3?
+	local _, target = getAimResult()
 	return target
+end
+
+local function isActiveArenaTarget(result: RaycastResult?): boolean
+	if result == nil then
+		return false
+	end
+
+	local instance = result.Instance
+	return CollectionService:HasTag(instance, ArenaConstants.BlockTag)
+		and instance:GetAttribute(ArenaConstants.IsDestroyedAttribute) ~= true
+end
+
+local function stopTargetingFeedback()
+	if targetingConnection ~= nil then
+		targetingConnection:Disconnect()
+		targetingConnection = nil
+	end
+
+	if crosshair ~= nil then
+		crosshair.setTargeting(false)
+	end
+end
+
+local function startTargetingFeedback()
+	stopTargetingFeedback()
+	targetingConnection = RunService.RenderStepped:Connect(function()
+		local result = getAimResult()
+		if crosshair ~= nil then
+			crosshair.setTargeting(isActiveArenaTarget(result))
+		end
+	end)
 end
 
 local function findToolSound(tool: Tool, soundName: string): Sound?
@@ -177,12 +243,14 @@ end
 local function setToolEquipped(tool: Tool)
 	equippedTool = tool
 	lastLocalFireClock = 0
+	setCombatBackpackHidden(true)
 	CombatCameraController.enable()
 
 	if crosshair ~= nil then
 		crosshair.setCenteredOnScreen()
 		crosshair.setVisible(true)
 	end
+	startTargetingFeedback()
 	if fireButton ~= nil then
 		fireButton.setVisible(UserInputService.TouchEnabled)
 	end
@@ -194,6 +262,8 @@ local function clearToolEquipped(tool: Tool)
 	end
 
 	equippedTool = nil
+	stopTargetingFeedback()
+	setCombatBackpackHidden(false)
 	CombatCameraController.disable()
 	if crosshair ~= nil then
 		crosshair.setVisible(false)
@@ -309,6 +379,8 @@ function PuffadorController.start()
 	end
 
 	localPlayer.CharacterAdded:Connect(function(character)
+		stopTargetingFeedback()
+		setCombatBackpackHidden(false)
 		CombatCameraController.disable()
 		equippedTool = nil
 		scanExistingChildren(character)

@@ -1,9 +1,12 @@
 --!strict
 
 local CollectionService = game:GetService("CollectionService")
+local Debris = game:GetService("Debris")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local TweenService = game:GetService("TweenService")
 
 local GameConfig = require(ReplicatedStorage.Shared.config.GameConfig)
+local ArenaConstants = require(ReplicatedStorage.Shared.modules.ArenaConstants)
 local StateAttributeNames = require(ReplicatedStorage.Shared.types.StateAttributeNames)
 local ReplicatedState = require(script.Parent.ReplicatedStateService)
 
@@ -40,13 +43,20 @@ type BlockRecord = {
 
 local ARENA_NAME = "Arena"
 local BLOCKS_NAME = "Blocks"
-local BLOCK_TAG = "ArenaBlock"
+local EFFECTS_NAME = "Effects"
+local VISUALS_NAME = "Visuals"
+local BLOCK_TAG = ArenaConstants.BlockTag
 local GENERATED_BY_ATTRIBUTE = "GeneratedBy"
 local SERVICE_NAME = "ArenaService"
-local ATTR_IS_DESTROYED = "IsDestroyed"
+local ATTR_IS_DESTROYED = ArenaConstants.IsDestroyedAttribute
 
 local SPAWN_HEIGHT_OFFSET = 5
 local SPAWN_MARGIN_RATIO = 0.15
+local ENERGY_NODE_SIZE = 1.35
+local ENERGY_HEIGHT_OFFSET = 1.15
+local ENERGY_BEAM_WIDTH = 0.34
+local COLLAPSE_DURATION = 0.34
+local RESTORE_FADE_DURATION = 0.22
 
 local ArenaService = {}
 
@@ -54,6 +64,10 @@ local currentWorldRoot: Model? = nil
 local arenaModel: Model? = nil
 local arenaBlocks: { Part } = {}
 local currentArenaConfig: ArenaConfig? = nil
+local effectsFolder: Folder? = nil
+local energyNodes: { Part } = {}
+local energyLights: { PointLight } = {}
+local energyBeams: { Beam } = {}
 
 local blockRecords: { [Part]: BlockRecord } = {}
 local arenaGeneration = 0
@@ -88,6 +102,100 @@ local function getArenaColors(palette: WorldPalette): { Color3 }
 	}
 end
 
+local function setArenaEnergy(active: boolean)
+	local nodeTransparency = if active then 0.06 else 0.38
+	local lightBrightness = if active then 2.1 else 0.7
+	local beamTransparency = if active then 0.12 else 0.5
+
+	for _, node in ipairs(energyNodes) do
+		TweenService:Create(node, TweenInfo.new(0.35, Enum.EasingStyle.Quad), {
+			Transparency = nodeTransparency,
+		}):Play()
+	end
+	for _, light in ipairs(energyLights) do
+		TweenService:Create(light, TweenInfo.new(0.35, Enum.EasingStyle.Quad), {
+			Brightness = lightBrightness,
+		}):Play()
+	end
+	for _, beam in ipairs(energyBeams) do
+		beam.Transparency = NumberSequence.new(beamTransparency)
+	end
+end
+
+local function createArenaVisuals(
+	parent: Model,
+	config: ArenaConfig,
+	palette: WorldPalette,
+	totalWidth: number,
+	totalDepth: number
+)
+	local visuals = Instance.new("Model")
+	visuals.Name = VISUALS_NAME
+	visuals.Parent = parent
+
+	local energyY = config.Position.Y - (config.BlockSize.Y / 2) - ENERGY_HEIGHT_OFFSET
+	local halfWidth = (totalWidth / 2) + 0.5
+	local halfDepth = (totalDepth / 2) + 0.5
+	local cornerOffsets = {
+		Vector3.new(-halfWidth, 0, -halfDepth),
+		Vector3.new(halfWidth, 0, -halfDepth),
+		Vector3.new(halfWidth, 0, halfDepth),
+		Vector3.new(-halfWidth, 0, halfDepth),
+	}
+
+	for index, offset in ipairs(cornerOffsets) do
+		local node = Instance.new("Part")
+		node.Name = string.format("EnergyNode%02d", index)
+		node.Shape = Enum.PartType.Ball
+		node.Size = Vector3.new(ENERGY_NODE_SIZE, ENERGY_NODE_SIZE, ENERGY_NODE_SIZE)
+		node.Position = Vector3.new(config.Position.X, energyY, config.Position.Z) + offset
+		node.Anchored = true
+		node.CanCollide = false
+		node.CanTouch = false
+		node.CanQuery = false
+		node.CastShadow = false
+		node.Material = Enum.Material.Neon
+		node.Color = palette.Purple:Lerp(palette.LightBlue, 0.35)
+		node.Transparency = 0.38
+		node.Parent = visuals
+
+		local attachment = Instance.new("Attachment")
+		attachment.Name = "EnergyAttachment"
+		attachment.Parent = node
+
+		local light = Instance.new("PointLight")
+		light.Name = "EnergyLight"
+		light.Color = node.Color
+		light.Brightness = 0.7
+		light.Range = 12
+		light.Shadows = false
+		light.Parent = node
+
+		table.insert(energyNodes, node)
+		table.insert(energyLights, light)
+	end
+
+	for index = 1, #energyNodes do
+		local nextIndex = if index == #energyNodes then 1 else index + 1
+		local attachment0 = energyNodes[index]:FindFirstChild("EnergyAttachment")
+		local attachment1 = energyNodes[nextIndex]:FindFirstChild("EnergyAttachment")
+		if attachment0 ~= nil and attachment0:IsA("Attachment") and attachment1 ~= nil and attachment1:IsA("Attachment") then
+			local beam = Instance.new("Beam")
+			beam.Name = string.format("EnergyEdge%02d", index)
+			beam.Attachment0 = attachment0
+			beam.Attachment1 = attachment1
+			beam.Width0 = ENERGY_BEAM_WIDTH
+			beam.Width1 = ENERGY_BEAM_WIDTH
+			beam.FaceCamera = true
+			beam.LightEmission = 0.85
+			beam.Color = ColorSequence.new(palette.Purple, palette.LightBlue)
+			beam.Transparency = NumberSequence.new(0.5)
+			beam.Parent = visuals
+			table.insert(energyBeams, beam)
+		end
+	end
+end
+
 local function publishBlockCounts()
 	local total = #arenaBlocks
 	local remaining = remainingBlockCount
@@ -108,8 +216,12 @@ function ArenaService.destroy()
 	arenaModel = nil
 	currentWorldRoot = nil
 	currentArenaConfig = nil
+	effectsFolder = nil
 	table.clear(arenaBlocks)
 	table.clear(blockRecords)
+	table.clear(energyNodes)
+	table.clear(energyLights)
+	table.clear(energyBeams)
 	remainingBlockCount = 0
 	destructionEnabled = false
 	activeRoundId = 0
@@ -132,6 +244,10 @@ function ArenaService.create(worldRoot: Model, config: ArenaConfig, palette: Wor
 	blocksFolder.Name = BLOCKS_NAME
 	blocksFolder.Parent = newArena
 
+	local newEffectsFolder = Instance.new("Folder")
+	newEffectsFolder.Name = EFFECTS_NAME
+	newEffectsFolder.Parent = newArena
+
 	local colors = getArenaColors(palette)
 	local stepX = config.BlockSize.X + config.BlockGap
 	local stepZ = config.BlockSize.Z + config.BlockGap
@@ -139,6 +255,8 @@ function ArenaService.create(worldRoot: Model, config: ArenaConfig, palette: Wor
 	local totalDepth = (config.Rows * config.BlockSize.Z) + ((config.Rows - 1) * config.BlockGap)
 	local startX = config.Position.X - (totalWidth / 2) + (config.BlockSize.X / 2)
 	local startZ = config.Position.Z - (totalDepth / 2) + (config.BlockSize.Z / 2)
+
+	createArenaVisuals(newArena, config, palette, totalWidth, totalDepth)
 
 	for row = 1, config.Rows do
 		for column = 1, config.Columns do
@@ -159,9 +277,9 @@ function ArenaService.create(worldRoot: Model, config: ArenaConfig, palette: Wor
 			block.Color = colors[colorIndex]
 			block.TopSurface = Enum.SurfaceType.Smooth
 			block.BottomSurface = Enum.SurfaceType.Smooth
-			block:SetAttribute("GridRow", row)
-			block:SetAttribute("GridColumn", column)
-			block:SetAttribute("BlockId", blockId)
+			block:SetAttribute(ArenaConstants.GridRowAttribute, row)
+			block:SetAttribute(ArenaConstants.GridColumnAttribute, column)
+			block:SetAttribute(ArenaConstants.BlockIdAttribute, blockId)
 			block:SetAttribute(GENERATED_BY_ATTRIBUTE, SERVICE_NAME)
 			block:SetAttribute(ATTR_IS_DESTROYED, false)
 			CollectionService:AddTag(block, BLOCK_TAG)
@@ -189,6 +307,7 @@ function ArenaService.create(worldRoot: Model, config: ArenaConfig, palette: Wor
 
 	arenaModel = newArena
 	currentArenaConfig = config
+	effectsFolder = newEffectsFolder
 	remainingBlockCount = #arenaBlocks
 	publishBlockCounts()
 
@@ -252,10 +371,12 @@ end
 function ArenaService.beginRound(roundId: number)
 	activeRoundId = roundId
 	destructionEnabled = true
+	setArenaEnergy(true)
 end
 
 function ArenaService.endRound()
 	destructionEnabled = false
+	setArenaEnergy(false)
 end
 
 function ArenaService.isActiveBlock(instance: Instance): boolean
@@ -269,6 +390,54 @@ function ArenaService.isActiveBlock(instance: Instance): boolean
 	end
 
 	return not record.isDestroyed and record.generation == arenaGeneration
+end
+
+local function createCollapseEffect(record: BlockRecord, context: BlockDestructionContext)
+	local parent = effectsFolder
+	if parent == nil or parent.Parent == nil then
+		return
+	end
+
+	local visual = Instance.new("Part")
+	visual.Name = `{record.blockId}Collapse`
+	visual.Anchored = true
+	visual.CanCollide = false
+	visual.CanTouch = false
+	visual.CanQuery = false
+	visual.CastShadow = false
+	visual.CFrame = record.originalCFrame
+	visual.Size = record.originalSize
+	visual.Color = record.originalColor
+	visual.Material = Enum.Material.SmoothPlastic
+	visual.TopSurface = Enum.SurfaceType.Smooth
+	visual.BottomSurface = Enum.SurfaceType.Smooth
+	visual.Parent = parent
+
+	local columnDirection = if record.gridColumn % 2 == 0 then 1 else -1
+	local rowDirection = if record.gridRow % 2 == 0 then -1 else 1
+	local impactNudge = context.normal * 0.3
+	local fallOffset = Vector3.new(columnDirection * 1.35, -4.5, rowDirection * 1.35) + impactNudge
+	local tilt = CFrame.Angles(math.rad(rowDirection * 16), 0, math.rad(columnDirection * 18))
+	local endCFrame = (record.originalCFrame + fallOffset) * tilt
+
+	local light = Instance.new("PointLight")
+	light.Name = "CollapseGlow"
+	light.Color = record.originalColor
+	light.Brightness = 1.4
+	light.Range = 8
+	light.Shadows = false
+	light.Parent = visual
+
+	TweenService:Create(visual, TweenInfo.new(COLLAPSE_DURATION, Enum.EasingStyle.Back, Enum.EasingDirection.In), {
+		CFrame = endCFrame,
+		Size = Vector3.new(record.originalSize.X * 0.2, 0.12, record.originalSize.Z * 0.2),
+		Transparency = 1,
+	}):Play()
+	TweenService:Create(light, TweenInfo.new(COLLAPSE_DURATION, Enum.EasingStyle.Quad), {
+		Brightness = 0,
+	}):Play()
+
+	Debris:AddItem(visual, COLLAPSE_DURATION + 0.05)
 end
 
 function ArenaService.tryDestroyBlock(instance: Instance, context: BlockDestructionContext): boolean
@@ -325,6 +494,7 @@ function ArenaService.tryDestroyBlock(instance: Instance, context: BlockDestruct
 	instance.CanTouch = false
 	instance.CanQuery = false
 	instance:SetAttribute(ATTR_IS_DESTROYED, true)
+	createCollapseEffect(record, context)
 
 	publishBlockCounts()
 
@@ -361,9 +531,9 @@ local function recreateBlockFromRecord(record: BlockRecord): Part?
 	block.CanQuery = record.originalCanQuery
 	block.TopSurface = Enum.SurfaceType.Smooth
 	block.BottomSurface = Enum.SurfaceType.Smooth
-	block:SetAttribute("GridRow", record.gridRow)
-	block:SetAttribute("GridColumn", record.gridColumn)
-	block:SetAttribute("BlockId", record.blockId)
+	block:SetAttribute(ArenaConstants.GridRowAttribute, record.gridRow)
+	block:SetAttribute(ArenaConstants.GridColumnAttribute, record.gridColumn)
+	block:SetAttribute(ArenaConstants.BlockIdAttribute, record.blockId)
 	block:SetAttribute(GENERATED_BY_ATTRIBUTE, SERVICE_NAME)
 	block:SetAttribute(ATTR_IS_DESTROYED, false)
 	CollectionService:AddTag(block, BLOCK_TAG)
@@ -378,6 +548,7 @@ local function restoreBlockAt(index: number)
 	if record == nil then
 		return
 	end
+	local shouldAnimateRestore = record.isDestroyed or block.Transparency ~= record.originalTransparency
 
 	if block.Parent == nil then
 		local blocksFolder = if arenaModel ~= nil then arenaModel:FindFirstChild(BLOCKS_NAME) else nil
@@ -422,6 +593,13 @@ local function restoreBlockAt(index: number)
 	block.CanTouch = record.originalCanTouch
 	block.CanQuery = record.originalCanQuery
 	block:SetAttribute(ATTR_IS_DESTROYED, false)
+
+	if shouldAnimateRestore and record.originalTransparency < 1 then
+		block.Transparency = math.max(record.originalTransparency, 0.55)
+		TweenService:Create(block, TweenInfo.new(RESTORE_FADE_DURATION, Enum.EasingStyle.Quad), {
+			Transparency = record.originalTransparency,
+		}):Play()
+	end
 end
 
 function ArenaService.restoreAllBlocks()

@@ -147,27 +147,40 @@ function RoundHudView.new(playerGui: PlayerGui): RoundHudViewHandle
 	local countdownRoot, countdownGroup, countdownScale, countdownResponsive = createAnimationGroup(
 		screenGui,
 		"CountdownGroup",
-		UDim2.fromScale(0.5, 0.43),
-		UDim2.fromOffset(184, 184)
+		UDim2.new(1, -18, 0, 16),
+		UDim2.fromOffset(230, 76)
 	)
+	countdownRoot.AnchorPoint = Vector2.new(1, 0)
 	countdownRoot.Visible = false
 
-	UiTheme.createShadow(countdownGroup, UDim2.fromScale(0.5, 0.5), UDim2.fromScale(1, 1), 28)
+	UiTheme.createShadow(countdownGroup, UDim2.fromScale(0.5, 0.5), UDim2.fromScale(1, 1), 18)
 
 	local countdownCard = Instance.new("Frame")
 	countdownCard.Name = "CountdownCard"
 	countdownCard.Size = UDim2.fromScale(1, 1)
-	countdownCard.BackgroundColor3 = UiTheme.Colors.Yellow
+	countdownCard.BackgroundColor3 = UiTheme.Colors.Panel
 	countdownCard.BorderSizePixel = 0
 	countdownCard.ZIndex = 1
 	countdownCard.Parent = countdownGroup
-	UiTheme.addCorner(countdownCard, 28)
-	UiTheme.addStroke(countdownCard, UiTheme.Colors.Ink, 5)
+	UiTheme.addCorner(countdownCard, 18)
+	UiTheme.addStroke(countdownCard, UiTheme.Colors.Yellow, 4)
+
+	local numberBadge = Instance.new("Frame")
+	numberBadge.Name = "NumberBadge"
+	numberBadge.AnchorPoint = Vector2.new(1, 0.5)
+	numberBadge.Position = UDim2.new(1, -11, 0.5, 0)
+	numberBadge.Size = UDim2.fromOffset(54, 54)
+	numberBadge.BackgroundColor3 = UiTheme.Colors.Yellow
+	numberBadge.BorderSizePixel = 0
+	numberBadge.ZIndex = 2
+	numberBadge.Parent = countdownCard
+	UiTheme.addCorner(numberBadge, 15)
+	UiTheme.addStroke(numberBadge, UiTheme.Colors.Ink, 2)
 
 	local aspectRatio = Instance.new("UIAspectRatioConstraint")
 	aspectRatio.AspectRatio = 1
 	aspectRatio.AspectType = Enum.AspectType.ScaleWithParentSize
-	aspectRatio.Parent = countdownCard
+	aspectRatio.Parent = numberBadge
 
 	local prepareLabel = createTextLabel(
 		"PrepareLabel",
@@ -176,19 +189,18 @@ function RoundHudView.new(playerGui: PlayerGui): RoundHudViewHandle
 		15,
 		UiTheme.Colors.Ink
 	)
-	prepareLabel.Position = UDim2.new(0, 0, 0, 22)
-	prepareLabel.Size = UDim2.new(1, 0, 0, 22)
+	prepareLabel.Position = UDim2.new(0, 16, 0, 0)
+	prepareLabel.Size = UDim2.new(1, -90, 1, 0)
+	prepareLabel.TextXAlignment = Enum.TextXAlignment.Left
 	prepareLabel.Text = "PREPARE-SE"
 
 	local countdownLabel = createTextLabel(
 		"CountdownLabel",
-		countdownCard,
+		numberBadge,
 		UiTheme.Fonts.Heading,
-		82,
+		34,
 		UiTheme.Colors.Ink
 	)
-	countdownLabel.Position = UDim2.new(0, 0, 0, 38)
-	countdownLabel.Size = UDim2.new(1, 0, 1, -48)
 	countdownLabel.Text = "3"
 
 	local currentMode: RoundHudMode = "Hidden"

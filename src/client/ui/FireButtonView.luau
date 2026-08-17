@@ -8,7 +8,7 @@ local TweenService = game:GetService("TweenService")
 local UiTheme = require(script.Parent.UiTheme)
 
 local FIRE_BUTTON_NAME = "BlocoPuffFireButton"
-local BUTTON_SIZE = 84
+local BUTTON_SIZE = 92
 
 export type FireButtonViewHandle = {
 	screenGui: ScreenGui,
@@ -33,7 +33,7 @@ function FireButtonView.new(playerGui: PlayerGui, onFire: () -> ()): FireButtonV
 	button.AutoButtonColor = true
 	-- O texto transparente mantém uma descrição semântica no próprio botão;
 	-- o Label filho controla a apresentação acima do overlay de recarga.
-	button.Text = "PUFF!"
+	button.Text = "ATIRAR"
 	button.TextTransparency = 1
 	button.Active = true
 	button.Selectable = true
@@ -61,14 +61,19 @@ function FireButtonView.new(playerGui: PlayerGui, onFire: () -> ()): FireButtonV
 
 	local label = Instance.new("TextLabel")
 	label.Name = "Label"
-	label.Size = UDim2.fromScale(1, 1)
+	label.AnchorPoint = Vector2.new(0.5, 0.5)
+	label.Position = UDim2.fromScale(0.5, 0.5)
+	label.Size = UDim2.fromScale(0.76, 0.44)
 	label.BackgroundTransparency = 1
 	label.Font = UiTheme.Fonts.Heading
-	label.Text = "PUFF!"
+	label.Text = "ATIRAR"
 	label.TextColor3 = UiTheme.Colors.Ink
-	label.TextSize = 19
+	label.TextScaled = true
+	label.TextWrapped = false
+	label.TextTruncate = Enum.TextTruncate.None
 	label.ZIndex = 3
 	label.Parent = button
+	UiTheme.addTextConstraint(label, 12, 20)
 
 	button.Activated:Connect(function()
 		if button.Active then
@@ -108,8 +113,8 @@ function FireButtonView.new(playerGui: PlayerGui, onFire: () -> ()): FireButtonV
 			button.Selectable = true
 			button.AutoButtonColor = true
 			button.BackgroundColor3 = UiTheme.Colors.Yellow
-			button.Text = "PUFF!"
-			label.Text = "PUFF!"
+			button.Text = "ATIRAR"
+			label.Text = "ATIRAR"
 		end)
 	end
 

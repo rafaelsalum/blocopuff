@@ -10,6 +10,7 @@ local ReplicatedStateService = require(script.services.ReplicatedStateService)
 local PuffadorService = require(script.services.PuffadorService)
 local EliminationService = require(script.services.EliminationService)
 local RoundService = require(script.services.RoundService)
+local WorldVisualService = require(script.services.WorldVisualService)
 
 local WORLD_NAME = "BlocoPuffWorld"
 local GENERATED_BY_ATTRIBUTE = "GeneratedBy"
@@ -40,6 +41,9 @@ end
 local world = getOrCreateWorld()
 
 print("[BlocoPuff] Server initialized")
+
+WorldVisualService.start(world, GameConfig.Palette)
+print("[BlocoPuff] World visuals created")
 
 LobbyService.create(world, GameConfig.Lobby, GameConfig.Palette)
 print("[BlocoPuff] Lobby created")
