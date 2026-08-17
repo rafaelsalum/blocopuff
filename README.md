@@ -8,6 +8,7 @@ BlocoPuff! é um jogo multiplayer infantil, colorido e cartunesco para 2 a 10 jo
 - Luau em modo estrito (`--!strict`)
 - Rojo 7 para sincronização entre os arquivos locais e o Roblox Studio
 - Git para controle de versão
+- [graphify](https://github.com/Graphify-Labs/graphify) para o grafo de conhecimento do código (agentes de IA)
 
 ## Estrutura
 
@@ -22,6 +23,35 @@ tests/        # Testes futuros
 ```
 
 O arquivo `default.project.json` mapeia essas pastas para `StarterPlayerScripts/Client`, `ServerScriptService/Server` e `ReplicatedStorage/Shared`, respectivamente.
+
+## Grafo de conhecimento (graphify)
+
+O projeto usa [graphify](https://github.com/Graphify-Labs/graphify) para manter um grafo de código em `graphify-out/` (nós, arestas de chamada/import, comunidades). Agentes de IA (Codex, Claude Code) consultam esse grafo — `graphify query`, `graphify path`, `graphify explain` — em vez de ler ou buscar em todos os arquivos, o que reduz bastante o consumo de tokens em tarefas de exploração. As instruções de uso ficam em [AGENTS.md](AGENTS.md) e [CLAUDE.md](CLAUDE.md).
+
+A extração é 100% local (parsing AST via tree-sitter, com suporte a Luau), sem chamadas a LLM e sem custo:
+
+```sh
+graphify extract . --code-only   # gera/atualiza graphify-out/graph.json
+graphify cluster-only . --no-label   # agrupa em comunidades e gera GRAPH_REPORT.md
+```
+
+Depois de alterar o código, atualize o grafo antes de commitar:
+
+```sh
+graphify update .
+```
+
+`graphify-out/graph.json`, `GRAPH_REPORT.md` e `manifest.json` são versionados — quem entra no projeto (humano ou agente) já começa com o grafo extraído, sem precisar rodar `graphify extract` antes de consultar. `graphify-out/cache/`, `graph.html` e os arquivos de análise/labels de comunidade (`.graphify_analysis.json`, `.graphify_labels.json*`) ficam fora do Git: são derivados de `graph.json`, mudam a cada rebuild automático do hook e regeneram em segundos, offline e sem custo com `graphify cluster-only .` (esse comando também recria `graph.html`, caso você queira abrir a visualização interativa).
+
+A reconstrução automática a cada commit já está ativa via hooks locais do Git (`.git/hooks/post-commit` e `post-checkout`, instalados com `graphify hook install`; não versionados, cada clone precisa rodar o comando de novo). O merge do `graph.json` entre branches usa um driver de união configurado em [.gitattributes](.gitattributes) (`git config merge.graphify.*`, também local por clone).
+
+Quem usa Claude Code também pode instalar o hook `PreToolUse` que sugere `graphify query` antes de leituras/buscas de arquivo:
+
+```sh
+graphify claude install
+```
+
+Esse comando grava `.claude/settings.json` com o caminho absoluto do executável `graphify` da própria máquina — por isso o arquivo é local (ver `.gitignore`) e precisa ser gerado por cada desenvolvedor, não compartilhado pelo Git.
 
 ## Pré-requisitos
 

@@ -1,0 +1,132 @@
+{
+  "default.project.json": {
+    "mtime": 1786897052.4161093,
+    "ast_hash": "f2f248c93318ed8cf50a9c67b5b3ae8c",
+    "semantic_hash": "f2f248c93318ed8cf50a9c67b5b3ae8c"
+  },
+  "src/client/controllers/HudController.luau": {
+    "mtime": 1786919500.760374,
+    "ast_hash": "d5e5f4889c8fb3719ca7fff9988f9167",
+    "semantic_hash": "d5e5f4889c8fb3719ca7fff9988f9167"
+  },
+  "src/client/controllers/PuffadorController.luau": {
+    "mtime": 1786920433.711675,
+    "ast_hash": "bd8e3c70b2f66363d248f12fbaf53d91",
+    "semantic_hash": "bd8e3c70b2f66363d248f12fbaf53d91"
+  },
+  "src/client/controllers/SpectatorController.luau": {
+    "mtime": 1786913018.5584457,
+    "ast_hash": "4a91f1ac9dbdcd572e4aeb610484dff9",
+    "semantic_hash": "4a91f1ac9dbdcd572e4aeb610484dff9"
+  },
+  "src/client/init.client.luau": {
+    "mtime": 1786912658.5745254,
+    "ast_hash": "2adde42b8e4552f641668ef64e8d7b13",
+    "semantic_hash": "2adde42b8e4552f641668ef64e8d7b13"
+  },
+  "src/client/ui/CrosshairView.luau": {
+    "mtime": 1786920386.3316123,
+    "ast_hash": "007025bfb9e83e6e369743c70a496ce5",
+    "semantic_hash": "007025bfb9e83e6e369743c70a496ce5"
+  },
+  "src/client/ui/FireButtonView.luau": {
+    "mtime": 1786920398.730678,
+    "ast_hash": "53448411898fba4c91b67904f0585abb",
+    "semantic_hash": "53448411898fba4c91b67904f0585abb"
+  },
+  "src/client/ui/HudView.luau": {
+    "mtime": 1786919495.5452895,
+    "ast_hash": "05bd86cca8323376b4594f3ffbe0b186",
+    "semantic_hash": "05bd86cca8323376b4594f3ffbe0b186"
+  },
+  "src/client/ui/SpectatorView.luau": {
+    "mtime": 1786913002.2843618,
+    "ast_hash": "58b289233548c215338ebb01732daa54",
+    "semantic_hash": "58b289233548c215338ebb01732daa54"
+  },
+  "src/server/init.server.luau": {
+    "mtime": 1786911318.7821276,
+    "ast_hash": "379afef11b8a93a38d87fb29f73e28f0",
+    "semantic_hash": "379afef11b8a93a38d87fb29f73e28f0"
+  },
+  "src/server/services/ArenaService.luau": {
+    "mtime": 1786911236.4920692,
+    "ast_hash": "653c8c4ab869507399f73deee8b3c83f",
+    "semantic_hash": "653c8c4ab869507399f73deee8b3c83f"
+  },
+  "src/server/services/EliminationService.luau": {
+    "mtime": 1786911266.0147657,
+    "ast_hash": "8fb32b4ba5e678729c42210655936d5e",
+    "semantic_hash": "8fb32b4ba5e678729c42210655936d5e"
+  },
+  "src/server/services/LobbyService.luau": {
+    "mtime": 1786904479.5484967,
+    "ast_hash": "d7c1fd7a40168140d9c09e9b8b5dba1a",
+    "semantic_hash": "d7c1fd7a40168140d9c09e9b8b5dba1a"
+  },
+  "src/server/services/ProjectileService.luau": {
+    "mtime": 1786909883.706491,
+    "ast_hash": "b8c81535ddc606e9a2b9ead53f46e9ea",
+    "semantic_hash": "b8c81535ddc606e9a2b9ead53f46e9ea"
+  },
+  "src/server/services/PuffadorService.luau": {
+    "mtime": 1786920372.942837,
+    "ast_hash": "e480ed9ba0ace72a6d2245530d11a27f",
+    "semantic_hash": "e480ed9ba0ace72a6d2245530d11a27f"
+  },
+  "src/server/services/ReplicatedStateService.luau": {
+    "mtime": 1786909794.501761,
+    "ast_hash": "bb5c0722e956cf12ce95847e10c96629",
+    "semantic_hash": "bb5c0722e956cf12ce95847e10c96629"
+  },
+  "src/server/services/RoundService.luau": {
+    "mtime": 1786914204.045776,
+    "ast_hash": "a7c702f8dbf9a5148e166153bc3cdf02",
+    "semantic_hash": "a7c702f8dbf9a5148e166153bc3cdf02"
+  },
+  "src/shared/config/GameConfig.luau": {
+    "mtime": 1786911222.4187002,
+    "ast_hash": "0a971e7e605e59a40421ddbc2bfd959d",
+    "semantic_hash": "0a971e7e605e59a40421ddbc2bfd959d"
+  },
+  "src/shared/modules/PuffadorConstants.luau": {
+    "mtime": 1786906765.170858,
+    "ast_hash": "17623d28d2da78b6a147211074bf2c84",
+    "semantic_hash": "17623d28d2da78b6a147211074bf2c84"
+  },
+  "src/shared/modules/RoundMessages.luau": {
+    "mtime": 1786919473.2079751,
+    "ast_hash": "723ae15220c68e08c2bd50d1900647c4",
+    "semantic_hash": "723ae15220c68e08c2bd50d1900647c4"
+  },
+  "src/shared/types/EliminationTypes.luau": {
+    "mtime": 1786911226.2142622,
+    "ast_hash": "f00ee3db76828f024db2d17565e906de",
+    "semantic_hash": "f00ee3db76828f024db2d17565e906de"
+  },
+  "src/shared/types/RoundTypes.luau": {
+    "mtime": 1786904425.9646971,
+    "ast_hash": "35e80f4312710a8634558c8ff1d264b2",
+    "semantic_hash": "35e80f4312710a8634558c8ff1d264b2"
+  },
+  "src/shared/types/StateAttributeNames.luau": {
+    "mtime": 1786914185.3930254,
+    "ast_hash": "dcaf3ea803043f054de42ee6a885a20f",
+    "semantic_hash": "dcaf3ea803043f054de42ee6a885a20f"
+  },
+  "AGENTS.md": {
+    "mtime": 1787003653.191437,
+    "ast_hash": "2c4c2a9eb6d95bf8958881738cd8e166",
+    "semantic_hash": ""
+  },
+  "CLAUDE.md": {
+    "mtime": 1787003657.0021415,
+    "ast_hash": "82efb97a359f5c7290bf2513d14686be",
+    "semantic_hash": ""
+  },
+  "README.md": {
+    "mtime": 1787003960.7246907,
+    "ast_hash": "d574097152ee360345f849227c1cf290",
+    "semantic_hash": ""
+  }
+}

@@ -27,3 +27,21 @@
 /.vscode/*
 !/.vscode/extensions.json
 !/.vscode/settings.json
+
+# Graphify knowledge graph: commit graph.json + GRAPH_REPORT.md + manifest.json
+# so agents/teammates start with the map already extracted. Everything below
+# is derived from graph.json and regenerates in seconds, offline, at no cost
+# (`graphify cluster-only .`) — kept local to avoid large generated-file diffs
+# on every commit from the auto-rebuild hook.
+/graphify-out/cache/
+/graphify-out/cost.json
+/graphify-out/graph.html
+/graphify-out/.graphify_analysis.json
+/graphify-out/.graphify_labels.json
+/graphify-out/.graphify_labels.json.sig
+
+# graphify's Claude Code PreToolUse hook bakes in an absolute path to the
+# local `graphify` executable (by design, for cross-shell reliability), so
+# it isn't portable between machines/users. Each developer regenerates it
+# locally with `graphify claude install` (see README).
+/.claude/settings.json
