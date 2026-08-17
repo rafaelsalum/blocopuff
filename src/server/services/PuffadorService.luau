@@ -3,7 +3,8 @@
 -- Serviço autoritativo do Puffador: constrói a ferramenta, controla quando
 -- cada participante a possui, recebe o RemoteEvent de disparo, valida tudo
 -- no servidor e delega a simulação do projétil ao ProjectileService.
--- O cliente nunca escolhe origem, alcance, cadência ou alvo.
+-- O cliente informa somente o ponto que deseja mirar; nunca escolhe origem,
+-- alcance, cadência, resultado do impacto ou destruição.
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Workspace = game:GetService("Workspace")
@@ -16,12 +17,11 @@ local ProjectileService = require(script.Parent.ProjectileService)
 local GENERATED_BY_ATTRIBUTE = "GeneratedBy"
 local SERVICE_NAME = "PuffadorService"
 
-local MIN_DIRECTION_MAGNITUDE = 0.05
-
 local PuffadorService = {}
 
 local remotesFolder: Folder? = nil
 local requestPuffRemote: RemoteEvent? = nil
+local feedbackRemote: RemoteEvent? = nil
 local requestConnection: RBXScriptConnection? = nil
 
 local acceptingRequests = false
@@ -46,6 +46,7 @@ local function buildPuffadorTool(): Tool
 	local tool = Instance.new("Tool")
 	tool.Name = PuffadorConstants.ToolName
 	tool.RequiresHandle = true
+	tool.CanBeDropped = false
 	tool.ToolTip = "Puffador"
 	tool:SetAttribute(GENERATED_BY_ATTRIBUTE, SERVICE_NAME)
 
@@ -61,6 +62,22 @@ local function buildPuffadorTool(): Tool
 	handle.CanQuery = false
 	handle.Massless = true
 	handle.Parent = tool
+
+	local shotSound = Instance.new("Sound")
+	shotSound.Name = PuffadorConstants.ShotSoundName
+	shotSound.SoundId = "rbxasset://sounds/electronicpingshort.wav"
+	shotSound.Volume = 0.55
+	shotSound.PlaybackSpeed = 0.82
+	shotSound.RollOffMaxDistance = 70
+	shotSound.Parent = handle
+
+	local hitSound = Instance.new("Sound")
+	hitSound.Name = PuffadorConstants.HitSoundName
+	hitSound.SoundId = "rbxasset://sounds/button.wav"
+	hitSound.Volume = 0.5
+	hitSound.PlaybackSpeed = 1.25
+	hitSound.RollOffMaxDistance = 45
+	hitSound.Parent = handle
 
 	local barrel = Instance.new("Part")
 	barrel.Name = "Barrel"
@@ -207,15 +224,26 @@ function PuffadorService.endRound()
 	currentRoundId = 0
 end
 
-local function computeOrigin(rootPart: BasePart): Vector3
+local function computeOrigin(rootPart: BasePart, tool: Tool): Vector3
 	local config = GameConfig.Puffador
+	local handle = tool:FindFirstChild(PuffadorConstants.HandleName)
+	if handle ~= nil and handle:IsA("BasePart") then
+		local muzzle = handle:FindFirstChild(PuffadorConstants.MuzzleAttachmentName)
+		if muzzle ~= nil and muzzle:IsA("Attachment") then
+			local muzzlePosition = muzzle.WorldPosition
+			if (muzzlePosition - rootPart.Position).Magnitude <= config.MaximumOriginDistance then
+				return muzzlePosition
+			end
+		end
+	end
+
 	local rootCFrame = rootPart.CFrame
 	return rootCFrame.Position
 		+ (rootCFrame.LookVector * config.MuzzleForwardOffset)
 		+ Vector3.new(0, config.MuzzleUpOffset, 0)
 end
 
-local function onRequestPuff(player: Player, rawDirection: unknown)
+local function onRequestPuff(player: Player, rawAimTarget: unknown)
 	if player.Parent == nil then
 		return
 	end
@@ -224,13 +252,10 @@ local function onRequestPuff(player: Player, rawDirection: unknown)
 		return
 	end
 
-	if typeof(rawDirection) ~= "Vector3" then
+	if typeof(rawAimTarget) ~= "Vector3" then
 		return
 	end
-	if not isFiniteVector3(rawDirection) then
-		return
-	end
-	if rawDirection.Magnitude < MIN_DIRECTION_MAGNITUDE then
+	if not isFiniteVector3(rawAimTarget) then
 		return
 	end
 
@@ -274,15 +299,25 @@ local function onRequestPuff(player: Player, rawDirection: unknown)
 		return
 	end
 
-	local origin = computeOrigin(rootPart)
+	local origin = computeOrigin(rootPart, tool)
 	if (origin - rootPart.Position).Magnitude > GameConfig.Puffador.MaximumOriginDistance then
+		return
+	end
+
+	local aimDelta = rawAimTarget - origin
+	if not isFiniteVector3(aimDelta) or aimDelta.Magnitude < GameConfig.Puffador.MinimumAimDistance then
 		return
 	end
 
 	lastFireClock[player] = now
 
-	local direction = rawDirection.Unit
-	ProjectileService.spawn(player, origin, direction, currentRoundId)
+	local direction = aimDelta.Unit
+	ProjectileService.spawn(player, origin, direction, currentRoundId, function()
+		local remote = feedbackRemote
+		if remote ~= nil and player.Parent ~= nil then
+			remote:FireClient(player, "Hit")
+		end
+	end)
 end
 
 local function ensureRemotesContainer(): Folder
@@ -315,8 +350,12 @@ function PuffadorService.start(worldRoot: Model)
 	local remote = Instance.new("RemoteEvent")
 	remote.Name = PuffadorConstants.RequestPuffRemoteName
 	remote.Parent = folder
+	local newFeedbackRemote = Instance.new("RemoteEvent")
+	newFeedbackRemote.Name = PuffadorConstants.PuffFeedbackRemoteName
+	newFeedbackRemote.Parent = folder
 
 	requestPuffRemote = remote
+	feedbackRemote = newFeedbackRemote
 	requestConnection = remote.OnServerEvent:Connect(onRequestPuff)
 end
 
@@ -338,6 +377,7 @@ function PuffadorService.stop()
 	end
 	remotesFolder = nil
 	requestPuffRemote = nil
+	feedbackRemote = nil
 end
 
 return table.freeze(PuffadorService)

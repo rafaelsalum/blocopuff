@@ -40,6 +40,12 @@
 /graphify-out/.graphify_labels.json
 /graphify-out/.graphify_labels.json.sig
 
+# graphify auto-backs up graph.json (+ sidecar files) into a dated folder
+# before overwriting a "curated" or semantic graph — one new folder per day
+# the graph changes. Git is already our history/backup, so these pre-overwrite
+# snapshots stay local instead of accumulating in the repo forever.
+/graphify-out/[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]/
+
 # graphify's Claude Code PreToolUse hook bakes in an absolute path to the
 # local `graphify` executable (by design, for cross-shell reliability), so
 # it isn't portable between machines/users. Each developer regenerates it

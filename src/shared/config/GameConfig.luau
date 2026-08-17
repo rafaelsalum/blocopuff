@@ -34,10 +34,14 @@ export type PuffadorConfig = {
 	ProjectileSpeed: number,
 	ProjectileLifetime: number,
 	MaximumRange: number,
+	MinimumAimDistance: number,
 	ProjectileRadius: number,
 	MuzzleForwardOffset: number,
 	MuzzleUpOffset: number,
 	MaximumOriginDistance: number,
+	CameraShoulderOffset: Vector3,
+	CameraRecoilDegrees: number,
+	CameraRecoilRecovery: number,
 }
 
 export type EliminationZoneConfig = {
@@ -92,10 +96,14 @@ local Puffador: PuffadorConfig = table.freeze({
 	ProjectileSpeed = 95,
 	ProjectileLifetime = 2.5,
 	MaximumRange = 180,
+	MinimumAimDistance = 1,
 	ProjectileRadius = 0.8,
 	MuzzleForwardOffset = 2.5,
 	MuzzleUpOffset = 0.5,
 	MaximumOriginDistance = 12,
+	CameraShoulderOffset = Vector3.new(1.8, 0.65, 0),
+	CameraRecoilDegrees = 1.6,
+	CameraRecoilRecovery = 14,
 })
 
 -- DepthBelowArena fica bem acima de |FallenPartsDestroyHeight| (ver

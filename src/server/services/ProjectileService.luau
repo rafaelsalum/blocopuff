@@ -35,6 +35,7 @@ type ProjectileRecord = {
 	raycastParams: RaycastParams,
 	spawnClock: number,
 	distanceTraveled: number,
+	onBlockHit: (() -> ())?,
 }
 
 local ProjectileService = {}
@@ -73,7 +74,7 @@ local function createImpactEffect(position: Vector3, normal: Vector3)
 	effect.CanTouch = false
 	effect.CanQuery = false
 	effect.CastShadow = false
-	effect.Material = Enum.Material.SmoothPlastic
+	effect.Material = Enum.Material.Neon
 	effect.Color = PuffadorConstants.ProjectileColor
 	effect.Transparency = 0.35
 	effect.Size = Vector3.new(IMPACT_EFFECT_START_SIZE, IMPACT_EFFECT_START_SIZE, IMPACT_EFFECT_START_SIZE)
@@ -91,6 +92,30 @@ local function createImpactEffect(position: Vector3, normal: Vector3)
 	growTween:Play()
 
 	Debris:AddItem(effect, IMPACT_EFFECT_LIFETIME)
+
+	for fragmentIndex = 1, 4 do
+		local angle = (math.pi * 2 * fragmentIndex) / 4
+		local tangent = Vector3.new(math.cos(angle), 0.55, math.sin(angle)).Unit
+		local fragment = Instance.new("Part")
+		fragment.Name = "PuffadorSpark"
+		fragment.Shape = Enum.PartType.Ball
+		fragment.Size = Vector3.new(0.24, 0.24, 0.24)
+		fragment.Position = position + (normal * 0.12)
+		fragment.Anchored = true
+		fragment.CanCollide = false
+		fragment.CanTouch = false
+		fragment.CanQuery = false
+		fragment.CastShadow = false
+		fragment.Material = Enum.Material.Neon
+		fragment.Color = PuffadorConstants.PuffadorAccentColor
+		fragment.Parent = projectileContainer
+
+		TweenService:Create(fragment, TweenInfo.new(0.22, Enum.EasingStyle.Quad), {
+			Position = fragment.Position + (tangent * 2.4) + (normal * 0.8),
+			Transparency = 1,
+		}):Play()
+		Debris:AddItem(fragment, 0.24)
+	end
 end
 
 local function updateProjectiles(deltaTime: number)
@@ -121,7 +146,10 @@ local function updateProjectiles(deltaTime: number)
 					roundId = record.roundId,
 					projectileId = record.projectileId,
 				}
-				ArenaService.tryDestroyBlock(raycastResult.Instance, context)
+				local destroyedBlock = ArenaService.tryDestroyBlock(raycastResult.Instance, context)
+				if destroyedBlock and record.onBlockHit ~= nil then
+					record.onBlockHit()
+				end
 				createImpactEffect(raycastResult.Position, raycastResult.Normal)
 				return false
 			end
@@ -171,7 +199,13 @@ function ProjectileService.start(worldRoot: Model)
 	heartbeatConnection = RunService.Heartbeat:Connect(updateProjectiles)
 end
 
-function ProjectileService.spawn(player: Player, origin: Vector3, direction: Vector3, roundId: number)
+function ProjectileService.spawn(
+	player: Player,
+	origin: Vector3,
+	direction: Vector3,
+	roundId: number,
+	onBlockHit: (() -> ())?
+)
 	if projectileContainer == nil then
 		return
 	end
@@ -184,7 +218,7 @@ function ProjectileService.spawn(player: Player, origin: Vector3, direction: Vec
 	part.Shape = Enum.PartType.Ball
 	part.Size = Vector3.new(diameter, diameter, diameter)
 	part.Color = PuffadorConstants.ProjectileColor
-	part.Material = Enum.Material.SmoothPlastic
+	part.Material = Enum.Material.Neon
 	part.Anchored = true
 	part.CanCollide = false
 	part.CanTouch = false
@@ -201,6 +235,40 @@ function ProjectileService.spawn(player: Player, origin: Vector3, direction: Vec
 	CollectionService:AddTag(part, PuffadorConstants.ProjectileTag)
 
 	part.Parent = projectileContainer
+
+	local trailFront = Instance.new("Attachment")
+	trailFront.Name = "TrailFront"
+	trailFront.Position = Vector3.new(0, config.ProjectileRadius * 0.55, 0)
+	trailFront.Parent = part
+
+	local trailBack = Instance.new("Attachment")
+	trailBack.Name = "TrailBack"
+	trailBack.Position = Vector3.new(0, -config.ProjectileRadius * 0.55, 0)
+	trailBack.Parent = part
+
+	local trail = Instance.new("Trail")
+	trail.Name = "PuffTrail"
+	trail.Attachment0 = trailFront
+	trail.Attachment1 = trailBack
+	trail.Color = ColorSequence.new({
+		ColorSequenceKeypoint.new(0, PuffadorConstants.PuffadorAccentColor),
+		ColorSequenceKeypoint.new(1, PuffadorConstants.PuffadorPrimaryColor),
+	})
+	trail.Transparency = NumberSequence.new({
+		NumberSequenceKeypoint.new(0, 0.05),
+		NumberSequenceKeypoint.new(1, 1),
+	})
+	trail.Lifetime = 0.18
+	trail.LightEmission = 0.75
+	trail.FaceCamera = true
+	trail.Parent = part
+
+	local glow = Instance.new("PointLight")
+	glow.Name = "Glow"
+	glow.Color = PuffadorConstants.PuffadorAccentColor
+	glow.Brightness = 1.2
+	glow.Range = 7
+	glow.Parent = part
 
 	local filterInstances: { Instance } = { projectileContainer }
 	local character = player.Character
@@ -223,6 +291,7 @@ function ProjectileService.spawn(player: Player, origin: Vector3, direction: Vec
 		raycastParams = raycastParams,
 		spawnClock = os.clock(),
 		distanceTraveled = 0,
+		onBlockHit = onBlockHit,
 	}
 
 	table.insert(activeProjectiles, record)

@@ -19,10 +19,13 @@ export type PuffadorConstantsModule = {
 
 	RemotesContainerName: string,
 	RequestPuffRemoteName: string,
+	PuffFeedbackRemoteName: string,
 
 	OwnerUserIdAttribute: string,
 	RoundIdAttribute: string,
 	ProjectileIdAttribute: string,
+	ShotSoundName: string,
+	HitSoundName: string,
 
 	PuffadorPrimaryColor: Color3,
 	PuffadorAccentColor: Color3,
@@ -40,10 +43,13 @@ local PuffadorConstants: PuffadorConstantsModule = {
 
 	RemotesContainerName = "BlocoPuffRemotes",
 	RequestPuffRemoteName = "RequestPuff",
+	PuffFeedbackRemoteName = "PuffFeedback",
 
 	OwnerUserIdAttribute = "OwnerUserId",
 	RoundIdAttribute = StateAttributeNames.RoundId,
 	ProjectileIdAttribute = "ProjectileId",
+	ShotSoundName = "ShotSound",
+	HitSoundName = "HitSound",
 
 	PuffadorPrimaryColor = Color3.fromRGB(194, 168, 255),
 	PuffadorAccentColor = Color3.fromRGB(255, 230, 148),
