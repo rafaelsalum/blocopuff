@@ -5,12 +5,12 @@
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 287 nodes · 541 edges · 25 communities
-- Extraction: 84% EXTRACTED · 16% INFERRED · 0% AMBIGUOUS · INFERRED: 86 edges (avg confidence: 0.8)
+- 287 nodes · 535 edges · 26 communities
+- Extraction: 85% EXTRACTED · 15% INFERRED · 0% AMBIGUOUS · INFERRED: 80 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `9263c7ff`
+- Built from commit: `4827a7e7`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -37,11 +37,11 @@
 3. `beginRound()` - 12 edges
 4. `refreshSpectator()` - 11 edges
 5. `runEnding()` - 11 edges
-6. `setAttribute()` - 10 edges
-7. `BlocoPuff!` - 10 edges
-8. `PuffadorController.start()` - 9 edges
-9. `AdminPanelView.new()` - 9 edges
-10. `AnnouncementView.new()` - 9 edges
+6. `BlocoPuff!` - 10 edges
+7. `setAttribute()` - 10 edges
+8. `AdminPanelView.new()` - 9 edges
+9. `RoundHudView.new()` - 9 edges
+10. `PuffadorController.start()` - 9 edges
 
 ## Surprising Connections (you probably didn't know these)
 - `beginRound()` --calls--> `EliminationService.beginRound()`  [INFERRED]
@@ -58,7 +58,7 @@
 ## Import Cycles
 - None detected.
 
-## Communities (25 total, 0 thin omitted)
+## Communities (26 total, 0 thin omitted)
 
 ### Community 0 - "RoundService.luau"
 Cohesion: 0.13
@@ -98,7 +98,7 @@ Nodes (8): assignLobbySpawn(), createContainmentPart(), createPart(), destroyOwn
 
 ### Community 9 - "UiTheme.addCorner"
 Cohesion: 0.14
-Nodes (26): AdminBroadcastView.new(), AdminPanelView.new(), constrainText(), createButton(), createLabel(), createTextBox(), AnnouncementView.new(), getToneColor() (+18 more)
+Nodes (25): AdminBroadcastView.new(), AdminPanelView.new(), constrainText(), createButton(), createLabel(), createTextBox(), AnnouncementView.new(), getToneColor() (+17 more)
 
 ### Community 17 - "BlocoPuff!"
 Cohesion: 0.08
@@ -121,18 +121,18 @@ Cohesion: 1.00
 Nodes (3): addCorner(), createHitLine(), CrosshairView.new()
 
 ## Knowledge Gaps
-- **18 isolated node(s):** `Linguagem e comunicação`, `Arquitetura`, `Segurança e dependências`, `Escopo e compatibilidade`, `Validação e entrega` (+13 more)
+- **18 isolated node(s):** `Stack`, `Estrutura`, `Grafo de conhecimento (graphify)`, `Pré-requisitos`, `Instalação inicial no macOS` (+13 more)
   These have ≤1 connection - possible missing edges or undocumented components.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `PuffadorController.start()` connect `PuffadorController.luau` to `UiTheme.addCorner`, `CrosshairView.new`?**
-  _High betweenness centrality (0.044) - this node is a cross-community bridge._
+  _High betweenness centrality (0.042) - this node is a cross-community bridge._
 - **Why does `runEnding()` connect `RoundService.luau` to `PuffadorService.luau`, `ArenaService.luau`, `EliminationService.luau`?**
   _High betweenness centrality (0.035) - this node is a cross-community bridge._
 - **Why does `SpectatorView.new()` connect `UiTheme.addCorner` to `SpectatorController.luau`?**
-  _High betweenness centrality (0.031) - this node is a cross-community bridge._
+  _High betweenness centrality (0.030) - this node is a cross-community bridge._
 - **Are the 13 inferred relationships involving `UiTheme.addCorner()` (e.g. with `AdminBroadcastView.new()` and `AdminPanelView.new()`) actually correct?**
   _`UiTheme.addCorner()` has 13 INFERRED edges - model-reasoned connections that need verification._
 - **Are the 12 inferred relationships involving `UiTheme.addStroke()` (e.g. with `AdminBroadcastView.new()` and `AdminPanelView.new()`) actually correct?**
