@@ -14,6 +14,16 @@ local LEGACY_VISUALS_NAME = "WorldVisuals"
 local ATMOSPHERE_NAME = "BlocoPuffAtmosphere"
 local BLOOM_NAME = "BlocoPuffBloom"
 local COLOR_CORRECTION_NAME = "BlocoPuffColorCorrection"
+local SKY_NAME = "BlocoPuffSky"
+
+-- Texturas do modelo "Sunless Blue Sky Skybox", de @Yourius, inspecionado
+-- na Toolbox. O modelo contém somente uma instância Sky e nenhum script.
+local SKYBOX_BACK = "rbxassetid://591058823"
+local SKYBOX_DOWN = "rbxassetid://591059876"
+local SKYBOX_FRONT = "rbxassetid://591058104"
+local SKYBOX_LEFT = "rbxassetid://591057861"
+local SKYBOX_RIGHT = "rbxassetid://591057625"
+local SKYBOX_UP = "rbxassetid://591059642"
 
 type WorldPalette = {
 	LightBlue: Color3,
@@ -28,6 +38,7 @@ local WorldVisualService = {}
 local atmosphere: Atmosphere? = nil
 local bloom: BloomEffect? = nil
 local colorCorrection: ColorCorrectionEffect? = nil
+local sky: Sky? = nil
 
 local function isOwned(instance: Instance): boolean
 	return instance:GetAttribute(GENERATED_BY_ATTRIBUTE) == SERVICE_NAME
@@ -46,6 +57,17 @@ local function destroyOwned(parent: Instance, name: string)
 	existing:Destroy()
 end
 
+local function destroyExistingSkies()
+	-- Lighting deve ter um único Sky para que o resultado não dependa da
+	-- ordem interna dos filhos. Substituir o céu anterior faz parte explícita
+	-- da configuração visual completa deste serviço.
+	for _, child in ipairs(Lighting:GetChildren()) do
+		if child:IsA("Sky") then
+			child:Destroy()
+		end
+	end
+end
+
 local function stopOwnedVisuals()
 	if atmosphere ~= nil and atmosphere.Parent ~= nil and isOwned(atmosphere) then
 		atmosphere:Destroy()
@@ -56,10 +78,14 @@ local function stopOwnedVisuals()
 	if colorCorrection ~= nil and colorCorrection.Parent ~= nil and isOwned(colorCorrection) then
 		colorCorrection:Destroy()
 	end
+	if sky ~= nil and sky.Parent ~= nil and isOwned(sky) then
+		sky:Destroy()
+	end
 
 	atmosphere = nil
 	bloom = nil
 	colorCorrection = nil
+	sky = nil
 end
 
 function WorldVisualService.start(worldRoot: Model, palette: WorldPalette)
@@ -68,6 +94,22 @@ function WorldVisualService.start(worldRoot: Model, palette: WorldPalette)
 	destroyOwned(Lighting, ATMOSPHERE_NAME)
 	destroyOwned(Lighting, BLOOM_NAME)
 	destroyOwned(Lighting, COLOR_CORRECTION_NAME)
+	destroyExistingSkies()
+
+	local newSky = Instance.new("Sky")
+	newSky.Name = SKY_NAME
+	newSky.SkyboxBk = SKYBOX_BACK
+	newSky.SkyboxDn = SKYBOX_DOWN
+	newSky.SkyboxFt = SKYBOX_FRONT
+	newSky.SkyboxLf = SKYBOX_LEFT
+	newSky.SkyboxRt = SKYBOX_RIGHT
+	newSky.SkyboxUp = SKYBOX_UP
+	newSky.SunTextureId = "rbxasset://sky/sun.jpg"
+	newSky.MoonTextureId = "rbxasset://sky/moon.jpg"
+	newSky.StarCount = 3000
+	newSky.CelestialBodiesShown = true
+	newSky:SetAttribute(GENERATED_BY_ATTRIBUTE, SERVICE_NAME)
+	newSky.Parent = Lighting
 
 	local newAtmosphere = Instance.new("Atmosphere")
 	newAtmosphere.Name = ATMOSPHERE_NAME
@@ -100,6 +142,7 @@ function WorldVisualService.start(worldRoot: Model, palette: WorldPalette)
 	atmosphere = newAtmosphere
 	bloom = newBloom
 	colorCorrection = newColorCorrection
+	sky = newSky
 end
 
 function WorldVisualService.stop()

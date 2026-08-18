@@ -60,8 +60,8 @@
     "semantic_hash": "8fb32b4ba5e678729c42210655936d5e"
   },
   "src/server/services/LobbyService.luau": {
-    "mtime": 1787008419.75336,
-    "ast_hash": "8ba946f5c59186efae8a29ad988ba8b1",
+    "mtime": 1787015956.1623409,
+    "ast_hash": "1ff5ec9a78915ccada7f1f985df699b8",
     "semantic_hash": ""
   },
   "src/server/services/ProjectileService.luau": {
@@ -160,8 +160,8 @@
     "semantic_hash": ""
   },
   "src/server/services/WorldVisualService.luau": {
-    "mtime": 1787014104.0443823,
-    "ast_hash": "c8d45dc632bd9a0b9cdf273e749cee4d",
+    "mtime": 1787015956.1160543,
+    "ast_hash": "50ea5a6835ab39706d38044d4db469a2",
     "semantic_hash": ""
   },
   "src/shared/modules/ArenaConstants.luau": {

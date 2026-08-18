@@ -24,6 +24,11 @@ local CORNER_POST_SIZE = 2
 local SPAWN_SIZE = Vector3.new(8, 1, 8)
 local RETURN_HEIGHT_OFFSET = 3
 
+-- Acabamento do modelo oficial "Grass Baseplate" da Roblox, aplicado à
+-- plataforma existente para evitar uma segunda superfície de colisão.
+local GRASS_BASEPLATE_COLOR = Color3.fromRGB(58, 125, 21)
+local GRASS_BASEPLATE_REFLECTANCE = 0.5
+
 local LobbyService = {}
 
 local currentWorldRoot: Model? = nil
@@ -131,6 +136,11 @@ function LobbyService.create(worldRoot: Model, config: LobbyConfig, palette: Wor
 	newLobby.Parent = worldRoot
 
 	local platform = createPart("Platform", config.PlatformSize, config.Position, palette.LightBlue, newLobby)
+	platform.Color = GRASS_BASEPLATE_COLOR
+	platform.Material = Enum.Material.Slate
+	platform.Reflectance = GRASS_BASEPLATE_REFLECTANCE
+	platform.TopSurface = Enum.SurfaceType.Studs
+	platform.BottomSurface = Enum.SurfaceType.Inlet
 	local platformTop = config.Position.Y + (config.PlatformSize.Y / 2)
 
 	local foundationColor = palette.Purple:Lerp(Color3.fromRGB(78, 82, 105), 0.42)
