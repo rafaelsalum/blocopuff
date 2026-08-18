@@ -44,19 +44,19 @@ local world = getOrCreateWorld()
 
 print("[BlocoPuff] Server initialized")
 
+-- Publica o estado antes de carregar meshes remotas. Na primeira execução,
+-- a criação da ilha pode levar alguns segundos e o HUD não deve expirar.
+ReplicatedStateService.create()
+print("[BlocoPuff] Replicated state initialized")
+
 WorldVisualService.start(world, GameConfig.Palette)
 print("[BlocoPuff] World visuals created")
 
 SkyIslandService.start(world)
-print("[BlocoPuff] Sky island backdrop created")
+print("[BlocoPuff] Walkable sky island created")
 
 LobbyService.create(world, GameConfig.Lobby, GameConfig.Palette)
 print("[BlocoPuff] Lobby created")
-
--- Precisa existir antes da Arena: ArenaService publica as contagens de
--- blocos assim que os cria, sem esperar por um ciclo de replicação futuro.
-ReplicatedStateService.create()
-print("[BlocoPuff] Replicated state initialized")
 
 AdminService.start()
 print("[BlocoPuff] Secure admin panel initialized")

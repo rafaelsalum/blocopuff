@@ -73,12 +73,14 @@ local Arena: ArenaConfig = table.freeze({
 	Columns = 15,
 	BlockSize = Vector3.new(6, 1, 6),
 	BlockGap = 0.2,
-	Position = Vector3.new(0, 50, 0),
+	Position = Vector3.new(0, 220, 0),
 })
 
 local Lobby: LobbyConfig = table.freeze({
-	PlatformSize = Vector3.new(40, 2, 40),
-	Position = Vector3.new(0, 60, -130),
+	-- PlatformSize permanece no contrato para compatibilidade, mas o lobby
+	-- agora usa a topografia real da ilha em vez de uma plataforma artificial.
+	PlatformSize = Vector3.new(100, 2, 100),
+	Position = Vector3.new(0, 50, 0),
 })
 
 local Palette: WorldPalette = table.freeze({
