@@ -38,20 +38,21 @@ local function createPanelRoot(
 	root.Size = size
 	root.BackgroundTransparency = 1
 	root.Parent = parent
-	table.insert(scaleHandles, ResponsiveScale.attach(root, REFERENCE_VIEWPORT, 0.8, 1.08))
+	table.insert(scaleHandles, ResponsiveScale.attach(root, REFERENCE_VIEWPORT, 0.72, 1))
 
-	UiTheme.createShadow(root, UDim2.fromScale(0.5, 0.5), UDim2.fromScale(1, 1), 16)
+	UiTheme.createShadow(root, UDim2.fromScale(0.5, 0.5), UDim2.fromScale(1, 1), 14)
 
 	local card = Instance.new("Frame")
 	card.Name = "Card"
 	card.Size = UDim2.fromScale(1, 1)
 	card.BackgroundColor3 = UiTheme.Colors.Panel
-	card.BackgroundTransparency = 0.03
+	card.BackgroundTransparency = 0.18
 	card.BorderSizePixel = 0
 	card.ZIndex = 1
 	card.Parent = root
-	UiTheme.addCorner(card, 16)
-	UiTheme.addStroke(card, accentColor, 3)
+	UiTheme.addCorner(card, 14)
+	local stroke = UiTheme.addStroke(card, accentColor, 1.5)
+	stroke.Transparency = 0.22
 
 	return root, card
 end
@@ -88,7 +89,7 @@ function CombatHudView.new(playerGui: PlayerGui): CombatHudViewHandle
 		"TimerPanel",
 		Vector2.new(0.5, 0),
 		UDim2.new(0.5, 0, 0, 16),
-		UDim2.fromOffset(144, 54),
+		UDim2.fromOffset(118, 44),
 		UiTheme.Colors.Blue,
 		scaleHandles
 	)
@@ -97,7 +98,7 @@ function CombatHudView.new(playerGui: PlayerGui): CombatHudViewHandle
 		timerCard,
 		"03:00",
 		UiTheme.Fonts.Heading,
-		27,
+		21,
 		UiTheme.Colors.Ink
 	)
 
@@ -106,7 +107,7 @@ function CombatHudView.new(playerGui: PlayerGui): CombatHudViewHandle
 		"PlayersPanel",
 		Vector2.new(1, 0),
 		UDim2.new(1, -18, 0, 16),
-		UDim2.fromOffset(174, 54),
+		UDim2.fromOffset(146, 44),
 		UiTheme.Colors.Purple,
 		scaleHandles
 	)
@@ -115,11 +116,11 @@ function CombatHudView.new(playerGui: PlayerGui): CombatHudViewHandle
 		playersCard,
 		"JOGADORES",
 		UiTheme.Fonts.BodyBold,
-		12,
+		10,
 		UiTheme.Colors.InkSoft
 	)
-	playersCaption.Position = UDim2.new(0, 14, 0, 7)
-	playersCaption.Size = UDim2.new(1, -66, 0, 18)
+	playersCaption.Position = UDim2.new(0, 12, 0, 6)
+	playersCaption.Size = UDim2.new(1, -54, 0, 15)
 	playersCaption.TextXAlignment = Enum.TextXAlignment.Left
 
 	local playersValue = createLabel(
@@ -127,12 +128,12 @@ function CombatHudView.new(playerGui: PlayerGui): CombatHudViewHandle
 		playersCard,
 		"0",
 		UiTheme.Fonts.Heading,
-		27,
+		21,
 		UiTheme.Colors.Ink
 	)
 	playersValue.AnchorPoint = Vector2.new(1, 0.5)
-	playersValue.Position = UDim2.new(1, -14, 0.5, 0)
-	playersValue.Size = UDim2.fromOffset(44, 40)
+	playersValue.Position = UDim2.new(1, -11, 0.5, 0)
+	playersValue.Size = UDim2.fromOffset(36, 32)
 	playersValue.TextXAlignment = Enum.TextXAlignment.Right
 
 	local playersSubLabel = createLabel(
@@ -140,11 +141,11 @@ function CombatHudView.new(playerGui: PlayerGui): CombatHudViewHandle
 		playersCard,
 		"NA RODADA",
 		UiTheme.Fonts.Body,
-		10,
+		8,
 		UiTheme.Colors.InkSoft
 	)
-	playersSubLabel.Position = UDim2.new(0, 14, 0, 25)
-	playersSubLabel.Size = UDim2.new(1, -66, 0, 16)
+	playersSubLabel.Position = UDim2.new(0, 12, 0, 22)
+	playersSubLabel.Size = UDim2.new(1, -54, 0, 13)
 	playersSubLabel.TextXAlignment = Enum.TextXAlignment.Left
 
 	local arenaRoot, arenaCard = createPanelRoot(
@@ -152,7 +153,7 @@ function CombatHudView.new(playerGui: PlayerGui): CombatHudViewHandle
 		"ArenaPanel",
 		Vector2.new(0, 0),
 		UDim2.new(0, 18, 0, 16),
-		UDim2.fromOffset(270, 70),
+		UDim2.fromOffset(220, 58),
 		UiTheme.Colors.Green,
 		scaleHandles
 	)
@@ -162,10 +163,10 @@ function CombatHudView.new(playerGui: PlayerGui): CombatHudViewHandle
 		arenaCard,
 		"ARENA 100%",
 		UiTheme.Fonts.BodyBold,
-		14,
+		12,
 		UiTheme.Colors.Ink
 	)
-	arenaTitle.Position = UDim2.new(0, 15, 0, 8)
+	arenaTitle.Position = UDim2.new(0, 12, 0, 6)
 	arenaTitle.Size = UDim2.new(0.65, 0, 0, 20)
 	arenaTitle.TextXAlignment = Enum.TextXAlignment.Left
 
@@ -174,25 +175,25 @@ function CombatHudView.new(playerGui: PlayerGui): CombatHudViewHandle
 		arenaCard,
 		"225 / 225",
 		UiTheme.Fonts.Body,
-		12,
+		10,
 		UiTheme.Colors.InkSoft
 	)
 	arenaExact.AnchorPoint = Vector2.new(1, 0)
-	arenaExact.Position = UDim2.new(1, -15, 0, 9)
+	arenaExact.Position = UDim2.new(1, -12, 0, 7)
 	arenaExact.Size = UDim2.new(0.35, 0, 0, 18)
 	arenaExact.TextXAlignment = Enum.TextXAlignment.Right
 
 	local progressTrack = Instance.new("Frame")
 	progressTrack.Name = "IntegrityTrack"
-	progressTrack.Position = UDim2.new(0, 15, 0, 39)
-	progressTrack.Size = UDim2.new(1, -30, 0, 14)
+	progressTrack.Position = UDim2.new(0, 12, 0, 35)
+	progressTrack.Size = UDim2.new(1, -24, 0, 9)
 	progressTrack.BackgroundColor3 = UiTheme.Colors.Track
-	progressTrack.BackgroundTransparency = 0.72
+	progressTrack.BackgroundTransparency = 0.3
 	progressTrack.BorderSizePixel = 0
 	progressTrack.ClipsDescendants = true
 	progressTrack.ZIndex = 2
 	progressTrack.Parent = arenaCard
-	UiTheme.addCorner(progressTrack, 7)
+	UiTheme.addCorner(progressTrack, 5)
 
 	local progressFill = Instance.new("Frame")
 	progressFill.Name = "IntegrityFill"
@@ -201,14 +202,14 @@ function CombatHudView.new(playerGui: PlayerGui): CombatHudViewHandle
 	progressFill.BorderSizePixel = 0
 	progressFill.ZIndex = 3
 	progressFill.Parent = progressTrack
-	UiTheme.addCorner(progressFill, 7)
+	UiTheme.addCorner(progressFill, 5)
 
 	local scoreRoot, scoreCard = createPanelRoot(
 		screenGui,
 		"PersonalScorePanel",
 		Vector2.new(0, 0),
-		UDim2.new(0, 18, 0, 96),
-		UDim2.fromOffset(178, 46),
+		UDim2.new(0, 18, 0, 82),
+		UDim2.fromOffset(146, 38),
 		UiTheme.Colors.Yellow,
 		scaleHandles
 	)
@@ -219,11 +220,11 @@ function CombatHudView.new(playerGui: PlayerGui): CombatHudViewHandle
 		scoreCard,
 		"SEUS BLOCOS",
 		UiTheme.Fonts.BodyBold,
-		11,
+		9,
 		UiTheme.Colors.InkSoft
 	)
-	scoreCaption.Position = UDim2.new(0, 13, 0, 0)
-	scoreCaption.Size = UDim2.new(1, -60, 1, 0)
+	scoreCaption.Position = UDim2.new(0, 11, 0, 0)
+	scoreCaption.Size = UDim2.new(1, -50, 1, 0)
 	scoreCaption.TextXAlignment = Enum.TextXAlignment.Left
 
 	local scoreValue = createLabel(
@@ -231,12 +232,12 @@ function CombatHudView.new(playerGui: PlayerGui): CombatHudViewHandle
 		scoreCard,
 		"0",
 		UiTheme.Fonts.Heading,
-		23,
+		19,
 		UiTheme.Colors.Ink
 	)
 	scoreValue.AnchorPoint = Vector2.new(1, 0.5)
-	scoreValue.Position = UDim2.new(1, -13, 0.5, 0)
-	scoreValue.Size = UDim2.fromOffset(42, 34)
+	scoreValue.Position = UDim2.new(1, -11, 0.5, 0)
+	scoreValue.Size = UDim2.fromOffset(34, 28)
 	scoreValue.TextXAlignment = Enum.TextXAlignment.Right
 	local lastPersonalScore = 0
 
@@ -247,9 +248,9 @@ function CombatHudView.new(playerGui: PlayerGui): CombatHudViewHandle
 		local camera = Workspace.CurrentCamera
 		local compact = camera ~= nil and camera.ViewportSize.X < 700
 		arenaRoot.Position = UDim2.new(0, if compact then 12 else 18, 0, 16)
-		scoreRoot.Position = UDim2.new(0, if compact then 12 else 18, 0, 96)
+		scoreRoot.Position = UDim2.new(0, if compact then 12 else 18, 0, 82)
 		playersRoot.Position = UDim2.new(1, if compact then -12 else -18, 0, 16)
-		timerRoot.Position = UDim2.new(0.5, 0, 0, if compact then 150 else 16)
+		timerRoot.Position = UDim2.new(0.5, 0, 0, if compact then 106 else 16)
 	end
 
 	local function connectCamera()
@@ -304,9 +305,9 @@ function CombatHudView.new(playerGui: PlayerGui): CombatHudViewHandle
 		scoreRoot.Visible = visible
 		scoreValue.Text = tostring(safeCount)
 		if visible and safeCount > lastPersonalScore then
-			scoreValue.TextSize = 28
+			scoreValue.TextSize = 23
 			TweenService:Create(scoreValue, TweenInfo.new(0.18, Enum.EasingStyle.Back), {
-				TextSize = 23,
+				TextSize = 19,
 			}):Play()
 		end
 		lastPersonalScore = safeCount

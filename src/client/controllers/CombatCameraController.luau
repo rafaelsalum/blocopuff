@@ -18,7 +18,7 @@ local CAMERA_RENDER_PRIORITY = Enum.RenderPriority.Camera.Value + 1
 local CombatCameraController = {}
 
 local enabled = false
-local recoilDegrees = 0
+local recoilDistance = 0
 local previousMouseBehavior = Enum.MouseBehavior.Default
 local previousMouseIconEnabled = true
 local previousCameraOffset = Vector3.zero
@@ -61,14 +61,13 @@ local function onRenderStep(deltaTime: number)
 		return
 	end
 
-	humanoid.CameraOffset = GameConfig.Puffador.CameraShoulderOffset
+	humanoid.CameraOffset = GameConfig.Puffador.CameraShoulderOffset + Vector3.new(0, 0, recoilDistance)
 	updateCharacterFacing(rootPart, camera)
 
-	if recoilDegrees > 0.01 then
-		camera.CFrame *= CFrame.Angles(-math.rad(recoilDegrees), 0, 0)
-		recoilDegrees *= math.exp(-GameConfig.Puffador.CameraRecoilRecovery * deltaTime)
+	if recoilDistance > 0.001 then
+		recoilDistance *= math.exp(-GameConfig.Puffador.CameraRecoilRecovery * deltaTime)
 	else
-		recoilDegrees = 0
+		recoilDistance = 0
 	end
 end
 
@@ -103,7 +102,7 @@ function CombatCameraController.disable()
 	end
 
 	enabled = false
-	recoilDegrees = 0
+	recoilDistance = 0
 	RunService:UnbindFromRenderStep(RENDER_STEP_NAME)
 
 	local humanoid = getCharacterParts()
@@ -123,9 +122,9 @@ function CombatCameraController.addRecoil()
 		return
 	end
 
-	recoilDegrees = math.min(
-		recoilDegrees + GameConfig.Puffador.CameraRecoilDegrees,
-		GameConfig.Puffador.CameraRecoilDegrees * 2
+	recoilDistance = math.min(
+		recoilDistance + GameConfig.Puffador.CameraRecoilDistance,
+		GameConfig.Puffador.CameraRecoilDistance * 1.5
 	)
 end
 

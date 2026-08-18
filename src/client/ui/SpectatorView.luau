@@ -25,18 +25,19 @@ local function createButton(
 	local button = Instance.new("TextButton")
 	button.Name = name
 	button.Text = text
-	button.Font = UiTheme.Fonts.Heading
-	button.TextSize = 25
+	button.Font = UiTheme.Fonts.BodyBold
+	button.TextSize = 22
 	button.TextColor3 = UiTheme.Colors.Ink
-	button.BackgroundColor3 = UiTheme.Colors.Blue
+	button.BackgroundColor3 = UiTheme.Colors.SurfaceSoft
+	button.BackgroundTransparency = 0.08
 	button.AutoButtonColor = true
-	button.Size = UDim2.fromOffset(54, 54)
+	button.Size = UDim2.fromOffset(48, 48)
 	button.LayoutOrder = layoutOrder
 	button.Selectable = true
 	button.SelectionOrder = selectionOrder
 	button.Parent = parent
-	UiTheme.addCorner(button, 15)
-	UiTheme.addStroke(button, UiTheme.Colors.Ink, 3)
+	UiTheme.addCorner(button, 14)
+	UiTheme.addStroke(button, UiTheme.Colors.Border, 1.5)
 	return button
 end
 
@@ -48,7 +49,7 @@ function SpectatorView.new(playerGui: PlayerGui, onPrevious: () -> (), onNext: (
 	responsiveRoot.Name = "ResponsiveRoot"
 	responsiveRoot.AnchorPoint = Vector2.new(0.5, 1)
 	responsiveRoot.Position = UDim2.new(0.5, 0, 1, -22)
-	responsiveRoot.Size = UDim2.fromOffset(430, 76)
+	responsiveRoot.Size = UDim2.fromOffset(360, 66)
 	responsiveRoot.BackgroundTransparency = 1
 	responsiveRoot.Parent = screenGui
 	local responsiveHandle = ResponsiveScale.attach(responsiveRoot, Vector2.new(1280, 720), 0.76, 1.08)
@@ -69,28 +70,27 @@ function SpectatorView.new(playerGui: PlayerGui, onPrevious: () -> (), onNext: (
 	panel.Name = "SpectatorPanel"
 	panel.Size = UDim2.fromScale(1, 1)
 	panel.BackgroundColor3 = UiTheme.Colors.Panel
-	panel.BackgroundTransparency = 0.03
+	panel.BackgroundTransparency = 0.16
 	panel.BorderSizePixel = 0
 	panel.ZIndex = 1
 	panel.Parent = animationGroup
-	UiTheme.addCorner(panel, 20)
-	UiTheme.addStroke(panel, UiTheme.Colors.Purple, 4)
-	UiTheme.addPadding(panel, 10, 10)
+	UiTheme.addCorner(panel, 17)
+	UiTheme.addStroke(panel, UiTheme.Colors.Border, 1.5)
+	UiTheme.addPadding(panel, 8, 8)
 
 	local layout = Instance.new("UIListLayout")
 	layout.FillDirection = Enum.FillDirection.Horizontal
 	layout.HorizontalAlignment = Enum.HorizontalAlignment.Center
 	layout.VerticalAlignment = Enum.VerticalAlignment.Center
 	layout.SortOrder = Enum.SortOrder.LayoutOrder
-	layout.Padding = UDim.new(0, 12)
+	layout.Padding = UDim.new(0, 9)
 	layout.Parent = panel
 
-	local previousButton = createButton("PreviousButton", "ANT.", panel, 1, 20)
-	previousButton.TextSize = 12
+	local previousButton = createButton("PreviousButton", "<", panel, 1, 20)
 
 	local information = Instance.new("Frame")
 	information.Name = "Information"
-	information.Size = UDim2.fromOffset(270, 54)
+	information.Size = UDim2.fromOffset(226, 48)
 	information.BackgroundTransparency = 1
 	information.LayoutOrder = 2
 	information.Parent = panel
@@ -101,7 +101,7 @@ function SpectatorView.new(playerGui: PlayerGui, onPrevious: () -> (), onNext: (
 	captionLabel.BackgroundTransparency = 1
 	captionLabel.Font = UiTheme.Fonts.BodyBold
 	captionLabel.Text = "ASSISTINDO"
-	captionLabel.TextSize = 11
+	captionLabel.TextSize = 10
 	captionLabel.TextColor3 = UiTheme.Colors.InkSoft
 	captionLabel.Parent = information
 
@@ -112,7 +112,7 @@ function SpectatorView.new(playerGui: PlayerGui, onPrevious: () -> (), onNext: (
 	nameLabel.BackgroundTransparency = 1
 	nameLabel.Font = UiTheme.Fonts.Heading
 	nameLabel.Text = ""
-	nameLabel.TextSize = 20
+	nameLabel.TextSize = 17
 	nameLabel.TextColor3 = UiTheme.Colors.Ink
 	nameLabel.TextTruncate = Enum.TextTruncate.AtEnd
 	nameLabel.Parent = information
@@ -128,8 +128,7 @@ function SpectatorView.new(playerGui: PlayerGui, onPrevious: () -> (), onNext: (
 	countLabel.TextColor3 = UiTheme.Colors.InkSoft
 	countLabel.Parent = information
 
-	local nextButton = createButton("NextButton", "PRÓX.", panel, 3, 21)
-	nextButton.TextSize = 11
+	local nextButton = createButton("NextButton", ">", panel, 3, 21)
 
 	previousButton.Activated:Connect(onPrevious)
 	nextButton.Activated:Connect(onNext)

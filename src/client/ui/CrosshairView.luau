@@ -64,7 +64,10 @@ function CrosshairView.new(playerGui: PlayerGui): CrosshairViewHandle
 	local screenGui = Instance.new("ScreenGui")
 	screenGui.Name = CROSSHAIR_NAME
 	screenGui.ResetOnSpawn = false
-	screenGui.IgnoreGuiInset = false
+	-- O disparo usa Camera:ViewportPointToRay no centro do viewport. A mira
+	-- precisa ignorar o inset da barra superior para ocupar exatamente o mesmo
+	-- ponto; caso contrário, ela aparece alguns pixels abaixo da trajetória.
+	screenGui.IgnoreGuiInset = true
 	screenGui.DisplayOrder = 20
 	screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 	screenGui.Enabled = false

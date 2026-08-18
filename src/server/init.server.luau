@@ -11,6 +11,7 @@ local PuffadorService = require(script.services.PuffadorService)
 local EliminationService = require(script.services.EliminationService)
 local RoundService = require(script.services.RoundService)
 local WorldVisualService = require(script.services.WorldVisualService)
+local AdminService = require(script.services.AdminService)
 
 local WORLD_NAME = "BlocoPuffWorld"
 local GENERATED_BY_ATTRIBUTE = "GeneratedBy"
@@ -52,6 +53,9 @@ print("[BlocoPuff] Lobby created")
 -- blocos assim que os cria, sem esperar por um ciclo de replicação futuro.
 ReplicatedStateService.create()
 print("[BlocoPuff] Replicated state initialized")
+
+AdminService.start()
+print("[BlocoPuff] Secure admin panel initialized")
 
 ArenaService.create(world, GameConfig.Arena, GameConfig.Palette)
 print(string.format("[BlocoPuff] Arena created with %d blocks", #ArenaService.getBlocks()))

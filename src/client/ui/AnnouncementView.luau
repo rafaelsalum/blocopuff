@@ -35,8 +35,8 @@ function AnnouncementView.new(playerGui: PlayerGui): AnnouncementViewHandle
 	local responsiveRoot = Instance.new("Frame")
 	responsiveRoot.Name = "ResponsiveRoot"
 	responsiveRoot.AnchorPoint = Vector2.new(0.5, 0.5)
-	responsiveRoot.Position = UDim2.fromScale(0.5, 0.48)
-	responsiveRoot.Size = UDim2.fromOffset(540, 116)
+	responsiveRoot.Position = UDim2.fromScale(0.5, 0.43)
+	responsiveRoot.Size = UDim2.fromOffset(460, 92)
 	responsiveRoot.BackgroundTransparency = 1
 	responsiveRoot.Visible = false
 	responsiveRoot.Parent = screenGui
@@ -58,17 +58,18 @@ function AnnouncementView.new(playerGui: PlayerGui): AnnouncementViewHandle
 	card.Name = "AnnouncementCard"
 	card.Size = UDim2.fromScale(1, 1)
 	card.BackgroundColor3 = UiTheme.Colors.Panel
+	card.BackgroundTransparency = 0.12
 	card.BorderSizePixel = 0
 	card.ZIndex = 1
 	card.Parent = animationGroup
-	UiTheme.addCorner(card, 22)
-	local cardStroke = UiTheme.addStroke(card, UiTheme.Colors.Blue, 5)
+	UiTheme.addCorner(card, 18)
+	local cardStroke = UiTheme.addStroke(card, UiTheme.Colors.Blue, 2)
 
 	local accent = Instance.new("Frame")
 	accent.Name = "Accent"
 	accent.AnchorPoint = Vector2.new(0.5, 0)
 	accent.Position = UDim2.new(0.5, 0, 0, 0)
-	accent.Size = UDim2.new(0.58, 0, 0, 8)
+	accent.Size = UDim2.new(0.46, 0, 0, 4)
 	accent.BackgroundColor3 = UiTheme.Colors.Blue
 	accent.BorderSizePixel = 0
 	accent.ZIndex = 2
@@ -77,8 +78,8 @@ function AnnouncementView.new(playerGui: PlayerGui): AnnouncementViewHandle
 
 	local titleLabel = Instance.new("TextLabel")
 	titleLabel.Name = "TitleLabel"
-	titleLabel.Position = UDim2.new(0, 20, 0, 19)
-	titleLabel.Size = UDim2.new(1, -40, 0, 44)
+	titleLabel.Position = UDim2.new(0, 18, 0, 14)
+	titleLabel.Size = UDim2.new(1, -36, 0, 34)
 	titleLabel.BackgroundTransparency = 1
 	titleLabel.Font = UiTheme.Fonts.Heading
 	titleLabel.Text = ""
@@ -87,12 +88,12 @@ function AnnouncementView.new(playerGui: PlayerGui): AnnouncementViewHandle
 	titleLabel.TextWrapped = true
 	titleLabel.ZIndex = 2
 	titleLabel.Parent = card
-	UiTheme.addTextConstraint(titleLabel, 22, 38)
+	UiTheme.addTextConstraint(titleLabel, 18, 28)
 
 	local subtitleLabel = Instance.new("TextLabel")
 	subtitleLabel.Name = "SubtitleLabel"
-	subtitleLabel.Position = UDim2.new(0, 22, 0, 66)
-	subtitleLabel.Size = UDim2.new(1, -44, 0, 32)
+	subtitleLabel.Position = UDim2.new(0, 20, 0, 51)
+	subtitleLabel.Size = UDim2.new(1, -40, 0, 25)
 	subtitleLabel.BackgroundTransparency = 1
 	subtitleLabel.Font = UiTheme.Fonts.BodyBold
 	subtitleLabel.Text = ""
@@ -101,7 +102,7 @@ function AnnouncementView.new(playerGui: PlayerGui): AnnouncementViewHandle
 	subtitleLabel.TextWrapped = true
 	subtitleLabel.ZIndex = 2
 	subtitleLabel.Parent = card
-	UiTheme.addTextConstraint(subtitleLabel, 12, 18)
+	UiTheme.addTextConstraint(subtitleLabel, 11, 15)
 
 	local generation = 0
 	local visible = false
@@ -149,7 +150,7 @@ function AnnouncementView.new(playerGui: PlayerGui): AnnouncementViewHandle
 		cardStroke.Color = toneColor
 		responsiveRoot.Visible = true
 		animationScale.Scale = 0.78
-		setTransparency(0)
+		setTransparency(0.08)
 
 		TweenService:Create(animationScale, TweenInfo.new(0.25, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
 			Scale = 1,

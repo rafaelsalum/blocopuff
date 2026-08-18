@@ -77,8 +77,8 @@ function RoundHudView.new(playerGui: PlayerGui): RoundHudViewHandle
 	local waitingRoot, waitingGroup, waitingScale, waitingResponsive = createAnimationGroup(
 		screenGui,
 		"WaitingGroup",
-		UDim2.new(0.5, 0, 0, 74),
-		UDim2.fromOffset(430, 96)
+		UDim2.new(0.5, 0, 0, 60),
+		UDim2.fromOffset(360, 76)
 	)
 	waitingRoot.Visible = false
 
@@ -88,12 +88,13 @@ function RoundHudView.new(playerGui: PlayerGui): RoundHudViewHandle
 	waitingCard.Name = "WaitingCard"
 	waitingCard.Size = UDim2.fromScale(1, 1)
 	waitingCard.BackgroundColor3 = UiTheme.Colors.Panel
+	waitingCard.BackgroundTransparency = 0.18
 	waitingCard.BorderSizePixel = 0
 	waitingCard.ZIndex = 1
 	waitingCard.Parent = waitingGroup
-	UiTheme.addCorner(waitingCard, 20)
-	UiTheme.addStroke(waitingCard, UiTheme.Colors.Purple, 4)
-	UiTheme.addPadding(waitingCard, 22, 12)
+	UiTheme.addCorner(waitingCard, 16)
+	UiTheme.addStroke(waitingCard, UiTheme.Colors.Purple, 1.5)
+	UiTheme.addPadding(waitingCard, 18, 9)
 
 	local waitingLayout = Instance.new("UIListLayout")
 	waitingLayout.FillDirection = Enum.FillDirection.Vertical
@@ -107,40 +108,41 @@ function RoundHudView.new(playerGui: PlayerGui): RoundHudViewHandle
 		"StatusLabel",
 		waitingCard,
 		UiTheme.Fonts.Heading,
-		25,
+		20,
 		UiTheme.Colors.Ink
 	)
-	statusLabel.Size = UDim2.new(1, 0, 0, 34)
+	statusLabel.Size = UDim2.new(1, 0, 0, 28)
 	statusLabel.LayoutOrder = 1
 
 	local participantsLabel = createTextLabel(
 		"ParticipantsLabel",
 		waitingCard,
 		UiTheme.Fonts.BodyBold,
-		15,
+		11,
 		UiTheme.Colors.InkSoft
 	)
-	participantsLabel.Size = UDim2.new(1, 0, 0, 22)
+	participantsLabel.Size = UDim2.new(1, 0, 0, 17)
 	participantsLabel.LayoutOrder = 2
 
 	local queueBadge = Instance.new("Frame")
 	queueBadge.Name = "QueueBadge"
 	queueBadge.AnchorPoint = Vector2.new(0.5, 0)
 	queueBadge.Position = UDim2.new(0.5, 0, 1, 12)
-	queueBadge.Size = UDim2.fromOffset(350, 38)
-	queueBadge.BackgroundColor3 = UiTheme.Colors.Yellow
+	queueBadge.Size = UDim2.fromOffset(292, 32)
+	queueBadge.BackgroundColor3 = UiTheme.Colors.Surface
+	queueBadge.BackgroundTransparency = 0.1
 	queueBadge.BorderSizePixel = 0
 	queueBadge.Visible = false
 	queueBadge.ZIndex = 2
 	queueBadge.Parent = waitingGroup
-	UiTheme.addCorner(queueBadge, 12)
-	UiTheme.addStroke(queueBadge, UiTheme.Colors.Ink, 2)
+	UiTheme.addCorner(queueBadge, 10)
+	UiTheme.addStroke(queueBadge, UiTheme.Colors.Yellow, 1)
 
 	local queueLabel = createTextLabel(
 		"QueueLabel",
 		queueBadge,
 		UiTheme.Fonts.BodyBold,
-		14,
+		11,
 		UiTheme.Colors.Ink
 	)
 
@@ -148,7 +150,7 @@ function RoundHudView.new(playerGui: PlayerGui): RoundHudViewHandle
 		screenGui,
 		"CountdownGroup",
 		UDim2.new(1, -18, 0, 16),
-		UDim2.fromOffset(230, 76)
+		UDim2.fromOffset(184, 58)
 	)
 	countdownRoot.AnchorPoint = Vector2.new(1, 0)
 	countdownRoot.Visible = false
@@ -159,23 +161,24 @@ function RoundHudView.new(playerGui: PlayerGui): RoundHudViewHandle
 	countdownCard.Name = "CountdownCard"
 	countdownCard.Size = UDim2.fromScale(1, 1)
 	countdownCard.BackgroundColor3 = UiTheme.Colors.Panel
+	countdownCard.BackgroundTransparency = 0.18
 	countdownCard.BorderSizePixel = 0
 	countdownCard.ZIndex = 1
 	countdownCard.Parent = countdownGroup
-	UiTheme.addCorner(countdownCard, 18)
-	UiTheme.addStroke(countdownCard, UiTheme.Colors.Yellow, 4)
+	UiTheme.addCorner(countdownCard, 15)
+	UiTheme.addStroke(countdownCard, UiTheme.Colors.Yellow, 1.5)
 
 	local numberBadge = Instance.new("Frame")
 	numberBadge.Name = "NumberBadge"
 	numberBadge.AnchorPoint = Vector2.new(1, 0.5)
-	numberBadge.Position = UDim2.new(1, -11, 0.5, 0)
-	numberBadge.Size = UDim2.fromOffset(54, 54)
-	numberBadge.BackgroundColor3 = UiTheme.Colors.Yellow
+	numberBadge.Position = UDim2.new(1, -8, 0.5, 0)
+	numberBadge.Size = UDim2.fromOffset(42, 42)
+	numberBadge.BackgroundColor3 = UiTheme.Colors.SurfaceSoft
 	numberBadge.BorderSizePixel = 0
 	numberBadge.ZIndex = 2
 	numberBadge.Parent = countdownCard
-	UiTheme.addCorner(numberBadge, 15)
-	UiTheme.addStroke(numberBadge, UiTheme.Colors.Ink, 2)
+	UiTheme.addCorner(numberBadge, 12)
+	UiTheme.addStroke(numberBadge, UiTheme.Colors.Yellow, 1)
 
 	local aspectRatio = Instance.new("UIAspectRatioConstraint")
 	aspectRatio.AspectRatio = 1
@@ -186,11 +189,11 @@ function RoundHudView.new(playerGui: PlayerGui): RoundHudViewHandle
 		"PrepareLabel",
 		countdownCard,
 		UiTheme.Fonts.BodyBold,
-		15,
+		12,
 		UiTheme.Colors.Ink
 	)
-	prepareLabel.Position = UDim2.new(0, 16, 0, 0)
-	prepareLabel.Size = UDim2.new(1, -90, 1, 0)
+	prepareLabel.Position = UDim2.new(0, 13, 0, 0)
+	prepareLabel.Size = UDim2.new(1, -68, 1, 0)
 	prepareLabel.TextXAlignment = Enum.TextXAlignment.Left
 	prepareLabel.Text = "PREPARE-SE"
 
@@ -198,7 +201,7 @@ function RoundHudView.new(playerGui: PlayerGui): RoundHudViewHandle
 		"CountdownLabel",
 		numberBadge,
 		UiTheme.Fonts.Heading,
-		34,
+		24,
 		UiTheme.Colors.Ink
 	)
 	countdownLabel.Text = "3"

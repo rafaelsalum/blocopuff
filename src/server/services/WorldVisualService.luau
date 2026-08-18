@@ -8,15 +8,12 @@ local Lighting = game:GetService("Lighting")
 
 local GENERATED_BY_ATTRIBUTE = "GeneratedBy"
 local SERVICE_NAME = "WorldVisualService"
-local VISUALS_NAME = "WorldVisuals"
+-- Nome mantido somente para limpar as nuvens geradas por versões anteriores.
+local LEGACY_VISUALS_NAME = "WorldVisuals"
 
 local ATMOSPHERE_NAME = "BlocoPuffAtmosphere"
 local BLOOM_NAME = "BlocoPuffBloom"
 local COLOR_CORRECTION_NAME = "BlocoPuffColorCorrection"
-
-local CLOUD_COUNT = 10
-local CLOUD_CENTER = Vector3.new(0, 0, -60)
-local CLOUD_RADIUS = 112
 
 type WorldPalette = {
 	LightBlue: Color3,
@@ -28,7 +25,6 @@ type WorldPalette = {
 
 local WorldVisualService = {}
 
-local visualsModel: Model? = nil
 local atmosphere: Atmosphere? = nil
 local bloom: BloomEffect? = nil
 local colorCorrection: ColorCorrectionEffect? = nil
@@ -50,43 +46,7 @@ local function destroyOwned(parent: Instance, name: string)
 	existing:Destroy()
 end
 
-local function createCloudPart(name: string, size: Vector3, position: Vector3, parent: Instance): Part
-	local part = Instance.new("Part")
-	part.Name = name
-	part.Shape = Enum.PartType.Ball
-	part.Size = size
-	part.Position = position
-	part.Anchored = true
-	part.CanCollide = false
-	part.CanTouch = false
-	part.CanQuery = false
-	part.CastShadow = false
-	part.Material = Enum.Material.SmoothPlastic
-	part.Color = Color3.fromRGB(207, 216, 226)
-	part.Transparency = 0.46
-	part.Parent = parent
-	return part
-end
-
-local function createCloud(index: number, parent: Instance)
-	local angle = ((index - 1) / CLOUD_COUNT) * math.pi * 2
-	local heightOffset = ((index * 17) % 24) - 12
-	local center = CLOUD_CENTER
-		+ Vector3.new(math.cos(angle) * CLOUD_RADIUS, 34 + heightOffset, math.sin(angle) * CLOUD_RADIUS)
-
-	local cloud = Instance.new("Model")
-	cloud.Name = string.format("Cloud%02d", index)
-	cloud.Parent = parent
-
-	createCloudPart("Center", Vector3.new(25, 10, 14), center, cloud)
-	createCloudPart("Left", Vector3.new(16, 8, 11), center + Vector3.new(-11, -1, 0), cloud)
-	createCloudPart("Right", Vector3.new(18, 9, 12), center + Vector3.new(11, -0.5, 1), cloud)
-end
-
 local function stopOwnedVisuals()
-	if visualsModel ~= nil and visualsModel.Parent ~= nil and isOwned(visualsModel) then
-		visualsModel:Destroy()
-	end
 	if atmosphere ~= nil and atmosphere.Parent ~= nil and isOwned(atmosphere) then
 		atmosphere:Destroy()
 	end
@@ -97,7 +57,6 @@ local function stopOwnedVisuals()
 		colorCorrection:Destroy()
 	end
 
-	visualsModel = nil
 	atmosphere = nil
 	bloom = nil
 	colorCorrection = nil
@@ -105,22 +64,10 @@ end
 
 function WorldVisualService.start(worldRoot: Model, palette: WorldPalette)
 	stopOwnedVisuals()
-	destroyOwned(worldRoot, VISUALS_NAME)
+	destroyOwned(worldRoot, LEGACY_VISUALS_NAME)
 	destroyOwned(Lighting, ATMOSPHERE_NAME)
 	destroyOwned(Lighting, BLOOM_NAME)
 	destroyOwned(Lighting, COLOR_CORRECTION_NAME)
-
-	local newVisuals = Instance.new("Model")
-	newVisuals.Name = VISUALS_NAME
-	newVisuals:SetAttribute(GENERATED_BY_ATTRIBUTE, SERVICE_NAME)
-	newVisuals.Parent = worldRoot
-
-	local clouds = Instance.new("Folder")
-	clouds.Name = "Clouds"
-	clouds.Parent = newVisuals
-	for index = 1, CLOUD_COUNT do
-		createCloud(index, clouds)
-	end
 
 	local newAtmosphere = Instance.new("Atmosphere")
 	newAtmosphere.Name = ATMOSPHERE_NAME
@@ -150,7 +97,6 @@ function WorldVisualService.start(worldRoot: Model, palette: WorldPalette)
 	newColorCorrection:SetAttribute(GENERATED_BY_ATTRIBUTE, SERVICE_NAME)
 	newColorCorrection.Parent = Lighting
 
-	visualsModel = newVisuals
 	atmosphere = newAtmosphere
 	bloom = newBloom
 	colorCorrection = newColorCorrection

@@ -3,6 +3,7 @@
 local HudController = require(script.controllers.HudController)
 local PuffadorController = require(script.controllers.PuffadorController)
 local SpectatorController = require(script.controllers.SpectatorController)
+local AdminController = require(script.controllers.AdminController)
 
 print("[BlocoPuff] Client initialized")
 
@@ -25,4 +26,11 @@ local spectatorOk, spectatorErr = pcall(function()
 end)
 if not spectatorOk then
 	warn(string.format("[BlocoPuff] Failed to start Spectator controller: %s", tostring(spectatorErr)))
+end
+
+local adminOk, adminErr = pcall(function()
+	AdminController.start()
+end)
+if not adminOk then
+	warn(string.format("[BlocoPuff] Failed to start Admin controller: %s", tostring(adminErr)))
 end

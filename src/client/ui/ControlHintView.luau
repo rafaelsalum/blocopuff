@@ -23,7 +23,7 @@ function ControlHintView.new(playerGui: PlayerGui): ControlHintViewHandle
 	responsiveRoot.Name = "ResponsiveRoot"
 	responsiveRoot.AnchorPoint = Vector2.new(0.5, 1)
 	responsiveRoot.Position = UDim2.new(0.5, 0, 1, if UserInputService.TouchEnabled then -112 else -22)
-	responsiveRoot.Size = UDim2.fromOffset(330, 52)
+	responsiveRoot.Size = UDim2.fromOffset(292, 42)
 	responsiveRoot.BackgroundTransparency = 1
 	responsiveRoot.Visible = false
 	responsiveRoot.Parent = screenGui
@@ -45,17 +45,17 @@ function ControlHintView.new(playerGui: PlayerGui): ControlHintViewHandle
 	card.Name = "Card"
 	card.Size = UDim2.fromScale(1, 1)
 	card.BackgroundColor3 = UiTheme.Colors.Panel
-	card.BackgroundTransparency = 0.06
+	card.BackgroundTransparency = 0.18
 	card.BorderSizePixel = 0
 	card.ZIndex = 1
 	card.Parent = animationGroup
-	UiTheme.addCorner(card, 15)
-	UiTheme.addStroke(card, UiTheme.Colors.Blue, 3)
+	UiTheme.addCorner(card, 13)
+	UiTheme.addStroke(card, UiTheme.Colors.Blue, 1.25)
 
 	local label = Instance.new("TextLabel")
 	label.Name = "HintLabel"
-	label.Position = UDim2.new(0, 14, 0, 6)
-	label.Size = UDim2.new(1, -28, 1, -12)
+	label.Position = UDim2.new(0, 12, 0, 5)
+	label.Size = UDim2.new(1, -24, 1, -10)
 	label.BackgroundTransparency = 1
 	label.Font = UiTheme.Fonts.BodyBold
 	label.Text = ""
@@ -64,7 +64,7 @@ function ControlHintView.new(playerGui: PlayerGui): ControlHintViewHandle
 	label.TextWrapped = true
 	label.ZIndex = 2
 	label.Parent = card
-	UiTheme.addTextConstraint(label, 12, 16)
+	UiTheme.addTextConstraint(label, 10, 13)
 
 	local generation = 0
 	local visible = false
@@ -95,7 +95,7 @@ function ControlHintView.new(playerGui: PlayerGui): ControlHintViewHandle
 		visible = true
 		label.Text = text
 		label.TextTransparency = 0
-		card.BackgroundTransparency = 0.06
+		card.BackgroundTransparency = 0.18
 		animationScale.Scale = 0.82
 		responsiveRoot.Visible = true
 		TweenService:Create(animationScale, TweenInfo.new(0.22, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {

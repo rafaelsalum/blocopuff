@@ -182,6 +182,14 @@ Arquivos `.rbxl` e `.rbxlx` são artefatos locais e não fazem parte da fonte pr
 
 ## Estado atual
 
+### Painel administrativo seguro
+
+O projeto possui um painel administrativo próprio, inspirado no fluxo do AdminPanel+, mas implementado integralmente nos arquivos do Rojo. O pacote original da Toolbox não é executado nem incluído no jogo. O acesso inicial pertence somente ao User ID `4328593410`, configurado em `src/server/config/AdminConfig.luau`; qualquer administrador adicional deve ser incluído explicitamente nesse arquivo.
+
+O botão `PAINEL ADMIN` aparece apenas depois que o servidor confirma a autorização. Pelo painel é possível enviar avisos filtrados, expulsar jogadores do servidor atual e aplicar ou remover banimentos persistentes por User ID. Todas as solicitações passam por autenticação e validação no servidor, possuem limite de frequência e impedem ações contra contas administrativas protegidas. Avisos e banimentos são sincronizados entre servidores com `MessagingService`; os bans usam o DataStore `BlocoPuffAdminBansV1`.
+
+Para testar persistência e sincronização no Studio, a experiência precisa estar publicada e com **Enable Studio Access to API Services** habilitado. Sem esse acesso, o restante do jogo continua funcionando e o painel informa quando uma operação persistente ou global não está disponível. O atalho `F2` abre ou fecha o painel no computador; em toque e gamepad, use o botão visível e os controles selecionáveis da interface.
+
 O servidor gera em runtime uma primeira versão visual do mundo, com lobby, ponto de nascimento e uma arena suspensa de 225 blocos identificados. Um ciclo de partidas autoritativo (`WaitingForPlayers → Countdown → Active → Ending`) seleciona participantes, teleporta-os para posições distintas na arena e replica o estado para o cliente somente por atributos em `ReplicatedStorage/BlocoPuffState`. O cliente traduz esse estado em camadas independentes de preparação, combate, anúncios e espectador.
 
 Quando há mais jogadores conectados do que o limite de participantes por rodada, a seleção usa uma **fila de rotação justa**: em vez de sempre escalar os primeiros jogadores conectados, quem acabou de jogar vai para o fim da fila, dando prioridade a quem ainda está esperando a vez. Jogadores que precisam esperar mais de uma rodada veem essa posição no HUD ("Você joga em N rodadas").

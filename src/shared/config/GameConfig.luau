@@ -40,7 +40,7 @@ export type PuffadorConfig = {
 	MuzzleUpOffset: number,
 	MaximumOriginDistance: number,
 	CameraShoulderOffset: Vector3,
-	CameraRecoilDegrees: number,
+	CameraRecoilDistance: number,
 	CameraRecoilRecovery: number,
 }
 
@@ -102,8 +102,10 @@ local Puffador: PuffadorConfig = table.freeze({
 	MuzzleUpOffset = 0.5,
 	MaximumOriginDistance = 12,
 	CameraShoulderOffset = Vector3.new(1.8, 0.65, 0),
-	CameraRecoilDegrees = 1.6,
-	CameraRecoilRecovery = 14,
+	-- O recuo desloca a câmera levemente para trás, sem alterar a direção
+	-- central da mira ou acumular inclinação entre disparos.
+	CameraRecoilDistance = 0.16,
+	CameraRecoilRecovery = 18,
 })
 
 -- DepthBelowArena fica bem acima de |FallenPartsDestroyHeight| (ver
