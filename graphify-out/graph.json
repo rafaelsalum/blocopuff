@@ -1162,7 +1162,7 @@
       "label": "getOrCreateWorld()",
       "file_type": "code",
       "source_file": "src/server/init.server.luau",
-      "source_location": "L20",
+      "source_location": "L21",
       "_origin": "ast",
       "id": "src_server_init_server_getorcreateworld",
       "community": 10,
@@ -1583,8 +1583,8 @@
       "source_location": "L377",
       "_origin": "ast",
       "id": "src_server_services_arenaservice_arenaservice_endround",
-      "community": 0,
-      "community_name": "RoundService.luau",
+      "community": 2,
+      "community_name": "ArenaService.luau",
       "norm_label": "arenaservice.endround()"
     },
     {
@@ -2719,6 +2719,83 @@
       "community": 0,
       "community_name": "RoundService.luau",
       "norm_label": "roundservice.getparticipants()"
+    },
+    {
+      "label": "SkyIslandService.luau",
+      "file_type": "code",
+      "source_file": "src/server/services/SkyIslandService.luau",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "src_server_services_skyislandservice",
+      "community": 25,
+      "community_name": "SkyIslandService.luau",
+      "norm_label": "skyislandservice.luau"
+    },
+    {
+      "label": "isOwned()",
+      "file_type": "code",
+      "source_file": "src/server/services/SkyIslandService.luau",
+      "source_location": "L75",
+      "_origin": "ast",
+      "id": "src_server_services_skyislandservice_isowned",
+      "community": 25,
+      "community_name": "SkyIslandService.luau",
+      "norm_label": "isowned()"
+    },
+    {
+      "label": "removeDefaultBaseplate()",
+      "file_type": "code",
+      "source_file": "src/server/services/SkyIslandService.luau",
+      "source_location": "L79",
+      "_origin": "ast",
+      "id": "src_server_services_skyislandservice_removedefaultbaseplate",
+      "community": 25,
+      "community_name": "SkyIslandService.luau",
+      "norm_label": "removedefaultbaseplate()"
+    },
+    {
+      "label": "createMesh()",
+      "file_type": "code",
+      "source_file": "src/server/services/SkyIslandService.luau",
+      "source_location": "L86",
+      "_origin": "ast",
+      "id": "src_server_services_skyislandservice_createmesh",
+      "community": 25,
+      "community_name": "SkyIslandService.luau",
+      "norm_label": "createmesh()"
+    },
+    {
+      "label": "createIsland()",
+      "file_type": "code",
+      "source_file": "src/server/services/SkyIslandService.luau",
+      "source_location": "L117",
+      "_origin": "ast",
+      "id": "src_server_services_skyislandservice_createisland",
+      "community": 25,
+      "community_name": "SkyIslandService.luau",
+      "norm_label": "createisland()"
+    },
+    {
+      "label": "SkyIslandService.start()",
+      "file_type": "code",
+      "source_file": "src/server/services/SkyIslandService.luau",
+      "source_location": "L127",
+      "_origin": "ast",
+      "id": "src_server_services_skyislandservice_skyislandservice_start",
+      "community": 25,
+      "community_name": "SkyIslandService.luau",
+      "norm_label": "skyislandservice.start()"
+    },
+    {
+      "label": "SkyIslandService.stop()",
+      "file_type": "code",
+      "source_file": "src/server/services/SkyIslandService.luau",
+      "source_location": "L152",
+      "_origin": "ast",
+      "id": "src_server_services_skyislandservice_skyislandservice_stop",
+      "community": 25,
+      "community_name": "SkyIslandService.luau",
+      "norm_label": "skyislandservice.stop()"
     },
     {
       "label": "WorldVisualService.luau",
@@ -5708,7 +5785,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/server/init.server.luau",
-      "source_location": "L20",
+      "source_location": "L21",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_server_init_server",
@@ -9029,6 +9106,144 @@
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
+      "source_file": "src/server/services/SkyIslandService.luau",
+      "source_location": "L117",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_server_services_skyislandservice",
+      "target": "src_server_services_skyislandservice_createisland",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/server/services/SkyIslandService.luau",
+      "source_location": "L86",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_server_services_skyislandservice",
+      "target": "src_server_services_skyislandservice_createmesh",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/server/services/SkyIslandService.luau",
+      "source_location": "L75",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_server_services_skyislandservice",
+      "target": "src_server_services_skyislandservice_isowned",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/server/services/SkyIslandService.luau",
+      "source_location": "L79",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_server_services_skyislandservice",
+      "target": "src_server_services_skyislandservice_removedefaultbaseplate",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/server/services/SkyIslandService.luau",
+      "source_location": "L127",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_server_services_skyislandservice",
+      "target": "src_server_services_skyislandservice_skyislandservice_start",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/server/services/SkyIslandService.luau",
+      "source_location": "L152",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_server_services_skyislandservice",
+      "target": "src_server_services_skyislandservice_skyislandservice_stop",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/server/services/SkyIslandService.luau",
+      "source_location": "L133",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_server_services_skyislandservice_skyislandservice_start",
+      "target": "src_server_services_skyislandservice_isowned",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/server/services/SkyIslandService.luau",
+      "source_location": "L153",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_server_services_skyislandservice_skyislandservice_stop",
+      "target": "src_server_services_skyislandservice_isowned",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/server/services/SkyIslandService.luau",
+      "source_location": "L129",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_server_services_skyislandservice_skyislandservice_start",
+      "target": "src_server_services_skyislandservice_removedefaultbaseplate",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/server/services/SkyIslandService.luau",
+      "source_location": "L123",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_server_services_skyislandservice_createisland",
+      "target": "src_server_services_skyislandservice_createmesh",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/server/services/SkyIslandService.luau",
+      "source_location": "L146",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_server_services_skyislandservice_skyislandservice_start",
+      "target": "src_server_services_skyislandservice_createisland",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/server/services/SkyIslandService.luau",
+      "source_location": "L128",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_server_services_skyislandservice_skyislandservice_start",
+      "target": "src_server_services_skyislandservice_skyislandservice_stop",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
       "source_file": "src/server/services/WorldVisualService.luau",
       "source_location": "L60",
       "weight": 1.0,
@@ -9441,5 +9656,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "61c9fca0128b36a6555d985b7dcab0ca039df0a6"
+  "built_at_commit": "c970f144e8ed5ede75ba9f61c20cf32cca67f1c8"
 }

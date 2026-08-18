@@ -11,6 +11,7 @@ local PuffadorService = require(script.services.PuffadorService)
 local EliminationService = require(script.services.EliminationService)
 local RoundService = require(script.services.RoundService)
 local WorldVisualService = require(script.services.WorldVisualService)
+local SkyIslandService = require(script.services.SkyIslandService)
 local AdminService = require(script.services.AdminService)
 
 local WORLD_NAME = "BlocoPuffWorld"
@@ -45,6 +46,9 @@ print("[BlocoPuff] Server initialized")
 
 WorldVisualService.start(world, GameConfig.Palette)
 print("[BlocoPuff] World visuals created")
+
+SkyIslandService.start(world)
+print("[BlocoPuff] Sky island backdrop created")
 
 LobbyService.create(world, GameConfig.Lobby, GameConfig.Palette)
 print("[BlocoPuff] Lobby created")

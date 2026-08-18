@@ -45,8 +45,8 @@
     "semantic_hash": ""
   },
   "src/server/init.server.luau": {
-    "mtime": 1787011014.6517165,
-    "ast_hash": "9a52cc05212d3ea61be22beb6526959a",
+    "mtime": 1787017081.9943886,
+    "ast_hash": "6bf42028306da15aa23b9bbac9252805",
     "semantic_hash": ""
   },
   "src/server/services/ArenaService.luau": {
@@ -202,6 +202,11 @@
   "src/shared/modules/AdminConstants.luau": {
     "mtime": 1787011014.493583,
     "ast_hash": "dba1d58996429fb9ffebccbd9d4cfe2d",
+    "semantic_hash": ""
+  },
+  "src/server/services/SkyIslandService.luau": {
+    "mtime": 1787017179.4778345,
+    "ast_hash": "8e2e789c580668cb3093c08ef655ed66",
     "semantic_hash": ""
   }
 }
