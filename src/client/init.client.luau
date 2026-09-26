@@ -4,6 +4,7 @@ local HudController = require(script.controllers.HudController)
 local PuffadorController = require(script.controllers.PuffadorController)
 local SpectatorController = require(script.controllers.SpectatorController)
 local AdminController = require(script.controllers.AdminController)
+local BlockCollapseController = require(script.controllers.BlockCollapseController)
 
 print("[BlocoPuff] Client initialized")
 
@@ -33,4 +34,11 @@ local adminOk, adminErr = pcall(function()
 end)
 if not adminOk then
 	warn(string.format("[BlocoPuff] Failed to start Admin controller: %s", tostring(adminErr)))
+end
+
+local collapseOk, collapseErr = pcall(function()
+	BlockCollapseController.start()
+end)
+if not collapseOk then
+	warn(string.format("[BlocoPuff] Failed to start block collapse effects: %s", tostring(collapseErr)))
 end

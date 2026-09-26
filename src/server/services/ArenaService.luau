@@ -1,7 +1,6 @@
 --!strict
 
 local CollectionService = game:GetService("CollectionService")
-local Debris = game:GetService("Debris")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TweenService = game:GetService("TweenService")
 
@@ -56,7 +55,6 @@ local ENERGY_NODE_SIZE = 1.35
 local ENERGY_HEIGHT_OFFSET = 1.15
 local ENERGY_BEAM_WIDTH = 0.34
 local ENERGY_WALL_INSET = 1
-local COLLAPSE_DURATION = 0.34
 local RESTORE_FADE_DURATION = 0.22
 
 local ArenaService = {}
@@ -363,54 +361,6 @@ function ArenaService.isActiveBlock(instance: Instance): boolean
 	return not record.isDestroyed and record.generation == arenaGeneration
 end
 
-local function createCollapseEffect(record: BlockRecord, context: BlockDestructionContext)
-	local parent = effectsFolder
-	if parent == nil or parent.Parent == nil then
-		return
-	end
-
-	local visual = Instance.new("Part")
-	visual.Name = `{record.blockId}Collapse`
-	visual.Anchored = true
-	visual.CanCollide = false
-	visual.CanTouch = false
-	visual.CanQuery = false
-	visual.CastShadow = false
-	visual.CFrame = record.originalCFrame
-	visual.Size = record.originalSize
-	visual.Color = record.originalColor
-	visual.Material = record.originalMaterial
-	visual.TopSurface = Enum.SurfaceType.Smooth
-	visual.BottomSurface = Enum.SurfaceType.Smooth
-	visual.Parent = parent
-
-	local columnDirection = if record.gridColumn % 2 == 0 then 1 else -1
-	local rowDirection = if record.gridRow % 2 == 0 then -1 else 1
-	local impactNudge = context.normal * 0.3
-	local fallOffset = Vector3.new(columnDirection * 1.35, -4.5, rowDirection * 1.35) + impactNudge
-	local tilt = CFrame.Angles(math.rad(rowDirection * 16), 0, math.rad(columnDirection * 18))
-	local endCFrame = (record.originalCFrame + fallOffset) * tilt
-
-	local light = Instance.new("PointLight")
-	light.Name = "CollapseGlow"
-	light.Color = record.originalColor
-	light.Brightness = 0.65
-	light.Range = 6
-	light.Shadows = false
-	light.Parent = visual
-
-	TweenService:Create(visual, TweenInfo.new(COLLAPSE_DURATION, Enum.EasingStyle.Back, Enum.EasingDirection.In), {
-		CFrame = endCFrame,
-		Size = Vector3.new(record.originalSize.X * 0.2, 0.12, record.originalSize.Z * 0.2),
-		Transparency = 1,
-	}):Play()
-	TweenService:Create(light, TweenInfo.new(COLLAPSE_DURATION, Enum.EasingStyle.Quad), {
-		Brightness = 0,
-	}):Play()
-
-	Debris:AddItem(visual, COLLAPSE_DURATION + 0.05)
-end
-
 function ArenaService.tryDestroyBlock(instance: Instance, context: BlockDestructionContext): boolean
 	if not destructionEnabled then
 		return false
@@ -465,7 +415,8 @@ function ArenaService.tryDestroyBlock(instance: Instance, context: BlockDestruct
 	instance.CanTouch = false
 	instance.CanQuery = false
 	instance:SetAttribute(ATTR_IS_DESTROYED, true)
-	createCollapseEffect(record, context)
+	-- A animação de quebra roda no cliente (BlockCollapseController), a partir
+	-- do atributo IsDestroyed, para ficar fluida.
 
 	publishBlockCounts()
 

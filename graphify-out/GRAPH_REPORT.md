@@ -1,16 +1,16 @@
 # Graph Report - blocopuff  (2026-09-26)
 
 ## Corpus Check
-- 44 files · ~29,695 words
+- 45 files · ~30,223 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 325 nodes · 632 edges · 26 communities
-- Extraction: 84% EXTRACTED · 16% INFERRED · 0% AMBIGUOUS · INFERRED: 99 edges (avg confidence: 0.8)
+- 333 nodes · 642 edges · 28 communities
+- Extraction: 85% EXTRACTED · 15% INFERRED · 0% AMBIGUOUS · INFERRED: 99 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `15afb691`
+- Built from commit: `0321e42e`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -29,7 +29,9 @@
 - WorldVisualService.luau
 - AdminService.luau
 - AdminController.luau
+- BlockCollapseController.luau
 - BuildingDecor.luau
+- CrosshairView.new
 
 ## God Nodes (most connected - your core abstractions)
 1. `UiTheme.addCorner()` - 15 edges
@@ -52,25 +54,25 @@
   src/client/controllers/PuffadorController.luau → src/client/controllers/CombatCameraController.luau
 - `PuffadorController.start()` --calls--> `ControlHintView.new()`  [INFERRED]
   src/client/controllers/PuffadorController.luau → src/client/ui/ControlHintView.luau
-- `PuffadorController.start()` --calls--> `FireButtonView.new()`  [INFERRED]
-  src/client/controllers/PuffadorController.luau → src/client/ui/FireButtonView.luau
+- `PuffadorController.start()` --calls--> `CrosshairView.new()`  [INFERRED]
+  src/client/controllers/PuffadorController.luau → src/client/ui/CrosshairView.luau
 
 ## Import Cycles
 - None detected.
 
-## Communities (26 total, 0 thin omitted)
+## Communities (28 total, 0 thin omitted)
 
 ### Community 0 - "RoundService.luau"
 Cohesion: 0.12
-Nodes (30): ArenaService.getPlayerSpawnCFrames(), PuffadorService.beginRound(), beginRound(), clearRoundParticipants(), connectParticipantDeathHandlers(), countConnectedPlayers(), dequeuePlayer(), disconnectParticipantDeathHandlers() (+22 more)
+Nodes (30): ArenaService.endRound(), ArenaService.restoreAllBlocks(), beginRound(), clearRoundParticipants(), connectParticipantDeathHandlers(), countConnectedPlayers(), dequeuePlayer(), disconnectParticipantDeathHandlers() (+22 more)
 
 ### Community 1 - "PuffadorService.luau"
 Cohesion: 0.15
-Nodes (24): createImpactEffect(), isOwned(), ProjectileService.clearAll(), ProjectileService.clearForPlayer(), ProjectileService.spawn(), ProjectileService.start(), ProjectileService.stop(), removeProjectileAt() (+16 more)
+Nodes (23): isOwned(), ProjectileService.clearAll(), ProjectileService.clearForPlayer(), ProjectileService.spawn(), ProjectileService.start(), ProjectileService.stop(), removeProjectileAt(), buildPuffadorTool() (+15 more)
 
 ### Community 2 - "ArenaService.luau"
-Cohesion: 0.15
-Nodes (16): ArenaService.beginRound(), ArenaService.create(), ArenaService.destroy(), ArenaService.endRound(), ArenaService.restoreAllBlocks(), ArenaService.tryDestroyBlock(), createArenaVisuals(), createCollapseEffect() (+8 more)
+Cohesion: 0.14
+Nodes (16): ArenaService.beginRound(), ArenaService.create(), ArenaService.destroy(), ArenaService.getPlayerSpawnCFrames(), ArenaService.tryDestroyBlock(), createArenaVisuals(), destroyOwnedChild(), getFloorStyle() (+8 more)
 
 ### Community 3 - "SpectatorController.luau"
 Cohesion: 0.31
@@ -81,8 +83,8 @@ Cohesion: 0.24
 Nodes (4): clearAnnouncement(), getQueueMessage(), renderCountdown(), renderWaiting()
 
 ### Community 5 - "PuffadorController.luau"
-Cohesion: 0.12
-Nodes (31): CombatCameraController.addRecoil(), CombatCameraController.disable(), CombatCameraController.enable(), getCharacterParts(), getSafeShoulderOffset(), lockZoom(), onRenderStep(), restoreZoom() (+23 more)
+Cohesion: 0.14
+Nodes (28): CombatCameraController.addRecoil(), CombatCameraController.disable(), CombatCameraController.enable(), getCharacterParts(), getSafeShoulderOffset(), lockZoom(), onRenderStep(), restoreZoom() (+20 more)
 
 ### Community 6 - "ReplicatedStateService.luau"
 Cohesion: 0.27
@@ -116,9 +118,17 @@ Nodes (21): createRemotes(), deliverAnnouncement(), filterText(), getFilteredRea
 Cohesion: 0.60
 Nodes (4): AdminController.start(), buildPlayerEntries(), getRemote(), refreshPlayers()
 
+### Community 22 - "BlockCollapseController.luau"
+Cohesion: 0.33
+Nodes (6): BlockCollapseController.start(), createFragment(), emitDust(), getEffectsFolder(), playCollapse(), watchBlock()
+
 ### Community 25 - "BuildingDecor.luau"
 Cohesion: 0.17
 Nodes (26): addPointLight(), BuildingDecor.createChandelier(), BuildingDecor.createPart(), BuildingDecor.createPlant(), BuildingDecor.createSideTable(), BuildingDecor.createSofa(), BuildingDecor.decorateStory(), BuildingDecor.wallCFrame() (+18 more)
+
+### Community 27 - "CrosshairView.new"
+Cohesion: 1.00
+Nodes (3): addCorner(), createHitLine(), CrosshairView.new()
 
 ## Knowledge Gaps
 - **19 isolated node(s):** `Linguagem e comunicação`, `Arquitetura`, `Segurança e dependências`, `Escopo e compatibilidade`, `Validação e entrega` (+14 more)
@@ -127,12 +137,12 @@ Nodes (26): addPointLight(), BuildingDecor.createChandelier(), BuildingDecor.cre
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `PuffadorController.start()` connect `PuffadorController.luau` to `UiTheme.addCorner`?**
-  _High betweenness centrality (0.037) - this node is a cross-community bridge._
-- **Why does `runEnding()` connect `RoundService.luau` to `LobbyService.luau`, `PuffadorService.luau`, `ArenaService.luau`, `EliminationService.luau`?**
-  _High betweenness centrality (0.029) - this node is a cross-community bridge._
-- **Why does `RoundService.stop()` connect `RoundService.luau` to `LobbyService.luau`, `PuffadorService.luau`, `ArenaService.luau`, `EliminationService.luau`?**
-  _High betweenness centrality (0.029) - this node is a cross-community bridge._
+- **Why does `PuffadorController.start()` connect `PuffadorController.luau` to `UiTheme.addCorner`, `CrosshairView.new`?**
+  _High betweenness centrality (0.035) - this node is a cross-community bridge._
+- **Why does `RoundService.stop()` connect `RoundService.luau` to `LobbyService.luau`, `PuffadorService.luau`, `EliminationService.luau`?**
+  _High betweenness centrality (0.027) - this node is a cross-community bridge._
+- **Why does `runEnding()` connect `RoundService.luau` to `LobbyService.luau`, `PuffadorService.luau`, `EliminationService.luau`?**
+  _High betweenness centrality (0.027) - this node is a cross-community bridge._
 - **Are the 13 inferred relationships involving `UiTheme.addCorner()` (e.g. with `AdminBroadcastView.new()` and `AdminPanelView.new()`) actually correct?**
   _`UiTheme.addCorner()` has 13 INFERRED edges - model-reasoned connections that need verification._
 - **Are the 5 inferred relationships involving `BuildingDecor.createPart()` (e.g. with `createFillLights()` and `createSolid()`) actually correct?**
