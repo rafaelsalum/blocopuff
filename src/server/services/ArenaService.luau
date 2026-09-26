@@ -52,10 +52,6 @@ local GENERATED_BY_ATTRIBUTE = "GeneratedBy"
 local SERVICE_NAME = "ArenaService"
 local ATTR_IS_DESTROYED = ArenaConstants.IsDestroyedAttribute
 
--- Pisos inferiores ficam levemente mais escuros para que o jogador saiba,
--- olhando para cima ou para baixo, em qual andar está.
-local LOWER_FLOOR_TINT = Color3.fromRGB(78, 80, 98)
-local LOWER_FLOOR_TINT_ALPHA = 0.3
 local ENERGY_NODE_SIZE = 1.35
 local ENERGY_HEIGHT_OFFSET = 1.15
 local ENERGY_BEAM_WIDTH = 0.34
@@ -75,6 +71,7 @@ local energyLights: { PointLight } = {}
 local energyBeams: { Beam } = {}
 
 local blockRecords: { [Part]: BlockRecord } = {}
+local spawnRandom = Random.new()
 local arenaGeneration = 0
 local destructionEnabled = false
 local activeRoundId = 0
@@ -97,23 +94,9 @@ local function destroyOwnedChild(worldRoot: Model)
 	existing:Destroy()
 end
 
-local function getArenaColors(palette: WorldPalette, floorIndex: number, floorCount: number): { Color3 }
-	local colors = {
-		palette.LightBlue,
-		palette.Yellow,
-		palette.Orange,
-		palette.Purple,
-		palette.Pink,
-	}
-	if floorIndex >= floorCount then
-		return colors
-	end
-
-	local tinted: { Color3 } = {}
-	for _, color in ipairs(colors) do
-		table.insert(tinted, color:Lerp(LOWER_FLOOR_TINT, LOWER_FLOOR_TINT_ALPHA))
-	end
-	return tinted
+local function getFloorStyle(config: ArenaConfig, floorIndex: number): GameConfig.FloorStyle
+	local styles = config.FloorStyles
+	return styles[math.min(floorIndex, #styles)]
 end
 
 local function setArenaEnergy(active: boolean)
@@ -168,7 +151,7 @@ local function createArenaVisuals(
 		node.CanQuery = false
 		node.CastShadow = false
 		node.Material = Enum.Material.Neon
-		node.Color = palette.Purple:Lerp(palette.LightBlue, 0.35)
+		node.Color = palette.Yellow:Lerp(palette.Orange, 0.4)
 		node.Transparency = 0.58
 		node.Parent = visuals
 
@@ -202,7 +185,7 @@ local function createArenaVisuals(
 			beam.Width1 = ENERGY_BEAM_WIDTH
 			beam.FaceCamera = true
 			beam.LightEmission = 0.45
-			beam.Color = ColorSequence.new(palette.Purple, palette.LightBlue)
+			beam.Color = ColorSequence.new(palette.Yellow, palette.Orange)
 			beam.Transparency = NumberSequence.new(0.72)
 			beam.Parent = visuals
 			table.insert(energyBeams, beam)
@@ -273,14 +256,15 @@ function ArenaService.create(worldRoot: Model, config: ArenaConfig, palette: Wor
 	visuals.Parent = newArena
 
 	for floorIndex = 1, config.FloorCount do
-		local colors = getArenaColors(palette, floorIndex, config.FloorCount)
+		local style = getFloorStyle(config, floorIndex)
+		local colors = style.Colors
 		local floorY = BuildingLayout.getFloorY(config, floorIndex)
 		createArenaVisuals(visuals, config, palette, floorIndex, totalWidth, totalDepth)
 
 		for row = 1, config.Rows do
 			for column = 1, config.Columns do
 				local blockId = string.format("F%dR%02dC%02d", floorIndex, row, column)
-				local colorIndex = ((row + column + floorIndex - 3) % #colors) + 1
+				local colorIndex = ((row + column) % #colors) + 1
 
 				local block = Instance.new("Part")
 				block.Name = blockId
@@ -288,7 +272,7 @@ function ArenaService.create(worldRoot: Model, config: ArenaConfig, palette: Wor
 				block.CanCollide = true
 				block.Size = config.BlockSize
 				block.Position = Vector3.new(startX + ((column - 1) * stepX), floorY, startZ + ((row - 1) * stepZ))
-				block.Material = Enum.Material.SmoothPlastic
+				block.Material = style.Material
 				block.Color = colors[colorIndex]
 				block.TopSurface = Enum.SurfaceType.Smooth
 				block.BottomSurface = Enum.SurfaceType.Smooth
@@ -345,13 +329,14 @@ function ArenaService.getBlocks(): { Part }
 	return blocksCopy
 end
 
-function ArenaService.getPlayerSpawnCFrames(): { CFrame }
+function ArenaService.getPlayerSpawnCFrames(count: number): { CFrame }
 	if currentArenaConfig == nil then
 		error(`Cannot compute spawn positions before {SERVICE_NAME}.create has been called`)
 	end
 
-	-- A partida sempre começa no piso de cima.
-	return BuildingLayout.getFloorSpawnCFrames(currentArenaConfig, currentArenaConfig.FloorCount, GameConfig.MaximumPlayers)
+	-- A partida sempre começa no piso de cima, com os jogadores sorteados em
+	-- posições o mais afastadas possível umas das outras.
+	return BuildingLayout.getSpreadSpawnCFrames(currentArenaConfig, currentArenaConfig.FloorCount, count, spawnRandom)
 end
 
 function ArenaService.beginRound(roundId: number)
@@ -394,7 +379,7 @@ local function createCollapseEffect(record: BlockRecord, context: BlockDestructi
 	visual.CFrame = record.originalCFrame
 	visual.Size = record.originalSize
 	visual.Color = record.originalColor
-	visual.Material = Enum.Material.SmoothPlastic
+	visual.Material = record.originalMaterial
 	visual.TopSurface = Enum.SurfaceType.Smooth
 	visual.BottomSurface = Enum.SurfaceType.Smooth
 	visual.Parent = parent

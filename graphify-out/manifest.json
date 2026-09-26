@@ -1,8 +1,8 @@
 {
   "default.project.json": {
-    "mtime": 1786897052.4161093,
-    "ast_hash": "f2f248c93318ed8cf50a9c67b5b3ae8c",
-    "semantic_hash": "f2f248c93318ed8cf50a9c67b5b3ae8c"
+    "mtime": 1790460591.7503128,
+    "ast_hash": "a2a6e75ebae5434acf926f2474e97fee",
+    "semantic_hash": ""
   },
   "src/client/controllers/HudController.luau": {
     "mtime": 1787008716.5735567,
@@ -45,13 +45,13 @@
     "semantic_hash": ""
   },
   "src/server/init.server.luau": {
-    "mtime": 1790458006.224798,
+    "mtime": 1790459506.3839872,
     "ast_hash": "5c5de11692a211f6455eb85f020d9802",
     "semantic_hash": ""
   },
   "src/server/services/ArenaService.luau": {
-    "mtime": 1790457955.35166,
-    "ast_hash": "27010f0aacfd1ea405abcf12df0eda58",
+    "mtime": 1790460383.4405456,
+    "ast_hash": "8642ea6976c7322d6e34d3f5db0f946b",
     "semantic_hash": ""
   },
   "src/server/services/EliminationService.luau": {
@@ -60,8 +60,8 @@
     "semantic_hash": "8fb32b4ba5e678729c42210655936d5e"
   },
   "src/server/services/LobbyService.luau": {
-    "mtime": 1790457988.7926192,
-    "ast_hash": "7313f97a9b6a991cc2339e1b4a12cc99",
+    "mtime": 1790460405.2738774,
+    "ast_hash": "482e4d8f417a2913c068e9b99069d9a5",
     "semantic_hash": ""
   },
   "src/server/services/ProjectileService.luau": {
@@ -80,13 +80,13 @@
     "semantic_hash": "bb5c0722e956cf12ce95847e10c96629"
   },
   "src/server/services/RoundService.luau": {
-    "mtime": 1790458006.2246187,
-    "ast_hash": "16f2a70f1f1ca71ca3461e42026d33e1",
+    "mtime": 1790460399.186579,
+    "ast_hash": "9a7e9f123e96e98557640b8e0af256ba",
     "semantic_hash": ""
   },
   "src/shared/config/GameConfig.luau": {
-    "mtime": 1790457848.5557547,
-    "ast_hash": "8fb569062a855b6bc1b84d3e55ee57df",
+    "mtime": 1790460352.4480033,
+    "ast_hash": "c3fa579fb0aaeb562f7e341aa44c5635",
     "semantic_hash": ""
   },
   "src/shared/modules/PuffadorConstants.luau": {
@@ -125,8 +125,8 @@
     "semantic_hash": ""
   },
   "README.md": {
-    "mtime": 1790458166.588346,
-    "ast_hash": "3d759ced1e2b72134909660733a1fd5a",
+    "mtime": 1790460614.7959216,
+    "ast_hash": "4e98f7b7f1bde04f06f9fe279d88a73a",
     "semantic_hash": ""
   },
   "src/client/controllers/CombatCameraController.luau": {
@@ -160,12 +160,12 @@
     "semantic_hash": ""
   },
   "src/server/services/WorldVisualService.luau": {
-    "mtime": 1790457916.0509758,
-    "ast_hash": "5b63c53199cd087369778a7761c4fd29",
+    "mtime": 1790460591.7498026,
+    "ast_hash": "07621640a76c8e56df6c22d2828ac172",
     "semantic_hash": ""
   },
   "src/shared/modules/ArenaConstants.luau": {
-    "mtime": 1790457943.3818696,
+    "mtime": 1790459506.3855577,
     "ast_hash": "7f3e05a9b39c4054d980f46db4af78ef",
     "semantic_hash": ""
   },
@@ -205,13 +205,18 @@
     "semantic_hash": ""
   },
   "src/server/services/BuildingService.luau": {
-    "mtime": 1790457890.6323195,
-    "ast_hash": "7d7bccc051b1ffaca167924e0dcc223a",
+    "mtime": 1790460555.3212008,
+    "ast_hash": "d10a7690731b04f8ffa9f0d3e05fe473",
     "semantic_hash": ""
   },
   "src/shared/modules/BuildingLayout.luau": {
-    "mtime": 1790457836.2705038,
-    "ast_hash": "85aedcbf7bdbd9e17b81f01684fc807e",
+    "mtime": 1790460368.5720227,
+    "ast_hash": "1778bab5d7bca0d0db5677f8c695c781",
+    "semantic_hash": ""
+  },
+  "src/server/services/BuildingDecor.luau": {
+    "mtime": 1790460580.7028189,
+    "ast_hash": "3fe54583ffcea53d3cad7f172e0ddbcc",
     "semantic_hash": ""
   }
 }

@@ -17,13 +17,14 @@ local COLOR_CORRECTION_NAME = "BlocoPuffColorCorrection"
 -- atmosfera). O jogo agora acontece dentro de um prédio fechado.
 local LEGACY_LIGHTING_NAMES = { "BlocoPuffSky", "BlocoPuffAtmosphere" }
 
--- Luz ambiente de interior: sem céu visível, a leitura da cena depende da
--- iluminação ambiente somada às luzes do prédio (BuildingService).
-local INTERIOR_AMBIENT = Color3.fromRGB(128, 126, 140)
-local INTERIOR_OUTDOOR_AMBIENT = Color3.fromRGB(128, 126, 140)
-local INTERIOR_BRIGHTNESS = 1
-local INTERIOR_ENVIRONMENT_DIFFUSE = 0.35
-local INTERIOR_ENVIRONMENT_SPECULAR = 0.2
+-- Luz ambiente de interior, escura e quente como uma mansão à noite: a
+-- leitura da cena vem principalmente de arandelas e lustres (BuildingService).
+-- Lighting.Technology = Future é definido em default.project.json.
+local INTERIOR_AMBIENT = Color3.fromRGB(64, 56, 54)
+local INTERIOR_OUTDOOR_AMBIENT = Color3.fromRGB(64, 56, 54)
+local INTERIOR_BRIGHTNESS = 0.5
+local INTERIOR_ENVIRONMENT_DIFFUSE = 0.15
+local INTERIOR_ENVIRONMENT_SPECULAR = 0.35
 
 type LightingSnapshot = {
 	Ambient: Color3,
@@ -113,18 +114,18 @@ function WorldVisualService.start(worldRoot: Model, _palette: WorldPalette)
 
 	local newBloom = Instance.new("BloomEffect")
 	newBloom.Name = BLOOM_NAME
-	newBloom.Intensity = 0.08
-	newBloom.Size = 12
-	newBloom.Threshold = 1.8
+	newBloom.Intensity = 0.35
+	newBloom.Size = 18
+	newBloom.Threshold = 1.15
 	newBloom:SetAttribute(GENERATED_BY_ATTRIBUTE, SERVICE_NAME)
 	newBloom.Parent = Lighting
 
 	local newColorCorrection = Instance.new("ColorCorrectionEffect")
 	newColorCorrection.Name = COLOR_CORRECTION_NAME
-	newColorCorrection.Brightness = 0
-	newColorCorrection.Contrast = 0.025
-	newColorCorrection.Saturation = -0.14
-	newColorCorrection.TintColor = Color3.fromRGB(244, 247, 250)
+	newColorCorrection.Brightness = -0.03
+	newColorCorrection.Contrast = 0.14
+	newColorCorrection.Saturation = 0.06
+	newColorCorrection.TintColor = Color3.fromRGB(255, 240, 224)
 	newColorCorrection:SetAttribute(GENERATED_BY_ATTRIBUTE, SERVICE_NAME)
 	newColorCorrection.Parent = Lighting
 

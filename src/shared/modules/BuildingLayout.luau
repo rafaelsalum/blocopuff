@@ -28,7 +28,8 @@ export type GalleryLayout = {
 }
 
 local SPAWN_HEIGHT_OFFSET = 5
-local SPAWN_MARGIN_RATIO = 0.15
+local SPAWN_EDGE_BLOCKS = 1
+local SPREAD_TOLERANCE = 0.9
 local GALLERY_SPAWN_INSET = 4
 
 local BuildingLayout = {}
@@ -98,20 +99,77 @@ local function distributeOnGrid(count: number, minX: number, minZ: number, spanX
 	return cframes
 end
 
-function BuildingLayout.getFloorSpawnCFrames(arena: ArenaConfig, floorIndex: number, count: number): { CFrame }
+local function getSpawnCandidates(arena: ArenaConfig, floorIndex: number): { Vector3 }
 	local width, depth = BuildingLayout.getFloorSize(arena)
-	local marginX = width * SPAWN_MARGIN_RATIO
-	local marginZ = depth * SPAWN_MARGIN_RATIO
+	local stepX = arena.BlockSize.X + arena.BlockGap
+	local stepZ = arena.BlockSize.Z + arena.BlockGap
+	local startX = arena.Position.X - (width / 2) + (arena.BlockSize.X / 2)
+	local startZ = arena.Position.Z - (depth / 2) + (arena.BlockSize.Z / 2)
 	local y = BuildingLayout.getFloorSurfaceY(arena, floorIndex) + SPAWN_HEIGHT_OFFSET
+	-- Evita nascer colado à parede, onde a câmera fica apertada.
+	local edge = if arena.Rows > 2 and arena.Columns > 2 then SPAWN_EDGE_BLOCKS else 0
 
-	return distributeOnGrid(
-		count,
-		arena.Position.X - (width / 2) + marginX,
-		arena.Position.Z - (depth / 2) + marginZ,
-		width - (marginX * 2),
-		depth - (marginZ * 2),
-		y
-	)
+	local candidates: { Vector3 } = {}
+	for row = 1 + edge, arena.Rows - edge do
+		for column = 1 + edge, arena.Columns - edge do
+			table.insert(candidates, Vector3.new(startX + ((column - 1) * stepX), y, startZ + ((row - 1) * stepZ)))
+		end
+	end
+	return candidates
+end
+
+local function getMinimumDistance(point: Vector3, chosen: { Vector3 }): number
+	local minimum = math.huge
+	for _, other in ipairs(chosen) do
+		minimum = math.min(minimum, (point - other).Magnitude)
+	end
+	return minimum
+end
+
+-- Amostragem do ponto mais distante: o primeiro jogador nasce em um bloco
+-- aleatório e cada próximo no bloco mais afastado de todos os já escolhidos.
+-- Sortear entre os candidatos quase tão bons mantém as partidas variadas.
+function BuildingLayout.getSpreadSpawnCFrames(arena: ArenaConfig, floorIndex: number, count: number, rng: Random): { CFrame }
+	local candidates = getSpawnCandidates(arena, floorIndex)
+	local center = Vector3.new(arena.Position.X, 0, arena.Position.Z)
+	local chosen: { Vector3 } = {}
+	if #candidates == 0 then
+		return {}
+	end
+
+	table.insert(chosen, candidates[rng:NextInteger(1, #candidates)])
+	while #chosen < count do
+		local bestDistance = 0
+		local distances: { number } = {}
+		for index, candidate in ipairs(candidates) do
+			distances[index] = getMinimumDistance(candidate, chosen)
+			bestDistance = math.max(bestDistance, distances[index])
+		end
+
+		local nearlyBest: { Vector3 } = {}
+		for index, candidate in ipairs(candidates) do
+			if bestDistance > 0 and distances[index] >= bestDistance * SPREAD_TOLERANCE then
+				table.insert(nearlyBest, candidate)
+			end
+		end
+		if #nearlyBest == 0 then
+			-- Mais jogadores que blocos livres: reaproveita posições.
+			table.insert(chosen, candidates[rng:NextInteger(1, #candidates)])
+		else
+			table.insert(chosen, nearlyBest[rng:NextInteger(1, #nearlyBest)])
+		end
+	end
+
+	local cframes: { CFrame } = {}
+	for _, position in ipairs(chosen) do
+		local lookTarget = Vector3.new(center.X, position.Y, center.Z)
+		if (lookTarget - position).Magnitude < 1e-3 then
+			table.insert(cframes, CFrame.new(position))
+		else
+			table.insert(cframes, CFrame.lookAt(position, lookTarget))
+		end
+	end
+	return cframes
 end
 
 function BuildingLayout.getGallerySpawnCFrames(arena: ArenaConfig, building: BuildingConfig, count: number): { CFrame }

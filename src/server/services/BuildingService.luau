@@ -1,18 +1,21 @@
 --!strict
 
--- Constrói o prédio fechado onde a partida acontece: paredes, teto e poço em
--- cores sólidas, faixas de luz por andar e uma galeria envidraçada para quem
--- aguarda ou já foi eliminado. Usa somente instâncias nativas e a geometria
--- de BuildingLayout, para que o invólucro sempre acompanhe os pisos da arena.
+-- Constrói o prédio fechado onde a partida acontece, com interior no estilo
+-- mansão: porão de tijolos no poço, um andar decorado para cada piso da
+-- arena, teto com vigas e lustres e uma galeria envidraçada que funciona
+-- como lobby. A geometria vem de BuildingLayout; a decoração, de
+-- BuildingDecor. Só usa instâncias e materiais nativos.
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Workspace = game:GetService("Workspace")
 
 local GameConfig = require(ReplicatedStorage.Shared.config.GameConfig)
 local BuildingLayout = require(ReplicatedStorage.Shared.modules.BuildingLayout)
+local BuildingDecor = require(script.Parent.BuildingDecor)
 
 type ArenaConfig = GameConfig.ArenaConfig
 type BuildingConfig = GameConfig.BuildingConfig
+type WallSegment = BuildingDecor.WallSegment
 
 local MODEL_NAME = "Building"
 local GENERATED_BY_ATTRIBUTE = "GeneratedBy"
@@ -23,20 +26,26 @@ local LEGACY_MODELS: { [string]: string } = {
 	SkyIslandBackdrop = "SkyIslandService",
 }
 
-local TRIM_HEIGHT = 1.2
-local TRIM_DEPTH = 0.4
-local LIGHT_STRIP_HEIGHT = 0.6
-local LIGHT_STRIP_DEPTH = 0.3
-local LIGHT_STRIP_HEIGHT_ABOVE_FLOOR = 11
-local LIGHT_STRIP_LENGTH_RATIO = 0.8
-local WALL_LIGHT_RANGE = 40
-local WALL_LIGHT_BRIGHTNESS = 1.4
-local CEILING_PANEL_SIZE = Vector3.new(18, 0.4, 18)
-local CEILING_LIGHT_RANGE = 36
-local CEILING_LIGHT_BRIGHTNESS = 1.8
+-- Semente fixa: quadros e cores ficam iguais em todo servidor e reinício.
+local DECOR_SEED = 1987
+local FLOOR_BAND_HEIGHT = 1.6
+local FLOOR_BAND_DEPTH = 0.5
+local BEAM_SIZE = 1.2
+local BEAM_SPACING = 14
+local ARENA_LAMP_RANGE = 22
+local ARENA_LAMP_BRIGHTNESS = 1.1
+local GALLERY_LAMP_RANGE = 16
+local GALLERY_LAMP_BRIGHTNESS = 0.8
+local CHANDELIER_DROP = 5
+local CHANDELIER_RANGE = 46
+local CHANDELIER_BRIGHTNESS = 1.5
 local GLASS_THICKNESS = 0.4
-local GLASS_TRANSPARENCY = 0.72
-local GLASS_COLOR = Color3.fromRGB(188, 214, 232)
+local GLASS_TRANSPARENCY = 0.78
+local GLASS_COLOR = Color3.fromRGB(170, 190, 200)
+local MULLION_SPACING = 12
+local HANDRAIL_HEIGHT = 3.4
+local SOFA_WIDTH = 7
+local SOFA_SPACING = 20
 
 local BuildingService = {}
 
@@ -64,150 +73,89 @@ local function removeDefaultBaseplate()
 	end
 end
 
-local function createSolid(parent: Instance, name: string, size: Vector3, position: Vector3, color: Color3): Part
-	local part = Instance.new("Part")
-	part.Name = name
-	part.Anchored = true
-	part.CanCollide = true
-	part.CanTouch = false
-	part.CanQuery = true
-	part.CastShadow = true
-	part.Size = size
-	part.Position = position
-	part.Color = color
-	part.Material = Enum.Material.SmoothPlastic
-	part.TopSurface = Enum.SurfaceType.Smooth
-	part.BottomSurface = Enum.SurfaceType.Smooth
-	part.Parent = parent
+local function createSolid(parent: Instance, name: string, size: Vector3, position: Vector3, color: Color3, material: Enum.Material): Part
+	local part = BuildingDecor.createPart(parent, name, size, CFrame.new(position), color, {
+		material = material,
+		collide = true,
+	})
 	return part
 end
 
-local function createDecoration(parent: Instance, name: string, size: Vector3, position: Vector3, color: Color3): Part
-	local part = createSolid(parent, name, size, position, color)
-	part.CanCollide = false
-	part.CanQuery = false
-	part.CastShadow = false
-	return part
-end
-
-local function addSurfaceLight(part: BasePart, face: Enum.NormalId, color: Color3, range: number, brightness: number)
-	local light = Instance.new("SurfaceLight")
-	light.Face = face
-	light.Color = color
-	light.Range = range
-	light.Brightness = brightness
-	light.Angle = 120
-	light.Shadows = false
-	light.Parent = part
-end
-
-type WallFace = {
-	name: string,
-	-- Ponto na face interna da parede, na altura zero.
-	origin: Vector3,
-	-- Direção que aponta para dentro da sala.
-	inward: Vector3,
-	length: number,
-	lightFace: Enum.NormalId,
+type Segments = {
+	arena: { WallSegment },
+	gallery: { WallSegment },
 }
 
-local function getWallFaces(arena: ArenaConfig, building: BuildingConfig): { WallFace }
+local function getSegments(arena: ArenaConfig, building: BuildingConfig): Segments
 	local bounds = BuildingLayout.getRoomBounds(arena, building)
-	local center = bounds.center
+	local gallery = BuildingLayout.getGallery(arena, building)
+	local center = Vector3.new(bounds.center.X, 0, bounds.center.Z)
+	local supportTopY = gallery.floorY - 1
+	local galleryCenterX = gallery.center.X
+
 	return {
-		{
-			name = "West",
-			origin = center + Vector3.new(-bounds.halfWidth, 0, 0),
-			inward = Vector3.new(1, 0, 0),
-			length = bounds.halfDepth * 2,
-			lightFace = Enum.NormalId.Right,
+		arena = {
+			{
+				name = "West",
+				origin = center + Vector3.new(-bounds.halfWidth, 0, 0),
+				inward = Vector3.new(1, 0, 0),
+				length = bounds.halfDepth * 2,
+				bottomY = bounds.bottomY,
+				topY = bounds.ceilingY,
+			},
+			{
+				name = "North",
+				origin = center + Vector3.new(0, 0, -bounds.halfDepth),
+				inward = Vector3.new(0, 0, 1),
+				length = bounds.halfWidth * 2,
+				bottomY = bounds.bottomY,
+				topY = bounds.ceilingY,
+			},
+			{
+				name = "South",
+				origin = center + Vector3.new(0, 0, bounds.halfDepth),
+				inward = Vector3.new(0, 0, -1),
+				length = bounds.halfWidth * 2,
+				bottomY = bounds.bottomY,
+				topY = bounds.ceilingY,
+			},
+			{
+				-- Face do bloco que sustenta a galeria; acima dela fica o vidro.
+				name = "EastSupport",
+				origin = center + Vector3.new(bounds.halfWidth, 0, 0),
+				inward = Vector3.new(-1, 0, 0),
+				length = bounds.halfDepth * 2,
+				bottomY = bounds.bottomY,
+				topY = supportTopY,
+			},
 		},
-		{
-			name = "East",
-			origin = center + Vector3.new(bounds.halfWidth, 0, 0),
-			inward = Vector3.new(-1, 0, 0),
-			length = bounds.halfDepth * 2,
-			lightFace = Enum.NormalId.Left,
-		},
-		{
-			name = "North",
-			origin = center + Vector3.new(0, 0, -bounds.halfDepth),
-			inward = Vector3.new(0, 0, 1),
-			length = bounds.halfWidth * 2,
-			lightFace = Enum.NormalId.Back,
-		},
-		{
-			name = "South",
-			origin = center + Vector3.new(0, 0, bounds.halfDepth),
-			inward = Vector3.new(0, 0, -1),
-			length = bounds.halfWidth * 2,
-			lightFace = Enum.NormalId.Front,
+		gallery = {
+			{
+				name = "GalleryEast",
+				origin = Vector3.new(gallery.innerX + building.GalleryDepth, 0, center.Z),
+				inward = Vector3.new(-1, 0, 0),
+				length = bounds.halfDepth * 2,
+				bottomY = gallery.floorY,
+				topY = bounds.ceilingY,
+			},
+			{
+				name = "GalleryNorth",
+				origin = Vector3.new(galleryCenterX, 0, center.Z - bounds.halfDepth),
+				inward = Vector3.new(0, 0, 1),
+				length = building.GalleryDepth,
+				bottomY = gallery.floorY,
+				topY = bounds.ceilingY,
+			},
+			{
+				name = "GallerySouth",
+				origin = Vector3.new(galleryCenterX, 0, center.Z + bounds.halfDepth),
+				inward = Vector3.new(0, 0, -1),
+				length = building.GalleryDepth,
+				bottomY = gallery.floorY,
+				topY = bounds.ceilingY,
+			},
 		},
 	}
-end
-
-local function getStripSize(face: WallFace, length: number, height: number, depth: number): Vector3
-	if face.inward.X ~= 0 then
-		return Vector3.new(depth, height, length)
-	end
-	return Vector3.new(length, height, depth)
-end
-
--- Faixas por andar reforçam a ideia de prédio com vários pisos: um friso na
--- altura de cada piso e uma luz na parede para iluminar o nível.
-local function createFloorDetails(parent: Instance, arena: ArenaConfig, building: BuildingConfig)
-	local topSurfaceY = BuildingLayout.getFloorSurfaceY(arena, arena.FloorCount)
-	for floorIndex = 1, arena.FloorCount do
-		local floorY = BuildingLayout.getFloorY(arena, floorIndex)
-		local surfaceY = BuildingLayout.getFloorSurfaceY(arena, floorIndex)
-		for _, face in ipairs(getWallFaces(arena, building)) do
-			-- A parede leste do piso de cima é o vidro da galeria.
-			local isGalleryGlass = face.name == "East" and surfaceY >= topSurfaceY
-			local trimPosition = face.origin + (face.inward * (TRIM_DEPTH / 2)) + Vector3.new(0, floorY, 0)
-			createDecoration(
-				parent,
-				string.format("Trim%s%d", face.name, floorIndex),
-				getStripSize(face, face.length, TRIM_HEIGHT, TRIM_DEPTH),
-				trimPosition,
-				building.TrimColor
-			)
-
-			if not isGalleryGlass then
-				local stripPosition = face.origin
-					+ (face.inward * (LIGHT_STRIP_DEPTH / 2))
-					+ Vector3.new(0, surfaceY + LIGHT_STRIP_HEIGHT_ABOVE_FLOOR, 0)
-				local strip = createDecoration(
-					parent,
-					string.format("LightStrip%s%d", face.name, floorIndex),
-					getStripSize(face, face.length * LIGHT_STRIP_LENGTH_RATIO, LIGHT_STRIP_HEIGHT, LIGHT_STRIP_DEPTH),
-					stripPosition,
-					building.LightColor
-				)
-				strip.Material = Enum.Material.Neon
-				addSurfaceLight(strip, face.lightFace, building.LightColor, WALL_LIGHT_RANGE, WALL_LIGHT_BRIGHTNESS)
-			end
-		end
-	end
-end
-
-local function createCeilingLights(parent: Instance, arena: ArenaConfig, building: BuildingConfig)
-	local bounds = BuildingLayout.getRoomBounds(arena, building)
-	local offsets = {
-		Vector2.new(-0.5, -0.5),
-		Vector2.new(0.5, -0.5),
-		Vector2.new(-0.5, 0.5),
-		Vector2.new(0.5, 0.5),
-	}
-	for index, offset in ipairs(offsets) do
-		local position = Vector3.new(
-			bounds.center.X + (offset.X * bounds.halfWidth),
-			bounds.ceilingY - (CEILING_PANEL_SIZE.Y / 2),
-			bounds.center.Z + (offset.Y * bounds.halfDepth)
-		)
-		local panel = createDecoration(parent, string.format("CeilingLight%02d", index), CEILING_PANEL_SIZE, position, building.LightColor)
-		panel.Material = Enum.Material.Neon
-		addSurfaceLight(panel, Enum.NormalId.Bottom, building.LightColor, CEILING_LIGHT_RANGE, CEILING_LIGHT_BRIGHTNESS)
-	end
 end
 
 local function createShell(parent: Instance, arena: ArenaConfig, building: BuildingConfig)
@@ -217,38 +165,42 @@ local function createShell(parent: Instance, arena: ArenaConfig, building: Build
 	local center = bounds.center
 	local height = bounds.ceilingY - bounds.bottomY
 	local midY = (bounds.ceilingY + bounds.bottomY) / 2
-	-- O prédio se estende para +X para abrigar a galeria.
 	local outerWidth = (bounds.halfWidth * 2) + building.GalleryDepth + (thickness * 2)
 	local outerCenterX = center.X + (building.GalleryDepth / 2)
 	local innerDepth = bounds.halfDepth * 2
+	local wallColor = building.StoryWallpaperColors[1]
 
 	createSolid(
 		parent,
-		"Pit",
+		"PitFloor",
 		Vector3.new(outerWidth, thickness, innerDepth + (thickness * 2)),
 		Vector3.new(outerCenterX, bounds.bottomY - (thickness / 2), center.Z),
-		building.PitColor
+		building.PitFloorColor,
+		Enum.Material.Slate
 	)
 	createSolid(
 		parent,
 		"Ceiling",
 		Vector3.new(outerWidth, thickness, innerDepth + (thickness * 2)),
 		Vector3.new(outerCenterX, bounds.ceilingY + (thickness / 2), center.Z),
-		building.CeilingColor
+		building.CeilingColor,
+		Enum.Material.Plaster
 	)
 	createSolid(
 		parent,
 		"WallWest",
 		Vector3.new(thickness, height, innerDepth),
 		Vector3.new(center.X - bounds.halfWidth - (thickness / 2), midY, center.Z),
-		building.WallColor
+		wallColor,
+		Enum.Material.Plaster
 	)
 	createSolid(
 		parent,
 		"WallEast",
 		Vector3.new(thickness, height, innerDepth),
 		Vector3.new(gallery.innerX + building.GalleryDepth + (thickness / 2), midY, center.Z),
-		building.WallColor
+		wallColor,
+		Enum.Material.Plaster
 	)
 	for _, side in ipairs({ -1, 1 }) do
 		createSolid(
@@ -256,56 +208,215 @@ local function createShell(parent: Instance, arena: ArenaConfig, building: Build
 			if side < 0 then "WallNorth" else "WallSouth",
 			Vector3.new(outerWidth, height, thickness),
 			Vector3.new(outerCenterX, midY, center.Z + (side * (bounds.halfDepth + (thickness / 2)))),
-			building.WallColor
+			wallColor,
+			Enum.Material.Plaster
 		)
 	end
 
-	-- Os andares inferiores recebem uma pintura mais escura para facilitar a
-	-- leitura de em qual piso o jogador está.
-	local lowerTopY = BuildingLayout.getFloorSurfaceY(arena, math.max(1, arena.FloorCount - 1))
-		+ (arena.FloorSpacing / 2)
-	for _, face in ipairs(getWallFaces(arena, building)) do
-		if face.name ~= "East" then
-			local paintHeight = lowerTopY - bounds.bottomY
-			createDecoration(
-				parent,
-				`LowerPaint{face.name}`,
-				getStripSize(face, face.length, paintHeight, 0.1),
-				face.origin + (face.inward * 0.05) + Vector3.new(0, bounds.bottomY + (paintHeight / 2), 0),
-				building.LowerWallColor
-			)
-		end
-	end
-
-	-- Bloco maciço sob a galeria: sua face oeste fecha a lateral da arena nos
-	-- pisos inferiores e seu topo sustenta o piso da galeria.
 	local supportTopY = gallery.floorY - 1
-	local support = createSolid(
+	createSolid(
 		parent,
 		"GallerySupport",
 		Vector3.new(building.GalleryDepth, supportTopY - bounds.bottomY, innerDepth),
 		Vector3.new(gallery.center.X, (supportTopY + bounds.bottomY) / 2, center.Z),
-		building.LowerWallColor
+		building.BasementBrickColor,
+		Enum.Material.Brick
 	)
-	support.CastShadow = false
 	createSolid(
 		parent,
 		"GalleryFloor",
 		Vector3.new(building.GalleryDepth, 1, innerDepth),
 		Vector3.new(gallery.center.X, gallery.floorY - 0.5, center.Z),
-		building.GalleryFloorColor
+		building.GalleryCarpetColor,
+		Enum.Material.Carpet
+	)
+end
+
+-- Poço como porão de tijolos, um andar decorado por piso da arena e uma
+-- faixa de madeira na altura de cada laje, reforçando a ideia de prédio.
+local function decorateArenaWalls(parent: Instance, arena: ArenaConfig, building: BuildingConfig, segments: { WallSegment }, rng: Random)
+	local bounds = BuildingLayout.getRoomBounds(arena, building)
+	local halfBlock = arena.BlockSize.Y / 2
+	for _, segment in ipairs(segments) do
+		local basementTop = math.min(BuildingLayout.getFloorY(arena, 1) - halfBlock, segment.topY)
+		BuildingDecor.createPart(
+			parent,
+			`{segment.name}Basement`,
+			Vector3.new(segment.length, basementTop - bounds.bottomY, 0.2),
+			BuildingDecor.wallCFrame(segment, 0, (basementTop + bounds.bottomY) / 2, 0.1),
+			building.BasementBrickColor,
+			{ material = Enum.Material.Brick }
+		)
+
+		for floorIndex = 1, arena.FloorCount do
+			local floorY = BuildingLayout.getFloorY(arena, floorIndex)
+			if floorY < segment.topY then
+				BuildingDecor.createPart(
+					parent,
+					string.format("%sFloorBand%d", segment.name, floorIndex),
+					Vector3.new(segment.length, FLOOR_BAND_HEIGHT, FLOOR_BAND_DEPTH),
+					BuildingDecor.wallCFrame(segment, 0, floorY, FLOOR_BAND_DEPTH / 2),
+					building.TrimColor,
+					{ material = Enum.Material.Wood }
+				)
+			end
+
+			local storyBottom = BuildingLayout.getFloorSurfaceY(arena, floorIndex)
+			local isTop = floorIndex == arena.FloorCount
+			local storyTop = if isTop then bounds.ceilingY else BuildingLayout.getFloorY(arena, floorIndex + 1) - halfBlock
+			local wallpapers = building.StoryWallpaperColors
+			local isOuterWall = segment.name ~= "EastSupport"
+			BuildingDecor.decorateStory(parent, segment, storyBottom, storyTop, building, {
+				wallpaperColor = wallpapers[math.min(floorIndex, #wallpapers)],
+				lamps = true,
+				art = true,
+				windows = isTop and isOuterWall,
+				door = not isTop and isOuterWall,
+				lampRange = ARENA_LAMP_RANGE,
+				lampBrightness = ARENA_LAMP_BRIGHTNESS,
+			}, rng)
+		end
+	end
+end
+
+local function decorateGallery(parent: Instance, arena: ArenaConfig, building: BuildingConfig, segments: { WallSegment }, rng: Random)
+	local bounds = BuildingLayout.getRoomBounds(arena, building)
+	local gallery = BuildingLayout.getGallery(arena, building)
+	for _, segment in ipairs(segments) do
+		BuildingDecor.decorateStory(parent, segment, gallery.floorY, bounds.ceilingY, building, {
+			wallpaperColor = building.GalleryWallpaperColor,
+			lamps = true,
+			art = true,
+			windows = segment.name == "GalleryEast",
+			door = segment.name ~= "GalleryEast",
+			lampRange = GALLERY_LAMP_RANGE,
+			lampBrightness = GALLERY_LAMP_BRIGHTNESS,
+		}, rng)
+	end
+
+	local innerDepth = bounds.halfDepth * 2
+	BuildingDecor.createPart(
+		parent,
+		"GalleryRug",
+		Vector3.new(building.GalleryDepth - 8, 0.1, innerDepth * 0.8),
+		CFrame.new(gallery.center + Vector3.new(0, 0.05, 0)),
+		building.RugColor,
+		{ material = Enum.Material.Fabric }
 	)
 
-	local glass = createSolid(
+	-- Vidro com montantes de madeira e corrimão: o lobby enxerga a arena,
+	-- mas ninguém entra nela antes de ser escalado para a partida.
+	local supportTopY = gallery.floorY - 1
+	local glassHeight = bounds.ceilingY - supportTopY
+	local glass = BuildingDecor.createPart(
 		parent,
 		"GalleryGlass",
-		Vector3.new(GLASS_THICKNESS, bounds.ceilingY - supportTopY, innerDepth),
-		Vector3.new(gallery.innerX + (GLASS_THICKNESS / 2), (bounds.ceilingY + supportTopY) / 2, center.Z),
-		GLASS_COLOR
+		Vector3.new(GLASS_THICKNESS, glassHeight, innerDepth),
+		CFrame.new(gallery.innerX + (GLASS_THICKNESS / 2), supportTopY + (glassHeight / 2), bounds.center.Z),
+		GLASS_COLOR,
+		{ material = Enum.Material.Glass, collide = true, transparency = GLASS_TRANSPARENCY }
 	)
-	glass.Material = Enum.Material.Glass
-	glass.Transparency = GLASS_TRANSPARENCY
 	glass.CastShadow = false
+
+	local mullionCount = math.floor(innerDepth / MULLION_SPACING)
+	for index = 0, mullionCount do
+		local z = bounds.center.Z - bounds.halfDepth + (index * (innerDepth / mullionCount))
+		BuildingDecor.createPart(
+			parent,
+			string.format("GlassMullion%02d", index),
+			Vector3.new(0.8, glassHeight, 0.6),
+			CFrame.new(gallery.innerX + 0.4, supportTopY + (glassHeight / 2), z),
+			building.TrimColor,
+			{ material = Enum.Material.Wood }
+		)
+	end
+	BuildingDecor.createPart(
+		parent,
+		"GalleryHandrail",
+		Vector3.new(0.6, 0.4, innerDepth),
+		CFrame.new(gallery.innerX + 1, gallery.floorY + HANDRAIL_HEIGHT, bounds.center.Z),
+		building.TrimColor,
+		{ material = Enum.Material.Wood }
+	)
+
+	local eastX = gallery.innerX + building.GalleryDepth
+	local sofaCount = math.floor(innerDepth / SOFA_SPACING)
+	for index = 1, sofaCount do
+		local z = bounds.center.Z - bounds.halfDepth + ((index - 0.5) * (innerDepth / sofaCount))
+		BuildingDecor.createSofa(
+			parent,
+			string.format("Sofa%02d", index),
+			Vector3.new(eastX - 2.4, gallery.floorY, z),
+			Vector3.new(-1, 0, 0),
+			SOFA_WIDTH,
+			building
+		)
+		local between = z + ((innerDepth / sofaCount) / 2)
+		if index < sofaCount then
+			if index % 2 == 1 then
+				BuildingDecor.createSideTable(parent, string.format("SideTable%02d", index), Vector3.new(eastX - 1.8, gallery.floorY, between), building)
+			else
+				BuildingDecor.createPlant(parent, string.format("Plant%02d", index), Vector3.new(eastX - 1.8, gallery.floorY, between), building)
+			end
+		end
+	end
+end
+
+local function decorateCeiling(parent: Instance, arena: ArenaConfig, building: BuildingConfig)
+	local bounds = BuildingLayout.getRoomBounds(arena, building)
+	local gallery = BuildingLayout.getGallery(arena, building)
+	local innerDepth = bounds.halfDepth * 2
+	local fullWidth = (bounds.halfWidth * 2) + building.GalleryDepth
+	local fullCenterX = bounds.center.X + (building.GalleryDepth / 2)
+	local beamY = bounds.ceilingY - (BEAM_SIZE / 2)
+
+	local beamCount = math.floor(innerDepth / BEAM_SPACING)
+	for index = 1, beamCount do
+		local z = bounds.center.Z - bounds.halfDepth + (index * (innerDepth / (beamCount + 1)))
+		BuildingDecor.createPart(
+			parent,
+			string.format("CeilingBeam%02d", index),
+			Vector3.new(fullWidth, BEAM_SIZE, BEAM_SIZE),
+			CFrame.new(fullCenterX, beamY, z),
+			building.CeilingBeamColor,
+			{ material = Enum.Material.Wood }
+		)
+	end
+
+	local chandelierOffsets = {
+		Vector2.new(-0.5, -0.5),
+		Vector2.new(0.5, -0.5),
+		Vector2.new(-0.5, 0.5),
+		Vector2.new(0.5, 0.5),
+	}
+	for index, offset in ipairs(chandelierOffsets) do
+		BuildingDecor.createChandelier(
+			parent,
+			string.format("Chandelier%02d", index),
+			Vector3.new(
+				bounds.center.X + (offset.X * bounds.halfWidth),
+				bounds.ceilingY,
+				bounds.center.Z + (offset.Y * bounds.halfDepth)
+			),
+			CHANDELIER_DROP,
+			2.4,
+			building,
+			CHANDELIER_RANGE,
+			CHANDELIER_BRIGHTNESS
+		)
+	end
+	for index, zRatio in ipairs({ -0.5, 0.5 }) do
+		BuildingDecor.createChandelier(
+			parent,
+			string.format("GalleryChandelier%02d", index),
+			Vector3.new(gallery.center.X, bounds.ceilingY, bounds.center.Z + (zRatio * bounds.halfDepth)),
+			CHANDELIER_DROP,
+			1.6,
+			building,
+			28,
+			1
+		)
+	end
 end
 
 function BuildingService.create(worldRoot: Model, arena: ArenaConfig, building: BuildingConfig): Model
@@ -320,9 +431,12 @@ function BuildingService.create(worldRoot: Model, arena: ArenaConfig, building: 
 	model.Name = MODEL_NAME
 	model:SetAttribute(GENERATED_BY_ATTRIBUTE, SERVICE_NAME)
 
+	local rng = Random.new(DECOR_SEED)
+	local segments = getSegments(arena, building)
 	createShell(model, arena, building)
-	createFloorDetails(model, arena, building)
-	createCeilingLights(model, arena, building)
+	decorateArenaWalls(model, arena, building, segments.arena, rng)
+	decorateGallery(model, arena, building, segments.gallery, rng)
+	decorateCeiling(model, arena, building)
 
 	model.Parent = worldRoot
 	buildingModel = model

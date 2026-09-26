@@ -10,21 +10,41 @@ export type ArenaConfig = {
 	Position: Vector3,
 	FloorCount: number,
 	FloorSpacing: number,
+	-- Indexado pelo piso (1 = mais baixo); pisos sem entrada usam o último.
+	FloorStyles: { FloorStyle },
 }
 
+export type FloorStyle = {
+	Material: Enum.Material,
+	Colors: { Color3 },
+}
+
+-- Paleta de interior no estilo mansão: papel de parede, lambri de madeira,
+-- molduras, porão de tijolos e luz quente de arandelas e lustres.
 export type BuildingConfig = {
 	WallThickness: number,
 	CeilingClearance: number,
 	PitDepth: number,
 	GalleryDepth: number,
 	GalleryRise: number,
-	WallColor: Color3,
-	LowerWallColor: Color3,
-	CeilingColor: Color3,
-	PitColor: Color3,
+	-- Indexado pelo piso (1 = mais baixo).
+	StoryWallpaperColors: { Color3 },
+	GalleryWallpaperColor: Color3,
+	WainscotColor: Color3,
 	TrimColor: Color3,
-	GalleryFloorColor: Color3,
-	LightColor: Color3,
+	BaseboardColor: Color3,
+	CeilingColor: Color3,
+	CeilingBeamColor: Color3,
+	BasementBrickColor: Color3,
+	PitFloorColor: Color3,
+	GalleryCarpetColor: Color3,
+	RugColor: Color3,
+	UpholsteryColor: Color3,
+	FrameColor: Color3,
+	BrassColor: Color3,
+	WindowColor: Color3,
+	LampColor: Color3,
+	ArtColors: { Color3 },
 }
 
 export type WorldPalette = {
@@ -90,6 +110,19 @@ local Arena: ArenaConfig = table.freeze({
 	Position = Vector3.new(0, 100, 0),
 	FloorCount = 2,
 	FloorSpacing = 28,
+	FloorStyles = {
+		-- Piso de baixo: cerâmica em xadrez claro, contrastando com o poço escuro.
+		{
+			Material = Enum.Material.CeramicTiles,
+			Colors = { Color3.fromRGB(206, 194, 170), Color3.fromRGB(96, 112, 114) },
+		},
+		-- Piso de cima: taco de madeira em dois tons; os buracos revelam a
+		-- cerâmica clara de baixo, o que facilita a leitura do mapa.
+		{
+			Material = Enum.Material.WoodPlanks,
+			Colors = { Color3.fromRGB(168, 116, 68), Color3.fromRGB(116, 76, 46) },
+		},
+	},
 })
 
 -- Prédio fechado ao redor da arena: paredes e teto em cores sólidas para não
@@ -99,15 +132,34 @@ local Building: BuildingConfig = table.freeze({
 	WallThickness = 2,
 	CeilingClearance = 26,
 	PitDepth = 45,
-	GalleryDepth = 16,
+	GalleryDepth = 20,
 	GalleryRise = 6,
-	WallColor = Color3.fromRGB(196, 200, 212),
-	LowerWallColor = Color3.fromRGB(150, 156, 176),
-	CeilingColor = Color3.fromRGB(228, 230, 236),
-	PitColor = Color3.fromRGB(46, 44, 60),
-	TrimColor = Color3.fromRGB(116, 108, 150),
-	GalleryFloorColor = Color3.fromRGB(176, 160, 206),
-	LightColor = Color3.fromRGB(255, 244, 226),
+	StoryWallpaperColors = {
+		Color3.fromRGB(112, 50, 54),
+		Color3.fromRGB(74, 98, 80),
+	},
+	GalleryWallpaperColor = Color3.fromRGB(52, 78, 86),
+	WainscotColor = Color3.fromRGB(86, 56, 38),
+	TrimColor = Color3.fromRGB(150, 108, 66),
+	BaseboardColor = Color3.fromRGB(58, 38, 28),
+	CeilingColor = Color3.fromRGB(196, 184, 160),
+	CeilingBeamColor = Color3.fromRGB(80, 52, 34),
+	BasementBrickColor = Color3.fromRGB(92, 62, 52),
+	PitFloorColor = Color3.fromRGB(34, 30, 32),
+	GalleryCarpetColor = Color3.fromRGB(122, 34, 40),
+	RugColor = Color3.fromRGB(176, 136, 70),
+	UpholsteryColor = Color3.fromRGB(64, 40, 70),
+	FrameColor = Color3.fromRGB(178, 138, 64),
+	BrassColor = Color3.fromRGB(196, 154, 82),
+	WindowColor = Color3.fromRGB(26, 36, 64),
+	LampColor = Color3.fromRGB(255, 196, 132),
+	ArtColors = {
+		Color3.fromRGB(58, 84, 120),
+		Color3.fromRGB(140, 92, 50),
+		Color3.fromRGB(92, 120, 72),
+		Color3.fromRGB(150, 60, 56),
+		Color3.fromRGB(196, 170, 120),
+	},
 })
 
 local Palette: WorldPalette = table.freeze({

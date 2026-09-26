@@ -155,7 +155,7 @@ local function selectParticipants(): { Player }
 end
 
 local function teleportParticipantsToArena(players: { Player })
-	local spawnCFrames = ArenaService.getPlayerSpawnCFrames()
+	local spawnCFrames = ArenaService.getPlayerSpawnCFrames(#players)
 
 	for index, player in ipairs(players) do
 		local cframe = spawnCFrames[index]
@@ -361,9 +361,6 @@ local function beginRound(timings: RoundTimings)
 		markParticipantAttributes(player, currentRoundId)
 	end
 
-	-- Quem não joga esta rodada vai para a galeria antes de os participantes
-	-- ocuparem o piso de cima.
-	LobbyService.beginMatch(participantOrder)
 	teleportParticipantsToArena(participantOrder)
 	connectParticipantDeathHandlers(participantOrder)
 	PuffadorService.beginRound(participantOrder, currentRoundId)
@@ -434,10 +431,10 @@ local function runEnding(timings: RoundTimings)
 		ReplicatedState.setTimeRemaining(remaining)
 	end
 
-	-- Restaura os pisos e, na mesma etapa, reposiciona todos sobre o piso de
-	-- cima; ninguém fica preso dentro de um bloco que reapareceu.
+	LobbyService.returnToLobby(participantOrder)
+	-- Restaura depois que os jogadores já saíram da arena, evitando que um
+	-- bloco reapareça dentro de um personagem.
 	ArenaService.restoreAllBlocks()
-	LobbyService.endMatch()
 	for _, player in ipairs(participantOrder) do
 		resetParticipantAttributes(player)
 	end
@@ -498,8 +495,8 @@ function RoundService.stop()
 	EliminationService.stop()
 	ArenaService.endRound()
 	PuffadorService.stop()
+	LobbyService.returnToLobby(participantOrder)
 	ArenaService.restoreAllBlocks()
-	LobbyService.endMatch()
 	for _, player in ipairs(participantOrder) do
 		resetParticipantAttributes(player)
 	end

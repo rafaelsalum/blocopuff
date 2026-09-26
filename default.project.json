@@ -29,6 +29,13 @@
         "Gravity": 196.2,
         "FallenPartsDestroyHeight": -500
       }
+    },
+    "Lighting": {
+      "$className": "Lighting",
+      "$properties": {
+        "Technology": "Future",
+        "GlobalShadows": true
+      }
     }
   }
 }

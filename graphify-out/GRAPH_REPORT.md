@@ -1,16 +1,16 @@
 # Graph Report - blocopuff  (2026-09-26)
 
 ## Corpus Check
-- 43 files · ~26,462 words
+- 44 files · ~28,731 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 310 nodes · 593 edges · 27 communities
-- Extraction: 85% EXTRACTED · 15% INFERRED · 0% AMBIGUOUS · INFERRED: 88 edges (avg confidence: 0.8)
+- 321 nodes · 622 edges · 27 communities
+- Extraction: 84% EXTRACTED · 16% INFERRED · 0% AMBIGUOUS · INFERRED: 98 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `507cd26e`
+- Built from commit: `5ed9657e`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -30,19 +30,19 @@
 - AdminService.luau
 - AdminController.luau
 - CrosshairView.new
-- BuildingService.luau
+- BuildingDecor.luau
 
 ## God Nodes (most connected - your core abstractions)
 1. `UiTheme.addCorner()` - 15 edges
-2. `UiTheme.addStroke()` - 13 edges
-3. `beginRound()` - 13 edges
-4. `refreshSpectator()` - 11 edges
-5. `runEnding()` - 11 edges
-6. `setAttribute()` - 10 edges
-7. `BlocoPuff!` - 10 edges
-8. `PuffadorController.start()` - 9 edges
-9. `AdminPanelView.new()` - 9 edges
-10. `AnnouncementView.new()` - 9 edges
+2. `BuildingDecor.createPart()` - 14 edges
+3. `UiTheme.addStroke()` - 13 edges
+4. `beginRound()` - 12 edges
+5. `refreshSpectator()` - 11 edges
+6. `runEnding()` - 11 edges
+7. `setAttribute()` - 10 edges
+8. `BlocoPuff!` - 10 edges
+9. `PuffadorController.start()` - 9 edges
+10. `AdminPanelView.new()` - 9 edges
 
 ## Surprising Connections (you probably didn't know these)
 - `beginRound()` --calls--> `EliminationService.beginRound()`  [INFERRED]
@@ -94,8 +94,8 @@ Cohesion: 0.29
 Nodes (10): ArenaService.getModel(), checkParticipants(), createVisualZoneIfNeeded(), destroyOwnedVisual(), EliminationService.beginRound(), EliminationService.endRound(), EliminationService.start(), EliminationService.stop() (+2 more)
 
 ### Community 8 - "LobbyService.luau"
-Cohesion: 0.25
-Nodes (16): assignActiveSpawn(), createSpawn(), destroyOwnedChild(), getActiveSpawn(), getFloorSlots(), getGallerySlots(), getLivingRoot(), isActiveCompetitor() (+8 more)
+Cohesion: 0.29
+Nodes (13): assignActiveSpawn(), createSpawn(), destroyOwnedChild(), getActiveSpawn(), getGallerySlots(), getLivingRoot(), isActiveCompetitor(), isOwned() (+5 more)
 
 ### Community 9 - "UiTheme.addCorner"
 Cohesion: 0.14
@@ -121,9 +121,9 @@ Nodes (4): AdminController.start(), buildPlayerEntries(), getRemote(), refreshPl
 Cohesion: 1.00
 Nodes (3): addCorner(), createHitLine(), CrosshairView.new()
 
-### Community 25 - "BuildingService.luau"
-Cohesion: 0.31
-Nodes (13): addSurfaceLight(), BuildingService.create(), BuildingService.destroy(), createCeilingLights(), createDecoration(), createFloorDetails(), createShell(), createSolid() (+5 more)
+### Community 25 - "BuildingDecor.luau"
+Cohesion: 0.17
+Nodes (25): addPointLight(), BuildingDecor.createChandelier(), BuildingDecor.createPart(), BuildingDecor.createPlant(), BuildingDecor.createSideTable(), BuildingDecor.createSofa(), BuildingDecor.decorateStory(), BuildingDecor.wallCFrame() (+17 more)
 
 ## Knowledge Gaps
 - **19 isolated node(s):** `Linguagem e comunicação`, `Arquitetura`, `Segurança e dependências`, `Escopo e compatibilidade`, `Validação e entrega` (+14 more)
@@ -133,16 +133,16 @@ Nodes (13): addSurfaceLight(), BuildingService.create(), BuildingService.destroy
 _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `PuffadorController.start()` connect `PuffadorController.luau` to `UiTheme.addCorner`, `CrosshairView.new`?**
-  _High betweenness centrality (0.037) - this node is a cross-community bridge._
-- **Why does `beginRound()` connect `RoundService.luau` to `LobbyService.luau`, `PuffadorService.luau`, `ArenaService.luau`, `EliminationService.luau`?**
-  _High betweenness centrality (0.033) - this node is a cross-community bridge._
+  _High betweenness centrality (0.035) - this node is a cross-community bridge._
 - **Why does `RoundService.stop()` connect `RoundService.luau` to `LobbyService.luau`, `PuffadorService.luau`, `EliminationService.luau`?**
-  _High betweenness centrality (0.028) - this node is a cross-community bridge._
+  _High betweenness centrality (0.029) - this node is a cross-community bridge._
+- **Why does `runEnding()` connect `RoundService.luau` to `LobbyService.luau`, `PuffadorService.luau`, `EliminationService.luau`?**
+  _High betweenness centrality (0.029) - this node is a cross-community bridge._
 - **Are the 13 inferred relationships involving `UiTheme.addCorner()` (e.g. with `AdminBroadcastView.new()` and `AdminPanelView.new()`) actually correct?**
   _`UiTheme.addCorner()` has 13 INFERRED edges - model-reasoned connections that need verification._
+- **Are the 4 inferred relationships involving `BuildingDecor.createPart()` (e.g. with `createSolid()` and `decorateArenaWalls()`) actually correct?**
+  _`BuildingDecor.createPart()` has 4 INFERRED edges - model-reasoned connections that need verification._
 - **Are the 12 inferred relationships involving `UiTheme.addStroke()` (e.g. with `AdminBroadcastView.new()` and `AdminPanelView.new()`) actually correct?**
   _`UiTheme.addStroke()` has 12 INFERRED edges - model-reasoned connections that need verification._
-- **Are the 5 inferred relationships involving `beginRound()` (e.g. with `ArenaService.beginRound()` and `ArenaService.restoreAllBlocks()`) actually correct?**
-  _`beginRound()` has 5 INFERRED edges - model-reasoned connections that need verification._
-- **Are the 5 inferred relationships involving `runEnding()` (e.g. with `ArenaService.endRound()` and `ArenaService.restoreAllBlocks()`) actually correct?**
-  _`runEnding()` has 5 INFERRED edges - model-reasoned connections that need verification._
+- **Are the 4 inferred relationships involving `beginRound()` (e.g. with `ArenaService.beginRound()` and `ArenaService.restoreAllBlocks()`) actually correct?**
+  _`beginRound()` has 4 INFERRED edges - model-reasoned connections that need verification._
