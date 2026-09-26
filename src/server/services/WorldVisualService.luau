@@ -20,8 +20,8 @@ local LEGACY_LIGHTING_NAMES = { "BlocoPuffSky", "BlocoPuffAtmosphere" }
 -- Luz ambiente de interior, escura e quente como uma mansão à noite: a
 -- leitura da cena vem principalmente de arandelas e lustres (BuildingService).
 -- Lighting.Technology = Future é definido em default.project.json.
-local INTERIOR_AMBIENT = Color3.fromRGB(64, 56, 54)
-local INTERIOR_OUTDOOR_AMBIENT = Color3.fromRGB(64, 56, 54)
+local INTERIOR_AMBIENT = Color3.fromRGB(84, 76, 72)
+local INTERIOR_OUTDOOR_AMBIENT = Color3.fromRGB(84, 76, 72)
 local INTERIOR_BRIGHTNESS = 0.5
 local INTERIOR_ENVIRONMENT_DIFFUSE = 0.15
 local INTERIOR_ENVIRONMENT_SPECULAR = 0.35

@@ -71,7 +71,10 @@ export type PuffadorConfig = {
 	MuzzleForwardOffset: number,
 	MuzzleUpOffset: number,
 	MaximumOriginDistance: number,
+	MaximumAimOriginDistance: number,
+	ProjectileConvergeDistance: number,
 	CameraShoulderOffset: Vector3,
+	CombatCameraZoom: number,
 	CameraRecoilDistance: number,
 	CameraRecoilRecovery: number,
 }
@@ -174,15 +177,22 @@ local Palette: WorldPalette = table.freeze({
 -- simular uma arma real. Nenhum valor aqui se relaciona a dano ou destruição.
 local Puffador: PuffadorConfig = table.freeze({
 	FireCooldown = 0.65,
-	ProjectileSpeed = 95,
-	ProjectileLifetime = 2.5,
-	MaximumRange = 180,
+	ProjectileSpeed = 220,
+	ProjectileLifetime = 1.5,
+	MaximumRange = 220,
 	MinimumAimDistance = 1,
 	ProjectileRadius = 0.8,
 	MuzzleForwardOffset = 2.5,
 	MuzzleUpOffset = 0.5,
 	MaximumOriginDistance = 12,
+	-- Como em jogos de tiro, o acerto segue o raio da câmera (o que está sob
+	-- a mira). O servidor só aceita uma origem de câmera próxima da cabeça e
+	-- com linha livre até ela.
+	MaximumAimOriginDistance = 24,
+	-- Distância em que o projétil visual sai do cano e encontra o raio da mira.
+	ProjectileConvergeDistance = 10,
 	CameraShoulderOffset = Vector3.new(1.8, 0.65, 0),
+	CombatCameraZoom = 10,
 	-- O recuo desloca a câmera levemente para trás, sem alterar a direção
 	-- central da mira ou acumular inclinação entre disparos.
 	CameraRecoilDistance = 0.16,

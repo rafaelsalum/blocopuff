@@ -1,8 +1,8 @@
 --!strict
 
 -- Unifica clique, toque, botão dedicado e gatilho em um disparo central.
--- O cliente envia apenas o ponto visado; o servidor recalcula a direção a
--- partir da origem autoritativa e continua decidindo alcance e impacto.
+-- O cliente envia o ponto sob a mira e a origem do raio da câmera; o
+-- servidor valida essa origem e continua decidindo alcance e impacto.
 
 local Debris = game:GetService("Debris")
 local CollectionService = game:GetService("CollectionService")
@@ -90,16 +90,16 @@ local function isFiniteVector3(vector: Vector3): boolean
 	return isFiniteNumber(vector.X) and isFiniteNumber(vector.Y) and isFiniteNumber(vector.Z)
 end
 
-local function getAimResult(): (RaycastResult?, Vector3?)
+local function getAimResult(): (RaycastResult?, Vector3?, Vector3?)
 	local camera = Workspace.CurrentCamera
 	if camera == nil then
-		return nil, nil
+		return nil, nil, nil
 	end
 
 	local screenPoint = Vector2.new(camera.ViewportSize.X / 2, camera.ViewportSize.Y / 2)
 	local cameraRay = camera:ViewportPointToRay(screenPoint.X, screenPoint.Y)
 	if cameraRay.Direction.Magnitude < 1e-4 then
-		return nil, nil
+		return nil, nil, nil
 	end
 
 	local raycastParams = RaycastParams.new()
@@ -116,16 +116,11 @@ local function getAimResult(): (RaycastResult?, Vector3?)
 	local direction = cameraRay.Direction.Unit * GameConfig.Puffador.MaximumRange
 	local result = Workspace:Raycast(cameraRay.Origin, direction, raycastParams)
 	local target = if result ~= nil then result.Position else cameraRay.Origin + direction
-	if not isFiniteVector3(target) then
-		return result, nil
+	if not isFiniteVector3(target) or not isFiniteVector3(cameraRay.Origin) then
+		return result, nil, nil
 	end
 
-	return result, target
-end
-
-local function getAimTarget(): Vector3?
-	local _, target = getAimResult()
-	return target
+	return result, target, cameraRay.Origin
 end
 
 local function isActiveArenaTarget(result: RaycastResult?): boolean
@@ -248,8 +243,8 @@ local function onToolActivated()
 		return
 	end
 
-	local aimTarget = getAimTarget()
-	if aimTarget == nil then
+	local _, aimTarget, aimOrigin = getAimResult()
+	if aimTarget == nil or aimOrigin == nil then
 		return
 	end
 
@@ -258,7 +253,7 @@ local function onToolActivated()
 		controlHint.hide()
 	end
 	playLocalShotFeedback(tool)
-	remote:FireServer(aimTarget)
+	remote:FireServer(aimTarget, aimOrigin)
 end
 
 local function setToolEquipped(tool: Tool)

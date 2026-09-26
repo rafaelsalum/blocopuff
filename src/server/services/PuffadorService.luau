@@ -3,8 +3,9 @@
 -- Serviço autoritativo do Puffador: constrói a ferramenta, controla quando
 -- cada participante a possui, recebe o RemoteEvent de disparo, valida tudo
 -- no servidor e delega a simulação do projétil ao ProjectileService.
--- O cliente informa somente o ponto que deseja mirar; nunca escolhe origem,
--- alcance, cadência, resultado do impacto ou destruição.
+-- O cliente informa o ponto mirado e a origem do raio da câmera; o servidor
+-- só aceita essa origem perto da cabeça e com linha livre até ela, e segue
+-- decidindo alcance, cadência, resultado do impacto e destruição.
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Workspace = game:GetService("Workspace")
@@ -243,6 +244,38 @@ local function computeOrigin(rootPart: BasePart, tool: Tool): Vector3
 		+ Vector3.new(0, config.MuzzleUpOffset, 0)
 end
 
+-- Origem do raio da mira. Usar a câmera (e não o cano) faz o tiro acertar
+-- exatamente o que está sob a mira, como em jogos de tiro em terceira pessoa.
+-- Se a origem enviada for inválida, distante ou atrás de uma parede, cai
+-- para o cano, que é sempre autoritativo.
+local function resolveAimOrigin(character: Model, rootPart: BasePart, rawAimOrigin: unknown, fallback: Vector3): Vector3
+	if typeof(rawAimOrigin) ~= "Vector3" or not isFiniteVector3(rawAimOrigin) then
+		return fallback
+	end
+
+	local head = character:FindFirstChild("Head")
+	local headPosition = if head ~= nil and head:IsA("BasePart")
+		then head.Position
+		else rootPart.Position + Vector3.new(0, 1.5, 0)
+	local toOrigin = rawAimOrigin - headPosition
+	if toOrigin.Magnitude > GameConfig.Puffador.MaximumAimOriginDistance then
+		return fallback
+	end
+	if toOrigin.Magnitude < 1e-3 then
+		return rawAimOrigin
+	end
+
+	local params = RaycastParams.new()
+	params.FilterType = Enum.RaycastFilterType.Exclude
+	params.FilterDescendantsInstances = { character }
+	params.IgnoreWater = true
+	if Workspace:Raycast(headPosition, toOrigin, params) ~= nil then
+		return fallback
+	end
+
+	return rawAimOrigin
+end
+
 local function incrementRoundBlocksDestroyed(player: Player)
 	local attributeName = StateAttributeNames.PlayerRoundBlocksDestroyed
 	local currentValue = player:GetAttribute(attributeName)
@@ -250,7 +283,7 @@ local function incrementRoundBlocksDestroyed(player: Player)
 	player:SetAttribute(attributeName, currentScore + 1)
 end
 
-local function onRequestPuff(player: Player, rawAimTarget: unknown)
+local function onRequestPuff(player: Player, rawAimTarget: unknown, rawAimOrigin: unknown)
 	if player.Parent == nil then
 		return
 	end
@@ -311,7 +344,8 @@ local function onRequestPuff(player: Player, rawAimTarget: unknown)
 		return
 	end
 
-	local aimDelta = rawAimTarget - origin
+	local aimOrigin = resolveAimOrigin(character, rootPart, rawAimOrigin, origin)
+	local aimDelta = rawAimTarget - aimOrigin
 	if not isFiniteVector3(aimDelta) or aimDelta.Magnitude < GameConfig.Puffador.MinimumAimDistance then
 		return
 	end
@@ -319,7 +353,7 @@ local function onRequestPuff(player: Player, rawAimTarget: unknown)
 	lastFireClock[player] = now
 
 	local direction = aimDelta.Unit
-	ProjectileService.spawn(player, origin, direction, currentRoundId, function()
+	ProjectileService.spawn(player, origin, aimOrigin, direction, currentRoundId, function()
 		incrementRoundBlocksDestroyed(player)
 		local remote = feedbackRemote
 		if remote ~= nil and player.Parent ~= nil then

@@ -2,7 +2,8 @@
 
 -- Cria, simula e limpa os projéteis visuais do Puffador. Não conhece regras
 -- de rodada, participantes ou o RemoteEvent de disparo: apenas recebe uma
--- origem e direção já validadas e devolve efeito visual ao impacto.
+-- origem e direção já validadas e devolve efeito visual ao impacto. O acerto
+-- percorre o raio da mira; o projétil visível sai do cano e converge nele.
 -- Nenhum dano, impulso ou destruição de blocos ocorre aqui.
 
 local CollectionService = game:GetService("CollectionService")
@@ -32,6 +33,11 @@ type ProjectileRecord = {
 	roundId: number,
 	projectileId: number,
 	direction: Vector3,
+	-- Posição autoritativa, que percorre o raio da mira (câmera → alvo).
+	logicPosition: Vector3,
+	-- Diferença entre o cano e a origem da mira; some ao longo da
+	-- convergência para o projétil visual sair da arma e seguir a mira.
+	visualOffset: Vector3,
 	raycastParams: RaycastParams,
 	spawnClock: number,
 	distanceTraveled: number,
@@ -134,7 +140,7 @@ local function updateProjectiles(deltaTime: number)
 			end
 
 			local displacement = record.direction * config.ProjectileSpeed * deltaTime
-			local previousPosition = record.part.Position
+			local previousPosition = record.logicPosition
 
 			local raycastResult = Workspace:Raycast(previousPosition, displacement, record.raycastParams)
 			if raycastResult ~= nil then
@@ -164,7 +170,9 @@ local function updateProjectiles(deltaTime: number)
 			end
 
 			record.distanceTraveled = newDistance
-			record.part.Position = previousPosition + displacement
+			record.logicPosition = previousPosition + displacement
+			local convergence = math.clamp(1 - (newDistance / config.ProjectileConvergeDistance), 0, 1)
+			record.part.Position = record.logicPosition + (record.visualOffset * convergence)
 			return true
 		end)
 
@@ -199,9 +207,12 @@ function ProjectileService.start(worldRoot: Model)
 	heartbeatConnection = RunService.Heartbeat:Connect(updateProjectiles)
 end
 
+-- `origin` é o cano (visual); `aimOrigin` é a origem validada do raio da
+-- mira, por onde o acerto é decidido.
 function ProjectileService.spawn(
 	player: Player,
 	origin: Vector3,
+	aimOrigin: Vector3,
 	direction: Vector3,
 	roundId: number,
 	onBlockHit: (() -> ())?
@@ -288,6 +299,8 @@ function ProjectileService.spawn(
 		roundId = roundId,
 		projectileId = projectileId,
 		direction = direction,
+		logicPosition = aimOrigin,
+		visualOffset = origin - aimOrigin,
 		raycastParams = raycastParams,
 		spawnClock = os.clock(),
 		distanceTraveled = 0,

@@ -34,6 +34,14 @@ local BEAM_SIZE = 1.2
 local BEAM_SPACING = 14
 local ARENA_LAMP_RANGE = 22
 local ARENA_LAMP_BRIGHTNESS = 1.1
+-- Andares abaixo do topo não recebem luz dos lustres; arandelas mais fortes
+-- e luzes de preenchimento compensam.
+local LOWER_LAMP_RANGE = 30
+local LOWER_LAMP_BRIGHTNESS = 1.5
+local FILL_LIGHT_GRID = 3
+local FILL_LIGHT_DROP = 4
+local FILL_LIGHT_RANGE = 44
+local FILL_LIGHT_BRIGHTNESS = 1.3
 local GALLERY_LAMP_RANGE = 16
 local GALLERY_LAMP_BRIGHTNESS = 0.8
 local CHANDELIER_DROP = 5
@@ -272,8 +280,8 @@ local function decorateArenaWalls(parent: Instance, arena: ArenaConfig, building
 				art = true,
 				windows = isTop and isOuterWall,
 				door = not isTop and isOuterWall,
-				lampRange = ARENA_LAMP_RANGE,
-				lampBrightness = ARENA_LAMP_BRIGHTNESS,
+				lampRange = if isTop then ARENA_LAMP_RANGE else LOWER_LAMP_RANGE,
+				lampBrightness = if isTop then ARENA_LAMP_BRIGHTNESS else LOWER_LAMP_BRIGHTNESS,
 			}, rng)
 		end
 	end
@@ -419,6 +427,40 @@ local function decorateCeiling(parent: Instance, arena: ArenaConfig, building: B
 	end
 end
 
+-- Luzes invisíveis logo abaixo de cada piso superior, fazendo o papel de
+-- luminárias de teto do andar de baixo. Ficam fora do alcance de tiros e
+-- colisões e não dependem dos blocos, que podem ser destruídos.
+local function createFillLights(parent: Instance, arena: ArenaConfig, building: BuildingConfig)
+	local bounds = BuildingLayout.getRoomBounds(arena, building)
+	for floorIndex = 2, arena.FloorCount do
+		local y = BuildingLayout.getFloorY(arena, floorIndex) - FILL_LIGHT_DROP
+		for row = 1, FILL_LIGHT_GRID do
+			for column = 1, FILL_LIGHT_GRID do
+				local xRatio = ((column - 0.5) / FILL_LIGHT_GRID) - 0.5
+				local zRatio = ((row - 0.5) / FILL_LIGHT_GRID) - 0.5
+				local source = BuildingDecor.createPart(
+					parent,
+					string.format("FillLightF%d_%d_%d", floorIndex - 1, row, column),
+					Vector3.new(0.2, 0.2, 0.2),
+					CFrame.new(
+						bounds.center.X + (xRatio * bounds.halfWidth * 2),
+						y,
+						bounds.center.Z + (zRatio * bounds.halfDepth * 2)
+					),
+					building.LampColor,
+					{ transparency = 1 }
+				)
+				local light = Instance.new("PointLight")
+				light.Color = building.LampColor
+				light.Range = FILL_LIGHT_RANGE
+				light.Brightness = FILL_LIGHT_BRIGHTNESS
+				light.Shadows = false
+				light.Parent = source
+			end
+		end
+	end
+end
+
 function BuildingService.create(worldRoot: Model, arena: ArenaConfig, building: BuildingConfig): Model
 	BuildingService.destroy()
 	removeDefaultBaseplate()
@@ -437,6 +479,7 @@ function BuildingService.create(worldRoot: Model, arena: ArenaConfig, building: 
 	decorateArenaWalls(model, arena, building, segments.arena, rng)
 	decorateGallery(model, arena, building, segments.gallery, rng)
 	decorateCeiling(model, arena, building)
+	createFillLights(model, arena, building)
 
 	model.Parent = worldRoot
 	buildingModel = model
