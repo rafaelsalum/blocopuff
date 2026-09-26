@@ -7,6 +7,7 @@ local TweenService = game:GetService("TweenService")
 
 local GameConfig = require(ReplicatedStorage.Shared.config.GameConfig)
 local ArenaConstants = require(ReplicatedStorage.Shared.modules.ArenaConstants)
+local BuildingLayout = require(ReplicatedStorage.Shared.modules.BuildingLayout)
 local StateAttributeNames = require(ReplicatedStorage.Shared.types.StateAttributeNames)
 local ReplicatedState = require(script.Parent.ReplicatedStateService)
 
@@ -26,6 +27,7 @@ export type BlockDestructionContext = {
 
 type BlockRecord = {
 	part: Part,
+	floorIndex: number,
 	gridRow: number,
 	gridColumn: number,
 	blockId: string,
@@ -50,11 +52,14 @@ local GENERATED_BY_ATTRIBUTE = "GeneratedBy"
 local SERVICE_NAME = "ArenaService"
 local ATTR_IS_DESTROYED = ArenaConstants.IsDestroyedAttribute
 
-local SPAWN_HEIGHT_OFFSET = 5
-local SPAWN_MARGIN_RATIO = 0.15
+-- Pisos inferiores ficam levemente mais escuros para que o jogador saiba,
+-- olhando para cima ou para baixo, em qual andar está.
+local LOWER_FLOOR_TINT = Color3.fromRGB(78, 80, 98)
+local LOWER_FLOOR_TINT_ALPHA = 0.3
 local ENERGY_NODE_SIZE = 1.35
 local ENERGY_HEIGHT_OFFSET = 1.15
 local ENERGY_BEAM_WIDTH = 0.34
+local ENERGY_WALL_INSET = 1
 local COLLAPSE_DURATION = 0.34
 local RESTORE_FADE_DURATION = 0.22
 
@@ -92,14 +97,23 @@ local function destroyOwnedChild(worldRoot: Model)
 	existing:Destroy()
 end
 
-local function getArenaColors(palette: WorldPalette): { Color3 }
-	return {
+local function getArenaColors(palette: WorldPalette, floorIndex: number, floorCount: number): { Color3 }
+	local colors = {
 		palette.LightBlue,
 		palette.Yellow,
 		palette.Orange,
 		palette.Purple,
 		palette.Pink,
 	}
+	if floorIndex >= floorCount then
+		return colors
+	end
+
+	local tinted: { Color3 } = {}
+	for _, color in ipairs(colors) do
+		table.insert(tinted, color:Lerp(LOWER_FLOOR_TINT, LOWER_FLOOR_TINT_ALPHA))
+	end
+	return tinted
 end
 
 local function setArenaEnergy(active: boolean)
@@ -123,19 +137,18 @@ local function setArenaEnergy(active: boolean)
 end
 
 local function createArenaVisuals(
-	parent: Model,
+	visuals: Model,
 	config: ArenaConfig,
 	palette: WorldPalette,
+	floorIndex: number,
 	totalWidth: number,
 	totalDepth: number
 )
-	local visuals = Instance.new("Model")
-	visuals.Name = VISUALS_NAME
-	visuals.Parent = parent
-
-	local energyY = config.Position.Y - (config.BlockSize.Y / 2) - ENERGY_HEIGHT_OFFSET
-	local halfWidth = (totalWidth / 2) + 0.5
-	local halfDepth = (totalDepth / 2) + 0.5
+	local firstNodeIndex = #energyNodes + 1
+	local energyY = BuildingLayout.getFloorY(config, floorIndex) - (config.BlockSize.Y / 2) - ENERGY_HEIGHT_OFFSET
+	-- Recuado para dentro, pois as paredes do prédio encostam na borda do piso.
+	local halfWidth = (totalWidth / 2) - ENERGY_WALL_INSET
+	local halfDepth = (totalDepth / 2) - ENERGY_WALL_INSET
 	local cornerOffsets = {
 		Vector3.new(-halfWidth, 0, -halfDepth),
 		Vector3.new(halfWidth, 0, -halfDepth),
@@ -145,7 +158,7 @@ local function createArenaVisuals(
 
 	for index, offset in ipairs(cornerOffsets) do
 		local node = Instance.new("Part")
-		node.Name = string.format("EnergyNode%02d", index)
+		node.Name = string.format("EnergyNodeF%d_%02d", floorIndex, index)
 		node.Shape = Enum.PartType.Ball
 		node.Size = Vector3.new(ENERGY_NODE_SIZE, ENERGY_NODE_SIZE, ENERGY_NODE_SIZE)
 		node.Position = Vector3.new(config.Position.X, energyY, config.Position.Z) + offset
@@ -175,13 +188,14 @@ local function createArenaVisuals(
 		table.insert(energyLights, light)
 	end
 
-	for index = 1, #energyNodes do
-		local nextIndex = if index == #energyNodes then 1 else index + 1
+	local lastNodeIndex = #energyNodes
+	for index = firstNodeIndex, lastNodeIndex do
+		local nextIndex = if index == lastNodeIndex then firstNodeIndex else index + 1
 		local attachment0 = energyNodes[index]:FindFirstChild("EnergyAttachment")
 		local attachment1 = energyNodes[nextIndex]:FindFirstChild("EnergyAttachment")
 		if attachment0 ~= nil and attachment0:IsA("Attachment") and attachment1 ~= nil and attachment1:IsA("Attachment") then
 			local beam = Instance.new("Beam")
-			beam.Name = string.format("EnergyEdge%02d", index)
+			beam.Name = string.format("EnergyEdgeF%d_%02d", floorIndex, index - firstNodeIndex + 1)
 			beam.Attachment0 = attachment0
 			beam.Attachment1 = attachment1
 			beam.Width0 = ENERGY_BEAM_WIDTH
@@ -248,60 +262,64 @@ function ArenaService.create(worldRoot: Model, config: ArenaConfig, palette: Wor
 	newEffectsFolder.Name = EFFECTS_NAME
 	newEffectsFolder.Parent = newArena
 
-	local colors = getArenaColors(palette)
 	local stepX = config.BlockSize.X + config.BlockGap
 	local stepZ = config.BlockSize.Z + config.BlockGap
-	local totalWidth = (config.Columns * config.BlockSize.X) + ((config.Columns - 1) * config.BlockGap)
-	local totalDepth = (config.Rows * config.BlockSize.Z) + ((config.Rows - 1) * config.BlockGap)
+	local totalWidth, totalDepth = BuildingLayout.getFloorSize(config)
 	local startX = config.Position.X - (totalWidth / 2) + (config.BlockSize.X / 2)
 	local startZ = config.Position.Z - (totalDepth / 2) + (config.BlockSize.Z / 2)
 
-	createArenaVisuals(newArena, config, palette, totalWidth, totalDepth)
+	local visuals = Instance.new("Model")
+	visuals.Name = VISUALS_NAME
+	visuals.Parent = newArena
 
-	for row = 1, config.Rows do
-		for column = 1, config.Columns do
-			local blockId = string.format("R%02dC%02d", row, column)
-			local colorIndex = ((row + column - 2) % #colors) + 1
+	for floorIndex = 1, config.FloorCount do
+		local colors = getArenaColors(palette, floorIndex, config.FloorCount)
+		local floorY = BuildingLayout.getFloorY(config, floorIndex)
+		createArenaVisuals(visuals, config, palette, floorIndex, totalWidth, totalDepth)
 
-			local block = Instance.new("Part")
-			block.Name = blockId
-			block.Anchored = true
-			block.CanCollide = true
-			block.Size = config.BlockSize
-			block.Position = Vector3.new(
-				startX + ((column - 1) * stepX),
-				config.Position.Y,
-				startZ + ((row - 1) * stepZ)
-			)
-			block.Material = Enum.Material.SmoothPlastic
-			block.Color = colors[colorIndex]
-			block.TopSurface = Enum.SurfaceType.Smooth
-			block.BottomSurface = Enum.SurfaceType.Smooth
-			block:SetAttribute(ArenaConstants.GridRowAttribute, row)
-			block:SetAttribute(ArenaConstants.GridColumnAttribute, column)
-			block:SetAttribute(ArenaConstants.BlockIdAttribute, blockId)
-			block:SetAttribute(GENERATED_BY_ATTRIBUTE, SERVICE_NAME)
-			block:SetAttribute(ATTR_IS_DESTROYED, false)
-			CollectionService:AddTag(block, BLOCK_TAG)
-			block.Parent = blocksFolder
+		for row = 1, config.Rows do
+			for column = 1, config.Columns do
+				local blockId = string.format("F%dR%02dC%02d", floorIndex, row, column)
+				local colorIndex = ((row + column + floorIndex - 3) % #colors) + 1
 
-			table.insert(arenaBlocks, block)
-			blockRecords[block] = {
-				part = block,
-				gridRow = row,
-				gridColumn = column,
-				blockId = blockId,
-				originalCFrame = block.CFrame,
-				originalSize = block.Size,
-				originalColor = block.Color,
-				originalMaterial = block.Material,
-				originalTransparency = block.Transparency,
-				originalCanCollide = block.CanCollide,
-				originalCanTouch = block.CanTouch,
-				originalCanQuery = block.CanQuery,
-				generation = arenaGeneration,
-				isDestroyed = false,
-			}
+				local block = Instance.new("Part")
+				block.Name = blockId
+				block.Anchored = true
+				block.CanCollide = true
+				block.Size = config.BlockSize
+				block.Position = Vector3.new(startX + ((column - 1) * stepX), floorY, startZ + ((row - 1) * stepZ))
+				block.Material = Enum.Material.SmoothPlastic
+				block.Color = colors[colorIndex]
+				block.TopSurface = Enum.SurfaceType.Smooth
+				block.BottomSurface = Enum.SurfaceType.Smooth
+				block:SetAttribute(ArenaConstants.FloorAttribute, floorIndex)
+				block:SetAttribute(ArenaConstants.GridRowAttribute, row)
+				block:SetAttribute(ArenaConstants.GridColumnAttribute, column)
+				block:SetAttribute(ArenaConstants.BlockIdAttribute, blockId)
+				block:SetAttribute(GENERATED_BY_ATTRIBUTE, SERVICE_NAME)
+				block:SetAttribute(ATTR_IS_DESTROYED, false)
+				CollectionService:AddTag(block, BLOCK_TAG)
+				block.Parent = blocksFolder
+
+				table.insert(arenaBlocks, block)
+				blockRecords[block] = {
+					part = block,
+					floorIndex = floorIndex,
+					gridRow = row,
+					gridColumn = column,
+					blockId = blockId,
+					originalCFrame = block.CFrame,
+					originalSize = block.Size,
+					originalColor = block.Color,
+					originalMaterial = block.Material,
+					originalTransparency = block.Transparency,
+					originalCanCollide = block.CanCollide,
+					originalCanTouch = block.CanTouch,
+					originalCanQuery = block.CanQuery,
+					generation = arenaGeneration,
+					isDestroyed = false,
+				}
+			end
 		end
 	end
 
@@ -327,45 +345,13 @@ function ArenaService.getBlocks(): { Part }
 	return blocksCopy
 end
 
-local function computeSpawnCFrames(config: ArenaConfig, count: number): { CFrame }
-	local totalWidth = (config.Columns * config.BlockSize.X) + ((config.Columns - 1) * config.BlockGap)
-	local totalDepth = (config.Rows * config.BlockSize.Z) + ((config.Rows - 1) * config.BlockGap)
-	local topY = config.Position.Y + (config.BlockSize.Y / 2) + SPAWN_HEIGHT_OFFSET
-
-	local marginX = totalWidth * SPAWN_MARGIN_RATIO
-	local marginZ = totalDepth * SPAWN_MARGIN_RATIO
-	local usableWidth = totalWidth - (marginX * 2)
-	local usableDepth = totalDepth - (marginZ * 2)
-	local minX = config.Position.X - (totalWidth / 2) + marginX
-	local minZ = config.Position.Z - (totalDepth / 2) + marginZ
-
-	local gridColumns = math.ceil(math.sqrt(count))
-	local gridRows = math.ceil(count / gridColumns)
-
-	local spawnCFrames: { CFrame } = {}
-	for index = 1, count do
-		local zeroBased = index - 1
-		local gridRow = math.floor(zeroBased / gridColumns)
-		local gridColumn = zeroBased % gridColumns
-
-		local xRatio = if gridColumns > 1 then gridColumn / (gridColumns - 1) else 0.5
-		local zRatio = if gridRows > 1 then gridRow / (gridRows - 1) else 0.5
-
-		local x = minX + (xRatio * usableWidth)
-		local z = minZ + (zRatio * usableDepth)
-
-		table.insert(spawnCFrames, CFrame.new(x, topY, z))
-	end
-
-	return spawnCFrames
-end
-
 function ArenaService.getPlayerSpawnCFrames(): { CFrame }
 	if currentArenaConfig == nil then
 		error(`Cannot compute spawn positions before {SERVICE_NAME}.create has been called`)
 	end
 
-	return computeSpawnCFrames(currentArenaConfig, GameConfig.MaximumPlayers)
+	-- A partida sempre começa no piso de cima.
+	return BuildingLayout.getFloorSpawnCFrames(currentArenaConfig, currentArenaConfig.FloorCount, GameConfig.MaximumPlayers)
 end
 
 function ArenaService.beginRound(roundId: number)
@@ -531,6 +517,7 @@ local function recreateBlockFromRecord(record: BlockRecord): Part?
 	block.CanQuery = record.originalCanQuery
 	block.TopSurface = Enum.SurfaceType.Smooth
 	block.BottomSurface = Enum.SurfaceType.Smooth
+	block:SetAttribute(ArenaConstants.FloorAttribute, record.floorIndex)
 	block:SetAttribute(ArenaConstants.GridRowAttribute, record.gridRow)
 	block:SetAttribute(ArenaConstants.GridColumnAttribute, record.gridColumn)
 	block:SetAttribute(ArenaConstants.BlockIdAttribute, record.blockId)
@@ -565,6 +552,7 @@ local function restoreBlockAt(index: number)
 			arenaBlocks[index] = recreated
 			blockRecords[recreated] = {
 				part = recreated,
+				floorIndex = record.floorIndex,
 				gridRow = record.gridRow,
 				gridColumn = record.gridColumn,
 				blockId = record.blockId,
@@ -631,7 +619,9 @@ function ArenaService.getEliminationY(): number
 		error(`Cannot compute elimination height before {SERVICE_NAME}.create has been called`)
 	end
 
-	return currentArenaConfig.Position.Y - GameConfig.EliminationZone.DepthBelowArena
+	-- Só cair abaixo do piso mais baixo elimina: quem cai do piso de cima
+	-- apenas desce de andar e continua na partida.
+	return BuildingLayout.getEliminationY(currentArenaConfig, GameConfig.EliminationZone.DepthBelowArena)
 end
 
 return table.freeze(ArenaService)

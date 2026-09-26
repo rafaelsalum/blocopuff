@@ -11,7 +11,7 @@ local PuffadorService = require(script.services.PuffadorService)
 local EliminationService = require(script.services.EliminationService)
 local RoundService = require(script.services.RoundService)
 local WorldVisualService = require(script.services.WorldVisualService)
-local SkyIslandService = require(script.services.SkyIslandService)
+local BuildingService = require(script.services.BuildingService)
 local AdminService = require(script.services.AdminService)
 
 local WORLD_NAME = "BlocoPuffWorld"
@@ -44,18 +44,16 @@ local world = getOrCreateWorld()
 
 print("[BlocoPuff] Server initialized")
 
--- Publica o estado antes de carregar meshes remotas. Na primeira execução,
--- a criação da ilha pode levar alguns segundos e o HUD não deve expirar.
 ReplicatedStateService.create()
 print("[BlocoPuff] Replicated state initialized")
 
 WorldVisualService.start(world, GameConfig.Palette)
 print("[BlocoPuff] World visuals created")
 
-SkyIslandService.start(world)
-print("[BlocoPuff] Walkable sky island created")
+BuildingService.create(world, GameConfig.Arena, GameConfig.Building)
+print("[BlocoPuff] Building created")
 
-LobbyService.create(world, GameConfig.Lobby, GameConfig.Palette)
+LobbyService.create(world, GameConfig.Arena, GameConfig.Building)
 print("[BlocoPuff] Lobby created")
 
 AdminService.start()

@@ -8,11 +8,23 @@ export type ArenaConfig = {
 	BlockSize: Vector3,
 	BlockGap: number,
 	Position: Vector3,
+	FloorCount: number,
+	FloorSpacing: number,
 }
 
-export type LobbyConfig = {
-	PlatformSize: Vector3,
-	Position: Vector3,
+export type BuildingConfig = {
+	WallThickness: number,
+	CeilingClearance: number,
+	PitDepth: number,
+	GalleryDepth: number,
+	GalleryRise: number,
+	WallColor: Color3,
+	LowerWallColor: Color3,
+	CeilingColor: Color3,
+	PitColor: Color3,
+	TrimColor: Color3,
+	GalleryFloorColor: Color3,
+	LightColor: Color3,
 }
 
 export type WorldPalette = {
@@ -61,7 +73,7 @@ export type GameConfig = {
 	StudioRoundDuration: number,
 	StudioIntermissionDuration: number,
 	Arena: ArenaConfig,
-	Lobby: LobbyConfig,
+	Building: BuildingConfig,
 	Palette: WorldPalette,
 	Puffador: PuffadorConfig,
 	EliminationZone: EliminationZoneConfig,
@@ -73,14 +85,29 @@ local Arena: ArenaConfig = table.freeze({
 	Columns = 15,
 	BlockSize = Vector3.new(6, 1, 6),
 	BlockGap = 0.2,
-	Position = Vector3.new(0, 220, 0),
+	-- Centro do piso mais baixo. Os demais pisos ficam FloorSpacing studs
+	-- acima um do outro; os jogadores começam no piso de cima.
+	Position = Vector3.new(0, 100, 0),
+	FloorCount = 2,
+	FloorSpacing = 28,
 })
 
-local Lobby: LobbyConfig = table.freeze({
-	-- PlatformSize permanece no contrato para compatibilidade, mas o lobby
-	-- agora usa a topografia real da ilha em vez de uma plataforma artificial.
-	PlatformSize = Vector3.new(100, 2, 100),
-	Position = Vector3.new(0, 50, 0),
+-- Prédio fechado ao redor da arena: paredes e teto em cores sólidas para não
+-- passar a sensação de mapa aberto. PitDepth precisa ser maior que
+-- EliminationZone.DepthBelowArena para a eliminação ocorrer antes do fundo.
+local Building: BuildingConfig = table.freeze({
+	WallThickness = 2,
+	CeilingClearance = 26,
+	PitDepth = 45,
+	GalleryDepth = 16,
+	GalleryRise = 6,
+	WallColor = Color3.fromRGB(196, 200, 212),
+	LowerWallColor = Color3.fromRGB(150, 156, 176),
+	CeilingColor = Color3.fromRGB(228, 230, 236),
+	PitColor = Color3.fromRGB(46, 44, 60),
+	TrimColor = Color3.fromRGB(116, 108, 150),
+	GalleryFloorColor = Color3.fromRGB(176, 160, 206),
+	LightColor = Color3.fromRGB(255, 244, 226),
 })
 
 local Palette: WorldPalette = table.freeze({
@@ -110,7 +137,7 @@ local Puffador: PuffadorConfig = table.freeze({
 	CameraRecoilRecovery = 18,
 })
 
--- DepthBelowArena fica bem acima de |FallenPartsDestroyHeight| (ver
+-- DepthBelowArena é medido a partir do piso mais baixo e fica bem acima de |FallenPartsDestroyHeight| (ver
 -- default.project.json) para que a eliminação autoritativa sempre aconteça
 -- antes do limite global de destruição de partes.
 local EliminationZone: EliminationZoneConfig = table.freeze({
@@ -134,7 +161,7 @@ GameConfig.StudioRoundDuration = 20
 GameConfig.StudioIntermissionDuration = 5
 
 GameConfig.Arena = Arena
-GameConfig.Lobby = Lobby
+GameConfig.Building = Building
 GameConfig.Palette = Palette
 GameConfig.Puffador = Puffador
 GameConfig.EliminationZone = EliminationZone

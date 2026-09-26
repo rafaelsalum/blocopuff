@@ -159,16 +159,18 @@ Para um teste simples, abra **View > Output** e clique em **Play**. Sem erros, d
 
 ```text
 [BlocoPuff] Server initialized
-[BlocoPuff] Lobby created
 [BlocoPuff] Replicated state initialized
-[BlocoPuff] Arena created with 225 blocks
+[BlocoPuff] World visuals created
+[BlocoPuff] Building created
+[BlocoPuff] Lobby created
+[BlocoPuff] Arena created with 450 blocks
 [BlocoPuff] Puffador system started
 [BlocoPuff] Elimination zone armed
 [BlocoPuff] Round cycle started
 [BlocoPuff] Client initialized
 ```
 
-Durante o teste, o servidor também cria `Workspace/BlocoPuffWorld` com o lobby, a arena e `Projectiles`, além de `ReplicatedStorage/BlocoPuffState` (estado da rodada por atributos) e `ReplicatedStorage/BlocoPuffRemotes`, com `RequestPuff` para solicitar disparos e `PuffFeedback` para confirmar acertos válidos ao atirador. O cliente lê exclusivamente os atributos replicados para desenhar o HUD; a cada mudança real de estado, o servidor registra `[BlocoPuff] Round state: <Estado>`. Encerre o teste pelo botão **Stop**; os objetos gerados em runtime desaparecem ao finalizar o Play.
+Durante o teste, o servidor também cria `Workspace/BlocoPuffWorld` com o prédio (`Building`), o lobby, a arena e `Projectiles`, além de `ReplicatedStorage/BlocoPuffState` (estado da rodada por atributos) e `ReplicatedStorage/BlocoPuffRemotes`, com `RequestPuff` para solicitar disparos e `PuffFeedback` para confirmar acertos válidos ao atirador. O cliente lê exclusivamente os atributos replicados para desenhar o HUD; a cada mudança real de estado, o servidor registra `[BlocoPuff] Round state: <Estado>`. Encerre o teste pelo botão **Stop**; os objetos gerados em runtime desaparecem ao finalizar o Play.
 
 ## Build local
 
@@ -190,7 +192,7 @@ O botão `PAINEL ADMIN` aparece apenas depois que o servidor confirma a autoriza
 
 Para testar persistência e sincronização no Studio, a experiência precisa estar publicada e com **Enable Studio Access to API Services** habilitado. Sem esse acesso, o restante do jogo continua funcionando e o painel informa quando uma operação persistente ou global não está disponível. O atalho `F2` abre ou fecha o painel no computador; em toque e gamepad, use o botão visível e os controles selecionáveis da interface.
 
-O servidor gera em runtime uma primeira versão visual do mundo, com lobby, ponto de nascimento e uma arena suspensa de 225 blocos identificados. Um ciclo de partidas autoritativo (`WaitingForPlayers → Countdown → Active → Ending`) seleciona participantes, teleporta-os para posições distintas na arena e replica o estado para o cliente somente por atributos em `ReplicatedStorage/BlocoPuffState`. O cliente traduz esse estado em camadas independentes de preparação, combate, anúncios e espectador.
+O servidor gera em runtime uma primeira versão visual do mundo, com um prédio fechado e uma arena de dois pisos (450 blocos identificados). Um ciclo de partidas autoritativo (`WaitingForPlayers → Countdown → Active → Ending`) seleciona participantes, teleporta-os para posições distintas na arena e replica o estado para o cliente somente por atributos em `ReplicatedStorage/BlocoPuffState`. O cliente traduz esse estado em camadas independentes de preparação, combate, anúncios e espectador.
 
 Quando há mais jogadores conectados do que o limite de participantes por rodada, a seleção usa uma **fila de rotação justa**: em vez de sempre escalar os primeiros jogadores conectados, quem acabou de jogar vai para o fim da fila, dando prioridade a quem ainda está esperando a vez. Jogadores que precisam esperar mais de uma rodada veem essa posição no HUD ("Você joga em N rodadas").
 
@@ -208,9 +210,15 @@ Na quarta fase, cada participante passou a ter uma pontuação pessoal de blocos
 
 Cada participante recebe, ao entrar em `Active`, o **Puffador**: uma ferramenta cartunesca construída inteiramente com instâncias nativas (sem assets externos), já equipada na mão. O jogador mira e dispara com mouse, toque, gamepad ou o botão dedicado — todos convergem para a mesma função no cliente, que calcula o ponto visado no mundo e o envia pelo `RemoteEvent RequestPuff`. O servidor recalcula a direção entre o cano validado e esse ponto, eliminando a paralaxe da câmera sem confiar no cliente para origem, alcance, cadência ou impacto. O projétil usa material neon, trilha, brilho e efeito de impacto; recuo, clarão, som e recarga são feedbacks locais imediatos.
 
-Quando um projétil atinge diretamente um bloco válido e ativo da arena (tag `ArenaBlock`), o `ArenaService` o remove **temporariamente**: fica invisível, sem colisão e sem ser atingível por novos raycasts, permitindo que personagens caiam pelo espaço aberto. O bloco não é destruído de fato — todos os 225 são restaurados integralmente (posição, tamanho, cor, atributos e tags) antes de cada nova rodada. O Puffador continua **sem causar dano direto**: a queda usa apenas a física normal, sem impulso, sem eliminação atribuída ao disparo. As contagens `TotalBlockCount`, `RemainingBlockCount` e `DestroyedBlockCount` são replicadas em `BlocoPuffState`; durante `Active`, o HUD as apresenta como percentual de integridade, barra visual e contagem exata secundária.
+Quando um projétil atinge diretamente um bloco válido e ativo da arena (tag `ArenaBlock`), o `ArenaService` o remove **temporariamente**: fica invisível, sem colisão e sem ser atingível por novos raycasts, permitindo que personagens caiam pelo espaço aberto. O bloco não é destruído de fato — todos os 450 são restaurados integralmente (posição, tamanho, cor, atributos e tags) antes de cada nova rodada. O Puffador continua **sem causar dano direto**: a queda usa apenas a física normal, sem impulso, sem eliminação atribuída ao disparo. As contagens `TotalBlockCount`, `RemainingBlockCount` e `DestroyedBlockCount` são replicadas em `BlocoPuffState`; durante `Active`, o HUD as apresenta como percentual de integridade, barra visual e contagem exata secundária.
 
 Abaixo da arena existe uma **zona de eliminação** autoritativa: o servidor monitora, a cada 0,1s, a posição vertical dos participantes ativos e os elimina assim que cruzam um limite calculado a partir da própria posição da arena (não é um valor fixo do mundo, nem depende exclusivamente de `Workspace.FallenPartsDestroyHeight`, que continua existindo apenas como rede de segurança global). A eliminação registra a causa (`FellFromArena`, `CharacterDied` para outras mortes durante `Active`, ou `PlayerLeft` ao sair), revoga o Puffador, limpa os projéteis do jogador e permite o respawn normal no lobby — sem impulso, sem teleporte especial e sem crédito de eliminação atribuído a outro jogador.
+
+### Prédio fechado com dois pisos
+
+A ilha flutuante e o skybox foram removidos: a partida acontece dentro de um prédio fechado (`BuildingService`), com paredes, teto e poço em cores sólidas, frisos e faixas de luz por andar e iluminação de interior (`WorldVisualService`). A geometria é centralizada em `src/shared/modules/BuildingLayout.luau` e configurada em `GameConfig.Arena` (`FloorCount`, `FloorSpacing`) e `GameConfig.Building`.
+
+O lobby é o próprio piso de cima: o jogador já nasce onde a partida acontece. A arena tem dois pisos de blocos: quem está em cima atira no próprio chão ou, pelos buracos, no piso de baixo; quem está embaixo atira para cima e derruba o piso de quem está acima. Cair do piso de cima apenas leva ao andar inferior; somente cair abaixo do piso mais baixo elimina, até restar um competidor. Durante a rodada, quem não participa ou já foi eliminado fica em uma galeria envidraçada, dentro do prédio; ao final, os pisos são restaurados e todos voltam ao piso de cima.
 
 Ainda não há dano direto, resistência de blocos, regeneração durante a rodada, persistência ou monetização.
 

@@ -175,26 +175,6 @@ local function teleportParticipantsToArena(players: { Player })
 	end
 end
 
-local function returnParticipantsToLobby(players: { Player })
-	local returnCFrame = LobbyService.getReturnCFrame()
-	if returnCFrame == nil then
-		warn("[BlocoPuff] Lobby return position unavailable; skipping return teleport")
-		return
-	end
-
-	for index, player in ipairs(players) do
-		local character = player.Character
-		if character == nil then
-			continue
-		end
-
-		local offset = Vector3.new((((index - 1) % 5) - 2) * 4, 0, math.floor((index - 1) / 5) * 4)
-		if not moveCharacterTo(character, returnCFrame + offset) then
-			warn(string.format("[BlocoPuff] Failed to return %s to the lobby", player.Name))
-		end
-	end
-end
-
 local function resetParticipantAttributes(player: Player)
 	player:SetAttribute(ATTR_IS_PARTICIPANT, false)
 	player:SetAttribute(ATTR_PARTICIPATING_ROUND_ID, 0)
@@ -381,6 +361,9 @@ local function beginRound(timings: RoundTimings)
 		markParticipantAttributes(player, currentRoundId)
 	end
 
+	-- Quem não joga esta rodada vai para a galeria antes de os participantes
+	-- ocuparem o piso de cima.
+	LobbyService.beginMatch(participantOrder)
 	teleportParticipantsToArena(participantOrder)
 	connectParticipantDeathHandlers(participantOrder)
 	PuffadorService.beginRound(participantOrder, currentRoundId)
@@ -451,10 +434,10 @@ local function runEnding(timings: RoundTimings)
 		ReplicatedState.setTimeRemaining(remaining)
 	end
 
-	returnParticipantsToLobby(participantOrder)
-	-- Restaura depois que os jogadores já saíram da arena, evitando que um
-	-- bloco reapareça dentro de um personagem.
+	-- Restaura os pisos e, na mesma etapa, reposiciona todos sobre o piso de
+	-- cima; ninguém fica preso dentro de um bloco que reapareceu.
 	ArenaService.restoreAllBlocks()
+	LobbyService.endMatch()
 	for _, player in ipairs(participantOrder) do
 		resetParticipantAttributes(player)
 	end
@@ -516,6 +499,7 @@ function RoundService.stop()
 	ArenaService.endRound()
 	PuffadorService.stop()
 	ArenaService.restoreAllBlocks()
+	LobbyService.endMatch()
 	for _, player in ipairs(participantOrder) do
 		resetParticipantAttributes(player)
 	end

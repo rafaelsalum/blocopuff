@@ -9,6 +9,7 @@ export type ArenaConstantsModule = {
 	GridRowAttribute: string,
 	GridColumnAttribute: string,
 	BlockIdAttribute: string,
+	FloorAttribute: string,
 }
 
 local ArenaConstants: ArenaConstantsModule = {
@@ -17,6 +18,7 @@ local ArenaConstants: ArenaConstantsModule = {
 	GridRowAttribute = "GridRow",
 	GridColumnAttribute = "GridColumn",
 	BlockIdAttribute = "BlockId",
+	FloorAttribute = "FloorIndex",
 }
 
 return table.freeze(ArenaConstants)
