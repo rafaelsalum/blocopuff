@@ -45,14 +45,9 @@ local function createPanelRoot(
 	local card = Instance.new("Frame")
 	card.Name = "Card"
 	card.Size = UDim2.fromScale(1, 1)
-	card.BackgroundColor3 = UiTheme.Colors.Panel
-	card.BackgroundTransparency = 0.18
-	card.BorderSizePixel = 0
 	card.ZIndex = 1
 	card.Parent = root
-	UiTheme.addCorner(card, 14)
-	local stroke = UiTheme.addStroke(card, accentColor, 1.5)
-	stroke.Transparency = 0.22
+	UiTheme.stylePanel(card, { accent = accentColor, radius = 14, transparency = 0.1 })
 
 	return root, card
 end
@@ -97,10 +92,11 @@ function CombatHudView.new(playerGui: PlayerGui): CombatHudViewHandle
 		"TimerLabel",
 		timerCard,
 		"03:00",
-		UiTheme.Fonts.Heading,
-		21,
+		UiTheme.Fonts.Display,
+		24,
 		UiTheme.Colors.Ink
 	)
+	UiTheme.addTextOutline(timerLabel, 2)
 
 	local playersRoot, playersCard = createPanelRoot(
 		screenGui,
@@ -135,6 +131,7 @@ function CombatHudView.new(playerGui: PlayerGui): CombatHudViewHandle
 	playersValue.Position = UDim2.new(1, -11, 0.5, 0)
 	playersValue.Size = UDim2.fromOffset(36, 32)
 	playersValue.TextXAlignment = Enum.TextXAlignment.Right
+	UiTheme.addTextOutline(playersValue, 2)
 
 	local playersSubLabel = createLabel(
 		"PlayersSubLabel",
@@ -203,6 +200,13 @@ function CombatHudView.new(playerGui: PlayerGui): CombatHudViewHandle
 	progressFill.ZIndex = 3
 	progressFill.Parent = progressTrack
 	UiTheme.addCorner(progressFill, 5)
+	-- Brilho no topo da barra, dando volume ao preenchimento.
+	local fillShine = UiTheme.addGradient(progressFill, UiTheme.Colors.White, UiTheme.Colors.White)
+	fillShine.Transparency = NumberSequence.new({
+		NumberSequenceKeypoint.new(0, 0.55),
+		NumberSequenceKeypoint.new(0.5, 0),
+		NumberSequenceKeypoint.new(1, 0),
+	})
 
 	local scoreRoot, scoreCard = createPanelRoot(
 		screenGui,
@@ -231,14 +235,15 @@ function CombatHudView.new(playerGui: PlayerGui): CombatHudViewHandle
 		"ScoreValue",
 		scoreCard,
 		"0",
-		UiTheme.Fonts.Heading,
+		UiTheme.Fonts.Display,
 		19,
-		UiTheme.Colors.Ink
+		UiTheme.Colors.Gold
 	)
 	scoreValue.AnchorPoint = Vector2.new(1, 0.5)
 	scoreValue.Position = UDim2.new(1, -11, 0.5, 0)
 	scoreValue.Size = UDim2.fromOffset(34, 28)
 	scoreValue.TextXAlignment = Enum.TextXAlignment.Right
+	UiTheme.addTextOutline(scoreValue, 2)
 	local lastPersonalScore = 0
 
 	local cameraConnection: RBXScriptConnection? = nil

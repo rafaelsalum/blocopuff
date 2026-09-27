@@ -21,13 +21,21 @@ local CombatCameraController = require(script.Parent.CombatCameraController)
 local CrosshairView = require(script.Parent.Parent.ui.CrosshairView)
 local ControlHintView = require(script.Parent.Parent.ui.ControlHintView)
 local FireButtonView = require(script.Parent.Parent.ui.FireButtonView)
+local FeedbackView = require(script.Parent.Parent.ui.FeedbackView)
 
 type CrosshairViewHandle = CrosshairView.CrosshairViewHandle
 type ControlHintViewHandle = ControlHintView.ControlHintViewHandle
 type FireButtonViewHandle = FireButtonView.FireButtonViewHandle
+type FeedbackViewHandle = FeedbackView.FeedbackViewHandle
 
 local STATE_WAIT_TIMEOUT = 10
 local MUZZLE_FLASH_LIFETIME = 0.12
+-- Marcos de blocos derrubados na rodada que merecem uma notificação.
+local SCORE_MILESTONES: { [number]: string } = {
+	[10] = "10 blocos derrubados! 🔥",
+	[25] = "25 blocos! Você está dominando a arena",
+	[50] = "50 blocos! Demolidor oficial 🏆",
+}
 
 local PuffadorController = {}
 
@@ -40,6 +48,10 @@ local equippedTool: Tool? = nil
 local crosshair: CrosshairViewHandle? = nil
 local fireButton: FireButtonViewHandle? = nil
 local controlHint: ControlHintViewHandle? = nil
+local feedback: FeedbackViewHandle? = nil
+-- Acertos com a ferramenta atual; cada rodada entrega uma ferramenta nova.
+local equipHits = 0
+local scoredTool: Tool? = nil
 local backpackWasEnabled: boolean? = nil
 local targetingConnection: RBXScriptConnection? = nil
 local hasShownControlHint = false
@@ -259,6 +271,10 @@ end
 local function setToolEquipped(tool: Tool)
 	equippedTool = tool
 	lastLocalFireClock = 0
+	if scoredTool ~= tool then
+		scoredTool = tool
+		equipHits = 0
+	end
 	setCombatBackpackHidden(true)
 	CombatCameraController.enable()
 
@@ -283,6 +299,9 @@ local function clearToolEquipped(tool: Tool)
 
 	equippedTool = nil
 	stopTargetingFeedback()
+	if feedback ~= nil then
+		feedback.resetCombo()
+	end
 	if controlHint ~= nil then
 		controlHint.hide()
 	end
@@ -355,6 +374,14 @@ local function connectRemotes(): boolean
 		if crosshair ~= nil then
 			crosshair.playHit()
 		end
+		if feedback ~= nil then
+			feedback.playBlockHit()
+			equipHits += 1
+			local milestone = SCORE_MILESTONES[equipHits]
+			if milestone ~= nil then
+				feedback.showToast(milestone, "Success")
+			end
+		end
 		local tool = equippedTool
 		if tool ~= nil then
 			playToolSound(tool, PuffadorConstants.HitSoundName)
@@ -381,6 +408,7 @@ function PuffadorController.start()
 		crosshair = CrosshairView.new(playerGuiInstance)
 		fireButton = FireButtonView.new(playerGuiInstance, onToolActivated)
 		controlHint = ControlHintView.new(playerGuiInstance)
+		feedback = FeedbackView.new(playerGuiInstance)
 	else
 		warn("[BlocoPuff] Puffador UI not started: PlayerGui unavailable")
 	end

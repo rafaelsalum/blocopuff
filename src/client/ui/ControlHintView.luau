@@ -44,13 +44,9 @@ function ControlHintView.new(playerGui: PlayerGui): ControlHintViewHandle
 	local card = Instance.new("Frame")
 	card.Name = "Card"
 	card.Size = UDim2.fromScale(1, 1)
-	card.BackgroundColor3 = UiTheme.Colors.Panel
-	card.BackgroundTransparency = 0.18
-	card.BorderSizePixel = 0
 	card.ZIndex = 1
 	card.Parent = animationGroup
-	UiTheme.addCorner(card, 13)
-	UiTheme.addStroke(card, UiTheme.Colors.Blue, 1.25)
+	UiTheme.stylePanel(card, { accent = UiTheme.Colors.Blue, radius = 13 })
 
 	local label = Instance.new("TextLabel")
 	label.Name = "HintLabel"

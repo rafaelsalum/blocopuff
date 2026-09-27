@@ -53,23 +53,19 @@ function AdminBroadcastView.new(playerGui: PlayerGui): AdminBroadcastViewHandle
 	local card = Instance.new("Frame")
 	card.Name = "Card"
 	card.Size = UDim2.fromScale(1, 1)
-	card.BackgroundColor3 = UiTheme.Colors.Panel
-	card.BackgroundTransparency = 0.12
-	card.BorderSizePixel = 0
 	card.ZIndex = 1
 	card.Parent = animationGroup
-	UiTheme.addCorner(card, 16)
-	local stroke = UiTheme.addStroke(card, UiTheme.Colors.Blue, 1.5)
+	local stroke = UiTheme.stylePanel(card, { accent = UiTheme.Colors.Gold, radius = 16 })
 
 	local badge = Instance.new("TextLabel")
 	badge.Name = "Badge"
 	badge.Position = UDim2.new(0, 13, 0, 11)
 	badge.Size = UDim2.fromOffset(94, 21)
-	badge.BackgroundColor3 = UiTheme.Colors.SurfaceSoft
+	badge.BackgroundColor3 = UiTheme.Colors.Gold
 	badge.BorderSizePixel = 0
 	badge.Font = UiTheme.Fonts.BodyBold
-	badge.Text = "AVISO ADMIN"
-	badge.TextColor3 = UiTheme.Colors.Ink
+	badge.Text = "📣 AVISO"
+	badge.TextColor3 = UiTheme.Colors.Outline
 	badge.TextSize = 10
 	badge.ZIndex = 2
 	badge.Parent = card
@@ -117,7 +113,7 @@ function AdminBroadcastView.new(playerGui: PlayerGui): AdminBroadcastViewHandle
 		badge.BackgroundTransparency = 0.08
 		senderLabel.TextTransparency = 0
 		messageLabel.TextTransparency = 0
-		stroke.Transparency = 0.22
+		stroke.Transparency = 0
 
 		TweenService:Create(scale, TweenInfo.new(0.22, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
 			Scale = 1,

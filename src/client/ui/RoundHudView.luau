@@ -3,6 +3,7 @@
 local TweenService = game:GetService("TweenService")
 
 local ResponsiveScale = require(script.Parent.ResponsiveScale)
+local UiKit = require(script.Parent.UiKit)
 local UiTheme = require(script.Parent.UiTheme)
 
 type ResponsiveScaleHandle = ResponsiveScale.ResponsiveScaleHandle
@@ -77,23 +78,25 @@ function RoundHudView.new(playerGui: PlayerGui): RoundHudViewHandle
 	local waitingRoot, waitingGroup, waitingScale, waitingResponsive = createAnimationGroup(
 		screenGui,
 		"WaitingGroup",
-		UDim2.new(0.5, 0, 0, 60),
+		UDim2.new(0.5, 0, 0, 124),
 		UDim2.fromOffset(360, 76)
 	)
 	waitingRoot.Visible = false
+
+	-- Logotipo do jogo acima do cartão de espera: é a primeira coisa que o
+	-- jogador vê no lobby e fixa a identidade visual.
+	local wordmark = UiKit.createWordmark(waitingGroup, 60, 3)
+	wordmark.AnchorPoint = Vector2.new(0.5, 1)
+	wordmark.Position = UDim2.new(0.5, 0, 0, -4)
 
 	UiTheme.createShadow(waitingGroup, UDim2.fromScale(0.5, 0.5), UDim2.fromScale(1, 1), 20)
 
 	local waitingCard = Instance.new("Frame")
 	waitingCard.Name = "WaitingCard"
 	waitingCard.Size = UDim2.fromScale(1, 1)
-	waitingCard.BackgroundColor3 = UiTheme.Colors.Panel
-	waitingCard.BackgroundTransparency = 0.18
-	waitingCard.BorderSizePixel = 0
 	waitingCard.ZIndex = 1
 	waitingCard.Parent = waitingGroup
-	UiTheme.addCorner(waitingCard, 16)
-	UiTheme.addStroke(waitingCard, UiTheme.Colors.Purple, 1.5)
+	UiTheme.stylePanel(waitingCard, { accent = UiTheme.Colors.Brand, radius = 16 })
 	UiTheme.addPadding(waitingCard, 18, 9)
 
 	local waitingLayout = Instance.new("UIListLayout")
@@ -113,6 +116,7 @@ function RoundHudView.new(playerGui: PlayerGui): RoundHudViewHandle
 	)
 	statusLabel.Size = UDim2.new(1, 0, 0, 28)
 	statusLabel.LayoutOrder = 1
+	UiTheme.addTextOutline(statusLabel, 2)
 
 	local participantsLabel = createTextLabel(
 		"ParticipantsLabel",
@@ -129,14 +133,10 @@ function RoundHudView.new(playerGui: PlayerGui): RoundHudViewHandle
 	queueBadge.AnchorPoint = Vector2.new(0.5, 0)
 	queueBadge.Position = UDim2.new(0.5, 0, 1, 12)
 	queueBadge.Size = UDim2.fromOffset(292, 32)
-	queueBadge.BackgroundColor3 = UiTheme.Colors.Surface
-	queueBadge.BackgroundTransparency = 0.1
-	queueBadge.BorderSizePixel = 0
 	queueBadge.Visible = false
 	queueBadge.ZIndex = 2
 	queueBadge.Parent = waitingGroup
-	UiTheme.addCorner(queueBadge, 10)
-	UiTheme.addStroke(queueBadge, UiTheme.Colors.Yellow, 1)
+	UiTheme.stylePanel(queueBadge, { accent = UiTheme.Colors.Gold, radius = 10 })
 
 	local queueLabel = createTextLabel(
 		"QueueLabel",
@@ -160,25 +160,23 @@ function RoundHudView.new(playerGui: PlayerGui): RoundHudViewHandle
 	local countdownCard = Instance.new("Frame")
 	countdownCard.Name = "CountdownCard"
 	countdownCard.Size = UDim2.fromScale(1, 1)
-	countdownCard.BackgroundColor3 = UiTheme.Colors.Panel
-	countdownCard.BackgroundTransparency = 0.18
-	countdownCard.BorderSizePixel = 0
 	countdownCard.ZIndex = 1
 	countdownCard.Parent = countdownGroup
-	UiTheme.addCorner(countdownCard, 15)
-	UiTheme.addStroke(countdownCard, UiTheme.Colors.Yellow, 1.5)
+	UiTheme.stylePanel(countdownCard, { accent = UiTheme.Colors.Gold, radius = 15 })
 
 	local numberBadge = Instance.new("Frame")
 	numberBadge.Name = "NumberBadge"
 	numberBadge.AnchorPoint = Vector2.new(1, 0.5)
 	numberBadge.Position = UDim2.new(1, -8, 0.5, 0)
 	numberBadge.Size = UDim2.fromOffset(42, 42)
-	numberBadge.BackgroundColor3 = UiTheme.Colors.SurfaceSoft
+	numberBadge.BackgroundColor3 = UiTheme.Colors.White
 	numberBadge.BorderSizePixel = 0
 	numberBadge.ZIndex = 2
 	numberBadge.Parent = countdownCard
 	UiTheme.addCorner(numberBadge, 12)
-	UiTheme.addStroke(numberBadge, UiTheme.Colors.Yellow, 1)
+	UiTheme.addGradient(numberBadge, UiTheme.Colors.Gold:Lerp(UiTheme.Colors.White, 0.3), UiTheme.Colors.GoldDeep)
+	local badgeStroke = UiTheme.addStroke(numberBadge, UiTheme.Colors.Outline, 2)
+	badgeStroke.Transparency = 0.2
 
 	local aspectRatio = Instance.new("UIAspectRatioConstraint")
 	aspectRatio.AspectRatio = 1
@@ -196,6 +194,9 @@ function RoundHudView.new(playerGui: PlayerGui): RoundHudViewHandle
 	prepareLabel.Size = UDim2.new(1, -68, 1, 0)
 	prepareLabel.TextXAlignment = Enum.TextXAlignment.Left
 	prepareLabel.Text = "PREPARE-SE"
+	prepareLabel.Font = UiTheme.Fonts.Display
+	prepareLabel.TextSize = 17
+	UiTheme.addTextOutline(prepareLabel, 2)
 
 	local countdownLabel = createTextLabel(
 		"CountdownLabel",
@@ -205,6 +206,8 @@ function RoundHudView.new(playerGui: PlayerGui): RoundHudViewHandle
 		UiTheme.Colors.Ink
 	)
 	countdownLabel.Text = "3"
+	countdownLabel.TextSize = 28
+	UiTheme.addTextOutline(countdownLabel, 2.5)
 
 	local currentMode: RoundHudMode = "Hidden"
 

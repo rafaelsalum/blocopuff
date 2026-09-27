@@ -57,19 +57,17 @@ function AnnouncementView.new(playerGui: PlayerGui): AnnouncementViewHandle
 	local card = Instance.new("Frame")
 	card.Name = "AnnouncementCard"
 	card.Size = UDim2.fromScale(1, 1)
-	card.BackgroundColor3 = UiTheme.Colors.Panel
-	card.BackgroundTransparency = 0.12
-	card.BorderSizePixel = 0
 	card.ZIndex = 1
 	card.Parent = animationGroup
-	UiTheme.addCorner(card, 18)
-	local cardStroke = UiTheme.addStroke(card, UiTheme.Colors.Blue, 2)
+	local cardStroke = UiTheme.stylePanel(card, { accent = UiTheme.Colors.Blue, radius = 18 })
+	cardStroke.Thickness = 3
+	local strokeGradient = cardStroke:FindFirstChildOfClass("UIGradient") :: UIGradient?
 
 	local accent = Instance.new("Frame")
 	accent.Name = "Accent"
 	accent.AnchorPoint = Vector2.new(0.5, 0)
 	accent.Position = UDim2.new(0.5, 0, 0, 0)
-	accent.Size = UDim2.new(0.46, 0, 0, 4)
+	accent.Size = UDim2.new(0.46, 0, 0, 5)
 	accent.BackgroundColor3 = UiTheme.Colors.Blue
 	accent.BorderSizePixel = 0
 	accent.ZIndex = 2
@@ -81,14 +79,16 @@ function AnnouncementView.new(playerGui: PlayerGui): AnnouncementViewHandle
 	titleLabel.Position = UDim2.new(0, 18, 0, 14)
 	titleLabel.Size = UDim2.new(1, -36, 0, 34)
 	titleLabel.BackgroundTransparency = 1
-	titleLabel.Font = UiTheme.Fonts.Heading
+	titleLabel.Font = UiTheme.Fonts.Display
 	titleLabel.Text = ""
-	titleLabel.TextColor3 = UiTheme.Colors.Ink
+	titleLabel.TextColor3 = UiTheme.Colors.White
 	titleLabel.TextScaled = true
 	titleLabel.TextWrapped = true
 	titleLabel.ZIndex = 2
 	titleLabel.Parent = card
-	UiTheme.addTextConstraint(titleLabel, 18, 28)
+	UiTheme.addTextConstraint(titleLabel, 18, 32)
+	local titleGradient = UiTheme.addGradient(titleLabel, UiTheme.Colors.White, UiTheme.Colors.Blue)
+	local titleOutline = UiTheme.addTextOutline(titleLabel, 3)
 
 	local subtitleLabel = Instance.new("TextLabel")
 	subtitleLabel.Name = "SubtitleLabel"
@@ -110,6 +110,7 @@ function AnnouncementView.new(playerGui: PlayerGui): AnnouncementViewHandle
 	local function setTransparency(value: number)
 		card.BackgroundTransparency = value
 		titleLabel.TextTransparency = value
+		titleOutline.Transparency = value
 		subtitleLabel.TextTransparency = value
 		accent.BackgroundTransparency = value
 		cardStroke.Transparency = value
@@ -128,6 +129,7 @@ function AnnouncementView.new(playerGui: PlayerGui): AnnouncementViewHandle
 		TweenService:Create(animationScale, TweenInfo.new(0.16, Enum.EasingStyle.Quad), { Scale = 0.9 }):Play()
 		local fadeTween = TweenService:Create(card, TweenInfo.new(0.16), { BackgroundTransparency = 1 })
 		TweenService:Create(titleLabel, TweenInfo.new(0.13), { TextTransparency = 1 }):Play()
+		TweenService:Create(titleOutline, TweenInfo.new(0.13), { Transparency = 1 }):Play()
 		TweenService:Create(subtitleLabel, TweenInfo.new(0.13), { TextTransparency = 1 }):Play()
 		TweenService:Create(accent, TweenInfo.new(0.13), { BackgroundTransparency = 1 }):Play()
 		fadeTween:Play()
@@ -147,7 +149,10 @@ function AnnouncementView.new(playerGui: PlayerGui): AnnouncementViewHandle
 		titleLabel.Text = title
 		subtitleLabel.Text = subtitle
 		accent.BackgroundColor3 = toneColor
-		cardStroke.Color = toneColor
+		titleGradient.Color = ColorSequence.new(UiTheme.Colors.White, toneColor:Lerp(UiTheme.Colors.White, 0.2))
+		if strokeGradient ~= nil then
+			strokeGradient.Color = ColorSequence.new(toneColor, toneColor:Lerp(UiTheme.Colors.Gold, 0.55))
+		end
 		responsiveRoot.Visible = true
 		animationScale.Scale = 0.78
 		setTransparency(0.08)

@@ -3,6 +3,7 @@
 local TweenService = game:GetService("TweenService")
 
 local ResponsiveScale = require(script.Parent.ResponsiveScale)
+local UiKit = require(script.Parent.UiKit)
 local UiTheme = require(script.Parent.UiTheme)
 
 export type SpectatorViewHandle = {
@@ -15,32 +16,6 @@ local GUI_NAME = "BlocoPuffSpectatorHud"
 
 local SpectatorView = {}
 
-local function createButton(
-	name: string,
-	text: string,
-	parent: Instance,
-	layoutOrder: number,
-	selectionOrder: number
-): TextButton
-	local button = Instance.new("TextButton")
-	button.Name = name
-	button.Text = text
-	button.Font = UiTheme.Fonts.BodyBold
-	button.TextSize = 22
-	button.TextColor3 = UiTheme.Colors.Ink
-	button.BackgroundColor3 = UiTheme.Colors.SurfaceSoft
-	button.BackgroundTransparency = 0.08
-	button.AutoButtonColor = true
-	button.Size = UDim2.fromOffset(48, 48)
-	button.LayoutOrder = layoutOrder
-	button.Selectable = true
-	button.SelectionOrder = selectionOrder
-	button.Parent = parent
-	UiTheme.addCorner(button, 14)
-	UiTheme.addStroke(button, UiTheme.Colors.Border, 1.5)
-	return button
-end
-
 function SpectatorView.new(playerGui: PlayerGui, onPrevious: () -> (), onNext: () -> ()): SpectatorViewHandle
 	local screenGui = UiTheme.createScreenGui(GUI_NAME, playerGui, 20)
 	screenGui.Enabled = false
@@ -49,7 +24,7 @@ function SpectatorView.new(playerGui: PlayerGui, onPrevious: () -> (), onNext: (
 	responsiveRoot.Name = "ResponsiveRoot"
 	responsiveRoot.AnchorPoint = Vector2.new(0.5, 1)
 	responsiveRoot.Position = UDim2.new(0.5, 0, 1, -22)
-	responsiveRoot.Size = UDim2.fromOffset(360, 66)
+	responsiveRoot.Size = UDim2.fromOffset(380, 74)
 	responsiveRoot.BackgroundTransparency = 1
 	responsiveRoot.Parent = screenGui
 	local responsiveHandle = ResponsiveScale.attach(responsiveRoot, Vector2.new(1280, 720), 0.76, 1.08)
@@ -69,13 +44,9 @@ function SpectatorView.new(playerGui: PlayerGui, onPrevious: () -> (), onNext: (
 	local panel = Instance.new("Frame")
 	panel.Name = "SpectatorPanel"
 	panel.Size = UDim2.fromScale(1, 1)
-	panel.BackgroundColor3 = UiTheme.Colors.Panel
-	panel.BackgroundTransparency = 0.16
-	panel.BorderSizePixel = 0
 	panel.ZIndex = 1
 	panel.Parent = animationGroup
-	UiTheme.addCorner(panel, 17)
-	UiTheme.addStroke(panel, UiTheme.Colors.Border, 1.5)
+	UiTheme.stylePanel(panel, { accent = UiTheme.Colors.Brand, radius = 18 })
 	UiTheme.addPadding(panel, 8, 8)
 
 	local layout = Instance.new("UIListLayout")
@@ -86,7 +57,16 @@ function SpectatorView.new(playerGui: PlayerGui, onPrevious: () -> (), onNext: (
 	layout.Padding = UDim.new(0, 9)
 	layout.Parent = panel
 
-	local previousButton = createButton("PreviousButton", "<", panel, 1, 20)
+	local previousButton = UiKit.createButton(panel, {
+		name = "PreviousButton",
+		text = "◀",
+		variant = "Primary",
+		size = UDim2.fromOffset(50, 54),
+		textSize = 20,
+		round = true,
+		layoutOrder = 1,
+		selectionOrder = 20,
+	})
 
 	local information = Instance.new("Frame")
 	information.Name = "Information"
@@ -100,7 +80,7 @@ function SpectatorView.new(playerGui: PlayerGui, onPrevious: () -> (), onNext: (
 	captionLabel.Size = UDim2.new(1, 0, 0, 17)
 	captionLabel.BackgroundTransparency = 1
 	captionLabel.Font = UiTheme.Fonts.BodyBold
-	captionLabel.Text = "ASSISTINDO"
+	captionLabel.Text = "👁  ASSISTINDO"
 	captionLabel.TextSize = 10
 	captionLabel.TextColor3 = UiTheme.Colors.InkSoft
 	captionLabel.Parent = information
@@ -110,12 +90,13 @@ function SpectatorView.new(playerGui: PlayerGui, onPrevious: () -> (), onNext: (
 	nameLabel.Position = UDim2.new(0, 0, 0, 14)
 	nameLabel.Size = UDim2.new(1, 0, 0, 24)
 	nameLabel.BackgroundTransparency = 1
-	nameLabel.Font = UiTheme.Fonts.Heading
+	nameLabel.Font = UiTheme.Fonts.Display
 	nameLabel.Text = ""
-	nameLabel.TextSize = 17
+	nameLabel.TextSize = 19
 	nameLabel.TextColor3 = UiTheme.Colors.Ink
 	nameLabel.TextTruncate = Enum.TextTruncate.AtEnd
 	nameLabel.Parent = information
+	UiTheme.addTextOutline(nameLabel, 2)
 
 	local countLabel = Instance.new("TextLabel")
 	countLabel.Name = "ActiveCountLabel"
@@ -128,10 +109,19 @@ function SpectatorView.new(playerGui: PlayerGui, onPrevious: () -> (), onNext: (
 	countLabel.TextColor3 = UiTheme.Colors.InkSoft
 	countLabel.Parent = information
 
-	local nextButton = createButton("NextButton", ">", panel, 3, 21)
+	local nextButton = UiKit.createButton(panel, {
+		name = "NextButton",
+		text = "▶",
+		variant = "Primary",
+		size = UDim2.fromOffset(50, 54),
+		textSize = 20,
+		round = true,
+		layoutOrder = 3,
+		selectionOrder = 21,
+	})
 
-	previousButton.Activated:Connect(onPrevious)
-	nextButton.Activated:Connect(onNext)
+	previousButton.button.Activated:Connect(onPrevious)
+	nextButton.button.Activated:Connect(onNext)
 
 	local currentlyVisible = false
 	local handle = {} :: SpectatorViewHandle
@@ -149,6 +139,9 @@ function SpectatorView.new(playerGui: PlayerGui, onPrevious: () -> (), onNext: (
 	end
 
 	handle.setTargetInfo = function(name: string, activeCount: number)
+		if nameLabel.Text ~= name then
+			UiKit.pop(nameLabel, 0.12)
+		end
 		nameLabel.Text = name
 		countLabel.Text = if activeCount == 1 then "1 jogador restante" else string.format("%d jogadores restantes", activeCount)
 	end

@@ -1,9 +1,18 @@
 --!strict
 
+-- Painel administrativo com a identidade visual do BlocoPuff: cabeçalho com
+-- logotipo, seções em cartões, lista de jogadores selecionável, botões 3D e
+-- uma pílula de status para o retorno do servidor. Toda ação continua sendo
+-- validada no servidor (AdminService); esta tela só coleta a intenção.
+
 local GuiService = game:GetService("GuiService")
+local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
 
+local UiKit = require(script.Parent.UiKit)
 local UiTheme = require(script.Parent.UiTheme)
+
+type ButtonHandle = UiKit.ButtonHandle
 
 export type PlayerEntry = {
 	userId: number,
@@ -25,62 +34,21 @@ export type AdminPanelViewHandle = {
 }
 
 local GUI_NAME = "BlocoPuffAdminPanel"
-local PANEL_WIDTH = 640
-local PANEL_HEIGHT = 580
+local PANEL_WIDTH = 660
+local PANEL_HEIGHT = 610
+local HEADER_HEIGHT = 76
+local ANNOUNCEMENT_LIMIT = 180
+local REASON_LIMIT = 120
+local TARGET_LIMIT = 20
+local ENTRY_HEIGHT = 44
 
 local AdminPanelView = {}
 
-local function createLabel(
-	name: string,
-	parent: Instance,
-	text: string,
-	font: Enum.Font,
-	textSize: number,
-	color: Color3
-): TextLabel
-	local label = Instance.new("TextLabel")
-	label.Name = name
-	label.BackgroundTransparency = 1
-	label.Font = font
-	label.Text = text
-	label.TextColor3 = color
-	label.TextSize = textSize
-	label.TextWrapped = true
-	label.TextXAlignment = Enum.TextXAlignment.Left
-	label.Parent = parent
-	return label
-end
-
-local function createButton(name: string, parent: Instance, text: string, color: Color3): TextButton
-	local button = Instance.new("TextButton")
-	button.Name = name
-	button.BackgroundColor3 = color
-	button.BackgroundTransparency = 0.06
-	button.BorderSizePixel = 0
-	button.AutoButtonColor = true
-	button.Font = UiTheme.Fonts.BodyBold
-	button.Text = text
-	button.TextColor3 = UiTheme.Colors.Ink
-	button.TextSize = 14
-	button.TextWrapped = true
-	button.Active = true
-	button.Selectable = true
-	button.Parent = parent
-	UiTheme.addCorner(button, 11)
-	UiTheme.addStroke(button, UiTheme.Colors.Border, 1.25)
-	return button
-end
-
-local function createTextBox(
-	name: string,
-	parent: Instance,
-	placeholder: string,
-	multiline: boolean
-): TextBox
+local function createTextBox(parent: Instance, name: string, placeholder: string, multiline: boolean): TextBox
 	local textBox = Instance.new("TextBox")
 	textBox.Name = name
-	textBox.BackgroundColor3 = UiTheme.Colors.SurfaceSoft
-	textBox.BackgroundTransparency = 0.08
+	textBox.BackgroundColor3 = UiTheme.Colors.Track
+	textBox.BackgroundTransparency = 0.15
 	textBox.BorderSizePixel = 0
 	textBox.ClearTextOnFocus = false
 	textBox.Font = UiTheme.Fonts.Body
@@ -95,35 +63,80 @@ local function createTextBox(
 	textBox.TextYAlignment = if multiline then Enum.TextYAlignment.Top else Enum.TextYAlignment.Center
 	textBox.Parent = parent
 	UiTheme.addCorner(textBox, 12)
-	UiTheme.addStroke(textBox, UiTheme.Colors.Border, 1.25)
 	UiTheme.addPadding(textBox, 13, if multiline then 10 else 4)
+
+	-- A borda acende em dourado enquanto o campo está em foco.
+	local stroke = UiTheme.addStroke(textBox, UiTheme.Colors.Border, 1.5)
+	textBox.Focused:Connect(function()
+		TweenService:Create(stroke, TweenInfo.new(0.12), { Color = UiTheme.Colors.Gold, Transparency = 0 }):Play()
+	end)
+	textBox.FocusLost:Connect(function()
+		TweenService:Create(stroke, TweenInfo.new(0.12), { Color = UiTheme.Colors.Border, Transparency = 0.2 }):Play()
+	end)
 	return textBox
 end
 
-local function constrainText(textBox: TextBox, maximumLength: number): RBXScriptConnection
-	return textBox:GetPropertyChangedSignal("Text"):Connect(function()
+local function constrainText(textBox: TextBox, maximumLength: number, counter: TextLabel?): RBXScriptConnection
+	local function update()
 		if #textBox.Text > maximumLength then
 			textBox.Text = string.sub(textBox.Text, 1, maximumLength)
 			textBox.CursorPosition = #textBox.Text + 1
 		end
-	end)
+		if counter ~= nil then
+			counter.Text = string.format("%d/%d", #textBox.Text, maximumLength)
+			counter.TextColor3 = if #textBox.Text >= maximumLength then UiTheme.Colors.Orange else UiTheme.Colors.InkSoft
+		end
+	end
+	update()
+	return textBox:GetPropertyChangedSignal("Text"):Connect(update)
+end
+
+local function createSection(parent: Instance, name: string, title: string, icon: string, accent: Color3, height: number, order: number): Frame
+	local section = Instance.new("Frame")
+	section.Name = name
+	section.Size = UDim2.new(1, -8, 0, height)
+	section.LayoutOrder = order
+	section.ZIndex = 12
+	section.Parent = parent
+	UiTheme.stylePanel(section, { accent = accent, radius = 16, transparency = 0.04 })
+
+	local iconBadge = UiTheme.createLabel(section, "Icon", icon, UiTheme.Fonts.BodyBold, 16, UiTheme.Colors.Outline)
+	iconBadge.Position = UDim2.fromOffset(14, 12)
+	iconBadge.Size = UDim2.fromOffset(30, 30)
+	iconBadge.BackgroundColor3 = accent
+	iconBadge.BackgroundTransparency = 0
+	iconBadge.ZIndex = 13
+	UiTheme.addCorner(iconBadge, 9)
+
+	local titleLabel = UiTheme.createLabel(section, "Title", title, UiTheme.Fonts.Display, 19, UiTheme.Colors.Ink)
+	titleLabel.Position = UDim2.fromOffset(52, 12)
+	titleLabel.Size = UDim2.new(1, -66, 0, 30)
+	titleLabel.TextXAlignment = Enum.TextXAlignment.Left
+	titleLabel.ZIndex = 13
+	UiTheme.addTextOutline(titleLabel, 2)
+	return section
 end
 
 function AdminPanelView.new(playerGui: PlayerGui, callbacks: AdminPanelCallbacks): AdminPanelViewHandle
 	local screenGui = UiTheme.createScreenGui(GUI_NAME, playerGui, 60)
 
-	local openButton = createButton("OpenButton", screenGui, "ADM", UiTheme.Colors.Surface)
-	openButton.AnchorPoint = Vector2.new(1, 0)
-	openButton.Position = UDim2.new(1, -16, 0, 92)
-	openButton.Size = UDim2.fromOffset(48, 40)
-	openButton.TextSize = 11
-	openButton.SelectionOrder = 100
+	local openButton = UiKit.createButton(screenGui, {
+		name = "OpenButton",
+		text = "ADM",
+		variant = "Gold",
+		size = UDim2.fromOffset(56, 60),
+		position = UDim2.new(1, -16, 0, 92),
+		anchorPoint = Vector2.new(1, 0),
+		textSize = 15,
+		round = true,
+		selectionOrder = 100,
+	})
 
 	local overlay = Instance.new("Frame")
 	overlay.Name = "Overlay"
 	overlay.Size = UDim2.fromScale(1, 1)
 	overlay.BackgroundColor3 = UiTheme.Colors.Shadow
-	overlay.BackgroundTransparency = 0.34
+	overlay.BackgroundTransparency = 0.3
 	overlay.BorderSizePixel = 0
 	overlay.Active = true
 	overlay.Visible = false
@@ -135,182 +148,177 @@ function AdminPanelView.new(playerGui: PlayerGui, callbacks: AdminPanelCallbacks
 	panel.AnchorPoint = Vector2.new(0.5, 0.5)
 	panel.Position = UDim2.fromScale(0.5, 0.5)
 	panel.Size = UDim2.new(1, -32, 1, -56)
-	panel.BackgroundColor3 = UiTheme.Colors.Panel
-	panel.BackgroundTransparency = 0.04
-	panel.BorderSizePixel = 0
 	panel.ZIndex = 11
 	panel.Parent = overlay
-	UiTheme.addCorner(panel, 18)
-	UiTheme.addStroke(panel, UiTheme.Colors.Border, 1.5)
+	UiTheme.stylePanel(panel, { accent = UiTheme.Colors.Brand, radius = 22, transparency = 0 })
+	local panelScale = Instance.new("UIScale")
+	panelScale.Parent = panel
 
 	local sizeConstraint = Instance.new("UISizeConstraint")
 	sizeConstraint.MinSize = Vector2.new(300, 300)
 	sizeConstraint.MaxSize = Vector2.new(PANEL_WIDTH, PANEL_HEIGHT)
 	sizeConstraint.Parent = panel
 
+	-- Cabeçalho com faixa em gradiente da marca e logotipo.
 	local header = Instance.new("Frame")
 	header.Name = "Header"
-	header.Size = UDim2.new(1, 0, 0, 60)
-	header.BackgroundColor3 = UiTheme.Colors.Surface
-	header.BackgroundTransparency = 0.04
+	header.Size = UDim2.new(1, 0, 0, HEADER_HEIGHT)
+	header.BackgroundColor3 = UiTheme.Colors.White
 	header.BorderSizePixel = 0
 	header.ZIndex = 12
 	header.Parent = panel
-	UiTheme.addCorner(header, 17)
+	UiTheme.addCorner(header, 22)
+	UiTheme.addGradient(header, UiTheme.Colors.Brand, UiTheme.Colors.BrandDeep, 0)
 
 	local headerCover = Instance.new("Frame")
 	headerCover.Name = "SquareBottom"
-	headerCover.Position = UDim2.new(0, 0, 1, -20)
-	headerCover.Size = UDim2.new(1, 0, 0, 20)
-	headerCover.BackgroundColor3 = UiTheme.Colors.Surface
+	headerCover.Position = UDim2.new(0, 0, 1, -22)
+	headerCover.Size = UDim2.new(1, 0, 0, 22)
+	headerCover.BackgroundColor3 = UiTheme.Colors.White
 	headerCover.BorderSizePixel = 0
 	headerCover.ZIndex = 12
 	headerCover.Parent = header
+	UiTheme.addGradient(headerCover, UiTheme.Colors.Brand, UiTheme.Colors.BrandDeep, 0)
 
-	local title = createLabel("Title", header, "ADMIN • BLOCO PUFF", UiTheme.Fonts.Heading, 19, UiTheme.Colors.Ink)
-	title.Position = UDim2.new(0, 18, 0, 7)
-	title.Size = UDim2.new(1, -92, 0, 25)
+	local wordmark = UiKit.createWordmark(header, 50, 13)
+	wordmark.AnchorPoint = Vector2.new(0, 0.5)
+	wordmark.Position = UDim2.new(0, 16, 0.5, 0)
+
+	local title = UiTheme.createLabel(header, "Title", "PAINEL ADMIN", UiTheme.Fonts.Display, 22, UiTheme.Colors.Ink)
+	title.Position = UDim2.fromOffset(160, 12)
+	title.Size = UDim2.new(1, -240, 0, 28)
+	title.TextXAlignment = Enum.TextXAlignment.Left
 	title.ZIndex = 13
+	UiTheme.addTextOutline(title, 2.5)
 
-	local subtitle = createLabel(
-		"Subtitle",
-		header,
-		"Acesso protegido pelo servidor",
-		UiTheme.Fonts.BodyBold,
-		11,
-		UiTheme.Colors.InkSoft
-	)
-	subtitle.Position = UDim2.new(0, 19, 0, 32)
-	subtitle.Size = UDim2.new(1, -80, 0, 20)
+	local subtitle = UiTheme.createLabel(header, "Subtitle", "🔒 Acesso protegido pelo servidor", UiTheme.Fonts.BodyBold, 12, UiTheme.Colors.Ink)
+	subtitle.Position = UDim2.fromOffset(161, 42)
+	subtitle.Size = UDim2.new(1, -240, 0, 18)
+	subtitle.TextXAlignment = Enum.TextXAlignment.Left
+	subtitle.TextTransparency = 0.15
 	subtitle.ZIndex = 13
 
-	local closeButton = createButton("CloseButton", header, "FECHAR", UiTheme.Colors.SurfaceSoft)
-	closeButton.AnchorPoint = Vector2.new(1, 0.5)
-	closeButton.Position = UDim2.new(1, -12, 0.5, 0)
-	closeButton.Size = UDim2.fromOffset(64, 36)
-	closeButton.TextSize = 11
-	closeButton.ZIndex = 14
-	closeButton.SelectionOrder = 101
+	local closeButton = UiKit.createButton(header, {
+		name = "CloseButton",
+		text = "✕",
+		variant = "Danger",
+		size = UDim2.fromOffset(46, 50),
+		position = UDim2.new(1, -14, 0.5, 0),
+		anchorPoint = Vector2.new(1, 0.5),
+		textSize = 18,
+		round = true,
+		selectionOrder = 101,
+		zIndex = 14,
+	})
 
 	local content = Instance.new("ScrollingFrame")
 	content.Name = "Content"
-	content.Position = UDim2.new(0, 12, 0, 70)
-	content.Size = UDim2.new(1, -24, 1, -82)
+	content.Position = UDim2.new(0, 14, 0, HEADER_HEIGHT + 12)
+	content.Size = UDim2.new(1, -28, 1, -(HEADER_HEIGHT + 70))
 	content.BackgroundTransparency = 1
 	content.BorderSizePixel = 0
-	content.CanvasSize = UDim2.fromOffset(0, 622)
-	content.ScrollBarImageColor3 = UiTheme.Colors.InkSoft
+	content.AutomaticCanvasSize = Enum.AutomaticSize.Y
+	content.CanvasSize = UDim2.new()
+	content.ScrollBarImageColor3 = UiTheme.Colors.Brand
 	content.ScrollBarThickness = 6
 	content.ScrollingDirection = Enum.ScrollingDirection.Y
 	content.ZIndex = 12
 	content.Parent = panel
 
-	local announcementSection = Instance.new("Frame")
-	announcementSection.Name = "AnnouncementSection"
-	announcementSection.Size = UDim2.new(1, -8, 0, 184)
-	announcementSection.BackgroundColor3 = UiTheme.Colors.Surface
-	announcementSection.BackgroundTransparency = 0.12
-	announcementSection.BorderSizePixel = 0
-	announcementSection.ZIndex = 12
-	announcementSection.Parent = content
-	UiTheme.addCorner(announcementSection, 16)
-	UiTheme.addStroke(announcementSection, UiTheme.Colors.Border, 1)
+	local contentLayout = Instance.new("UIListLayout")
+	contentLayout.FillDirection = Enum.FillDirection.Vertical
+	contentLayout.SortOrder = Enum.SortOrder.LayoutOrder
+	contentLayout.Padding = UDim.new(0, 12)
+	contentLayout.Parent = content
+	local contentPadding = Instance.new("UIPadding")
+	contentPadding.PaddingTop = UDim.new(0, 4)
+	contentPadding.PaddingBottom = UDim.new(0, 8)
+	contentPadding.PaddingLeft = UDim.new(0, 4)
+	contentPadding.Parent = content
 
-	local announcementTitle = createLabel(
-		"Title",
-		announcementSection,
-		"AVISO PARA O JOGO",
-		UiTheme.Fonts.BodyBold,
-		15,
-		UiTheme.Colors.Ink
-	)
-	announcementTitle.Position = UDim2.new(0, 15, 0, 12)
-	announcementTitle.Size = UDim2.new(1, -30, 0, 22)
-	announcementTitle.ZIndex = 13
+	-- Seção: aviso para o jogo.
+	local announcementSection = createSection(content, "AnnouncementSection", "AVISO PARA O JOGO", "📣", UiTheme.Colors.Blue, 200, 1)
 
-	local announcementBox = createTextBox(
-		"AnnouncementBox",
-		announcementSection,
-		"Mensagem para todos os jogadores (máx. 180 caracteres)",
-		true
-	)
-	announcementBox.Position = UDim2.new(0, 14, 0, 42)
-	announcementBox.Size = UDim2.new(1, -28, 0, 76)
+	local announcementBox = createTextBox(announcementSection, "AnnouncementBox", "Mensagem para todos os jogadores", true)
+	announcementBox.Position = UDim2.fromOffset(14, 52)
+	announcementBox.Size = UDim2.new(1, -28, 0, 74)
 	announcementBox.ZIndex = 13
 	announcementBox.SelectionOrder = 110
 
-	local announceButton = createButton("AnnounceButton", announcementSection, "ENVIAR AVISO", UiTheme.Colors.Blue)
-	announceButton.Position = UDim2.new(0, 14, 0, 130)
-	announceButton.Size = UDim2.new(1, -28, 0, 42)
-	announceButton.ZIndex = 13
-	announceButton.SelectionOrder = 111
+	local announcementCounter = UiTheme.createLabel(announcementSection, "Counter", "", UiTheme.Fonts.BodyBold, 11, UiTheme.Colors.InkSoft)
+	announcementCounter.AnchorPoint = Vector2.new(1, 0)
+	announcementCounter.Position = UDim2.new(1, -16, 0, 18)
+	announcementCounter.Size = UDim2.fromOffset(80, 16)
+	announcementCounter.TextXAlignment = Enum.TextXAlignment.Right
+	announcementCounter.ZIndex = 13
 
-	local moderationSection = Instance.new("Frame")
-	moderationSection.Name = "ModerationSection"
-	moderationSection.Position = UDim2.fromOffset(0, 198)
-	moderationSection.Size = UDim2.new(1, -8, 0, 348)
-	moderationSection.BackgroundColor3 = UiTheme.Colors.Surface
-	moderationSection.BackgroundTransparency = 0.12
-	moderationSection.BorderSizePixel = 0
-	moderationSection.ZIndex = 12
-	moderationSection.Parent = content
-	UiTheme.addCorner(moderationSection, 16)
-	UiTheme.addStroke(moderationSection, UiTheme.Colors.Border, 1)
+	local announceButton = UiKit.createButton(announcementSection, {
+		name = "AnnounceButton",
+		text = "ENVIAR AVISO",
+		variant = "Primary",
+		size = UDim2.new(1, -28, 0, 50),
+		position = UDim2.fromOffset(14, 136),
+		textSize = 17,
+		selectionOrder = 111,
+		zIndex = 13,
+	})
 
-	local moderationTitle = createLabel(
-		"Title",
-		moderationSection,
-		"MODERAÇÃO",
-		UiTheme.Fonts.BodyBold,
-		15,
-		UiTheme.Colors.Ink
-	)
-	moderationTitle.Position = UDim2.new(0, 15, 0, 11)
-	moderationTitle.Size = UDim2.new(1, -30, 0, 22)
-	moderationTitle.ZIndex = 13
+	-- Seção: moderação.
+	local moderationSection = createSection(content, "ModerationSection", "MODERAÇÃO", "🛡", UiTheme.Colors.Orange, 382, 2)
 
-	local playersCaption = createLabel(
-		"PlayersCaption",
-		moderationSection,
-		"Jogadores neste servidor — toque para selecionar",
-		UiTheme.Fonts.Body,
-		12,
-		UiTheme.Colors.InkSoft
-	)
-	playersCaption.Position = UDim2.new(0, 15, 0, 34)
-	playersCaption.Size = UDim2.new(1, -30, 0, 20)
+	local playersCaption = UiTheme.createLabel(moderationSection, "PlayersCaption", "Jogadores neste servidor — toque para selecionar", UiTheme.Fonts.Body, 12, UiTheme.Colors.InkSoft)
+	playersCaption.Position = UDim2.fromOffset(15, 46)
+	playersCaption.Size = UDim2.new(1, -30, 0, 18)
+	playersCaption.TextXAlignment = Enum.TextXAlignment.Left
 	playersCaption.ZIndex = 13
 
 	local playerList = Instance.new("ScrollingFrame")
 	playerList.Name = "PlayerList"
-	playerList.Position = UDim2.new(0, 14, 0, 58)
-	playerList.Size = UDim2.new(1, -28, 0, 96)
-	playerList.BackgroundColor3 = UiTheme.Colors.SurfaceSoft
-	playerList.BackgroundTransparency = 0.12
+	playerList.Position = UDim2.fromOffset(14, 68)
+	playerList.Size = UDim2.new(1, -28, 0, 106)
+	playerList.BackgroundColor3 = UiTheme.Colors.Track
+	playerList.BackgroundTransparency = 0.2
 	playerList.BorderSizePixel = 0
-	playerList.CanvasSize = UDim2.fromOffset(0, 0)
-	playerList.ScrollBarImageColor3 = UiTheme.Colors.InkSoft
+	playerList.CanvasSize = UDim2.new()
+	playerList.AutomaticCanvasSize = Enum.AutomaticSize.Y
+	playerList.ScrollBarImageColor3 = UiTheme.Colors.Brand
 	playerList.ScrollBarThickness = 5
 	playerList.ZIndex = 13
 	playerList.Parent = moderationSection
-	UiTheme.addCorner(playerList, 10)
+	UiTheme.addCorner(playerList, 12)
+	UiTheme.addPadding(playerList, 6, 6)
+	local listLayout = Instance.new("UIListLayout")
+	listLayout.SortOrder = Enum.SortOrder.LayoutOrder
+	listLayout.Padding = UDim.new(0, 5)
+	listLayout.Parent = playerList
 
-	local targetBox = createTextBox("TargetUserId", moderationSection, "User ID do jogador", false)
-	targetBox.Position = UDim2.new(0, 14, 0, 166)
-	targetBox.Size = UDim2.new(1, -28, 0, 43)
+	local emptyLabel = UiTheme.createLabel(playerList, "Empty", "Nenhum outro jogador no servidor.", UiTheme.Fonts.Body, 12, UiTheme.Colors.InkSoft)
+	emptyLabel.Size = UDim2.new(1, -12, 0, 90)
+	emptyLabel.ZIndex = 14
+
+	local targetBox = createTextBox(moderationSection, "TargetUserId", "User ID do jogador", false)
+	targetBox.Position = UDim2.fromOffset(14, 186)
+	targetBox.Size = UDim2.new(1, -28, 0, 44)
 	targetBox.ZIndex = 13
 	targetBox.SelectionOrder = 120
 
-	local reasonBox = createTextBox("Reason", moderationSection, "Motivo opcional (máx. 120 caracteres)", false)
-	reasonBox.Position = UDim2.new(0, 14, 0, 219)
-	reasonBox.Size = UDim2.new(1, -28, 0, 43)
+	local reasonBox = createTextBox(moderationSection, "Reason", "Motivo (opcional)", false)
+	reasonBox.Position = UDim2.fromOffset(14, 240)
+	reasonBox.Size = UDim2.new(1, -28, 0, 44)
 	reasonBox.ZIndex = 13
 	reasonBox.SelectionOrder = 121
 
+	local reasonCounter = UiTheme.createLabel(moderationSection, "ReasonCounter", "", UiTheme.Fonts.BodyBold, 11, UiTheme.Colors.InkSoft)
+	reasonCounter.AnchorPoint = Vector2.new(1, 0.5)
+	reasonCounter.Position = UDim2.new(1, -26, 0, 262)
+	reasonCounter.Size = UDim2.fromOffset(70, 16)
+	reasonCounter.TextXAlignment = Enum.TextXAlignment.Right
+	reasonCounter.ZIndex = 14
+
 	local actionRow = Instance.new("Frame")
 	actionRow.Name = "ActionRow"
-	actionRow.Position = UDim2.new(0, 14, 0, 275)
-	actionRow.Size = UDim2.new(1, -28, 0, 55)
+	actionRow.Position = UDim2.fromOffset(14, 300)
+	actionRow.Size = UDim2.new(1, -28, 0, 56)
 	actionRow.BackgroundTransparency = 1
 	actionRow.ZIndex = 13
 	actionRow.Parent = moderationSection
@@ -318,53 +326,55 @@ function AdminPanelView.new(playerGui: PlayerGui, callbacks: AdminPanelCallbacks
 	local actionLayout = Instance.new("UIListLayout")
 	actionLayout.FillDirection = Enum.FillDirection.Horizontal
 	actionLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
-	actionLayout.Padding = UDim.new(0, 8)
+	actionLayout.Padding = UDim.new(0, 10)
 	actionLayout.SortOrder = Enum.SortOrder.LayoutOrder
 	actionLayout.Parent = actionRow
 
-	local kickButton = createButton("KickButton", actionRow, "EXPULSAR", UiTheme.Colors.Orange)
-	kickButton.Size = UDim2.new(1 / 3, -6, 1, 0)
-	kickButton.LayoutOrder = 1
-	kickButton.ZIndex = 13
-	kickButton.SelectionOrder = 122
-	kickButton.TextSize = 12
+	local function createAction(name: string, text: string, variant: UiKit.ButtonVariant, order: number): ButtonHandle
+		return UiKit.createButton(actionRow, {
+			name = name,
+			text = text,
+			variant = variant,
+			size = UDim2.new(1 / 3, -7, 1, 0),
+			textSize = 15,
+			layoutOrder = order,
+			selectionOrder = 121 + order,
+			zIndex = 13,
+		})
+	end
+	local kickButton = createAction("KickButton", "EXPULSAR", "Warning", 1)
+	local banButton = createAction("BanButton", "BANIR", "Danger", 2)
+	local unbanButton = createAction("UnbanButton", "DESBANIR", "Success", 3)
 
-	local banButton = createButton("BanButton", actionRow, "BANIR", UiTheme.Colors.Danger)
-	banButton.Size = UDim2.new(1 / 3, -6, 1, 0)
-	banButton.LayoutOrder = 2
-	banButton.TextColor3 = UiTheme.Colors.White
-	banButton.ZIndex = 13
-	banButton.SelectionOrder = 123
-	banButton.TextSize = 12
+	-- Pílula de status fixa no rodapé do painel.
+	local statusPill = Instance.new("Frame")
+	statusPill.Name = "StatusPill"
+	statusPill.AnchorPoint = Vector2.new(0.5, 1)
+	statusPill.Position = UDim2.new(0.5, 0, 1, -12)
+	statusPill.Size = UDim2.new(1, -28, 0, 38)
+	statusPill.BackgroundColor3 = UiTheme.Colors.Track
+	statusPill.BackgroundTransparency = 0.1
+	statusPill.BorderSizePixel = 0
+	statusPill.ZIndex = 12
+	statusPill.Parent = panel
+	UiTheme.addCorner(statusPill, 19)
+	local statusStroke = UiTheme.addStroke(statusPill, UiTheme.Colors.Border, 1.5)
 
-	local unbanButton = createButton("UnbanButton", actionRow, "DESBANIR", UiTheme.Colors.Green)
-	unbanButton.Size = UDim2.new(1 / 3, -6, 1, 0)
-	unbanButton.LayoutOrder = 3
-	unbanButton.ZIndex = 13
-	unbanButton.SelectionOrder = 124
-	unbanButton.TextSize = 12
-
-	local feedbackLabel = createLabel(
-		"Feedback",
-		content,
-		"F2 abre ou fecha o painel • todas as ações são registradas pelo servidor",
-		UiTheme.Fonts.BodyBold,
-		13,
-		UiTheme.Colors.InkSoft
-	)
-	feedbackLabel.Position = UDim2.fromOffset(4, 558)
-	feedbackLabel.Size = UDim2.new(1, -16, 0, 48)
-	feedbackLabel.TextXAlignment = Enum.TextXAlignment.Center
-	feedbackLabel.ZIndex = 13
+	local statusLabel = UiTheme.createLabel(statusPill, "Feedback", "⌨  F2 abre ou fecha • ações registradas pelo servidor", UiTheme.Fonts.BodyBold, 13, UiTheme.Colors.InkSoft)
+	statusLabel.Size = UDim2.new(1, -24, 1, 0)
+	statusLabel.Position = UDim2.fromOffset(12, 0)
+	statusLabel.TextTruncate = Enum.TextTruncate.AtEnd
+	statusLabel.ZIndex = 13
 
 	local connections: { RBXScriptConnection } = {}
 	local playerEntryConnections: { RBXScriptConnection } = {}
-	table.insert(connections, constrainText(announcementBox, 180))
-	table.insert(connections, constrainText(reasonBox, 120))
-	table.insert(connections, constrainText(targetBox, 20))
+	table.insert(connections, constrainText(announcementBox, ANNOUNCEMENT_LIMIT, announcementCounter))
+	table.insert(connections, constrainText(reasonBox, REASON_LIMIT, reasonCounter))
+	table.insert(connections, constrainText(targetBox, TARGET_LIMIT, nil))
 
 	local busy = false
 	local actionButtons = { announceButton, kickButton, banButton, unbanButton }
+	local entryStrokes: { [number]: UIStroke } = {}
 
 	local function isGamepadInput(inputType: Enum.UserInputType): boolean
 		return string.find(inputType.Name, "Gamepad") ~= nil
@@ -372,16 +382,36 @@ function AdminPanelView.new(playerGui: PlayerGui, callbacks: AdminPanelCallbacks
 
 	local function updateSelection(visible: boolean)
 		if isGamepadInput(UserInputService:GetLastInputType()) then
-			GuiService.SelectedObject = if visible then closeButton else openButton
+			GuiService.SelectedObject = if visible then closeButton.button else openButton.button
 		else
 			GuiService.SelectedObject = nil
 		end
 	end
 
+	local function setStatus(message: string, color: Color3)
+		statusLabel.Text = message
+		statusLabel.TextColor3 = color
+		statusStroke.Color = color
+		UiKit.pop(statusPill, 0.05)
+	end
+
+	local function highlightTarget()
+		local selectedId = tonumber(targetBox.Text)
+		for userId, stroke in pairs(entryStrokes) do
+			local isSelected = userId == selectedId
+			stroke.Color = if isSelected then UiTheme.Colors.Gold else UiTheme.Colors.Border
+			stroke.Thickness = if isSelected then 2.5 else 1
+			stroke.Transparency = if isSelected then 0 else 0.5
+		end
+	end
+	table.insert(connections, targetBox:GetPropertyChangedSignal("Text"):Connect(highlightTarget))
+
 	local function setVisible(visible: boolean)
 		overlay.Visible = visible
-		openButton.Visible = not visible
+		openButton.root.Visible = not visible
 		if visible then
+			panelScale.Scale = 0.88
+			TweenService:Create(panelScale, TweenInfo.new(0.24, Enum.EasingStyle.Back, Enum.EasingDirection.Out), { Scale = 1 }):Play()
 			updateSelection(true)
 		else
 			announcementBox:ReleaseFocus()
@@ -391,10 +421,10 @@ function AdminPanelView.new(playerGui: PlayerGui, callbacks: AdminPanelCallbacks
 		end
 	end
 
-	table.insert(connections, openButton.Activated:Connect(function()
+	table.insert(connections, openButton.button.Activated:Connect(function()
 		setVisible(true)
 	end))
-	table.insert(connections, closeButton.Activated:Connect(function()
+	table.insert(connections, closeButton.button.Activated:Connect(function()
 		setVisible(false)
 	end))
 	table.insert(connections, UserInputService.InputBegan:Connect(function(input, gameProcessed)
@@ -410,12 +440,12 @@ function AdminPanelView.new(playerGui: PlayerGui, callbacks: AdminPanelCallbacks
 	table.insert(connections, UserInputService.LastInputTypeChanged:Connect(function(inputType)
 		if isGamepadInput(inputType) then
 			updateSelection(overlay.Visible)
-		elseif GuiService.SelectedObject == openButton or GuiService.SelectedObject == closeButton then
+		elseif GuiService.SelectedObject == openButton.button or GuiService.SelectedObject == closeButton.button then
 			GuiService.SelectedObject = nil
 		end
 	end))
 
-	table.insert(connections, announceButton.Activated:Connect(function()
+	table.insert(connections, announceButton.button.Activated:Connect(function()
 		if not busy then
 			callbacks.onAnnounce(announcementBox.Text)
 		end
@@ -426,15 +456,65 @@ function AdminPanelView.new(playerGui: PlayerGui, callbacks: AdminPanelCallbacks
 			callbacks.onModerate(action, targetBox.Text, reasonBox.Text)
 		end
 	end
-	table.insert(connections, kickButton.Activated:Connect(function()
+	table.insert(connections, kickButton.button.Activated:Connect(function()
 		moderate("Kick")
 	end))
-	table.insert(connections, banButton.Activated:Connect(function()
+	table.insert(connections, banButton.button.Activated:Connect(function()
 		moderate("Ban")
 	end))
-	table.insert(connections, unbanButton.Activated:Connect(function()
+	table.insert(connections, unbanButton.button.Activated:Connect(function()
 		moderate("Unban")
 	end))
+
+	local function createPlayerEntry(playerEntry: PlayerEntry, index: number)
+		local entry = Instance.new("TextButton")
+		entry.Name = `Player_{playerEntry.userId}`
+		entry:SetAttribute("AdminPlayerEntry", true)
+		entry.Size = UDim2.new(1, -4, 0, ENTRY_HEIGHT)
+		entry.LayoutOrder = index
+		entry.BackgroundColor3 = UiTheme.Colors.Surface
+		entry.BorderSizePixel = 0
+		entry.AutoButtonColor = true
+		entry.Text = ""
+		entry.Selectable = true
+		entry.SelectionOrder = 130 + index
+		entry.ZIndex = 14
+		entry.Parent = playerList
+		UiTheme.addCorner(entry, 10)
+		local stroke = UiTheme.addStroke(entry, UiTheme.Colors.Border, 1)
+		stroke.Transparency = 0.5
+		entryStrokes[playerEntry.userId] = stroke
+
+		-- Avatar com a inicial do nome, colorido de forma estável pelo User ID.
+		local palette = { UiTheme.Colors.Brand, UiTheme.Colors.Blue, UiTheme.Colors.Green, UiTheme.Colors.Pink, UiTheme.Colors.Orange }
+		local avatar = UiTheme.createLabel(entry, "Avatar", string.upper(string.sub(playerEntry.displayName, 1, 1)), UiTheme.Fonts.Display, 16, UiTheme.Colors.Outline)
+		avatar.AnchorPoint = Vector2.new(0, 0.5)
+		avatar.Position = UDim2.new(0, 7, 0.5, 0)
+		avatar.Size = UDim2.fromOffset(30, 30)
+		avatar.BackgroundColor3 = palette[(playerEntry.userId % #palette) + 1]
+		avatar.BackgroundTransparency = 0
+		avatar.ZIndex = 15
+		UiTheme.addCorner(avatar, 999)
+
+		local nameLabel = UiTheme.createLabel(entry, "Name", playerEntry.displayName, UiTheme.Fonts.BodyBold, 14, UiTheme.Colors.Ink)
+		nameLabel.Position = UDim2.fromOffset(46, 4)
+		nameLabel.Size = UDim2.new(1, -56, 0, 20)
+		nameLabel.TextXAlignment = Enum.TextXAlignment.Left
+		nameLabel.TextTruncate = Enum.TextTruncate.AtEnd
+		nameLabel.ZIndex = 15
+
+		local detailLabel = UiTheme.createLabel(entry, "Detail", string.format("@%s  •  %d", playerEntry.username, playerEntry.userId), UiTheme.Fonts.Body, 11, UiTheme.Colors.InkSoft)
+		detailLabel.Position = UDim2.fromOffset(46, 23)
+		detailLabel.Size = UDim2.new(1, -56, 0, 16)
+		detailLabel.TextXAlignment = Enum.TextXAlignment.Left
+		detailLabel.TextTruncate = Enum.TextTruncate.AtEnd
+		detailLabel.ZIndex = 15
+
+		table.insert(playerEntryConnections, entry.Activated:Connect(function()
+			targetBox.Text = tostring(playerEntry.userId)
+			UiKit.playClick(1.3)
+		end))
+	end
 
 	local handle = {} :: AdminPanelViewHandle
 	handle.setPlayers = function(players: { PlayerEntry })
@@ -442,6 +522,7 @@ function AdminPanelView.new(playerGui: PlayerGui, callbacks: AdminPanelCallbacks
 			connection:Disconnect()
 		end
 		table.clear(playerEntryConnections)
+		table.clear(entryStrokes)
 
 		for _, child in ipairs(playerList:GetChildren()) do
 			if child:GetAttribute("AdminPlayerEntry") == true then
@@ -449,46 +530,28 @@ function AdminPanelView.new(playerGui: PlayerGui, callbacks: AdminPanelCallbacks
 			end
 		end
 
-		local entryHeight = 40
 		for index, playerEntry in ipairs(players) do
-			local entry = createButton(
-				`Player_{playerEntry.userId}`,
-				playerList,
-				string.format("%s  @%s  •  %d", playerEntry.displayName, playerEntry.username, playerEntry.userId),
-				UiTheme.Colors.Panel
-			)
-			entry:SetAttribute("AdminPlayerEntry", true)
-			entry.Position = UDim2.fromOffset(5, (index - 1) * entryHeight + 5)
-			entry.Size = UDim2.new(1, -15, 0, entryHeight - 5)
-			entry.TextSize = 12
-			entry.TextTruncate = Enum.TextTruncate.AtEnd
-			entry.TextXAlignment = Enum.TextXAlignment.Left
-			entry.ZIndex = 14
-			entry.SelectionOrder = 130 + index
-			UiTheme.addPadding(entry, 10, 0)
-			table.insert(playerEntryConnections, entry.Activated:Connect(function()
-				targetBox.Text = tostring(playerEntry.userId)
-			end))
+			createPlayerEntry(playerEntry, index)
 		end
-		playerList.CanvasSize = UDim2.fromOffset(0, (#players * entryHeight) + 5)
+		emptyLabel.Visible = #players == 0
+		highlightTarget()
 	end
 
 	handle.setBusy = function(newBusy: boolean)
 		busy = newBusy
 		for _, button in ipairs(actionButtons) do
-			button.Active = not newBusy
-			button.AutoButtonColor = not newBusy
-			button.TextTransparency = if newBusy then 0.45 else 0
+			button.setEnabled(not newBusy)
 		end
 		if newBusy then
-			feedbackLabel.Text = "Processando ação no servidor…"
-			feedbackLabel.TextColor3 = UiTheme.Colors.InkSoft
+			setStatus("⏳  Processando ação no servidor…", UiTheme.Colors.InkSoft)
 		end
 	end
 
 	handle.setFeedback = function(message: string, ok: boolean)
-		feedbackLabel.Text = message
-		feedbackLabel.TextColor3 = if ok then UiTheme.Colors.Green else UiTheme.Colors.Danger
+		setStatus(
+			string.format("%s  %s", if ok then "✔" else "✖", message),
+			if ok then UiTheme.Colors.Green else UiTheme.Colors.Danger
+		)
 	end
 
 	handle.setVisible = setVisible
