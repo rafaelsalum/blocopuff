@@ -85,6 +85,11 @@ export type EliminationZoneConfig = {
 	VisualizeInStudio: boolean,
 }
 
+export type MusicConfig = {
+	SoundId: string,
+	Volume: number,
+}
+
 export type GameConfig = {
 	GameName: string,
 	MinimumPlayers: number,
@@ -100,6 +105,7 @@ export type GameConfig = {
 	Palette: WorldPalette,
 	Puffador: PuffadorConfig,
 	EliminationZone: EliminationZoneConfig,
+	Music: MusicConfig,
 	getRoundTimings: () -> RoundTimings,
 }
 
@@ -209,6 +215,13 @@ local EliminationZone: EliminationZoneConfig = table.freeze({
 	VisualizeInStudio = false,
 })
 
+-- Trilha de fundo tocada localmente em cada cliente, em loop e com volume
+-- baixo fixo para não competir com os sons do jogo.
+local Music: MusicConfig = table.freeze({
+	SoundId = "rbxassetid://1846613120",
+	Volume = 0.15,
+})
+
 local GameConfig = {} :: GameConfig
 
 GameConfig.GameName = "BlocoPuff"
@@ -228,6 +241,7 @@ GameConfig.Building = Building
 GameConfig.Palette = Palette
 GameConfig.Puffador = Puffador
 GameConfig.EliminationZone = EliminationZone
+GameConfig.Music = Music
 
 function GameConfig.getRoundTimings(): RoundTimings
 	if RunService:IsStudio() then

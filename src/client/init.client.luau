@@ -5,6 +5,7 @@ local PuffadorController = require(script.controllers.PuffadorController)
 local SpectatorController = require(script.controllers.SpectatorController)
 local AdminController = require(script.controllers.AdminController)
 local BlockCollapseController = require(script.controllers.BlockCollapseController)
+local MusicController = require(script.controllers.MusicController)
 
 print("[BlocoPuff] Client initialized")
 
@@ -41,4 +42,11 @@ local collapseOk, collapseErr = pcall(function()
 end)
 if not collapseOk then
 	warn(string.format("[BlocoPuff] Failed to start block collapse effects: %s", tostring(collapseErr)))
+end
+
+local musicOk, musicErr = pcall(function()
+	MusicController.start()
+end)
+if not musicOk then
+	warn(string.format("[BlocoPuff] Failed to start background music: %s", tostring(musicErr)))
 end

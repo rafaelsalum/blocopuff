@@ -222,6 +222,12 @@ O lobby é a galeria envidraçada dentro do próprio prédio, com carpete, sofá
 
 O interior segue o estilo de mansão de jogos como Murder Mystery, usando somente materiais nativos: porão de tijolos no poço, papel de parede, lambri, rodapés, sancas, portas, quadros e janelas noturnas por andar (`BuildingDecor`), teto com vigas, lustres e arandelas com luz quente. O piso de cima é de taco de madeira e o de baixo de pedra fosca, sem reflexo, o que facilita enxergar os buracos. A iluminação usa `Lighting.Technology = Future` (em `default.project.json`) com base uniforme de luz ambiente; lustres e arandelas são acentos fracos e o andar de baixo recebe uma única luz de teto difusa.
 
+### Identidade visual
+
+A interface segue uma identidade própria definida em `src/client/ui/UiTheme.luau`: "noite na mansão" (fundos roxo-escuros) com as duas cores do Puffador como marca, lilás Puff e dourado Puff; títulos em FredokaOne com contorno escuro; painéis com gradiente, borda em gradiente lilás→dourado e sombra sólida. O logotipo "BLOCO PUFF" aparece no lobby e no painel admin. `UiKit` oferece o botão 3D da marca (afunda ao clicar, cresce no hover, toca um clique e é selecionável por gamepad) e animações de destaque. O botão de tiro mobile é redondo, com recarga enchendo o círculo. `FeedbackView` mostra "+1" perto da mira a cada bloco derrubado, contador de combo, chamadas de sequência ("TRIPLO!", "EM CHAMAS!", "IMPARÁVEL!", "LENDÁRIO!") e notificações curtas para marcos de blocos. O painel admin usa cartões por seção, lista de jogadores com avatar e seleção destacada, contadores de caracteres e uma pílula de status para o retorno do servidor.
+
+Uma trilha de fundo (`MusicController`) toca localmente em cada cliente, em loop e com volume baixo fixo; o ID do áudio e o volume ficam em `GameConfig.Music`.
+
 Ainda não há dano direto, resistência de blocos, regeneração durante a rodada, persistência ou monetização.
 
 Para testar a zona de eliminação manualmente: entre em `Active` com 2+ jogadores, destrua o bloco sob um participante e confirme que ele cai e é eliminado com a mensagem "Você caiu da arena" no HUD, sem perda de vida instantânea no momento do disparo. Os atributos `IsEliminated`, `EliminationReason` e `EliminatedAtRoundId` no `Player` refletem a causa e a rodada.
