@@ -18,6 +18,7 @@
 -- A única pista é o som: passos em loop e latidos em intervalos
 -- irregulares, com áudio 3D na peça do corpo (sem indicador de distância).
 
+local CollectionService = game:GetService("CollectionService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
@@ -32,6 +33,10 @@ type Corridor = BuildingLayout.Corridor
 type Mode = "Sleeping" | "Patrol" | "Chase" | "Pause"
 
 export type Sender = (player: Player, kind: string, value: any) -> ()
+-- Encontro (começou a perseguir alguém), contato (empurrou) e fuga ("Jump"
+-- pulou por cima, "Run" escapou de uma perseguição sem ser pego).
+export type EventKind = "Encounter" | "Contact" | "Escape"
+export type EventListener = (kind: EventKind, player: Player, detail: string?) -> ()
 
 type Intruder = {
 	player: Player,
@@ -43,6 +48,13 @@ type Intruder = {
 local GENERATED_BY_ATTRIBUTE = "GeneratedBy"
 local SERVICE_NAME = "BaraoService"
 local STATE_ATTRIBUTE = "BaraoState"
+-- UserId de quem o Barão está perseguindo (0 = ninguém); o cliente usa para
+-- a trilha de tensão, que não diz direção nem distância.
+local TARGET_ATTRIBUTE = "BaraoTarget"
+local BARAO_TAG = "Barao"
+local ESCAPE_MIN_CHASE = 3
+local ENCOUNTER_COOLDOWN = 10
+local JUMP_ESCAPE_COOLDOWN = 3
 local EDGE_MARGIN = 1.6
 local LATERAL_MARGIN = 1.2
 local SLEEP_ALONG = -(BuildingLayout.CorridorHalfLength - 3)
@@ -80,6 +92,13 @@ local nextBarkAt = 0
 local otherCorridorSince: number? = nil
 local enragedUntil = 0
 local lastContact: { [Player]: number } = {}
+local eventListener: EventListener? = nil
+local chaseTarget: Player? = nil
+local chaseStartedAt = 0
+local chaseCaught = false
+local chaseJumped = false
+local lastEncounter: { [Player]: number } = {}
+local lastJumpEscape: { [Player]: number } = {}
 
 local function isActiveParticipant(player: Player): boolean
 	return active
@@ -119,6 +138,48 @@ local function setMode(newMode: Mode)
 	local current = model
 	if current ~= nil then
 		current:SetAttribute(STATE_ATTRIBUTE, newMode)
+	end
+end
+
+local function emit(kind: EventKind, player: Player, detail: string?)
+	local listener = eventListener
+	if listener ~= nil then
+		task.spawn(listener, kind, player, detail)
+	end
+end
+
+local function setTargetAttribute(player: Player?)
+	local current = model
+	if current ~= nil then
+		current:SetAttribute(TARGET_ATTRIBUTE, if player ~= nil then player.UserId else 0)
+	end
+end
+
+-- Fim de uma perseguição: se durou o bastante e ninguém foi pego (nem
+-- já contou como pulo), vale como fuga.
+local function endChase(now: number)
+	local previous = chaseTarget
+	if previous ~= nil and not chaseCaught and not chaseJumped and now - chaseStartedAt >= ESCAPE_MIN_CHASE and previous.Parent ~= nil then
+		emit("Escape", previous, "Run")
+	end
+	chaseTarget = nil
+	chaseCaught = false
+	chaseJumped = false
+	setTargetAttribute(nil)
+end
+
+local function beginChase(player: Player, now: number)
+	if chaseTarget == player then
+		return
+	end
+	endChase(now)
+	chaseTarget = player
+	chaseStartedAt = now
+	setTargetAttribute(player)
+	local last = lastEncounter[player]
+	if last == nil or now - last >= ENCOUNTER_COOLDOWN then
+		lastEncounter[player] = now
+		emit("Encounter", player, nil)
 	end
 end
 
@@ -195,6 +256,12 @@ local function place(bob: number)
 end
 
 local function goToSleep()
+	chaseTarget = nil
+	chaseCaught = false
+	chaseJumped = false
+	setTargetAttribute(nil)
+	table.clear(lastEncounter)
+	table.clear(lastJumpEscape)
 	corridorIndex = random:NextInteger(1, math.max(1, #corridors))
 	along = SLEEP_ALONG
 	lateral = 0
@@ -287,6 +354,10 @@ local function push(player: Player, intruder: Intruder, now: number, corridor: C
 	end
 	local velocity = (horizontal * config.PushSpeed) + Vector3.new(0, config.PushLift, 0)
 	lastContact[player] = now
+	if player == chaseTarget then
+		chaseCaught = true
+	end
+	emit("Contact", player, nil)
 	local sender = sendToPlayer
 	if sender ~= nil then
 		sender(player, "Knockback", velocity)
@@ -319,6 +390,16 @@ local function checkContacts(intruders: { Intruder }, now: number, corridor: Cor
 			if horizontal <= config.ContactRadius and feetHeight < config.JumpClearance then
 				push(intruder.player, intruder, now, corridor)
 				return
+			elseif horizontal <= config.ContactRadius then
+				-- Passou por cima dele no ar: fuga pelo pulo.
+				local lastJump = lastJumpEscape[intruder.player]
+				if lastJump == nil or now - lastJump >= JUMP_ESCAPE_COOLDOWN then
+					lastJumpEscape[intruder.player] = now
+					if intruder.player == chaseTarget then
+						chaseJumped = true
+					end
+					emit("Escape", intruder.player, "Jump")
+				end
 			end
 		end
 	end
@@ -396,12 +477,16 @@ local function step(dt: number)
 				scheduleBark(now)
 			end
 			otherCorridorSince = nil
+			beginChase(target.player, now)
 			local multiplier = if isEnraged(now) then GameConfig.Barao.EnragedSpeedMultiplier else 1
 			moved = moveTowards(target.along, target.lateral, GameConfig.Barao.ChaseSpeed * multiplier, dt)
 		else
 			if mode == "Chase" then
 				setMode("Patrol")
 				pauseUntil = now + random:NextNumber(SNIFF_TIME.Min, SNIFF_TIME.Max)
+			end
+			if chaseTarget ~= nil then
+				endChase(now)
 			end
 			if #intruders == 0 then
 				maybeSwitchCorridor(now)
@@ -430,6 +515,11 @@ local function step(dt: number)
 	end
 	local bob = if speed > 0.5 then math.abs(math.sin(now * speed * 1.2)) * 0.18 else 0
 	place(bob)
+end
+
+-- Avisado de encontros, contatos e fugas (telemetria e Momentos Puff).
+function BaraoService.setEventListener(listener: EventListener?)
+	eventListener = listener
 end
 
 function BaraoService.beginRound(newRoundId: number, wakeDelay: number)
@@ -485,6 +575,8 @@ function BaraoService.start(worldRoot: Instance, sender: Sender)
 
 	local newModel = BaraoModel.build()
 	newModel:SetAttribute(GENERATED_BY_ATTRIBUTE, SERVICE_NAME)
+	newModel:SetAttribute(TARGET_ATTRIBUTE, 0)
+	CollectionService:AddTag(newModel, BARAO_TAG)
 	local body = newModel:FindFirstChild(BaraoModel.SoundPartName)
 	if body ~= nil and body:IsA("BasePart") then
 		soundPart = body
@@ -510,6 +602,12 @@ function BaraoService.start(worldRoot: Instance, sender: Sender)
 	end)
 	playerRemoving = Players.PlayerRemoving:Connect(function(player: Player)
 		lastContact[player] = nil
+		lastEncounter[player] = nil
+		lastJumpEscape[player] = nil
+		if chaseTarget == player then
+			chaseTarget = nil
+			setTargetAttribute(nil)
+		end
 	end)
 end
 
@@ -533,6 +631,7 @@ function BaraoService.stop()
 	soundPart = nil
 	footsteps = nil
 	sendToPlayer = nil
+	eventListener = nil
 	table.clear(lastContact)
 	started = false
 end

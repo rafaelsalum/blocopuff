@@ -23,6 +23,9 @@ local CorridorBuilder = require(script.Parent.CorridorBuilder)
 type Toca = BuildingLayout.Toca
 
 export type Sender = (player: Player, kind: string, value: any) -> ()
+-- "Enter" ao ocupar; "Leave"/"Eject"/"RoundEnd" ao sair (com os segundos lá dentro).
+export type TocaEvent = "Enter" | "Leave" | "Eject" | "RoundEnd"
+export type EventListener = (kind: TocaEvent, player: Player, seconds: number) -> ()
 
 type TocaState = {
 	toca: Toca,
@@ -43,6 +46,7 @@ local roundId = 0
 local states: { TocaState } = {}
 local cooldownUntil: { [Player]: number } = {}
 local sendToPlayer: Sender? = nil
+local eventListener: EventListener? = nil
 local heartbeat: RBXScriptConnection? = nil
 local playerRemoving: RBXScriptConnection? = nil
 
@@ -71,6 +75,13 @@ local function send(player: Player, kind: string, value: any)
 	local sender = sendToPlayer
 	if sender ~= nil then
 		sender(player, kind, value)
+	end
+end
+
+local function emit(kind: TocaEvent, player: Player, seconds: number)
+	local listener = eventListener
+	if listener ~= nil then
+		task.spawn(listener, kind, player, seconds)
 	end
 end
 
@@ -105,6 +116,7 @@ end
 -- Fim do tempo: empurra o ocupante para o meio do corredor e aplica o
 -- tempo de espera antes de poder usar outra Toca.
 local function eject(state: TocaState, player: Player, now: number)
+	emit("Eject", player, now - state.enteredAt)
 	release(state)
 	cooldownUntil[player] = now + GameConfig.Toca.Cooldown
 	local config = GameConfig.Toca
@@ -116,6 +128,7 @@ end
 local function updateOccupied(state: TocaState, player: Player, now: number)
 	local root = getRoot(player)
 	if not isActiveParticipant(player) or root == nil or not BuildingLayout.isInsideToca(state.toca, root.Position) then
+		emit("Leave", player, now - state.enteredAt)
 		release(state)
 		send(player, "TocaLeave", 0)
 		return
@@ -142,6 +155,7 @@ local function claim(state: TocaState, candidates: { [Player]: Vector3 }, now: n
 			state.warned = false
 			paint(state)
 			send(player, "TocaEnter", GameConfig.Toca.MaxStay)
+			emit("Enter", player, 0)
 			return
 		end
 	end
@@ -182,6 +196,11 @@ function TocaService.isProtected(player: Player): boolean
 	return active and occupiedToca(player) ~= nil
 end
 
+-- Avisado de entradas e saídas das Tocas (telemetria).
+function TocaService.setEventListener(listener: EventListener?)
+	eventListener = listener
+end
+
 function TocaService.beginRound(newRoundId: number)
 	roundId = newRoundId
 	active = true
@@ -193,7 +212,12 @@ end
 
 function TocaService.endRound()
 	active = false
+	local now = os.clock()
 	for _, state in ipairs(states) do
+		local occupant = state.occupant
+		if occupant ~= nil then
+			emit("RoundEnd", occupant, now - state.enteredAt)
+		end
 		release(state)
 	end
 	table.clear(cooldownUntil)
@@ -261,6 +285,7 @@ function TocaService.stop()
 	table.clear(states)
 	table.clear(cooldownUntil)
 	sendToPlayer = nil
+	eventListener = nil
 	started = false
 end
 

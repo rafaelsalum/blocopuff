@@ -143,6 +143,7 @@ export type BaraoConfig = {
 	BarkSoundIds: { string },
 	FunnySoundIds: { string },
 	FootstepSoundId: string,
+	TensionSoundId: string,
 }
 
 export type TocaConfig = {
@@ -398,6 +399,8 @@ local Barao: BaraoConfig = table.freeze({
 	BarkSoundIds = table.freeze({ "rbxasset://sounds/action_get_up.mp3", "rbxasset://sounds/action_jump.mp3" }),
 	FunnySoundIds = table.freeze({ "rbxasset://sounds/oof.ogg", "rbxasset://sounds/ouch.ogg", "rbxasset://sounds/swoosh.wav" }),
 	FootstepSoundId = "rbxasset://sounds/action_footsteps_plastic.mp3",
+	-- Batida grave, sem direção, tocada só para quem está sendo perseguido.
+	TensionSoundId = "rbxasset://sounds/action_jump_land.mp3",
 })
 
 -- Tocas Seguras: protegem do Barão (não do Puffador) por MaxStay segundos;

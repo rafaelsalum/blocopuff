@@ -365,7 +365,7 @@ local function onRequestPuff(player: Player, rawAimTarget: unknown, rawAimOrigin
 	local isSuper = superCharges[player] ~= nil
 	local variant: Variant = if isSuper then "Super" else "Standard"
 	local power = if isSuper then GameConfig.SecretRoom.SuperPower else 1
-	TelemetryService.shot(player)
+	TelemetryService.shot(player, isSuper)
 	local hitSomeBlock = false
 	ProjectileService.spawn(player, origin, aimOrigin, direction, currentRoundId, function()
 		incrementRoundBlocksDestroyed(player)

@@ -12,6 +12,8 @@ local ResultsController = require(script.controllers.ResultsController)
 local TelemetryController = require(script.controllers.TelemetryController)
 local SecretPassageController = require(script.controllers.SecretPassageController)
 local BaraoController = require(script.controllers.BaraoController)
+local BaraoTensionController = require(script.controllers.BaraoTensionController)
+local PuffMomentController = require(script.controllers.PuffMomentController)
 
 print("[BlocoPuff] Client initialized")
 
@@ -97,4 +99,18 @@ local baraoOk, baraoErr = pcall(function()
 end)
 if not baraoOk then
 	warn(string.format("[BlocoPuff] Failed to start Barao controller: %s", tostring(baraoErr)))
+end
+
+local tensionOk, tensionErr = pcall(function()
+	BaraoTensionController.start()
+end)
+if not tensionOk then
+	warn(string.format("[BlocoPuff] Failed to start Barao tension controller: %s", tostring(tensionErr)))
+end
+
+local momentOk, momentErr = pcall(function()
+	PuffMomentController.start()
+end)
+if not momentOk then
+	warn(string.format("[BlocoPuff] Failed to start Puff moment controller: %s", tostring(momentErr)))
 end

@@ -29,6 +29,7 @@ type Counters = {
 	playerHits: number,
 	blockHits: number,
 	blocksDestroyed: number,
+	vaultShots: number,
 }
 
 local DEVICE_REPORT_COOLDOWN = 5
@@ -134,7 +135,7 @@ function TelemetryService.roundStarted(participants: { Player })
 	roundStartClock = os.clock()
 	table.clear(counters)
 	for _, player in ipairs(participants) do
-		counters[player] = { shots = 0, playerHits = 0, blockHits = 0, blocksDestroyed = 0 }
+		counters[player] = { shots = 0, playerHits = 0, blockHits = 0, blocksDestroyed = 0, vaultShots = 0 }
 		log(player, "RoundStarted", #participants)
 		-- Rematch: jogou a rodada anterior e continuou para esta.
 		if lastRoundParticipants[player] then
@@ -150,11 +151,27 @@ function TelemetryService.roundStarted(participants: { Player })
 	task.spawn(sampleFloors, roundToken, table.clone(participants))
 end
 
-function TelemetryService.shot(player: Player)
+function TelemetryService.shot(player: Player, withVaultPuffador: boolean?)
 	local current = getCounters(player)
 	if current ~= nil then
 		current.shots += 1
+		if withVaultPuffador then
+			current.vaultShots += 1
+		end
 	end
+end
+
+-- Evento avulso de outros serviços (corredores, Barão, Tocas, Momentos
+-- Puff). `value` padrão: segundos desde o início da rodada.
+function TelemetryService.event(player: Player, eventName: string, value: number?, context: string?, detail: string?)
+	if not roundActive then
+		return
+	end
+	log(player, eventName, if value ~= nil then value else elapsed(), context, detail)
+end
+
+function TelemetryService.roundElapsed(): number
+	return elapsed()
 end
 
 -- Um tiro que derrubou pelo menos um bloco conta um acerto em bloco;
@@ -238,6 +255,9 @@ function TelemetryService.roundFinished(outcomes: { [Player]: string })
 			log(player, "RoundPlayerHits", current.playerHits)
 			log(player, "RoundBlockHits", current.blockHits)
 			log(player, "RoundBlocksDestroyed", current.blocksDestroyed)
+			if current.vaultShots > 0 then
+				log(player, "RoundVaultShots", current.vaultShots)
+			end
 		end
 	end
 	roundActive = false

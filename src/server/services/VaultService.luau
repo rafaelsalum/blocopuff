@@ -27,6 +27,7 @@ local VaultProps = require(script.Parent.VaultProps)
 
 type DoorProps = VaultProps.DoorProps
 type OpenedListener = (player: Player) -> ()
+type PrizeListener = (player: Player) -> ()
 
 local FOLDER_NAME = "Vaults"
 local GENERATED_BY_ATTRIBUTE = "GeneratedBy"
@@ -43,6 +44,7 @@ local folder: Folder? = nil
 local vaultRemote: RemoteEvent? = nil
 local doors: { DoorProps } = {}
 local openedListener: OpenedListener? = nil
+local prizeListener: PrizeListener? = nil
 local connections: { RBXScriptConnection } = {}
 local random = Random.new()
 
@@ -153,6 +155,10 @@ local function onPrizeTriggered(player: Player)
 	markHolder(player)
 	fireAll("SuperTaken", player.DisplayName, player.UserId)
 	TelemetryService.vaultPrizeTaken(player)
+	local listener = prizeListener
+	if listener ~= nil then
+		task.spawn(listener, player)
+	end
 end
 
 local function spawnPrize(door: DoorProps)
@@ -224,6 +230,7 @@ local function expel(player: Player, door: DoorProps)
 	root.AssemblyLinearVelocity = Vector3.zero
 	root.CFrame = CFrame.lookAt(outside, outside + door.door.inward)
 	fireTo(player, "Expelled")
+	TelemetryService.event(player, "VaultExpelled")
 end
 
 local function updateStays(deltaTime: number)
@@ -317,6 +324,11 @@ function VaultService.setOpenedListener(listener: OpenedListener?)
 	openedListener = listener
 end
 
+-- Avisado quando alguém pega o Puffador do Cofre (Momento Puff).
+function VaultService.setPrizeListener(listener: PrizeListener?)
+	prizeListener = listener
+end
+
 function VaultService.start(worldRoot: Model)
 	if folder ~= nil then
 		return
@@ -381,6 +393,7 @@ function VaultService.stop()
 		folder = nil
 	end
 	openedListener = nil
+	prizeListener = nil
 end
 
 return table.freeze(VaultService)

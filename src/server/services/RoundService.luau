@@ -22,6 +22,8 @@ local SecretPassageService = require(script.Parent.SecretPassageService)
 local TocaService = require(script.Parent.TocaService)
 local BaraoService = require(script.Parent.BaraoService)
 local BuildModeService = require(script.Parent.BuildModeService)
+local PuffMomentService = require(script.Parent.PuffMomentService)
+local CorridorTelemetryService = require(script.Parent.CorridorTelemetryService)
 
 local awakeningRandom = Random.new()
 local PuffadorConstants = require(ReplicatedStorage.Shared.modules.PuffadorConstants)
@@ -77,6 +79,8 @@ local playerRemovingConnection: RBXScriptConnection? = nil
 local playerAddedConnection: RBXScriptConnection? = nil
 local winner: Winner? = nil
 local respawnGraceUntil: { [Player]: number } = {}
+-- Quem já usou a Segunda Chance nesta rodada (Momento Puff "Volta por Cima").
+local usedSecondChance: { [Player]: boolean } = {}
 -- Posição final de quem foi eliminado (1 = vencedor): quantos seguiam vivos
 -- depois da eliminação + 1.
 local eliminationPositions: { [Player]: number } = {}
@@ -242,6 +246,9 @@ local function creditKnockout(victim: Player)
 	local current = attacker:GetAttribute(ATTR_ROUND_KNOCKOUTS)
 	local count = if typeof(current) == "number" then current else 0
 	attacker:SetAttribute(ATTR_ROUND_KNOCKOUTS, count + 1)
+	if usedSecondChance[attacker] then
+		PuffMomentService.record(attacker, "Comeback", "Knockout")
+	end
 end
 
 -- Primeira queda para fora da arena: devolve o jogador a um bloco inteiro
@@ -268,6 +275,7 @@ local function trySecondChance(player: Player): boolean
 	end
 
 	player:SetAttribute(ATTR_HAS_SECOND_CHANCE, false)
+	usedSecondChance[player] = true
 	respawnGraceUntil[player] = os.clock() + RESPAWN_FALL_GRACE
 	KnockbackService.protect(player, GameConfig.SecondChance.RespawnProtection)
 	-- O personagem é simulado pelo cliente: ele também zera a própria
@@ -359,6 +367,7 @@ end
 
 local function clearRoundParticipants()
 	table.clear(respawnGraceUntil)
+	table.clear(usedSecondChance)
 	table.clear(eliminationPositions)
 	table.clear(eliminationTimes)
 	table.clear(participants)
@@ -391,6 +400,7 @@ local function onPlayerRemoving(player: Player)
 			print(string.format("[BlocoPuff] %s eliminated: %s", player.Name, EliminationTypes.PlayerLeft))
 		end
 		if currentState == RoundTypes.Active and participant.alive then
+			CorridorTelemetryService.leftMidRound(player)
 			TelemetryService.leftMidRound(player)
 		end
 
@@ -476,6 +486,8 @@ local function beginRound(timings: RoundTimings)
 	KnockbackService.beginRound(currentRoundId)
 	SecretPassageService.beginRound(currentRoundId)
 	TocaService.beginRound(currentRoundId)
+	PuffMomentService.beginRound()
+	CorridorTelemetryService.beginRound(currentRoundId)
 	-- O Barão acorda e o cofre destranca no mesmo instante sorteado.
 	local awakening = timings.RoundDuration * awakeningRandom:NextNumber(GameConfig.Barao.WakeMinFraction, GameConfig.Barao.WakeMaxFraction)
 	BaraoService.beginRound(currentRoundId, awakening)
@@ -587,6 +599,17 @@ local function runEnding(timings: RoundTimings)
 	TocaService.endRound()
 	ArenaService.endRound()
 	VaultService.endRound()
+	CorridorTelemetryService.endRound()
+	-- Volta por Cima também vale para quem venceu depois da Segunda Chance.
+	local roundWinner = winner
+	if roundWinner ~= nil then
+		for _, player in ipairs(participantOrder) do
+			if player.UserId == roundWinner.userId and usedSecondChance[player] then
+				PuffMomentService.record(player, "Comeback", "Win")
+			end
+		end
+	end
+	PuffMomentService.endRound()
 	publishResult()
 	-- Mesma regra de empate do resultado: tempo esgotado com vários vivos
 	-- ou os últimos caindo no mesmo instante.
@@ -709,6 +732,8 @@ function RoundService.stop()
 	SecretPassageService.stop()
 	BaraoService.stop()
 	TocaService.stop()
+	PuffMomentService.stop()
+	CorridorTelemetryService.stop()
 	ArenaService.endRound()
 	VaultService.stop()
 	BuildModeService.stop()

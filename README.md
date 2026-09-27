@@ -320,6 +320,33 @@ Escopo em `docs/FASE_2_SEGREDOS_COFRE_BARAO.md`.
 - **Ajustes:** ficam em `GameConfig.Barao` e `GameConfig.Toca`. Os sons atuais são provisórios, embutidos no Roblox; troque `BarkSoundIds`, `FunnySoundIds` e `FootstepSoundId` por áudios da Creator Store (`rbxassetid://...`).
 - **Código:** `BaraoService` (comportamento), `BaraoModel`, `TocaService`, `CorridorBuilder` (nichos) e `BuildingLayout.getTocas` / `isInsideToca` / `getCorridorFloorY`. No cliente, `BaraoController` mostra os avisos.
 
+### Alertas, Momentos Puff e telemetria dos segredos (Fase 2, entrega 2.4)
+
+- **Prioridade dos alertas** (`NotificationManager`, faixa do topo): alertas críticos passam na frente dos menores e nada se sobrepõe.
+
+  | Prioridade | Alertas |
+  |------------|---------|
+  | Crítica | Barão acordou / cofre destrancou; cofre aberto (com o Barão bravo) |
+  | Alta | Passagem secreta descoberta; Cofre Conquistado (Puffador do Cofre obtido); avisos do admin |
+  | Normal | Momentos Puff; "AU AU!" (contato do Barão); aviso de saída da Toca |
+  | Baixa | Toca Segura; modo Construir; quadro errado |
+
+- **Momentos Puff** (`PuffMomentService` / `PuffMomentController`): cada jogador conta no máximo uma vez por tipo por rodada.
+  - **Escapou do Barão:** pulou por cima dele, ou fugiu de uma perseguição de pelo menos 3 s sem ser pego.
+  - **Volta por Cima:** depois de usar a Segunda Chance, derrubou alguém ou venceu a rodada.
+  - **Cofre Conquistado:** pegou o Puffador do Cofre.
+  - **Descoberta secreta:** revelou uma passagem.
+
+  Cofre e descoberta usam a faixa que já existia; os demais ganham faixa própria.
+- **Tensão:** quem está sendo perseguido ouve uma batida grave sem direção (`BaraoTensionController`), que acelera e sobe de volume enquanto a perseguição dura. Ela não indica de onde o Barão vem; a pista de posição continua sendo o som 3D. O som fica em `GameConfig.Barao.TensionSoundId`.
+- **Telemetria** (`CorridorTelemetryService` e ganchos nos serviços):
+  - **Corredores:** `CorridorEntered` (andar de entrada) e `CorridorExited` (duração, andar de saída e de entrada).
+  - **Descobertas:** `PassageRevealed`, com `FirstOfRound` no primeiro da rodada; o valor é o tempo até a descoberta.
+  - **Tocas:** `TocaEntered` e `TocaLeft` (segundos, `Leave` ou `Eject`).
+  - **Barão:** `BaraoEncounter`, `BaraoContact`, `BaraoEscape` (`Jump` ou `Run`) e `LeftAfterBarao` (saiu do jogo até 30 s depois de encontrá-lo).
+  - **Cofre:** `VaultExpelled`, `VaultOpened`, `VaultPrizeTaken`, `BlockBuilt` e `RoundVaultShots` (tiros com o Puffador do Cofre).
+  - **Momentos:** `PuffMoment`.
+
 ### O Cofre e o Puffador do Cofre (Fase 2, entrega 2.3)
 
 A mansão pertence ao Barão Puff, inventor do Puffador. O protótipo dele, o **Puffador do Cofre**, fica guardado num cofre atrás da porta da parede oeste do andar de baixo, separado dos corredores secretos.

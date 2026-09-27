@@ -86,7 +86,7 @@ local function onVaultEvent(kind: unknown, first: unknown, second: unknown)
 	if kind == "Unlocked" then
 		playSound(CHIME_SOUND, 1.6, 0.6)
 		playSound(CHIME_SOUND, 2, 0.6, 0.18)
-		banner("🐶", "O BARÃO ACORDOU!", "E o cofre destrancou: porta dourada no andar de baixo", "Gold", 5, "High", "vault-unlocked")
+		banner("🐶", "O BARÃO ACORDOU!", "E o cofre destrancou: porta dourada no andar de baixo", "Gold", 5, "Critical", "vault-unlocked")
 	elseif kind == "Opened" then
 		playAlarm()
 		if isLocalUser(second) then
@@ -97,9 +97,9 @@ local function onVaultEvent(kind: unknown, first: unknown, second: unknown)
 	elseif kind == "SuperTaken" then
 		playSound(SUPER_SOUND, 0.8, 0.8)
 		if isLocalUser(second) then
-			banner("⚡", "PUFFADOR DO COFRE!", "2 blocos por Puff. Q, Y ou 🧱 troca para Construir", "Gold", 5, "High", "vault-super")
+			banner("⚡", "COFRE CONQUISTADO!", "Puffador do Cofre: 2 blocos por Puff. Q, Y ou 🧱 troca para Construir", "Gold", 5, "High", "vault-super")
 		else
-			banner("⚡", "PUFFADOR DO COFRE!", `{asText(first)} pegou o Puffador do Cofre. Derrube-o!`, "Gold", 4.5, "High", "vault-super")
+			banner("⚡", "COFRE CONQUISTADO!", `{asText(first)} pegou o Puffador do Cofre. Derrube-o!`, "Gold", 4.5, "High", "vault-super")
 		end
 	elseif kind == "Locked" then
 		local subtitle = if first == true then "O cofre está atrás de outra porta!" else "O cofre abre quando o Barão acordar…"
