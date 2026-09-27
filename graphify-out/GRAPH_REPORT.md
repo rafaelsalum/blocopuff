@@ -1,7 +1,7 @@
-# Graph Report - blocopuff  (2026-09-26)
+# Graph Report - blocopuff  (2026-09-27)
 
 ## Corpus Check
-- 45 files · ~30,223 words
+- 45 files · ~30,273 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
@@ -10,7 +10,7 @@
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `0321e42e`
+- Built from commit: `b22525cc`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 

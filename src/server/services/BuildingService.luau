@@ -32,23 +32,26 @@ local FLOOR_BAND_HEIGHT = 1.6
 local FLOOR_BAND_DEPTH = 0.5
 local BEAM_SIZE = 1.2
 local BEAM_SPACING = 14
-local ARENA_LAMP_RANGE = 22
-local ARENA_LAMP_BRIGHTNESS = 1.1
+-- Arandelas e abajures são apenas acentos: luz fraca e curta, para não
+-- criar pontos estourados no personagem quando ele passa perto da parede.
+local ARENA_LAMP_RANGE = 14
+local ARENA_LAMP_BRIGHTNESS = 0.45
 -- Andares abaixo do topo não recebem luz dos lustres; arandelas mais fortes
 -- e luzes de preenchimento compensam.
-local LOWER_LAMP_RANGE = 30
-local LOWER_LAMP_BRIGHTNESS = 1.5
-local FILL_LIGHT_GRID = 4
--- Altura acima do piso inferior: perto o bastante para iluminar o chão
--- (inclusive o meio da sala) e acima da cabeça dos jogadores.
-local FILL_LIGHT_HEIGHT = 12
-local FILL_LIGHT_RANGE = 34
-local FILL_LIGHT_BRIGHTNESS = 1.8
-local GALLERY_LAMP_RANGE = 16
-local GALLERY_LAMP_BRIGHTNESS = 0.8
+local LOWER_LAMP_RANGE = 16
+local LOWER_LAMP_BRIGHTNESS = 0.5
+-- Preenchimento suave: poucas luzes, altas e com alcance longo e brilho
+-- baixo, longe da cabeça dos jogadores para iluminar por igual, sem o
+-- efeito de "lâmpada presa no personagem".
+local FILL_LIGHT_GRID = 3
+local FILL_LIGHT_HEIGHT = 20
+local FILL_LIGHT_RANGE = 48
+local FILL_LIGHT_BRIGHTNESS = 0.35
+local GALLERY_LAMP_RANGE = 12
+local GALLERY_LAMP_BRIGHTNESS = 0.4
 local CHANDELIER_DROP = 5
-local CHANDELIER_RANGE = 46
-local CHANDELIER_BRIGHTNESS = 1.5
+local CHANDELIER_RANGE = 40
+local CHANDELIER_BRIGHTNESS = 0.6
 local GLASS_THICKNESS = 0.4
 local GLASS_TRANSPARENCY = 0.78
 local GLASS_COLOR = Color3.fromRGB(170, 190, 200)
@@ -423,8 +426,8 @@ local function decorateCeiling(parent: Instance, arena: ArenaConfig, building: B
 			CHANDELIER_DROP,
 			1.6,
 			building,
-			28,
-			1
+			24,
+			0.45
 		)
 	end
 end

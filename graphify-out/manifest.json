@@ -85,8 +85,8 @@
     "semantic_hash": ""
   },
   "src/shared/config/GameConfig.luau": {
-    "mtime": 1790461211.710306,
-    "ast_hash": "a3bc608a06cc67fe0df93316d06f6320",
+    "mtime": 1790504707.0605352,
+    "ast_hash": "882b6d99dbeb77d77f46f55afb9cd7ce",
     "semantic_hash": ""
   },
   "src/shared/modules/PuffadorConstants.luau": {
@@ -160,8 +160,8 @@
     "semantic_hash": ""
   },
   "src/server/services/WorldVisualService.luau": {
-    "mtime": 1790461298.3033266,
-    "ast_hash": "abd1fc5e97ebfd6bb639986840d957e0",
+    "mtime": 1790504707.060347,
+    "ast_hash": "76c20392988d078d56ee10707185d2d1",
     "semantic_hash": ""
   },
   "src/shared/modules/ArenaConstants.luau": {
@@ -205,8 +205,8 @@
     "semantic_hash": ""
   },
   "src/server/services/BuildingService.luau": {
-    "mtime": 1790462451.446488,
-    "ast_hash": "e21b640733fd21805ecf0ce9c88fce2e",
+    "mtime": 1790504707.0598066,
+    "ast_hash": "8789966fef11a95a9158e6e67bbb8152",
     "semantic_hash": ""
   },
   "src/shared/modules/BuildingLayout.luau": {
@@ -215,8 +215,8 @@
     "semantic_hash": ""
   },
   "src/server/services/BuildingDecor.luau": {
-    "mtime": 1790460580.7028189,
-    "ast_hash": "3fe54583ffcea53d3cad7f172e0ddbcc",
+    "mtime": 1790504707.0599406,
+    "ast_hash": "2c1e93593728c1c47b3a5fd9d9049062",
     "semantic_hash": ""
   },
   "src/client/controllers/BlockCollapseController.luau": {

@@ -117,7 +117,7 @@ local Arena: ArenaConfig = table.freeze({
 		-- Piso de baixo: cerâmica em xadrez claro, contrastando com o poço escuro.
 		{
 			Material = Enum.Material.CeramicTiles,
-			Colors = { Color3.fromRGB(206, 194, 170), Color3.fromRGB(96, 112, 114) },
+			Colors = { Color3.fromRGB(176, 166, 146), Color3.fromRGB(84, 98, 100) },
 		},
 		-- Piso de cima: taco de madeira em dois tons; os buracos revelam a
 		-- cerâmica clara de baixo, o que facilita a leitura do mapa.
@@ -155,7 +155,7 @@ local Building: BuildingConfig = table.freeze({
 	FrameColor = Color3.fromRGB(178, 138, 64),
 	BrassColor = Color3.fromRGB(196, 154, 82),
 	WindowColor = Color3.fromRGB(26, 36, 64),
-	LampColor = Color3.fromRGB(255, 196, 132),
+	LampColor = Color3.fromRGB(255, 226, 192),
 	ArtColors = {
 		Color3.fromRGB(58, 84, 120),
 		Color3.fromRGB(140, 92, 50),

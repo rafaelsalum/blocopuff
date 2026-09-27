@@ -385,7 +385,7 @@ function BuildingDecor.createSideTable(parent: Instance, name: string, base: Vec
 		material = Enum.Material.Fabric,
 		transparency = 0.1,
 	})
-	addPointLight(shade, style.LampColor, 14, 0.9, false)
+	addPointLight(shade, style.LampColor, 10, 0.35, false)
 end
 
 function BuildingDecor.createPlant(parent: Instance, name: string, base: Vector3, style: BuildingConfig)
