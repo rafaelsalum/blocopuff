@@ -13,6 +13,7 @@ local RoundService = require(script.services.RoundService)
 local WorldVisualService = require(script.services.WorldVisualService)
 local BuildingService = require(script.services.BuildingService)
 local AdminService = require(script.services.AdminService)
+local PhotoModeService = require(script.services.PhotoModeService)
 
 local WORLD_NAME = "BlocoPuffWorld"
 local GENERATED_BY_ATTRIBUTE = "GeneratedBy"
@@ -72,3 +73,6 @@ print("[BlocoPuff] Elimination zone armed")
 
 RoundService.start()
 print("[BlocoPuff] Round cycle started")
+
+-- Só ativo no Studio: cenas para capas e thumbnails da loja.
+PhotoModeService.start()

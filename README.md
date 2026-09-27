@@ -228,6 +228,22 @@ A interface segue uma identidade própria definida em `src/client/ui/UiTheme.lua
 
 Uma trilha de fundo (`MusicController`) toca localmente em cada cliente, em loop: baixa no lobby e bem mais baixa enquanto o jogador está competindo, com transição suave (eliminados voltam ao volume do lobby). O ID do áudio, os volumes e o tempo de transição ficam em `GameConfig.Music`.
 
+### Artes da loja
+
+**Modo foto (só no Studio).** `PhotoModeService` monta cenas prontas para prints: bonecos R15 em pose com o Puffador, buracos no piso, projéteis e pedaços congelados no ar, com a câmera já enquadrada. Aperte **Run** (F8, sem entrar como jogador) e, na barra de comandos, rode:
+
+```lua
+workspace:SetAttribute("PhotoScene", "acao")   -- tiroteio no piso de cima (thumbnail principal)
+workspace:SetAttribute("PhotoScene", "queda")  -- visto do andar de baixo, alguém caindo pelo buraco
+workspace:SetAttribute("PhotoScene", "icone")  -- close de um personagem mirando (base do ícone)
+workspace:SetAttribute("PhotoScene", "lobby")  -- galeria envidraçada com jogadores assistindo
+workspace:SetAttribute("PhotoScene", "")       -- limpa a cena e restaura os blocos
+```
+
+Depois é só tirar o print da janela do Studio (dá para ajustar a câmera à mão antes).
+
+**Editor de capas.** Abra `tools/store-art/editor-de-capas.html` no navegador, solte o print e escolha **Thumbnail** (1920×1080) ou **Ícone** (512×512). O editor aplica o logotipo BLOCO PUFF, uma chamada e um selo opcional no estilo da identidade visual, com zoom, enquadramento por arraste, vinheta, saturação e guias de área segura, e exporta o PNG pronto para o Creator Hub.
+
 Ainda não há dano direto, resistência de blocos, regeneração durante a rodada, persistência ou monetização.
 
 Para testar a zona de eliminação manualmente: entre em `Active` com 2+ jogadores, destrua o bloco sob um participante e confirme que ele cai e é eliminado com a mensagem "Você caiu da arena" no HUD, sem perda de vida instantânea no momento do disparo. Os atributos `IsEliminated`, `EliminationReason` e `EliminatedAtRoundId` no `Player` refletem a causa e a rodada.

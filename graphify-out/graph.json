@@ -1022,8 +1022,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_client_ui_crosshairview",
-      "community": 5,
-      "community_name": "PuffadorController.luau",
+      "community": 29,
+      "community_name": "CrosshairView.new",
       "norm_label": "crosshairview.luau"
     },
     {
@@ -1033,8 +1033,8 @@
       "source_location": "L32",
       "_origin": "ast",
       "id": "src_client_ui_crosshairview_addcorner",
-      "community": 5,
-      "community_name": "PuffadorController.luau",
+      "community": 29,
+      "community_name": "CrosshairView.new",
       "norm_label": "addcorner()"
     },
     {
@@ -1044,8 +1044,8 @@
       "source_location": "L38",
       "_origin": "ast",
       "id": "src_client_ui_crosshairview_createhitline",
-      "community": 5,
-      "community_name": "PuffadorController.luau",
+      "community": 29,
+      "community_name": "CrosshairView.new",
       "norm_label": "createhitline()"
     },
     {
@@ -1055,8 +1055,8 @@
       "source_location": "L58",
       "_origin": "ast",
       "id": "src_client_ui_crosshairview_crosshairview_new",
-      "community": 5,
-      "community_name": "PuffadorController.luau",
+      "community": 29,
+      "community_name": "CrosshairView.new",
       "norm_label": "crosshairview.new()"
     },
     {
@@ -1459,7 +1459,7 @@
       "label": "getOrCreateWorld()",
       "file_type": "code",
       "source_file": "src/server/init.server.luau",
-      "source_location": "L21",
+      "source_location": "L22",
       "_origin": "ast",
       "id": "src_server_init_server_getorcreateworld",
       "community": 10,
@@ -1836,8 +1836,8 @@
       "source_location": "L321",
       "_origin": "ast",
       "id": "src_server_services_arenaservice_arenaservice_getblocks",
-      "community": 2,
-      "community_name": "ArenaService.luau",
+      "community": 28,
+      "community_name": "PhotoModeService.luau",
       "norm_label": "arenaservice.getblocks()"
     },
     {
@@ -1847,8 +1847,8 @@
       "source_location": "L330",
       "_origin": "ast",
       "id": "src_server_services_arenaservice_arenaservice_getplayerspawncframes",
-      "community": 0,
-      "community_name": "RoundService.luau",
+      "community": 2,
+      "community_name": "ArenaService.luau",
       "norm_label": "arenaservice.getplayerspawncframes()"
     },
     {
@@ -2650,8 +2650,8 @@
       "source_location": "L325",
       "_origin": "ast",
       "id": "src_server_services_lobbyservice_lobbyservice_returntolobby",
-      "community": 0,
-      "community_name": "RoundService.luau",
+      "community": 8,
+      "community_name": "LobbyService.luau",
       "norm_label": "lobbyservice.returntolobby()"
     },
     {
@@ -2664,6 +2664,182 @@
       "community": 8,
       "community_name": "LobbyService.luau",
       "norm_label": "lobbyservice.getmodel()"
+    },
+    {
+      "label": "PhotoModeService.luau",
+      "file_type": "code",
+      "source_file": "src/server/services/PhotoModeService.luau",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "src_server_services_photomodeservice",
+      "community": 28,
+      "community_name": "PhotoModeService.luau",
+      "norm_label": "photomodeservice.luau"
+    },
+    {
+      "label": "blockCenter()",
+      "file_type": "code",
+      "source_file": "src/server/services/PhotoModeService.luau",
+      "source_location": "L65",
+      "_origin": "ast",
+      "id": "src_server_services_photomodeservice_blockcenter",
+      "community": 28,
+      "community_name": "PhotoModeService.luau",
+      "norm_label": "blockcenter()"
+    },
+    {
+      "label": "standingOn()",
+      "file_type": "code",
+      "source_file": "src/server/services/PhotoModeService.luau",
+      "source_location": "L78",
+      "_origin": "ast",
+      "id": "src_server_services_photomodeservice_standingon",
+      "community": 28,
+      "community_name": "PhotoModeService.luau",
+      "norm_label": "standingon()"
+    },
+    {
+      "label": "createPart()",
+      "file_type": "code",
+      "source_file": "src/server/services/PhotoModeService.luau",
+      "source_location": "L82",
+      "_origin": "ast",
+      "id": "src_server_services_photomodeservice_createpart",
+      "community": 28,
+      "community_name": "PhotoModeService.luau",
+      "norm_label": "createpart()"
+    },
+    {
+      "label": "openHole()",
+      "file_type": "code",
+      "source_file": "src/server/services/PhotoModeService.luau",
+      "source_location": "L97",
+      "_origin": "ast",
+      "id": "src_server_services_photomodeservice_openhole",
+      "community": 28,
+      "community_name": "PhotoModeService.luau",
+      "norm_label": "openhole()"
+    },
+    {
+      "label": "rotateJoint()",
+      "file_type": "code",
+      "source_file": "src/server/services/PhotoModeService.luau",
+      "source_location": "L108",
+      "_origin": "ast",
+      "id": "src_server_services_photomodeservice_rotatejoint",
+      "community": 28,
+      "community_name": "PhotoModeService.luau",
+      "norm_label": "rotatejoint()"
+    },
+    {
+      "label": "applyPose()",
+      "file_type": "code",
+      "source_file": "src/server/services/PhotoModeService.luau",
+      "source_location": "L115",
+      "_origin": "ast",
+      "id": "src_server_services_photomodeservice_applypose",
+      "community": 28,
+      "community_name": "PhotoModeService.luau",
+      "norm_label": "applypose()"
+    },
+    {
+      "label": "attachPuffador()",
+      "file_type": "code",
+      "source_file": "src/server/services/PhotoModeService.luau",
+      "source_location": "L135",
+      "_origin": "ast",
+      "id": "src_server_services_photomodeservice_attachpuffador",
+      "community": 28,
+      "community_name": "PhotoModeService.luau",
+      "norm_label": "attachpuffador()"
+    },
+    {
+      "label": "buildDescription()",
+      "file_type": "code",
+      "source_file": "src/server/services/PhotoModeService.luau",
+      "source_location": "L152",
+      "_origin": "ast",
+      "id": "src_server_services_photomodeservice_builddescription",
+      "community": 28,
+      "community_name": "PhotoModeService.luau",
+      "norm_label": "builddescription()"
+    },
+    {
+      "label": "spawnActor()",
+      "file_type": "code",
+      "source_file": "src/server/services/PhotoModeService.luau",
+      "source_location": "L165",
+      "_origin": "ast",
+      "id": "src_server_services_photomodeservice_spawnactor",
+      "community": 28,
+      "community_name": "PhotoModeService.luau",
+      "norm_label": "spawnactor()"
+    },
+    {
+      "label": "createShot()",
+      "file_type": "code",
+      "source_file": "src/server/services/PhotoModeService.luau",
+      "source_location": "L201",
+      "_origin": "ast",
+      "id": "src_server_services_photomodeservice_createshot",
+      "community": 28,
+      "community_name": "PhotoModeService.luau",
+      "norm_label": "createshot()"
+    },
+    {
+      "label": "createDebris()",
+      "file_type": "code",
+      "source_file": "src/server/services/PhotoModeService.luau",
+      "source_location": "L221",
+      "_origin": "ast",
+      "id": "src_server_services_photomodeservice_createdebris",
+      "community": 28,
+      "community_name": "PhotoModeService.luau",
+      "norm_label": "createdebris()"
+    },
+    {
+      "label": "getScene()",
+      "file_type": "code",
+      "source_file": "src/server/services/PhotoModeService.luau",
+      "source_location": "L238",
+      "_origin": "ast",
+      "id": "src_server_services_photomodeservice_getscene",
+      "community": 28,
+      "community_name": "PhotoModeService.luau",
+      "norm_label": "getscene()"
+    },
+    {
+      "label": "PhotoModeService.clear()",
+      "file_type": "code",
+      "source_file": "src/server/services/PhotoModeService.luau",
+      "source_location": "L323",
+      "_origin": "ast",
+      "id": "src_server_services_photomodeservice_photomodeservice_clear",
+      "community": 28,
+      "community_name": "PhotoModeService.luau",
+      "norm_label": "photomodeservice.clear()"
+    },
+    {
+      "label": "PhotoModeService.show()",
+      "file_type": "code",
+      "source_file": "src/server/services/PhotoModeService.luau",
+      "source_location": "L337",
+      "_origin": "ast",
+      "id": "src_server_services_photomodeservice_photomodeservice_show",
+      "community": 28,
+      "community_name": "PhotoModeService.luau",
+      "norm_label": "photomodeservice.show()"
+    },
+    {
+      "label": "PhotoModeService.start()",
+      "file_type": "code",
+      "source_file": "src/server/services/PhotoModeService.luau",
+      "source_location": "L378",
+      "_origin": "ast",
+      "id": "src_server_services_photomodeservice_photomodeservice_start",
+      "community": 28,
+      "community_name": "PhotoModeService.luau",
+      "norm_label": "photomodeservice.start()"
     },
     {
       "label": "ProjectileService.luau",
@@ -2881,8 +3057,8 @@
       "source_location": "L214",
       "_origin": "ast",
       "id": "src_server_services_puffadorservice_puffadorservice_beginround",
-      "community": 0,
-      "community_name": "RoundService.luau",
+      "community": 1,
+      "community_name": "PuffadorService.luau",
       "norm_label": "puffadorservice.beginround()"
     },
     {
@@ -3929,6 +4105,17 @@
       "community": 17,
       "community_name": "BlocoPuff!",
       "norm_label": "identidade visual"
+    },
+    {
+      "label": "Artes da loja",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": "L231",
+      "_origin": "ast",
+      "id": "readme_artes_da_loja",
+      "community": 17,
+      "community_name": "BlocoPuff!",
+      "norm_label": "artes da loja"
     }
   ],
   "links": [
@@ -7176,7 +7363,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/server/init.server.luau",
-      "source_location": "L21",
+      "source_location": "L22",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_server_init_server",
@@ -8259,6 +8446,18 @@
       "context": "call",
       "confidence": "INFERRED",
       "confidence_score": 0.8,
+      "source_file": "src/server/services/PhotoModeService.luau",
+      "source_location": "L98",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_server_services_photomodeservice_openhole",
+      "target": "src_server_services_arenaservice_arenaservice_getblocks"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
       "source_file": "src/server/services/RoundService.luau",
       "source_location": "L158",
       "weight": 1.0,
@@ -8337,6 +8536,18 @@
       "source": "src_server_services_arenaservice_restoreblockat",
       "target": "src_server_services_arenaservice_recreateblockfromrecord",
       "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "src/server/services/PhotoModeService.luau",
+      "source_location": "L329",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_server_services_photomodeservice_photomodeservice_clear",
+      "target": "src_server_services_arenaservice_arenaservice_restoreallblocks"
     },
     {
       "relation": "calls",
@@ -10007,6 +10218,387 @@
       "_origin": "ast",
       "source": "src_server_services_roundservice_runending",
       "target": "src_server_services_lobbyservice_lobbyservice_returntolobby"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/server/services/PhotoModeService.luau",
+      "source_location": "L115",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_server_services_photomodeservice",
+      "target": "src_server_services_photomodeservice_applypose",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/server/services/PhotoModeService.luau",
+      "source_location": "L135",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_server_services_photomodeservice",
+      "target": "src_server_services_photomodeservice_attachpuffador",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/server/services/PhotoModeService.luau",
+      "source_location": "L65",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_server_services_photomodeservice",
+      "target": "src_server_services_photomodeservice_blockcenter",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/server/services/PhotoModeService.luau",
+      "source_location": "L152",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_server_services_photomodeservice",
+      "target": "src_server_services_photomodeservice_builddescription",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/server/services/PhotoModeService.luau",
+      "source_location": "L221",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_server_services_photomodeservice",
+      "target": "src_server_services_photomodeservice_createdebris",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/server/services/PhotoModeService.luau",
+      "source_location": "L82",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_server_services_photomodeservice",
+      "target": "src_server_services_photomodeservice_createpart",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/server/services/PhotoModeService.luau",
+      "source_location": "L201",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_server_services_photomodeservice",
+      "target": "src_server_services_photomodeservice_createshot",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/server/services/PhotoModeService.luau",
+      "source_location": "L238",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_server_services_photomodeservice",
+      "target": "src_server_services_photomodeservice_getscene",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/server/services/PhotoModeService.luau",
+      "source_location": "L97",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_server_services_photomodeservice",
+      "target": "src_server_services_photomodeservice_openhole",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/server/services/PhotoModeService.luau",
+      "source_location": "L323",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_server_services_photomodeservice",
+      "target": "src_server_services_photomodeservice_photomodeservice_clear",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/server/services/PhotoModeService.luau",
+      "source_location": "L337",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_server_services_photomodeservice",
+      "target": "src_server_services_photomodeservice_photomodeservice_show",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/server/services/PhotoModeService.luau",
+      "source_location": "L378",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_server_services_photomodeservice",
+      "target": "src_server_services_photomodeservice_photomodeservice_start",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/server/services/PhotoModeService.luau",
+      "source_location": "L108",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_server_services_photomodeservice",
+      "target": "src_server_services_photomodeservice_rotatejoint",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/server/services/PhotoModeService.luau",
+      "source_location": "L165",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_server_services_photomodeservice",
+      "target": "src_server_services_photomodeservice_spawnactor",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/server/services/PhotoModeService.luau",
+      "source_location": "L78",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_server_services_photomodeservice",
+      "target": "src_server_services_photomodeservice_standingon",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/server/services/PhotoModeService.luau",
+      "source_location": "L248",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_server_services_photomodeservice_getscene",
+      "target": "src_server_services_photomodeservice_blockcenter",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/server/services/PhotoModeService.luau",
+      "source_location": "L79",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_server_services_photomodeservice_standingon",
+      "target": "src_server_services_photomodeservice_blockcenter",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/server/services/PhotoModeService.luau",
+      "source_location": "L245",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_server_services_photomodeservice_getscene",
+      "target": "src_server_services_photomodeservice_standingon",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/server/services/PhotoModeService.luau",
+      "source_location": "L144",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_server_services_photomodeservice_attachpuffador",
+      "target": "src_server_services_photomodeservice_createpart",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/server/services/PhotoModeService.luau",
+      "source_location": "L227",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_server_services_photomodeservice_createdebris",
+      "target": "src_server_services_photomodeservice_createpart",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/server/services/PhotoModeService.luau",
+      "source_location": "L208",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_server_services_photomodeservice_createshot",
+      "target": "src_server_services_photomodeservice_createpart",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/server/services/PhotoModeService.luau",
+      "source_location": "L352",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_server_services_photomodeservice_photomodeservice_show",
+      "target": "src_server_services_photomodeservice_openhole",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/server/services/PhotoModeService.luau",
+      "source_location": "L117",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_server_services_photomodeservice_applypose",
+      "target": "src_server_services_photomodeservice_rotatejoint",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/server/services/PhotoModeService.luau",
+      "source_location": "L191",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_server_services_photomodeservice_spawnactor",
+      "target": "src_server_services_photomodeservice_applypose",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/server/services/PhotoModeService.luau",
+      "source_location": "L196",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_server_services_photomodeservice_spawnactor",
+      "target": "src_server_services_photomodeservice_attachpuffador",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/server/services/PhotoModeService.luau",
+      "source_location": "L167",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_server_services_photomodeservice_spawnactor",
+      "target": "src_server_services_photomodeservice_builddescription",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/server/services/PhotoModeService.luau",
+      "source_location": "L373",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_server_services_photomodeservice_photomodeservice_show",
+      "target": "src_server_services_photomodeservice_spawnactor",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/server/services/PhotoModeService.luau",
+      "source_location": "L359",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_server_services_photomodeservice_photomodeservice_show",
+      "target": "src_server_services_photomodeservice_createshot",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/server/services/PhotoModeService.luau",
+      "source_location": "L356",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_server_services_photomodeservice_photomodeservice_show",
+      "target": "src_server_services_photomodeservice_createdebris",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/server/services/PhotoModeService.luau",
+      "source_location": "L339",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_server_services_photomodeservice_photomodeservice_show",
+      "target": "src_server_services_photomodeservice_getscene",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/server/services/PhotoModeService.luau",
+      "source_location": "L338",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_server_services_photomodeservice_photomodeservice_show",
+      "target": "src_server_services_photomodeservice_photomodeservice_clear",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/server/services/PhotoModeService.luau",
+      "source_location": "L388",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_server_services_photomodeservice_photomodeservice_start",
+      "target": "src_server_services_photomodeservice_photomodeservice_clear",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/server/services/PhotoModeService.luau",
+      "source_location": "L386",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_server_services_photomodeservice_photomodeservice_start",
+      "target": "src_server_services_photomodeservice_photomodeservice_show",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -12051,6 +12643,17 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "README.md",
+      "source_location": "L231",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "readme_estado_atual",
+      "target": "readme_artes_da_loja",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "README.md",
       "source_location": "L225",
       "weight": 1.0,
       "_origin": "ast",
@@ -12082,5 +12685,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "44d8976aa67ec2252ee99d361d310948fa4bc208"
+  "built_at_commit": "d78526ac0d705fd8a1c5c8a140a53d8c80365eb3"
 }

@@ -45,8 +45,8 @@
     "semantic_hash": ""
   },
   "src/server/init.server.luau": {
-    "mtime": 1790459506.3839872,
-    "ast_hash": "5c5de11692a211f6455eb85f020d9802",
+    "mtime": 1790515534.2623854,
+    "ast_hash": "58ab9e20e1d05925153fe8974a1094ec",
     "semantic_hash": ""
   },
   "src/server/services/ArenaService.luau": {
@@ -125,8 +125,8 @@
     "semantic_hash": ""
   },
   "README.md": {
-    "mtime": 1790514801.9021833,
-    "ast_hash": "0a6c57f7299b1f81bfae7050f840df1e",
+    "mtime": 1790515663.9871335,
+    "ast_hash": "7e3879c809e8a24f530959ca26e2edc2",
     "semantic_hash": ""
   },
   "src/client/controllers/CombatCameraController.luau": {
@@ -237,6 +237,16 @@
   "src/client/controllers/MusicController.luau": {
     "mtime": 1790514801.658227,
     "ast_hash": "160151ce044e542397207b74b3b00a1d",
+    "semantic_hash": ""
+  },
+  "src/server/services/PhotoModeService.luau": {
+    "mtime": 1790515534.2621002,
+    "ast_hash": "a80f4cd9cd2dc9676d49087cb4d1f448",
+    "semantic_hash": ""
+  },
+  "tools/store-art/editor-de-capas.html": {
+    "mtime": 1790515645.6104777,
+    "ast_hash": "a6829383494ed7e2e45023eb6a4e9836",
     "semantic_hash": ""
   }
 }

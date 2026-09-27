@@ -1,16 +1,16 @@
 # Graph Report - blocopuff  (2026-09-27)
 
 ## Corpus Check
-- 48 files · ~34,898 words
+- 49 files · ~39,405 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 357 nodes · 705 edges · 28 communities (27 shown, 1 thin omitted)
-- Extraction: 82% EXTRACTED · 18% INFERRED · 0% AMBIGUOUS · INFERRED: 126 edges (avg confidence: 0.8)
+- 374 nodes · 741 edges · 30 communities (29 shown, 1 thin omitted)
+- Extraction: 83% EXTRACTED · 17% INFERRED · 0% AMBIGUOUS · INFERRED: 128 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `44d8976a`
+- Built from commit: `d78526ac`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -32,6 +32,8 @@
 - BlockCollapseController.luau
 - BuildingDecor.luau
 - MusicController.luau
+- PhotoModeService.luau
+- CrosshairView.new
 
 ## God Nodes (most connected - your core abstractions)
 1. `BuildingDecor.createPart()` - 15 edges
@@ -54,25 +56,25 @@
   src/client/controllers/PuffadorController.luau → src/client/controllers/CombatCameraController.luau
 - `PuffadorController.start()` --calls--> `ControlHintView.new()`  [INFERRED]
   src/client/controllers/PuffadorController.luau → src/client/ui/ControlHintView.luau
-- `PuffadorController.start()` --calls--> `FeedbackView.new()`  [INFERRED]
-  src/client/controllers/PuffadorController.luau → src/client/ui/FeedbackView.luau
+- `PuffadorController.start()` --calls--> `CrosshairView.new()`  [INFERRED]
+  src/client/controllers/PuffadorController.luau → src/client/ui/CrosshairView.luau
 
 ## Import Cycles
 - None detected.
 
-## Communities (28 total, 1 thin omitted)
+## Communities (30 total, 1 thin omitted)
 
 ### Community 0 - "RoundService.luau"
-Cohesion: 0.11
-Nodes (33): ArenaService.endRound(), ArenaService.getPlayerSpawnCFrames(), ArenaService.restoreAllBlocks(), LobbyService.returnToLobby(), PuffadorService.beginRound(), beginRound(), clearRoundParticipants(), connectParticipantDeathHandlers() (+25 more)
+Cohesion: 0.12
+Nodes (30): ArenaService.endRound(), ArenaService.restoreAllBlocks(), beginRound(), clearRoundParticipants(), connectParticipantDeathHandlers(), countConnectedPlayers(), dequeuePlayer(), disconnectParticipantDeathHandlers() (+22 more)
 
 ### Community 1 - "PuffadorService.luau"
-Cohesion: 0.15
-Nodes (24): createImpactEffect(), isOwned(), ProjectileService.clearAll(), ProjectileService.clearForPlayer(), ProjectileService.spawn(), ProjectileService.start(), ProjectileService.stop(), removeProjectileAt() (+16 more)
+Cohesion: 0.14
+Nodes (25): createImpactEffect(), isOwned(), ProjectileService.clearAll(), ProjectileService.clearForPlayer(), ProjectileService.spawn(), ProjectileService.start(), ProjectileService.stop(), removeProjectileAt() (+17 more)
 
 ### Community 2 - "ArenaService.luau"
 Cohesion: 0.17
-Nodes (13): ArenaService.beginRound(), ArenaService.create(), ArenaService.destroy(), ArenaService.tryDestroyBlock(), createArenaVisuals(), destroyOwnedChild(), getFloorStyle(), isOwned() (+5 more)
+Nodes (14): ArenaService.beginRound(), ArenaService.create(), ArenaService.destroy(), ArenaService.getPlayerSpawnCFrames(), ArenaService.tryDestroyBlock(), createArenaVisuals(), destroyOwnedChild(), getFloorStyle() (+6 more)
 
 ### Community 3 - "SpectatorController.luau"
 Cohesion: 0.31
@@ -83,8 +85,8 @@ Cohesion: 0.24
 Nodes (4): clearAnnouncement(), getQueueMessage(), renderCountdown(), renderWaiting()
 
 ### Community 5 - "PuffadorController.luau"
-Cohesion: 0.12
-Nodes (31): CombatCameraController.addRecoil(), CombatCameraController.disable(), CombatCameraController.enable(), getCharacterParts(), getSafeShoulderOffset(), lockZoom(), onRenderStep(), restoreZoom() (+23 more)
+Cohesion: 0.14
+Nodes (28): CombatCameraController.addRecoil(), CombatCameraController.disable(), CombatCameraController.enable(), getCharacterParts(), getSafeShoulderOffset(), lockZoom(), onRenderStep(), restoreZoom() (+20 more)
 
 ### Community 6 - "ReplicatedStateService.luau"
 Cohesion: 0.27
@@ -95,8 +97,8 @@ Cohesion: 0.29
 Nodes (10): ArenaService.getModel(), checkParticipants(), createVisualZoneIfNeeded(), destroyOwnedVisual(), EliminationService.beginRound(), EliminationService.endRound(), EliminationService.start(), EliminationService.stop() (+2 more)
 
 ### Community 8 - "LobbyService.luau"
-Cohesion: 0.21
-Nodes (19): assignActiveSpawn(), createSpawn(), destroyOwnedChild(), getActiveSpawn(), getGallerySlots(), getHorizontalDistance(), getLivingRoot(), getOccupiedPositions() (+11 more)
+Cohesion: 0.20
+Nodes (20): assignActiveSpawn(), createSpawn(), destroyOwnedChild(), getActiveSpawn(), getGallerySlots(), getHorizontalDistance(), getLivingRoot(), getOccupiedPositions() (+12 more)
 
 ### Community 9 - "AdminPanelView.new"
 Cohesion: 0.11
@@ -104,7 +106,7 @@ Nodes (35): AdminBroadcastView.new(), AdminPanelView.new(), constrainText(), cre
 
 ### Community 17 - "BlocoPuff!"
 Cohesion: 0.07
-Nodes (24): Arquitetura, Escopo e compatibilidade, graphify, Instruções para agentes, Linguagem e comunicação, Segurança e dependências, Validação e entrega, graphify (+16 more)
+Nodes (25): Arquitetura, Escopo e compatibilidade, graphify, Instruções para agentes, Linguagem e comunicação, Segurança e dependências, Validação e entrega, graphify (+17 more)
 
 ### Community 18 - "WorldVisualService.luau"
 Cohesion: 0.60
@@ -126,20 +128,28 @@ Nodes (6): BlockCollapseController.start(), createFragment(), emitDust(), getEff
 Cohesion: 0.17
 Nodes (26): addPointLight(), BuildingDecor.createChandelier(), BuildingDecor.createPart(), BuildingDecor.createPlant(), BuildingDecor.createSideTable(), BuildingDecor.createSofa(), BuildingDecor.decorateStory(), BuildingDecor.wallCFrame() (+18 more)
 
+### Community 28 - "PhotoModeService.luau"
+Cohesion: 0.25
+Nodes (16): ArenaService.getBlocks(), applyPose(), attachPuffador(), blockCenter(), buildDescription(), createDebris(), createPart(), createShot() (+8 more)
+
+### Community 29 - "CrosshairView.new"
+Cohesion: 1.00
+Nodes (3): addCorner(), createHitLine(), CrosshairView.new()
+
 ## Knowledge Gaps
-- **20 isolated node(s):** `Linguagem e comunicação`, `Arquitetura`, `Segurança e dependências`, `Escopo e compatibilidade`, `Validação e entrega` (+15 more)
+- **21 isolated node(s):** `Linguagem e comunicação`, `Arquitetura`, `Segurança e dependências`, `Escopo e compatibilidade`, `Validação e entrega` (+16 more)
   These have ≤1 connection - possible missing edges or undocumented components.
 - **1 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `PuffadorController.start()` connect `PuffadorController.luau` to `AdminPanelView.new`?**
-  _High betweenness centrality (0.037) - this node is a cross-community bridge._
-- **Why does `LobbyService.returnToLobby()` connect `RoundService.luau` to `LobbyService.luau`?**
-  _High betweenness centrality (0.031) - this node is a cross-community bridge._
-- **Why does `runEnding()` connect `RoundService.luau` to `PuffadorService.luau`, `EliminationService.luau`?**
-  _High betweenness centrality (0.029) - this node is a cross-community bridge._
+- **Why does `ArenaService.restoreAllBlocks()` connect `RoundService.luau` to `ArenaService.luau`, `PhotoModeService.luau`?**
+  _High betweenness centrality (0.035) - this node is a cross-community bridge._
+- **Why does `PuffadorController.start()` connect `PuffadorController.luau` to `AdminPanelView.new`, `CrosshairView.new`?**
+  _High betweenness centrality (0.034) - this node is a cross-community bridge._
+- **Why does `LobbyService.returnToLobby()` connect `LobbyService.luau` to `RoundService.luau`?**
+  _High betweenness centrality (0.033) - this node is a cross-community bridge._
 - **Are the 5 inferred relationships involving `BuildingDecor.createPart()` (e.g. with `createFillLights()` and `createSolid()`) actually correct?**
   _`BuildingDecor.createPart()` has 5 INFERRED edges - model-reasoned connections that need verification._
 - **Are the 10 inferred relationships involving `AdminPanelView.new()` (e.g. with `UiKit.createButton()` and `UiKit.createWordmark()`) actually correct?**

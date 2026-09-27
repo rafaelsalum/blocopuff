@@ -1,0 +1,478 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Editor de Capas BlocoPuff</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@500;700;800&display=swap">
+<style>
+  /* Mesma identidade do jogo (src/client/ui/UiTheme.luau): noite na mansão,
+     lilás Puff e dourado Puff, títulos arredondados com contorno escuro. */
+  :root {
+    color-scheme: dark;
+    --night: #1a1530;
+    --surface: #2a2247;
+    --raised: #3a2f60;
+    --line: #5b4d8f;
+    --ink: #fff8ee;
+    --ink-soft: #bdb3d9;
+    --lilac: #a98bff;
+    --lilac-deep: #684ccc;
+    --gold: #ffd166;
+    --gold-deep: #d69628;
+    --outline: #0e0a1c;
+    --danger: #ff5d73;
+    --display: "Fredoka One", "Arial Rounded MT Bold", system-ui, sans-serif;
+    --body: "Nunito", system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    margin: 0;
+    background: radial-gradient(1200px 600px at 80% -10%, #2d2155 0%, var(--night) 60%);
+    color: var(--ink);
+    font: 500 14px/1.45 var(--body);
+    padding-inline: 16px;
+  }
+  header {
+    display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;
+    max-width: 1320px; margin: 0 auto; padding-block: 20px 12px;
+  }
+  .brand { display: flex; align-items: baseline; gap: 12px; }
+  .brand h1 {
+    margin: 0; font: 400 30px/1 var(--display); letter-spacing: .5px;
+    background: linear-gradient(#fff, var(--lilac)); -webkit-background-clip: text; background-clip: text; color: transparent;
+    -webkit-text-stroke: 1.5px var(--outline); paint-order: stroke fill;
+  }
+  .brand h1 b { background: linear-gradient(#ffe6a8, var(--gold-deep)); -webkit-background-clip: text; background-clip: text; font-weight: 400; }
+  .brand span { color: var(--ink-soft); font-weight: 700; }
+  main {
+    max-width: 1320px; margin: 0 auto; padding-block: 8px 32px;
+    display: grid; grid-template-columns: 340px 1fr; gap: 20px; align-items: start;
+  }
+  @media (max-width: 900px) { main { grid-template-columns: 1fr; } .stage { order: -1; } }
+
+  .panel { background: linear-gradient(var(--surface), var(--night)); border: 2px solid var(--line); border-radius: 18px; padding: 16px; display: grid; gap: 16px; }
+  fieldset { border: 0; margin: 0; padding: 0; display: grid; gap: 10px; }
+  legend { font: 400 17px/1.2 var(--display); color: var(--ink); padding: 0; margin-bottom: 8px; }
+  label { display: grid; gap: 4px; font-weight: 700; color: var(--ink-soft); font-size: 12px; letter-spacing: .3px; }
+  .row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+  .row > * { flex: 1 1 0; min-width: 0; }
+  input[type=text], select {
+    width: 100%; background: var(--outline); color: var(--ink); border: 1.5px solid var(--line); border-radius: 10px;
+    padding: 9px 11px; font: 700 14px var(--body);
+  }
+  input[type=text]:focus, select:focus { outline: none; border-color: var(--gold); }
+  input[type=range] { width: 100%; accent-color: var(--gold); }
+  .toggle { display: flex; align-items: center; gap: 8px; color: var(--ink); font-size: 13px; letter-spacing: 0; }
+  .toggle input { width: 18px; height: 18px; accent-color: var(--lilac); }
+
+  .tabs { display: flex; gap: 8px; }
+  .tab, .btn {
+    position: relative; border: 2px solid var(--outline); border-radius: 12px; cursor: pointer;
+    font: 400 15px/1 var(--display); letter-spacing: .3px; padding: 11px 14px; color: var(--ink);
+    background: linear-gradient(#c3adff, var(--lilac)); box-shadow: 0 4px 0 var(--lilac-deep);
+    transition: transform .08s ease, box-shadow .08s ease, filter .12s ease;
+  }
+  .tab { flex: 1; background: linear-gradient(var(--raised), var(--surface)); box-shadow: 0 4px 0 #120d24; color: var(--ink-soft); }
+  .tab[aria-selected=true] { background: linear-gradient(#ffe6a8, var(--gold)); box-shadow: 0 4px 0 var(--gold-deep); color: var(--outline); }
+  .btn.gold { background: linear-gradient(#ffe6a8, var(--gold)); box-shadow: 0 4px 0 var(--gold-deep); color: var(--outline); }
+  .tab:hover, .btn:hover { filter: brightness(1.06); }
+  .tab:active, .btn:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--lilac-deep); }
+  .tab:focus-visible, .btn:focus-visible, .drop:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
+  .btn { width: 100%; }
+
+  .drop {
+    border: 2px dashed var(--line); border-radius: 14px; padding: 14px; text-align: center; color: var(--ink-soft);
+    cursor: pointer; background: rgba(14,10,28,.4); font-weight: 700;
+  }
+  .drop.over { border-color: var(--gold); color: var(--ink); }
+  .drop small { display: block; font-weight: 500; margin-top: 4px; }
+
+  .stage { display: grid; gap: 12px; position: sticky; top: 12px; }
+  .canvas-wrap {
+    background: repeating-conic-gradient(#221b3d 0 25%, #1c1634 0 50%) 0 0/24px 24px;
+    border: 2px solid var(--line); border-radius: 18px; padding: 14px; display: grid; place-items: center;
+  }
+  canvas { max-width: 100%; height: auto; border-radius: 10px; cursor: grab; touch-action: none; box-shadow: 0 6px 0 rgba(8,5,18,.6); }
+  canvas.dragging { cursor: grabbing; }
+  canvas.icon { max-width: min(100%, 560px); }
+  .hint { color: var(--ink-soft); font-size: 13px; display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+  .hint kbd { font: 700 12px var(--body); background: var(--raised); border-radius: 6px; padding: 1px 6px; color: var(--ink); }
+  .spec { font-variant-numeric: tabular-nums; color: var(--gold); font-weight: 800; }
+  @media (prefers-reduced-motion: reduce) { .tab, .btn { transition: none; } }
+</style>
+</head>
+<body>
+<header>
+  <div class="brand"><h1>BLOCO <b>PUFF</b></h1><span>Editor de capas da loja</span></div>
+  <span class="hint">Formatos oficiais do Roblox: ícone <span class="spec">512×512</span> · thumbnail <span class="spec">1920×1080</span></span>
+</header>
+
+<main>
+  <section class="panel" aria-label="Controles">
+    <div class="tabs" role="tablist" aria-label="Formato">
+      <button class="tab" role="tab" id="tab-thumb" aria-selected="true" data-format="thumb">Thumbnail</button>
+      <button class="tab" role="tab" id="tab-icon" aria-selected="false" data-format="icon">Ícone</button>
+    </div>
+
+    <div class="drop" id="drop" tabindex="0" role="button" aria-label="Escolher print do jogo">
+      Solte o print aqui, clique para escolher ou cole com Ctrl/⌘+V
+      <small id="drop-status">Mostrando uma cena de exemplo até você enviar um print</small>
+      <input type="file" id="file" accept="image/*" hidden>
+    </div>
+
+    <fieldset>
+      <legend>Imagem</legend>
+      <label for="zoom">Zoom <input type="range" id="zoom" min="1" max="3" step="0.01" value="1"></label>
+      <label for="vignette">Escurecer bordas <input type="range" id="vignette" min="0" max="0.8" step="0.01" value="0.35"></label>
+      <label for="saturation">Saturação <input type="range" id="saturation" min="0.6" max="1.6" step="0.01" value="1.12"></label>
+    </fieldset>
+
+    <fieldset>
+      <legend>Logotipo</legend>
+      <label class="toggle" for="logo-on"><input type="checkbox" id="logo-on" checked> Mostrar "BLOCO PUFF"</label>
+      <div class="row">
+        <label for="logo-pos">Posição
+          <select id="logo-pos">
+            <option value="tl">Topo esquerda</option><option value="tc">Topo centro</option><option value="tr">Topo direita</option>
+            <option value="c">Centro</option>
+            <option value="bl">Base esquerda</option><option value="bc">Base centro</option><option value="br">Base direita</option>
+          </select>
+        </label>
+        <label for="logo-size">Tamanho <input type="range" id="logo-size" min="0.5" max="1.8" step="0.01" value="1"></label>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Chamada</legend>
+      <label class="toggle" for="head-on"><input type="checkbox" id="head-on" checked> Mostrar chamada</label>
+      <label for="head-text">Texto <input type="text" id="head-text" value="DERRUBE O CHÃO!" maxlength="40"></label>
+      <div class="row">
+        <label for="head-pos">Posição
+          <select id="head-pos">
+            <option value="tl">Topo esquerda</option><option value="tc">Topo centro</option><option value="tr">Topo direita</option>
+            <option value="c">Centro</option>
+            <option value="bl" selected>Base esquerda</option><option value="bc">Base centro</option><option value="br">Base direita</option>
+          </select>
+        </label>
+        <label for="head-color">Cor
+          <select id="head-color"><option value="gold">Dourado</option><option value="lilac">Lilás</option><option value="white">Branco</option></select>
+        </label>
+      </div>
+      <label for="head-size">Tamanho <input type="range" id="head-size" min="0.5" max="1.8" step="0.01" value="1"></label>
+    </fieldset>
+
+    <fieldset>
+      <legend>Selo</legend>
+      <label class="toggle" for="badge-on"><input type="checkbox" id="badge-on"> Mostrar selo</label>
+      <label for="badge-text">Texto do selo <input type="text" id="badge-text" value="NOVO!" maxlength="12"></label>
+    </fieldset>
+
+    <fieldset>
+      <legend>Conferência</legend>
+      <label class="toggle" for="guide-on"><input type="checkbox" id="guide-on" checked> Guias de área segura (não saem no PNG)</label>
+    </fieldset>
+
+    <button class="btn gold" id="export">Baixar PNG</button>
+  </section>
+
+  <section class="stage" aria-label="Pré-visualização">
+    <div class="canvas-wrap"><canvas id="canvas" width="1920" height="1080" aria-label="Pré-visualização da capa"></canvas></div>
+    <div class="hint">
+      <span>Arraste a imagem para enquadrar · <kbd>scroll</kbd> para zoom</span>
+      <span id="size-label" class="spec">1920×1080</span>
+    </div>
+  </section>
+</main>
+
+<script>
+(() => {
+  const FORMATS = {
+    thumb: { w: 1920, h: 1080, file: "blocopuff-thumbnail-1920x1080.png" },
+    icon: { w: 512, h: 512, file: "blocopuff-icone-512.png" },
+  };
+  const COLORS = {
+    outline: "#0e0a1c", lilac: "#a98bff", lilacDeep: "#684ccc", gold: "#ffd166", goldDeep: "#d69628", white: "#ffffff",
+  };
+  const DEFAULTS = {
+    thumb: { logoPos: "tl", logoSize: 1, headOn: true, headPos: "bl" },
+    icon: { logoPos: "bc", logoSize: 1.15, headOn: false, headPos: "tc" },
+  };
+
+  const $ = (id) => document.getElementById(id);
+  const canvas = $("canvas");
+  const ctx = canvas.getContext("2d");
+  const state = { format: "thumb", image: null, zoom: 1, panX: 0, panY: 0 };
+
+  // ---------- Cena de exemplo (até o usuário enviar um print) ----------
+  function drawSampleScene(c, w, h) {
+    const bg = c.createLinearGradient(0, 0, 0, h);
+    bg.addColorStop(0, "#3a2c5e"); bg.addColorStop(1, "#150f29");
+    c.fillStyle = bg; c.fillRect(0, 0, w, h);
+    const tile = Math.min(w, h) / 7;
+    const tones = ["#a8744a", "#744c2e"];
+    const holes = new Set(["3,2", "4,2", "3,3", "5,4"]);
+    for (let row = 0; row < 7; row++) {
+      for (let col = 0; col < 14; col++) {
+        const x = (col - row * 0.5) * tile * 0.9 + w * 0.12;
+        const y = h * 0.42 + row * tile * 0.42;
+        if (holes.has(`${col % 7},${row}`) || x < -tile || x > w) continue;
+        c.fillStyle = tones[(row + col) % 2];
+        c.beginPath();
+        c.moveTo(x, y); c.lineTo(x + tile * 0.9, y); c.lineTo(x + tile * 0.45, y + tile * 0.42); c.lineTo(x - tile * 0.45, y + tile * 0.42);
+        c.closePath(); c.fill();
+      }
+    }
+    c.fillStyle = "rgba(255,230,148,.9)";
+    c.beginPath(); c.arc(w * 0.62, h * 0.36, tile * 0.18, 0, Math.PI * 2); c.fill();
+  }
+
+  // ---------- Elementos da marca ----------
+  function strokeFill(c, text, x, y, fill, strokeWidth) {
+    c.lineJoin = "round"; c.miterLimit = 2;
+    c.lineWidth = strokeWidth; c.strokeStyle = COLORS.outline; c.strokeText(text, x, y);
+    c.fillStyle = fill; c.fillText(text, x, y);
+  }
+
+  function verticalGradient(c, top, bottom, y0, y1) {
+    const g = c.createLinearGradient(0, y0, 0, y1);
+    g.addColorStop(0, top); g.addColorStop(1, bottom);
+    return g;
+  }
+
+  // Posição de um bloco de conteúdo (largura bw, altura bh) num dos presets.
+  function anchor(pos, bw, bh, w, h) {
+    const m = Math.min(w, h) * 0.055;
+    const x = pos.endsWith("l") ? m : pos.endsWith("r") ? w - m - bw : (w - bw) / 2;
+    const y = pos.startsWith("t") ? m : pos.startsWith("b") ? h - m - bh : (h - bh) / 2;
+    return { x, y };
+  }
+
+  function drawWordmark(c, w, h, pos, size) {
+    const height = Math.min(w, h) * 0.26 * size;
+    const small = height * 0.46, big = height * 0.6;
+    c.font = `${big}px "Fredoka One"`;
+    const width = Math.max(c.measureText("PUFF").width, (() => { c.font = `${small}px "Fredoka One"`; return c.measureText("BLOCO").width; })());
+    const box = anchor(pos, width, height, w, h);
+    c.save();
+    c.translate(box.x + width / 2, box.y + height / 2);
+    c.rotate(-3 * Math.PI / 180);
+    c.textAlign = "center"; c.textBaseline = "alphabetic";
+    const lines = [
+      { text: "BLOCO", size: small, y: -height / 2 + small * 0.92, top: COLORS.white, bottom: COLORS.lilac },
+      { text: "PUFF", size: big, y: height / 2 - big * 0.05, top: "#ffe6a8", bottom: COLORS.goldDeep },
+    ];
+    for (const line of lines) {
+      c.font = `${line.size}px "Fredoka One"`;
+      const stroke = line.size * 0.2;
+      c.fillStyle = "rgba(8,5,18,.55)";
+      c.lineWidth = stroke; c.strokeStyle = "rgba(8,5,18,.55)"; c.lineJoin = "round";
+      c.strokeText(line.text, 0, line.y + line.size * 0.08); c.fillText(line.text, 0, line.y + line.size * 0.08);
+      strokeFill(c, line.text, 0, line.y, verticalGradient(c, line.top, line.bottom, line.y - line.size * 0.8, line.y), stroke);
+    }
+    c.restore();
+  }
+
+  function wrapLines(c, text, maxWidth) {
+    const words = text.trim().split(/\s+/);
+    const lines = [];
+    let current = "";
+    for (const word of words) {
+      const test = current ? `${current} ${word}` : word;
+      if (c.measureText(test).width > maxWidth && current) { lines.push(current); current = word; } else { current = test; }
+    }
+    if (current) lines.push(current);
+    return lines.slice(0, 3);
+  }
+
+  function drawHeadline(c, w, h, text, pos, size, colorKey) {
+    if (!text.trim()) return;
+    const fontSize = Math.min(w, h) * 0.12 * size;
+    c.font = `${fontSize}px "Fredoka One"`;
+    const lines = wrapLines(c, text.toUpperCase(), w * 0.62);
+    const lineHeight = fontSize * 1.02;
+    const width = Math.max(...lines.map((l) => c.measureText(l).width));
+    const height = lineHeight * lines.length;
+    const box = anchor(pos, width, height, w, h);
+    const tones = { gold: ["#ffffff", COLORS.gold], lilac: ["#ffffff", COLORS.lilac], white: ["#ffffff", "#e8e0ff"] }[colorKey];
+    c.save();
+    c.translate(box.x, box.y);
+    c.rotate(-2 * Math.PI / 180);
+    const align = pos.endsWith("l") ? "left" : pos.endsWith("r") ? "right" : "center";
+    const x = align === "left" ? 0 : align === "right" ? width : width / 2;
+    c.textAlign = align; c.textBaseline = "top";
+    lines.forEach((line, i) => {
+      const y = i * lineHeight;
+      c.fillStyle = "rgba(8,5,18,.55)"; c.lineWidth = fontSize * 0.2; c.strokeStyle = "rgba(8,5,18,.55)"; c.lineJoin = "round";
+      c.strokeText(line, x, y + fontSize * 0.07); c.fillText(line, x, y + fontSize * 0.07);
+      strokeFill(c, line, x, y, verticalGradient(c, tones[0], tones[1], y, y + fontSize), fontSize * 0.18);
+    });
+    c.restore();
+  }
+
+  function drawBadge(c, w, h, text) {
+    if (!text.trim()) return;
+    const r = Math.min(w, h) * 0.12;
+    const cx = w - r * 1.35, cy = r * 1.35;
+    c.save();
+    c.translate(cx, cy); c.rotate(12 * Math.PI / 180);
+    c.beginPath();
+    const points = 14;
+    for (let i = 0; i < points * 2; i++) {
+      const radius = i % 2 === 0 ? r : r * 0.82;
+      const a = (i / (points * 2)) * Math.PI * 2;
+      c.lineTo(Math.cos(a) * radius, Math.sin(a) * radius);
+    }
+    c.closePath();
+    c.fillStyle = verticalGradient(c, "#ffe6a8", COLORS.goldDeep, -r, r);
+    c.lineWidth = r * 0.1; c.strokeStyle = COLORS.outline; c.lineJoin = "round";
+    c.fill(); c.stroke();
+    let fontSize = r * 0.5;
+    c.font = `${fontSize}px "Fredoka One"`;
+    while (c.measureText(text).width > r * 1.4 && fontSize > 8) { fontSize -= 1; c.font = `${fontSize}px "Fredoka One"`; }
+    c.textAlign = "center"; c.textBaseline = "middle";
+    c.fillStyle = COLORS.outline;
+    c.fillText(text.toUpperCase(), 0, fontSize * 0.05);
+    c.restore();
+  }
+
+  function drawVignette(c, w, h, strength) {
+    if (strength <= 0) return;
+    const g = c.createRadialGradient(w / 2, h / 2, Math.min(w, h) * 0.3, w / 2, h / 2, Math.hypot(w, h) * 0.62);
+    g.addColorStop(0, "rgba(14,10,28,0)");
+    g.addColorStop(1, `rgba(14,10,28,${strength})`);
+    c.fillStyle = g; c.fillRect(0, 0, w, h);
+  }
+
+  // Guias: no ícone, a loja arredonda os cantos; na thumbnail, as bordas
+  // podem ser cortadas em telas estreitas.
+  function drawGuides(c, w, h) {
+    c.save();
+    c.strokeStyle = "rgba(255,209,102,.85)"; c.setLineDash([12, 10]); c.lineWidth = Math.max(2, w / 400);
+    if (state.format === "icon") {
+      const r = w * 0.18;
+      c.fillStyle = "rgba(14,10,28,.55)";
+      c.beginPath(); c.rect(0, 0, w, h); c.roundRect(0, 0, w, h, r); c.fill("evenodd");
+      c.strokeRect(w * 0.1, h * 0.1, w * 0.8, h * 0.8);
+    } else {
+      c.strokeRect(w * 0.05, h * 0.05, w * 0.9, h * 0.9);
+    }
+    c.restore();
+  }
+
+  function render(target, withGuides) {
+    const { w, h } = FORMATS[state.format];
+    const c = target.getContext("2d");
+    target.width = w; target.height = h;
+    c.clearRect(0, 0, w, h);
+
+    c.save();
+    c.filter = `saturate(${$("saturation").value})`;
+    if (state.image) {
+      const img = state.image;
+      const scale = Math.max(w / img.width, h / img.height) * state.zoom;
+      const dw = img.width * scale, dh = img.height * scale;
+      c.drawImage(img, (w - dw) / 2 + state.panX, (h - dh) / 2 + state.panY, dw, dh);
+    } else {
+      drawSampleScene(c, w, h);
+    }
+    c.restore();
+
+    drawVignette(c, w, h, Number($("vignette").value));
+    if ($("head-on").checked) drawHeadline(c, w, h, $("head-text").value, $("head-pos").value, Number($("head-size").value), $("head-color").value);
+    if ($("logo-on").checked) drawWordmark(c, w, h, $("logo-pos").value, Number($("logo-size").value));
+    if ($("badge-on").checked) drawBadge(c, w, h, $("badge-text").value);
+    if (withGuides && $("guide-on").checked) drawGuides(c, w, h);
+  }
+
+  const draw = () => render(canvas, true);
+
+  // ---------- Interação ----------
+  function setFormat(format) {
+    state.format = format;
+    state.zoom = 1; state.panX = 0; state.panY = 0;
+    $("zoom").value = "1";
+    const d = DEFAULTS[format];
+    $("logo-pos").value = d.logoPos; $("logo-size").value = String(d.logoSize);
+    $("head-on").checked = d.headOn; $("head-pos").value = d.headPos;
+    document.querySelectorAll(".tab").forEach((tab) => tab.setAttribute("aria-selected", String(tab.dataset.format === format)));
+    canvas.classList.toggle("icon", format === "icon");
+    $("size-label").textContent = `${FORMATS[format].w}×${FORMATS[format].h}`;
+    draw();
+  }
+
+  function loadFile(file) {
+    if (!file || !file.type.startsWith("image/")) { $("drop-status").textContent = "Esse arquivo não é uma imagem. Use PNG ou JPG."; return; }
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => {
+      state.image = img; state.zoom = 1; state.panX = 0; state.panY = 0; $("zoom").value = "1";
+      $("drop-status").textContent = `${file.name || "Imagem colada"} · ${img.width}×${img.height}`;
+      draw();
+    };
+    img.onerror = () => { $("drop-status").textContent = "Não foi possível abrir essa imagem."; };
+    img.src = url;
+  }
+
+  document.querySelectorAll(".tab").forEach((tab) => tab.addEventListener("click", () => setFormat(tab.dataset.format)));
+  document.querySelectorAll("input, select").forEach((el) => el.addEventListener("input", draw));
+  $("zoom").addEventListener("input", (e) => { state.zoom = Number(e.target.value); draw(); });
+
+  const drop = $("drop");
+  drop.addEventListener("click", () => $("file").click());
+  drop.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); $("file").click(); } });
+  $("file").addEventListener("change", (e) => loadFile(e.target.files[0]));
+  ["dragenter", "dragover"].forEach((t) => drop.addEventListener(t, (e) => { e.preventDefault(); drop.classList.add("over"); }));
+  ["dragleave", "drop"].forEach((t) => drop.addEventListener(t, (e) => { e.preventDefault(); drop.classList.remove("over"); }));
+  drop.addEventListener("drop", (e) => loadFile(e.dataTransfer.files[0]));
+  window.addEventListener("paste", (e) => {
+    const item = [...(e.clipboardData?.items || [])].find((i) => i.type.startsWith("image/"));
+    if (item) loadFile(item.getAsFile());
+  });
+
+  // Arrastar para enquadrar; a roda do mouse ajusta o zoom.
+  let dragging = null;
+  canvas.addEventListener("pointerdown", (e) => {
+    dragging = { x: e.clientX, y: e.clientY, panX: state.panX, panY: state.panY };
+    canvas.setPointerCapture(e.pointerId); canvas.classList.add("dragging");
+  });
+  canvas.addEventListener("pointermove", (e) => {
+    if (!dragging) return;
+    const ratio = canvas.width / canvas.getBoundingClientRect().width;
+    state.panX = dragging.panX + (e.clientX - dragging.x) * ratio;
+    state.panY = dragging.panY + (e.clientY - dragging.y) * ratio;
+    draw();
+  });
+  const endDrag = () => { dragging = null; canvas.classList.remove("dragging"); };
+  canvas.addEventListener("pointerup", endDrag);
+  canvas.addEventListener("pointercancel", endDrag);
+  canvas.addEventListener("wheel", (e) => {
+    e.preventDefault();
+    state.zoom = Math.min(3, Math.max(1, state.zoom - e.deltaY * 0.0015));
+    $("zoom").value = String(state.zoom);
+    draw();
+  }, { passive: false });
+
+  $("export").addEventListener("click", () => {
+    const out = document.createElement("canvas");
+    render(out, false);
+    out.toBlob((blob) => {
+      if (!blob) return;
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = FORMATS[state.format].file;
+      document.body.appendChild(link); link.click(); link.remove();
+      setTimeout(() => URL.revokeObjectURL(link.href), 2000);
+    }, "image/png");
+  });
+
+  // Desenha só depois de a fonte da marca carregar, para o PNG sair certo.
+  document.fonts.load('40px "Fredoka One"').finally(() => setFormat("thumb"));
+  draw();
+})();
+</script>
+</body>
+</html>
