@@ -5,11 +5,15 @@
 -- do andar de cima, tudo fechado por parede, teto e cabeceiras. Luz baixa e
 -- quente, para o corredor parecer escondido. As entradas (vãos na parede do
 -- prédio) e o que as esconde são do BuildingService e do SecretPassageService.
+-- Na parede externa, uma Toca Segura em cada patamar: um nicho raso com
+-- almofada e uma luz em cima da boca, que o TocaService pinta conforme o
+-- estado (livre ou ocupada).
 --
 -- Espaço local (BuildingLayout.getWallFrame): X ao longo da parede, Y para
 -- cima (altura do mundo) e Z para fora do prédio; o interior vai de
 -- Z = espessura da parede até espessura + largura do corredor.
 
+local CollectionService = game:GetService("CollectionService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local GameConfig = require(ReplicatedStorage.Shared.config.GameConfig)
@@ -18,6 +22,7 @@ local BuildingDecor = require(script.Parent.BuildingDecor)
 
 type BuildingConfig = GameConfig.BuildingConfig
 type Corridor = BuildingLayout.Corridor
+type Toca = BuildingLayout.Toca
 
 local SHELL = 1
 local FLOOR_COLOR = Color3.fromRGB(92, 64, 44)
@@ -25,8 +30,13 @@ local WALL_COLOR = Color3.fromRGB(64, 46, 36)
 local CEILING_COLOR = Color3.fromRGB(52, 40, 34)
 local RUNNER_COLOR = Color3.fromRGB(122, 36, 44)
 local LAMP_COLOR = Color3.fromRGB(255, 176, 104)
+local CUSHION_COLOR = Color3.fromRGB(46, 128, 72)
+local TOCA_LAMP_COLOR = Color3.fromRGB(110, 230, 130)
 
 local CorridorBuilder = {}
+
+-- Marca da luz de cada Toca (atributo TocaName = nome da Toca).
+CorridorBuilder.TocaLampTag = "TocaLamp"
 
 local function solid(parent: Instance, name: string, frame: CFrame, size: Vector3, offset: CFrame, color: Color3, material: Enum.Material): Part
 	return BuildingDecor.createPart(parent, name, size, frame * offset, color, { material = material, collide = true })
@@ -46,6 +56,59 @@ local function addLamp(parent: Instance, frame: CFrame, x: number, y: number, wa
 	light.Shadows = true
 	light.Parent = bulb
 	plate.CastShadow = false
+end
+
+-- Parede externa com os buracos das Tocas: colunas cheias entre os buracos
+-- e, em cada buraco, um pedaço abaixo do piso e outro acima da boca.
+local function buildOuterWall(parent: Instance, frame: CFrame, tocas: { Toca }, z: number, bottom: number, top: number, halfLength: number)
+	local size = BuildingLayout.TocaSize
+	local sorted = table.clone(tocas)
+	table.sort(sorted, function(a, b)
+		return a.along < b.along
+	end)
+	local function column(fromX: number, toX: number, fromY: number, toY: number)
+		if toX - fromX <= 0.01 or toY - fromY <= 0.01 then
+			return
+		end
+		solid(parent, "OuterWall", frame, Vector3.new(toX - fromX, toY - fromY, SHELL), CFrame.new((fromX + toX) / 2, (fromY + toY) / 2, z + (SHELL / 2)), WALL_COLOR, Enum.Material.WoodPlanks)
+	end
+	local cursor = -(halfLength + SHELL)
+	for _, toca in ipairs(sorted) do
+		local left = toca.along - (size.X / 2)
+		local right = toca.along + (size.X / 2)
+		column(cursor, left, bottom, top)
+		column(left, right, bottom, toca.floorY)
+		column(left, right, toca.floorY + size.Y, top)
+		cursor = right
+	end
+	column(cursor, halfLength + SHELL, bottom, top)
+end
+
+local function buildToca(parent: Instance, frame: CFrame, toca: Toca, outerZ: number)
+	local size = BuildingLayout.TocaSize
+	local x = toca.along
+	local y = toca.floorY
+	local depth = size.Z
+	local zMid = outerZ + (depth / 2)
+	local name = `Toca{toca.name}`
+
+	solid(parent, `{name}Floor`, frame, Vector3.new(size.X + (SHELL * 2), SHELL, depth + SHELL), CFrame.new(x, y - (SHELL / 2), outerZ + ((depth + SHELL) / 2)), FLOOR_COLOR, Enum.Material.WoodPlanks)
+	for _, side in ipairs({ -1, 1 }) do
+		solid(parent, `{name}Side`, frame, Vector3.new(SHELL, size.Y, depth), CFrame.new(x + (side * ((size.X + SHELL) / 2)), y + (size.Y / 2), zMid), WALL_COLOR, Enum.Material.WoodPlanks)
+	end
+	solid(parent, `{name}Back`, frame, Vector3.new(size.X + (SHELL * 2), size.Y + SHELL, SHELL), CFrame.new(x, y + ((size.Y + SHELL) / 2) - (SHELL / 2), outerZ + depth + (SHELL / 2)), WALL_COLOR, Enum.Material.WoodPlanks)
+	solid(parent, `{name}Roof`, frame, Vector3.new(size.X + (SHELL * 2), SHELL, depth + SHELL), CFrame.new(x, y + size.Y + (SHELL / 2), outerZ + ((depth + SHELL) / 2)), CEILING_COLOR, Enum.Material.Plaster)
+
+	decor(parent, `{name}Cushion`, frame, Vector3.new(size.X - 0.6, 0.5, depth - 0.6), CFrame.new(x, y + 0.25, zMid + 0.2), CUSHION_COLOR, Enum.Material.Fabric)
+	local lamp = decor(parent, `{name}Lamp`, frame, Vector3.new(size.X - 0.4, 0.3, 0.3), CFrame.new(x, y + size.Y - 0.3, outerZ - 0.2), TOCA_LAMP_COLOR, Enum.Material.Neon)
+	lamp.CastShadow = false
+	lamp:SetAttribute("TocaName", toca.name)
+	CollectionService:AddTag(lamp, CorridorBuilder.TocaLampTag)
+	local light = Instance.new("PointLight")
+	light.Color = TOCA_LAMP_COLOR
+	light.Range = 9
+	light.Brightness = 0.8
+	light.Parent = lamp
 end
 
 function CorridorBuilder.build(parent: Instance, corridor: Corridor, building: BuildingConfig): Model
@@ -98,7 +161,11 @@ function CorridorBuilder.build(parent: Instance, corridor: Corridor, building: B
 	)
 
 	-- Casca: parede externa, cabeceiras e teto.
-	solid(model, "OuterWall", frame, Vector3.new((halfLength * 2) + (SHELL * 2), shellHeight, SHELL), CFrame.new(0, shellBottom + (shellHeight / 2), outerZ + (SHELL / 2)), WALL_COLOR, Enum.Material.WoodPlanks)
+	local tocas = BuildingLayout.getTocas(corridor, building)
+	buildOuterWall(model, frame, tocas, outerZ, shellBottom, shellTop, halfLength)
+	for _, toca in ipairs(tocas) do
+		buildToca(model, frame, toca, outerZ)
+	end
 	for _, side in ipairs({ -1, 1 }) do
 		solid(model, "EndWall", frame, Vector3.new(SHELL, shellHeight, width), CFrame.new(side * (halfLength + (SHELL / 2)), shellBottom + (shellHeight / 2), zCenter), WALL_COLOR, Enum.Material.WoodPlanks)
 	end

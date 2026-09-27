@@ -46,6 +46,17 @@ export type Corridor = {
 	upperAlong: number,
 }
 
+-- Toca Segura: nicho na parede externa de um corredor, no nível de um
+-- patamar. `center` fica no meio da boca do nicho (face interna da parede
+-- externa do corredor), no nível do piso.
+export type Toca = {
+	name: string,
+	corridor: Corridor,
+	center: Vector3,
+	along: number,
+	floorY: number,
+}
+
 export type GalleryLayout = {
 	floorY: number,
 	center: Vector3,
@@ -74,6 +85,10 @@ BuildingLayout.CorridorHalfLength = 40
 BuildingLayout.CorridorRampHalfLength = 26
 BuildingLayout.CorridorEntranceAlong = 32
 BuildingLayout.CorridorHeadroom = 11
+-- Tocas Seguras: largura (ao longo), profundidade (para fora), altura e
+-- posição ao longo do corredor (uma em cada patamar).
+BuildingLayout.TocaSize = Vector3.new(4, 7, 3.5)
+BuildingLayout.TocaAlong = 29
 
 function BuildingLayout.getFloorSize(arena: ArenaConfig): (number, number)
 	local width = (arena.Columns * arena.BlockSize.X) + ((arena.Columns - 1) * arena.BlockGap)
@@ -271,17 +286,67 @@ function BuildingLayout.getCorridors(arena: ArenaConfig, building: BuildingConfi
 end
 
 -- Verdadeiro se a posição está dentro do corredor (incluindo os vãos das
--- entradas na espessura da parede). Usado pelo Barão e pela telemetria dos
--- corredores (entrega 2.2).
+-- entradas na espessura da parede e as Tocas). Usado pelo Barão e pela
+-- telemetria dos corredores.
 function BuildingLayout.isInsideCorridor(corridor: Corridor, building: BuildingConfig, position: Vector3): boolean
 	local relative = position - corridor.wallCenter
 	local outward = -relative:Dot(corridor.inward)
 	local sideways = relative:Dot(corridor.along)
 	return outward >= 0.3
-		and outward <= building.WallThickness + BuildingLayout.CorridorWidth
+		and outward <= building.WallThickness + BuildingLayout.CorridorWidth + 1 + BuildingLayout.TocaSize.Z
 		and math.abs(sideways) <= BuildingLayout.CorridorHalfLength
 		and position.Y >= corridor.lowerY - 2
 		and position.Y <= corridor.upperY + BuildingLayout.CorridorHeadroom
+end
+
+-- Altura do piso do corredor em uma posição ao longo dele: patamar de baixo,
+-- rampa ou patamar de cima.
+function BuildingLayout.getCorridorFloorY(corridor: Corridor, along: number): number
+	local rampHalf = BuildingLayout.CorridorRampHalfLength
+	if along <= -rampHalf then
+		return corridor.lowerY
+	elseif along >= rampHalf then
+		return corridor.upperY
+	end
+	local ratio = (along + rampHalf) / (rampHalf * 2)
+	return corridor.lowerY + ((corridor.upperY - corridor.lowerY) * ratio)
+end
+
+-- Duas Tocas por corredor: uma em cada patamar, na parede externa.
+function BuildingLayout.getTocas(corridor: Corridor, building: BuildingConfig): { Toca }
+	local outward = -corridor.inward
+	local mouthDistance = building.WallThickness + BuildingLayout.CorridorWidth
+	local tocas: { Toca } = {}
+	for _, definition in ipairs({
+		{ suffix = "Lower", along = -BuildingLayout.TocaAlong, floorY = corridor.lowerY },
+		{ suffix = "Upper", along = BuildingLayout.TocaAlong, floorY = corridor.upperY },
+	}) do
+		local center = corridor.wallCenter
+			+ (corridor.along * definition.along)
+			+ (outward * mouthDistance)
+			+ Vector3.new(0, definition.floorY, 0)
+		table.insert(tocas, {
+			name = `{corridor.name}{definition.suffix}`,
+			corridor = corridor,
+			center = center,
+			along = definition.along,
+			floorY = definition.floorY,
+		})
+	end
+	return tocas
+end
+
+-- Verdadeiro se a posição (raiz do personagem) está dentro do nicho da Toca.
+function BuildingLayout.isInsideToca(toca: Toca, position: Vector3): boolean
+	local size = BuildingLayout.TocaSize
+	local relative = position - toca.center
+	local outward = -relative:Dot(toca.corridor.inward)
+	local sideways = math.abs(relative:Dot(toca.corridor.along))
+	return outward >= -0.4
+		and outward <= size.Z + 1
+		and sideways <= size.X / 2
+		and relative.Y >= -1
+		and relative.Y <= size.Y
 end
 
 -- Porta do cofre: centro da parede oeste, no andar mais baixo. Norte e sul

@@ -120,6 +120,34 @@ export type FinalChaosConfig = {
 	WarningTime: number,
 }
 
+export type BaraoConfig = {
+	Enabled: boolean,
+	WakeDelay: number,
+	PatrolSpeed: number,
+	ChaseSpeed: number,
+	LateralSpeed: number,
+	SightRange: number,
+	SwitchCorridorDelay: number,
+	ContactRadius: number,
+	JumpClearance: number,
+	ContactCooldown: number,
+	ContactPause: number,
+	PushSpeed: number,
+	PushLift: number,
+	BarkIntervalPatrol: NumberRange,
+	BarkIntervalChase: NumberRange,
+	BarkSoundIds: { string },
+	FunnySoundIds: { string },
+	FootstepSoundId: string,
+}
+
+export type TocaConfig = {
+	MaxStay: number,
+	WarningAt: number,
+	Cooldown: number,
+	EjectSpeed: number,
+}
+
 export type TelemetryConfig = {
 	Enabled: boolean,
 	PrintInStudio: boolean,
@@ -153,6 +181,8 @@ export type GameConfig = {
 	SecondChance: SecondChanceConfig,
 	FinalChaos: FinalChaosConfig,
 	Telemetry: TelemetryConfig,
+	Barao: BaraoConfig,
+	Toca: TocaConfig,
 	getRoundTimings: () -> RoundTimings,
 }
 
@@ -332,6 +362,43 @@ local Telemetry: TelemetryConfig = table.freeze({
 	PrintInStudio = true,
 })
 
+-- Barão: mascote que patrulha os corredores secretos. Dorme no começo da
+-- rodada, acorda com um latido e expulsa quem encontra, sem dano. A
+-- perseguição é mais lenta que o jogador (WalkSpeed 16) para dar chance de
+-- fugir, e dá para pular por cima dele (JumpClearance: altura dos pés acima
+-- do piso que já passa sobre ele). Os sons são provisórios, embutidos no
+-- Roblox: troque por latidos reais (rbxassetid://...) quando houver.
+local Barao: BaraoConfig = table.freeze({
+	Enabled = true,
+	WakeDelay = 20,
+	PatrolSpeed = 8,
+	ChaseSpeed = 14,
+	LateralSpeed = 6,
+	SightRange = 34,
+	SwitchCorridorDelay = 4,
+	ContactRadius = 2.6,
+	JumpClearance = 2.4,
+	ContactCooldown = 1.5,
+	ContactPause = 1.2,
+	PushSpeed = 58,
+	PushLift = 24,
+	BarkIntervalPatrol = NumberRange.new(6, 13),
+	BarkIntervalChase = NumberRange.new(2.2, 4.5),
+	BarkSoundIds = table.freeze({ "rbxasset://sounds/action_get_up.mp3", "rbxasset://sounds/action_jump.mp3" }),
+	FunnySoundIds = table.freeze({ "rbxasset://sounds/oof.ogg", "rbxasset://sounds/ouch.ogg", "rbxasset://sounds/swoosh.wav" }),
+	FootstepSoundId = "rbxasset://sounds/action_footsteps_plastic.mp3",
+})
+
+-- Tocas Seguras: protegem do Barão (não do Puffador) por MaxStay segundos;
+-- depois o ocupante é empurrado para fora e fica Cooldown segundos sem
+-- poder usar nenhuma Toca.
+local Toca: TocaConfig = table.freeze({
+	MaxStay = 8,
+	WarningAt = 3,
+	Cooldown = 10,
+	EjectSpeed = 34,
+})
+
 local GameConfig = {} :: GameConfig
 
 GameConfig.GameName = "BlocoPuff"
@@ -358,6 +425,8 @@ GameConfig.Knockback = Knockback
 GameConfig.SecondChance = SecondChance
 GameConfig.FinalChaos = FinalChaos
 GameConfig.Telemetry = Telemetry
+GameConfig.Barao = Barao
+GameConfig.Toca = Toca
 
 function GameConfig.getRoundTimings(): RoundTimings
 	if RunService:IsStudio() then

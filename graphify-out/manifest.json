@@ -20,8 +20,8 @@
     "semantic_hash": ""
   },
   "src/client/init.client.luau": {
-    "mtime": 1790548785.7941887,
-    "ast_hash": "c8d65e66b703211748b964c4f0930be1",
+    "mtime": 1790549988.7373247,
+    "ast_hash": "33cf222215d6f2f671e6ff9ca287d2da",
     "semantic_hash": ""
   },
   "src/client/ui/CrosshairView.luau": {
@@ -45,8 +45,8 @@
     "semantic_hash": ""
   },
   "src/server/init.server.luau": {
-    "mtime": 1790548785.69772,
-    "ast_hash": "a79751c0cd60e00c2ec98a67808fd8c3",
+    "mtime": 1790549965.3954277,
+    "ast_hash": "7fc889eb51f36f8008c8e8647737833f",
     "semantic_hash": ""
   },
   "src/server/services/ArenaService.luau": {
@@ -80,13 +80,13 @@
     "semantic_hash": ""
   },
   "src/server/services/RoundService.luau": {
-    "mtime": 1790548785.6974833,
-    "ast_hash": "f01f4bda07c6ff09778a5b34ae8a80a3",
+    "mtime": 1790549965.3957102,
+    "ast_hash": "a31f974e8cd8e2481c7318b9f5f1fe98",
     "semantic_hash": ""
   },
   "src/shared/config/GameConfig.luau": {
-    "mtime": 1790548130.0657842,
-    "ast_hash": "2102fd544b9c0035a9a5bf382439635a",
+    "mtime": 1790549749.7534673,
+    "ast_hash": "2878de6f01d1d5e8fd49ceb19c935ae5",
     "semantic_hash": ""
   },
   "src/shared/modules/PuffadorConstants.luau": {
@@ -125,8 +125,8 @@
     "semantic_hash": ""
   },
   "README.md": {
-    "mtime": 1790548807.3167338,
-    "ast_hash": "6a9334fd6d543458c89f6bb32fd532e5",
+    "mtime": 1790550005.828208,
+    "ast_hash": "2b77777924f21dcfc00db1d1c973bdfd",
     "semantic_hash": ""
   },
   "src/client/controllers/CombatCameraController.luau": {
@@ -205,8 +205,8 @@
     "semantic_hash": ""
   },
   "src/shared/modules/BuildingLayout.luau": {
-    "mtime": 1790549288.561268,
-    "ast_hash": "f5c144081d3318d26cea47fc712f7190",
+    "mtime": 1790549577.2853894,
+    "ast_hash": "2275b7bd5bcf4d5eb8cf39f3c1b45154",
     "semantic_hash": ""
   },
   "src/server/services/BuildingDecor.luau": {
@@ -365,13 +365,33 @@
     "semantic_hash": ""
   },
   "src/server/services/CorridorBuilder.luau": {
-    "mtime": 1790548693.1638849,
-    "ast_hash": "783e8911afe4db56d21c144ea0040df3",
+    "mtime": 1790549781.83987,
+    "ast_hash": "fa1f866e88bae048f177996c0f0bc48e",
     "semantic_hash": ""
   },
   "src/server/services/SecretPassageService.luau": {
     "mtime": 1790548761.4129243,
     "ast_hash": "19e4a81fc8e89f907339e9aefe302304",
+    "semantic_hash": ""
+  },
+  "src/client/controllers/BaraoController.luau": {
+    "mtime": 1790549988.6279876,
+    "ast_hash": "acdf44e0c51870ee776a55f68176ff2f",
+    "semantic_hash": ""
+  },
+  "src/server/services/BaraoModel.luau": {
+    "mtime": 1790549879.6125453,
+    "ast_hash": "48408b7dd3c28540e89df0a2bc3c1cff",
+    "semantic_hash": ""
+  },
+  "src/server/services/BaraoService.luau": {
+    "mtime": 1790550379.2287292,
+    "ast_hash": "451f6a63e06033a64f182b3bffac02e7",
+    "semantic_hash": ""
+  },
+  "src/server/services/TocaService.luau": {
+    "mtime": 1790550379.2289016,
+    "ast_hash": "fe4d3a94ed626417713efcd1421e1d69",
     "semantic_hash": ""
   }
 }

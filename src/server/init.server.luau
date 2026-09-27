@@ -14,6 +14,8 @@ local VaultService = require(script.services.VaultService)
 local KnockbackService = require(script.services.KnockbackService)
 local TelemetryService = require(script.services.TelemetryService)
 local SecretPassageService = require(script.services.SecretPassageService)
+local TocaService = require(script.services.TocaService)
+local BaraoService = require(script.services.BaraoService)
 local WorldVisualService = require(script.services.WorldVisualService)
 local BuildingService = require(script.services.BuildingService)
 local AdminService = require(script.services.AdminService)
@@ -79,6 +81,11 @@ print("[BlocoPuff] Secret passages ready")
 
 KnockbackService.start(PuffadorService.sendFeedback)
 print("[BlocoPuff] Puffador knockback armed")
+
+-- Precisam dos corredores já construídos (luzes das Tocas marcadas).
+TocaService.start(world, PuffadorService.sendFeedback)
+BaraoService.start(world, PuffadorService.sendFeedback)
+print("[BlocoPuff] Barao and safe dens ready")
 
 -- Precisa da Arena já criada (usa ArenaService.getEliminationY) e do
 -- RoundService.eliminateParticipant como callback, para não depender dele.

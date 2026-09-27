@@ -309,6 +309,17 @@ Escopo em `docs/FASE_2_SEGREDOS_COFRE_BARAO.md`.
 - **Quadros:** a cada rodada um quadro de cada andar é sorteado em segredo. Acertá-lo com o Puffador revela, para todos, as entradas daquele andar: o painel some, surge uma moldura dourada acesa e aparece a faixa "PASSAGEM SECRETA!" com o nome de quem descobriu. Revelar um andar não revela o outro. Quadros errados respondem com um som e "NÃO ERA ESSE QUADRO".
 - **Código:** `SecretPassageService` (regras e painéis), `CorridorBuilder` (arquitetura), `BuildingLayout.getCorridors`, e `SecretPassageController` no cliente. Os quadros da arena são marcados com a tag `RevealPainting`.
 
+### Barão e Tocas Seguras (Fase 2, entrega 2.2)
+
+- **Barão:** vira-lata caramelo de camisa verde e amarela, feito de peças nativas (`BaraoModel`). Há um só por rodada. Começa dormindo no patamar de baixo de um corredor e acorda com latidos depois de `WakeDelay` segundos (20). Depois disso patrulha, persegue quem estiver no mesmo corredor e, se só houver gente no outro corredor por 4 s, reaparece lá pela ponta mais distante.
+- **Contato:** não causa dano. Dá um empurrão forte para longe dele, rumo à saída daquele lado. Quem está no vão de uma entrada é jogado para dentro do prédio. Toca um som engraçado aleatório e mostra "AU AU!" para quem foi empurrado.
+- **Como escapar:** a perseguição (14) é mais lenta que o jogador (16). Também dá para pular por cima dele, porque o contato só conta com os pés abaixo de `JumpClearance`.
+- **Pistas:** a única pista é o áudio 3D (passos em loop e latidos em intervalos irregulares). Não há minimapa nem indicador de distância.
+- **Tocas Seguras:** são duas por corredor, nichos na parede externa, uma em cada patamar. Cabe um ocupante por vez; a luz fica verde quando a Toca está livre e laranja quando está ocupada. O ocupante fica protegido do Barão, mas não do Puffador: um empurrão o tira de lá e a Toca fica livre.
+- **Contra camping:** cada ocupação dura no máximo 8 s, com aviso 3 s antes do fim. Depois o jogador é empurrado para o corredor e fica 10 s sem poder usar Tocas.
+- **Ajustes:** ficam em `GameConfig.Barao` e `GameConfig.Toca`. Os sons atuais são provisórios, embutidos no Roblox; troque `BarkSoundIds`, `FunnySoundIds` e `FootstepSoundId` por áudios da Creator Store (`rbxassetid://...`).
+- **Código:** `BaraoService` (comportamento), `BaraoModel`, `TocaService`, `CorridorBuilder` (nichos) e `BuildingLayout.getTocas` / `isInsideToca` / `getCorridorFloorY`. No cliente, `BaraoController` mostra os avisos.
+
 ### O Cofre do Barão Puff
 
 > **Desligado na Fase 1** (`GameConfig.SecretRoom.Enabled = false`): as portas ficam fechadas e sem interação. O cofre será refeito na Fase 2, conforme `docs/FASE_2_SEGREDOS_COFRE_BARAO.md`.

@@ -11,6 +11,7 @@ local KnockbackController = require(script.controllers.KnockbackController)
 local ResultsController = require(script.controllers.ResultsController)
 local TelemetryController = require(script.controllers.TelemetryController)
 local SecretPassageController = require(script.controllers.SecretPassageController)
+local BaraoController = require(script.controllers.BaraoController)
 
 print("[BlocoPuff] Client initialized")
 
@@ -89,4 +90,11 @@ local secretOk, secretErr = pcall(function()
 end)
 if not secretOk then
 	warn(string.format("[BlocoPuff] Failed to start secret passage controller: %s", tostring(secretErr)))
+end
+
+local baraoOk, baraoErr = pcall(function()
+	BaraoController.start()
+end)
+if not baraoOk then
+	warn(string.format("[BlocoPuff] Failed to start Barao controller: %s", tostring(baraoErr)))
 end
