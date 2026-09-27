@@ -2,9 +2,12 @@
 
 -- Botão de disparo para toque no estilo dos jogos de tiro mobile: grande,
 -- redondo, com volume (base mais escura), afunda ao tocar e mostra a recarga
--- enchendo o círculo de baixo para cima. O texto continua visível para não
--- depender apenas de cor ou de ícone.
+-- enchendo o círculo de baixo para cima. Segurar mantém o disparo (quem
+-- controla a cadência é o controller). Fica à esquerda e um pouco acima do
+-- botão de pulo nativo do Roblox, para os dois caberem sob o polegar direito
+-- sem se sobrepor. O texto continua visível para não depender só de cor.
 
+local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
 
 local UiTheme = require(script.Parent.UiTheme)
@@ -12,6 +15,9 @@ local UiTheme = require(script.Parent.UiTheme)
 local FIRE_BUTTON_NAME = "BlocoPuffFireButton"
 local BUTTON_SIZE = 96
 local DEPTH = 6
+local DEFAULT_POSITION = UDim2.new(1, -28, 1, -118)
+local JUMP_GAP = 14
+local LAYOUT_INTERVAL = 1
 
 export type FireButtonViewHandle = {
 	screenGui: ScreenGui,
@@ -26,14 +32,25 @@ local function circle(instance: Instance)
 	UiTheme.addCorner(instance, 999)
 end
 
-function FireButtonView.new(playerGui: PlayerGui, onFire: () -> ()): FireButtonViewHandle
+-- Botão de pulo da interface de toque do Roblox, se existir.
+local function findJumpButton(playerGui: PlayerGui): GuiObject?
+	local touchGui = playerGui:FindFirstChild("TouchGui")
+	local frame = if touchGui ~= nil then touchGui:FindFirstChild("TouchControlFrame") else nil
+	local jump = if frame ~= nil then frame:FindFirstChild("JumpButton") else nil
+	if jump ~= nil and jump:IsA("GuiObject") and jump.AbsoluteSize.X > 0 then
+		return jump
+	end
+	return nil
+end
+
+function FireButtonView.new(playerGui: PlayerGui, onPress: () -> (), onRelease: () -> ()): FireButtonViewHandle
 	local screenGui = UiTheme.createScreenGui(FIRE_BUTTON_NAME, playerGui, 19)
 	screenGui.Enabled = false
 
 	local root = Instance.new("Frame")
 	root.Name = "Root"
 	root.AnchorPoint = Vector2.new(1, 1)
-	root.Position = UDim2.new(1, -28, 1, -118)
+	root.Position = DEFAULT_POSITION
 	root.Size = UDim2.fromOffset(BUTTON_SIZE, BUTTON_SIZE + DEPTH)
 	root.BackgroundTransparency = 1
 	root.Parent = screenGui
@@ -135,7 +152,6 @@ function FireButtonView.new(playerGui: PlayerGui, onFire: () -> ()): FireButtonV
 	button.Parent = root
 	circle(button)
 
-	local ready = true
 
 	local function press(down: boolean)
 		local offset = if down then DEPTH - 1 else 0
@@ -147,19 +163,48 @@ function FireButtonView.new(playerGui: PlayerGui, onFire: () -> ()): FireButtonV
 		}):Play()
 	end
 
+	local holding = false
+	local function release()
+		if holding then
+			holding = false
+			press(false)
+			onRelease()
+		end
+	end
 	button.InputBegan:Connect(function(input)
 		if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then
+			holding = true
 			press(true)
+			onPress()
 		end
 	end)
-	button.InputEnded:Connect(function(input)
-		if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then
-			press(false)
+	button.InputEnded:Connect(release)
+	-- O dedo pode sair do botão antes de soltar; também para o disparo.
+	button.MouseLeave:Connect(release)
+
+	-- Reposiciona ao lado do botão de pulo nativo (ele muda de tamanho com a
+	-- tela e só existe depois que a interface de toque carrega).
+	local function layout()
+		local jump = findJumpButton(playerGui)
+		local area = screenGui.AbsoluteSize
+		if jump == nil or area.X <= 0 then
+			root.Position = DEFAULT_POSITION
+			return
 		end
-	end)
-	button.Activated:Connect(function()
-		if ready then
-			onFire()
+		-- Tudo no mesmo espaço absoluto: posição do pulo relativa a esta tela.
+		local jumpCenter = jump.AbsolutePosition + (jump.AbsoluteSize / 2) - screenGui.AbsolutePosition
+		local centerX = jumpCenter.X - (jump.AbsoluteSize.X / 2) - JUMP_GAP - (BUTTON_SIZE / 2)
+		local centerY = jumpCenter.Y - (jump.AbsoluteSize.Y * 0.35)
+		local right = area.X - (centerX + (BUTTON_SIZE / 2))
+		local bottom = area.Y - (centerY + ((BUTTON_SIZE + DEPTH) / 2))
+		root.Position = UDim2.new(1, -math.max(right, 8), 1, -math.max(bottom, 8))
+	end
+	task.spawn(function()
+		while screenGui.Parent ~= nil and Players.LocalPlayer ~= nil do
+			if screenGui.Enabled then
+				layout()
+			end
+			task.wait(LAYOUT_INTERVAL)
 		end
 	end)
 
@@ -168,10 +213,14 @@ function FireButtonView.new(playerGui: PlayerGui, onFire: () -> ()): FireButtonV
 
 	handle.setVisible = function(visible: boolean)
 		screenGui.Enabled = visible
+		if visible then
+			layout()
+		else
+			release()
+		end
 	end
 
 	handle.startCooldown = function(duration: number)
-		ready = false
 		button.Text = "RECARREGANDO"
 		caption.Text = "RECARGA"
 		ringStroke.Color = UiTheme.Colors.InkSoft
@@ -187,7 +236,6 @@ function FireButtonView.new(playerGui: PlayerGui, onFire: () -> ()): FireButtonV
 			if screenGui.Parent == nil then
 				return
 			end
-			ready = true
 			button.Text = "ATIRAR"
 			caption.Text = "ATIRAR"
 			ringStroke.Color = UiTheme.Colors.Gold

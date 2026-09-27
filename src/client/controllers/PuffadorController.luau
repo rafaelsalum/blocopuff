@@ -55,6 +55,10 @@ local scoredTool: Tool? = nil
 local backpackWasEnabled: boolean? = nil
 local targetingConnection: RBXScriptConnection? = nil
 local hasShownControlHint = false
+-- Disparo contínuo enquanto o botão (toque, mouse ou gatilho) está segurado.
+local holdingFire = false
+local holdSequence = 0
+local HOLD_POLL = 0.05
 
 local function getControlHintText(): string
 	local inputName = UserInputService:GetLastInputType().Name
@@ -62,12 +66,12 @@ local function getControlHintText(): string
 		string.find(inputName, "Gamepad") ~= nil
 		or (UserInputService.GamepadEnabled and not UserInputService.KeyboardEnabled and not UserInputService.TouchEnabled)
 	then
-		return "MIRE EM UM BLOCO • USE O GATILHO DIREITO"
+		return "SEGURE O GATILHO DIREITO (R2) PARA ATIRAR"
 	end
 	if UserInputService.TouchEnabled and not UserInputService.KeyboardEnabled then
-		return "MIRE EM UM BLOCO • TOQUE EM ATIRAR"
+		return "SEGURE O BOTÃO PUFF PARA ATIRAR"
 	end
-	return "MIRE EM UM BLOCO • CLIQUE PARA ATIRAR"
+	return "SEGURE O CLIQUE PARA ATIRAR"
 end
 
 local function setCombatBackpackHidden(hidden: boolean)
@@ -268,6 +272,34 @@ local function onToolActivated()
 	remote:FireServer(aimTarget, aimOrigin)
 end
 
+local function stopFiring()
+	holdingFire = false
+	holdSequence += 1
+end
+
+-- Enquanto segurado, tenta disparar; a cadência (FireCooldown) continua
+-- sendo aplicada por onToolActivated e revalidada no servidor.
+local function startFiring()
+	if holdingFire then
+		return
+	end
+	holdingFire = true
+	holdSequence += 1
+	local sequence = holdSequence
+	task.spawn(function()
+		while holdingFire and holdSequence == sequence and equippedTool ~= nil do
+			onToolActivated()
+			task.wait(HOLD_POLL)
+		end
+	end)
+end
+
+-- No toque, a Tool dispara em qualquer toque na tela, inclusive ao girar a
+-- câmera. Lá o disparo vem só do botão PUFF.
+local function isTouchInput(): boolean
+	return UserInputService:GetLastInputType() == Enum.UserInputType.Touch
+end
+
 local function setToolEquipped(tool: Tool)
 	equippedTool = tool
 	lastLocalFireClock = 0
@@ -298,6 +330,7 @@ local function clearToolEquipped(tool: Tool)
 	end
 
 	equippedTool = nil
+	stopFiring()
 	stopTargetingFeedback()
 	if feedback ~= nil then
 		feedback.resetCombo()
@@ -322,7 +355,12 @@ local function tryConnectTool(instance: Instance)
 
 	local tool = instance
 	connectedTools[tool] = true
-	tool.Activated:Connect(onToolActivated)
+	tool.Activated:Connect(function()
+		if not isTouchInput() then
+			startFiring()
+		end
+	end)
+	tool.Deactivated:Connect(stopFiring)
 	tool.Equipped:Connect(function()
 		setToolEquipped(tool)
 	end)
@@ -368,9 +406,9 @@ local function connectRemotes(): boolean
 	feedbackRemote = feedbackInstance
 	feedbackInstance.OnClientEvent:Connect(function(feedbackType: unknown)
 		if feedbackType == "PlayerHit" then
-			-- Acertou outro jogador: marcador na mira e som, sem somar bloco.
+			-- Acertou outro jogador: marcador rosa na mira e som, sem somar bloco.
 			if crosshair ~= nil then
-				crosshair.playHit()
+				crosshair.playPlayerHit()
 			end
 			local hitTool = equippedTool
 			if hitTool ~= nil then
@@ -417,7 +455,7 @@ function PuffadorController.start()
 	local playerGuiInstance = localPlayer:WaitForChild("PlayerGui", STATE_WAIT_TIMEOUT)
 	if playerGuiInstance ~= nil and playerGuiInstance:IsA("PlayerGui") then
 		crosshair = CrosshairView.new(playerGuiInstance)
-		fireButton = FireButtonView.new(playerGuiInstance, onToolActivated)
+		fireButton = FireButtonView.new(playerGuiInstance, startFiring, stopFiring)
 		controlHint = ControlHintView.new(playerGuiInstance)
 		feedback = FeedbackView.new(playerGuiInstance)
 	else

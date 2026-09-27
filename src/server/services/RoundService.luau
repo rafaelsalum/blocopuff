@@ -384,7 +384,7 @@ local function onPlayerRemoving(player: Player)
 		if participant.alive then
 			print(string.format("[BlocoPuff] %s eliminated: %s", player.Name, EliminationTypes.PlayerLeft))
 		end
-		if currentState == RoundTypes.Active then
+		if currentState == RoundTypes.Active and participant.alive then
 			TelemetryService.leftMidRound(player)
 		end
 
@@ -574,12 +574,24 @@ local function runEnding(timings: RoundTimings)
 	ArenaService.endRound()
 	VaultService.endRound()
 	publishResult()
+	-- Mesma regra de empate do resultado: tempo esgotado com vários vivos
+	-- ou os últimos caindo no mesmo instante.
+	local survivors = 0
+	for _, player in ipairs(participantOrder) do
+		local participant = participants[player]
+		if participant ~= nil and participant.alive then
+			survivors += 1
+		end
+	end
+	local tiedLast = if survivors == 0 then RoundResultBuilder.getLastEliminated(eliminationTimes) else {}
+	local isDraw = winner == nil and (survivors > 1 or #tiedLast > 1)
 	local outcomes: { [Player]: string } = {}
 	for _, player in ipairs(participantOrder) do
 		local participant = participants[player]
 		if participant ~= nil then
 			local won = winner ~= nil and player.UserId == winner.userId
-			outcomes[player] = if won then "Win" elseif winner == nil and participant.alive then "Draw" else "Loss"
+			local inDraw = isDraw and (participant.alive or table.find(tiedLast, player) ~= nil)
+			outcomes[player] = if won then "Win" elseif inDraw then "Draw" else "Loss"
 		end
 	end
 	TelemetryService.roundFinished(outcomes)

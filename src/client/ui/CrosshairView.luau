@@ -1,18 +1,20 @@
 --!strict
 
--- Retículo central de alto contraste. Expande ao disparar e mostra uma
--- confirmação colorida somente quando o servidor confirma a destruição de
--- um bloco válido.
+-- Retículo central pequeno e de alto contraste, no estilo dos jogos de tiro
+-- mobile. Fica verde sobre um bloco válido, expande ao disparar e mostra um
+-- marcador quando o servidor confirma o acerto: amarelo em bloco, rosa em
+-- jogador (empurrão).
 
 local TweenService = game:GetService("TweenService")
 
 local UiTheme = require(script.Parent.UiTheme)
 
 local CROSSHAIR_NAME = "BlocoPuffCrosshair"
-local DEFAULT_RING_SIZE = 26
-local SHOT_RING_SIZE = 38
-local DEFAULT_DOT_SIZE = 6
+local DEFAULT_RING_SIZE = 18
+local SHOT_RING_SIZE = 28
+local DEFAULT_DOT_SIZE = 4
 local HIT_COLOR = UiTheme.Colors.Yellow
+local PLAYER_HIT_COLOR = UiTheme.Colors.Pink
 local TARGET_COLOR = UiTheme.Colors.Green
 local DEFAULT_COLOR = UiTheme.Colors.White
 
@@ -24,6 +26,7 @@ export type CrosshairViewHandle = {
 	setTargeting: (targeting: boolean) -> (),
 	playShot: () -> (),
 	playHit: () -> (),
+	playPlayerHit: () -> (),
 	destroy: () -> (),
 }
 
@@ -39,7 +42,7 @@ local function createHitLine(parent: Instance, position: UDim2, rotation: number
 	local line = Instance.new("Frame")
 	line.AnchorPoint = Vector2.new(0.5, 0.5)
 	line.Position = position
-	line.Size = UDim2.fromOffset(10, 3)
+	line.Size = UDim2.fromOffset(8, 2)
 	line.Rotation = rotation
 	line.BackgroundColor3 = HIT_COLOR
 	line.BorderSizePixel = 0
@@ -91,7 +94,7 @@ function CrosshairView.new(playerGui: PlayerGui): CrosshairViewHandle
 
 	local shadowStroke = Instance.new("UIStroke")
 	shadowStroke.Color = UiTheme.Colors.Ink
-	shadowStroke.Thickness = 4
+	shadowStroke.Thickness = 3
 	shadowStroke.Transparency = 0.15
 	shadowStroke.Parent = shadowRing
 
@@ -106,7 +109,7 @@ function CrosshairView.new(playerGui: PlayerGui): CrosshairViewHandle
 
 	local ringStroke = Instance.new("UIStroke")
 	ringStroke.Color = DEFAULT_COLOR
-	ringStroke.Thickness = 2
+	ringStroke.Thickness = 1.5
 	ringStroke.Parent = ring
 
 	local dot = Instance.new("Frame")
@@ -121,33 +124,15 @@ function CrosshairView.new(playerGui: PlayerGui): CrosshairViewHandle
 
 	local dotStroke = Instance.new("UIStroke")
 	dotStroke.Color = UiTheme.Colors.Ink
-	dotStroke.Thickness = 2
+	dotStroke.Thickness = 1
 	dotStroke.Parent = dot
 
 	local hitLines = {
-		createHitLine(root, UDim2.new(0.5, -10, 0.5, -10), 45),
-		createHitLine(root, UDim2.new(0.5, 10, 0.5, -10), -45),
-		createHitLine(root, UDim2.new(0.5, -10, 0.5, 10), -45),
-		createHitLine(root, UDim2.new(0.5, 10, 0.5, 10), 45),
+		createHitLine(root, UDim2.new(0.5, -8, 0.5, -8), 45),
+		createHitLine(root, UDim2.new(0.5, 8, 0.5, -8), -45),
+		createHitLine(root, UDim2.new(0.5, -8, 0.5, 8), -45),
+		createHitLine(root, UDim2.new(0.5, 8, 0.5, 8), 45),
 	}
-
-	local targetLabel = Instance.new("TextLabel")
-	targetLabel.Name = "TargetLabel"
-	targetLabel.AnchorPoint = Vector2.new(0.5, 0)
-	targetLabel.Position = UDim2.new(0.5, 0, 0.5, 19)
-	targetLabel.Size = UDim2.fromOffset(54, 16)
-	targetLabel.BackgroundColor3 = UiTheme.Colors.Ink
-	targetLabel.BackgroundTransparency = 0.12
-	targetLabel.BorderSizePixel = 0
-	targetLabel.Font = UiTheme.Fonts.BodyBold
-	targetLabel.Text = "BLOCO"
-	targetLabel.TextColor3 = TARGET_COLOR
-	targetLabel.TextSize = 10
-	targetLabel.Visible = false
-	targetLabel.ZIndex = 2
-	targetLabel.Parent = root
-	UiTheme.addCorner(targetLabel, 7)
-	UiTheme.addStroke(targetLabel, TARGET_COLOR, 1)
 
 	screenGui.Parent = playerGui
 	local isTargeting = false
@@ -155,11 +140,10 @@ function CrosshairView.new(playerGui: PlayerGui): CrosshairViewHandle
 	local hitFeedbackSequence = 0
 
 	local function getRestingRingSize(): number
-		return if isTargeting then DEFAULT_RING_SIZE - 4 else DEFAULT_RING_SIZE
+		return if isTargeting then DEFAULT_RING_SIZE - 3 else DEFAULT_RING_SIZE
 	end
 
 	local function applyRestingStyle()
-		targetLabel.Visible = isTargeting
 		if isShowingHit then
 			return
 		end
@@ -217,15 +201,16 @@ function CrosshairView.new(playerGui: PlayerGui): CrosshairViewHandle
 		}):Play()
 	end
 
-	handle.playHit = function()
+	local function showHitMarker(color: Color3)
 		hitFeedbackSequence += 1
 		local sequence = hitFeedbackSequence
 		isShowingHit = true
-		ringStroke.Color = HIT_COLOR
-		dot.BackgroundColor3 = HIT_COLOR
+		ringStroke.Color = color
+		dot.BackgroundColor3 = color
 
 		for _, line in ipairs(hitLines) do
 			line.Visible = true
+			line.BackgroundColor3 = color
 			line.BackgroundTransparency = 0
 			TweenService:Create(line, TweenInfo.new(0.28, Enum.EasingStyle.Quad), {
 				BackgroundTransparency = 1,
@@ -242,6 +227,14 @@ function CrosshairView.new(playerGui: PlayerGui): CrosshairViewHandle
 				line.Visible = false
 			end
 		end)
+	end
+
+	handle.playHit = function()
+		showHitMarker(HIT_COLOR)
+	end
+
+	handle.playPlayerHit = function()
+		showHitMarker(PLAYER_HIT_COLOR)
 	end
 
 	handle.destroy = function()

@@ -232,6 +232,14 @@ Direção de produto em `docs/GAME_DESIGN.md`; escopo da fase em `docs/FASE_1_CO
 - **Segunda Chance:** a primeira queda para fora da arena devolve o jogador a um bloco inteiro do andar de baixo, com 2,5 s de imunidade a empurrões; a segunda queda elimina. A HUD mostra "2 VIDAS" / "ÚLTIMA VIDA".
 - **Caos Final:** nos últimos 30 s a Segunda Chance é desligada e, a cada 2 s, blocos aleatórios piscam em vermelho por 1,2 s e caem (3 no início, até 9 no fim). O cronômetro fica vermelho (`FinalChaosService`, `GameConfig.FinalChaos`).
 
+### Controles e mira (Fase 1, entrega 1.5)
+
+- **Mira:** retículo menor (anel de 18 px, ponto de 4 px, traços finos) sem a etiqueta "BLOCO". Fica verde sobre um bloco válido; o marcador de acerto é amarelo em bloco e rosa em jogador (empurrão).
+- **Segurar para atirar:** o botão PUFF (toque), o clique do mouse e o gatilho direito (R2/RT) disparam continuamente enquanto estiverem segurados, respeitando a cadência (`GameConfig.Puffador.FireCooldown`, revalidada no servidor).
+- **Celular:** tocar na tela para girar a câmera não dispara mais; o disparo vem só do botão PUFF. O botão fica à esquerda e um pouco acima do botão de pulo nativo do Roblox e se reposiciona conforme o tamanho da tela.
+- **Controle:** R2/RT atira e o analógico direito gira a câmera (padrão do Roblox); a dica de controle mostra o comando certo para cada dispositivo.
+- **Assistência de mira:** não foi adicionada. O game design só a prevê se o playtest mostrar necessidade.
+
 ### Telemetria (Fase 1, entrega 1.4)
 
 `TelemetryService` envia eventos customizados pelo `AnalyticsService` do Roblox; eles aparecem no Creator Dashboard, em Analytics › Custom Events. No Studio cada evento também é impresso no Output (`GameConfig.Telemetry`). Os contadores de combate são somados no servidor e enviados uma vez no fim da rodada. Todos os eventos são por jogador, e os campos customizados seguem a mesma ordem: **Field01 = dispositivo** (Mobile, Desktop, Gamepad, informado pelo `TelemetryController`), **Field02 = contexto**, **Field03 = detalhe**.
