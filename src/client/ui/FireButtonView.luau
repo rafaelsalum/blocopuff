@@ -59,7 +59,17 @@ function FireButtonView.new(playerGui: PlayerGui, onFire: () -> ()): FireButtonV
 	face.ZIndex = 2
 	face.Parent = root
 	circle(face)
-	UiTheme.addGradient(face, UiTheme.Colors.Brand:Lerp(UiTheme.Colors.White, 0.25), UiTheme.Colors.BrandDeep)
+
+	-- O gradiente fica num fundo próprio: num CanvasGroup ele tingiria
+	-- também o texto e os demais elementos do botão.
+	local fill = Instance.new("Frame")
+	fill.Name = "Fill"
+	fill.Size = UDim2.fromScale(1, 1)
+	fill.BackgroundColor3 = UiTheme.Colors.White
+	fill.BorderSizePixel = 0
+	fill.ZIndex = 2
+	fill.Parent = face
+	UiTheme.addGradient(fill, UiTheme.Colors.Brand:Lerp(UiTheme.Colors.White, 0.25), UiTheme.Colors.BrandDeep)
 
 	local ring = Instance.new("Frame")
 	ring.Name = "Ring"

@@ -142,10 +142,12 @@ function UiKit.createButton(parent: Instance, options: ButtonOptions): ButtonHan
 	face.BackgroundColor3 = UiTheme.Colors.White
 	face.BorderSizePixel = 0
 	face.AutoButtonColor = false
-	face.Font = UiTheme.Fonts.Heading
+	-- O texto do próprio botão fica invisível (mantido só como nome
+	-- acessível): um UIGradient tinge também o texto do objeto em que está,
+	-- o que deixava o rótulo da mesma cor do fundo. O rótulo visível é um
+	-- TextLabel filho, que o gradiente não afeta.
 	face.Text = options.text
-	face.TextSize = options.textSize or 16
-	face.TextWrapped = true
+	face.TextTransparency = 1
 	face.Active = true
 	face.Selectable = true
 	face.SelectionOrder = options.selectionOrder or 0
@@ -169,6 +171,10 @@ function UiKit.createButton(parent: Instance, options: ButtonOptions): ButtonHan
 	shine.Parent = face
 	UiTheme.addCorner(shine, if options.round == true then 999 else 9)
 
+	local label = UiTheme.createLabel(face, "Label", options.text, UiTheme.Fonts.Heading, options.textSize or 16)
+	label.Size = UDim2.fromScale(1, 1)
+	label.ZIndex = zIndex + 2
+
 	local enabled = true
 	local hovered = false
 	local selected = false
@@ -177,7 +183,7 @@ function UiKit.createButton(parent: Instance, options: ButtonOptions): ButtonHan
 		local colors = if enabled then getVariantColors(variant) else DISABLED_COLORS
 		faceGradient.Color = ColorSequence.new(colors.top, colors.bottom)
 		edge.BackgroundColor3 = colors.edge
-		face.TextColor3 = colors.text
+		label.TextColor3 = colors.text
 		faceStroke.Color = if selected then UiTheme.Colors.Gold else UiTheme.Colors.Outline
 		faceStroke.Thickness = if selected then 3 else 2
 		faceStroke.Transparency = if selected then 0 else 0.25
@@ -246,7 +252,7 @@ function UiKit.createButton(parent: Instance, options: ButtonOptions): ButtonHan
 		enabled = newEnabled
 		face.Active = newEnabled
 		face.AutoButtonColor = false
-		face.TextTransparency = if newEnabled then 0 else 0.25
+		label.TextTransparency = if newEnabled then 0 else 0.25
 		if not newEnabled then
 			setFaceOffset(0)
 			rootScale.Scale = 1
@@ -255,6 +261,7 @@ function UiKit.createButton(parent: Instance, options: ButtonOptions): ButtonHan
 	end
 	handle.setText = function(text: string)
 		face.Text = text
+		label.Text = text
 	end
 	handle.setVariant = function(newVariant: ButtonVariant)
 		variant = newVariant

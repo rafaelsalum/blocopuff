@@ -1011,8 +1011,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_client_ui_crosshairview",
-      "community": 28,
-      "community_name": "CrosshairView.new",
+      "community": 5,
+      "community_name": "PuffadorController.luau",
       "norm_label": "crosshairview.luau"
     },
     {
@@ -1022,8 +1022,8 @@
       "source_location": "L32",
       "_origin": "ast",
       "id": "src_client_ui_crosshairview_addcorner",
-      "community": 28,
-      "community_name": "CrosshairView.new",
+      "community": 5,
+      "community_name": "PuffadorController.luau",
       "norm_label": "addcorner()"
     },
     {
@@ -1033,8 +1033,8 @@
       "source_location": "L38",
       "_origin": "ast",
       "id": "src_client_ui_crosshairview_createhitline",
-      "community": 28,
-      "community_name": "CrosshairView.new",
+      "community": 5,
+      "community_name": "PuffadorController.luau",
       "norm_label": "createhitline()"
     },
     {
@@ -1044,8 +1044,8 @@
       "source_location": "L58",
       "_origin": "ast",
       "id": "src_client_ui_crosshairview_crosshairview_new",
-      "community": 28,
-      "community_name": "CrosshairView.new",
+      "community": 5,
+      "community_name": "PuffadorController.luau",
       "norm_label": "crosshairview.new()"
     },
     {
@@ -1294,7 +1294,7 @@
       "label": "UiKit.createWordmark()",
       "file_type": "code",
       "source_file": "src/client/ui/UiKit.luau",
-      "source_location": "L273",
+      "source_location": "L280",
       "_origin": "ast",
       "id": "src_client_ui_uikit_uikit_createwordmark",
       "community": 9,
@@ -6493,7 +6493,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.8,
       "source_file": "src/client/ui/FireButtonView.luau",
-      "source_location": "L62",
+      "source_location": "L72",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_client_ui_firebuttonview_firebuttonview_new",
@@ -6505,7 +6505,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.8,
       "source_file": "src/client/ui/FireButtonView.luau",
-      "source_location": "L73",
+      "source_location": "L83",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_client_ui_firebuttonview_firebuttonview_new",
@@ -6517,7 +6517,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.8,
       "source_file": "src/client/ui/FireButtonView.luau",
-      "source_location": "L104",
+      "source_location": "L114",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_client_ui_firebuttonview_firebuttonview_new",
@@ -6529,7 +6529,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.8,
       "source_file": "src/client/ui/FireButtonView.luau",
-      "source_location": "L99",
+      "source_location": "L109",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_client_ui_firebuttonview_firebuttonview_new",
@@ -6879,7 +6879,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/client/ui/UiKit.luau",
-      "source_location": "L273",
+      "source_location": "L280",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_client_ui_uikit",
@@ -6913,7 +6913,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/client/ui/UiKit.luau",
-      "source_location": "L236",
+      "source_location": "L242",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_client_ui_uikit_uikit_createbutton",
@@ -6938,7 +6938,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.8,
       "source_file": "src/client/ui/UiKit.luau",
-      "source_location": "L155",
+      "source_location": "L157",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_client_ui_uikit_uikit_createbutton",
@@ -6950,7 +6950,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.8,
       "source_file": "src/client/ui/UiKit.luau",
-      "source_location": "L158",
+      "source_location": "L160",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_client_ui_uikit_uikit_createbutton",
@@ -6962,11 +6962,23 @@
       "confidence": "INFERRED",
       "confidence_score": 0.8,
       "source_file": "src/client/ui/UiKit.luau",
-      "source_location": "L156",
+      "source_location": "L158",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_client_ui_uikit_uikit_createbutton",
       "target": "src_client_ui_uitheme_uitheme_addstroke"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "src/client/ui/UiKit.luau",
+      "source_location": "L174",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_client_ui_uikit_uikit_createbutton",
+      "target": "src_client_ui_uitheme_uitheme_createlabel"
     },
     {
       "relation": "contains",
@@ -12036,5 +12048,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "1d33d7903cabdeeec8331f93206a37c9610b8672"
+  "built_at_commit": "ee2970be97ff87151fd6e55c56d34cd848f08c6a"
 }

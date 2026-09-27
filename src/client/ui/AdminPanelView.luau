@@ -373,6 +373,8 @@ function AdminPanelView.new(playerGui: PlayerGui, callbacks: AdminPanelCallbacks
 	table.insert(connections, constrainText(targetBox, TARGET_LIMIT, nil))
 
 	local busy = false
+	-- Ação aguardando resposta, para limpar o campo certo quando der certo.
+	local pendingAction: string? = nil
 	local actionButtons = { announceButton, kickButton, banButton, unbanButton }
 	local entryStrokes: { [number]: UIStroke } = {}
 
@@ -447,12 +449,14 @@ function AdminPanelView.new(playerGui: PlayerGui, callbacks: AdminPanelCallbacks
 
 	table.insert(connections, announceButton.button.Activated:Connect(function()
 		if not busy then
+			pendingAction = "Announce"
 			callbacks.onAnnounce(announcementBox.Text)
 		end
 	end))
 
 	local function moderate(action: string)
 		if not busy then
+			pendingAction = action
 			callbacks.onModerate(action, targetBox.Text, reasonBox.Text)
 		end
 	end
@@ -548,6 +552,14 @@ function AdminPanelView.new(playerGui: PlayerGui, callbacks: AdminPanelCallbacks
 	end
 
 	handle.setFeedback = function(message: string, ok: boolean)
+		if ok then
+			if pendingAction == "Announce" then
+				announcementBox.Text = ""
+			elseif pendingAction ~= nil then
+				reasonBox.Text = ""
+			end
+		end
+		pendingAction = nil
 		setStatus(
 			string.format("%s  %s", if ok then "✔" else "✖", message),
 			if ok then UiTheme.Colors.Green else UiTheme.Colors.Danger
