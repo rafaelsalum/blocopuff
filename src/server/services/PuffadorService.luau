@@ -14,6 +14,9 @@ local GameConfig = require(ReplicatedStorage.Shared.config.GameConfig)
 local StateAttributeNames = require(ReplicatedStorage.Shared.types.StateAttributeNames)
 local PuffadorConstants = require(ReplicatedStorage.Shared.modules.PuffadorConstants)
 local ProjectileService = require(script.Parent.ProjectileService)
+local PuffadorModel = require(script.Parent.PuffadorModel)
+
+type Variant = PuffadorModel.Variant
 
 local GENERATED_BY_ATTRIBUTE = "GeneratedBy"
 local SERVICE_NAME = "PuffadorService"
@@ -30,6 +33,8 @@ local currentRoundId = 0
 
 local grantedTools: { [Player]: Tool } = {}
 local lastFireClock: { [Player]: number } = {}
+-- Tiros restantes do Super Puffador de cada jogador; ao zerar, volta ao comum.
+local superCharges: { [Player]: number } = {}
 
 local function isOwned(instance: Instance): boolean
 	return instance:GetAttribute(GENERATED_BY_ATTRIBUTE) == SERVICE_NAME
@@ -43,94 +48,8 @@ local function isFiniteVector3(vector: Vector3): boolean
 	return isFiniteNumber(vector.X) and isFiniteNumber(vector.Y) and isFiniteNumber(vector.Z)
 end
 
-local function buildPuffadorTool(): Tool
-	local tool = Instance.new("Tool")
-	tool.Name = PuffadorConstants.ToolName
-	tool.RequiresHandle = true
-	tool.CanBeDropped = false
-	tool.ToolTip = "Puffador"
-	tool:SetAttribute(GENERATED_BY_ATTRIBUTE, SERVICE_NAME)
-
-	local handle = Instance.new("Part")
-	handle.Name = PuffadorConstants.HandleName
-	handle.Size = Vector3.new(0.6, 2, 0.6)
-	handle.Color = PuffadorConstants.PuffadorAccentColor
-	handle.Material = Enum.Material.SmoothPlastic
-	handle.TopSurface = Enum.SurfaceType.Smooth
-	handle.BottomSurface = Enum.SurfaceType.Smooth
-	handle.CanCollide = false
-	handle.CanTouch = false
-	handle.CanQuery = false
-	handle.Massless = true
-	handle.Parent = tool
-
-	local shotSound = Instance.new("Sound")
-	shotSound.Name = PuffadorConstants.ShotSoundName
-	shotSound.SoundId = "rbxasset://sounds/electronicpingshort.wav"
-	shotSound.Volume = 0.55
-	shotSound.PlaybackSpeed = 0.82
-	shotSound.RollOffMaxDistance = 70
-	shotSound.Parent = handle
-
-	local hitSound = Instance.new("Sound")
-	hitSound.Name = PuffadorConstants.HitSoundName
-	hitSound.SoundId = "rbxasset://sounds/button.wav"
-	hitSound.Volume = 0.5
-	hitSound.PlaybackSpeed = 1.25
-	hitSound.RollOffMaxDistance = 45
-	hitSound.Parent = handle
-
-	local barrel = Instance.new("Part")
-	barrel.Name = "Barrel"
-	barrel.Shape = Enum.PartType.Cylinder
-	barrel.Size = Vector3.new(1.6, 0.9, 0.9)
-	barrel.Color = PuffadorConstants.PuffadorPrimaryColor
-	barrel.Material = Enum.Material.SmoothPlastic
-	barrel.CanCollide = false
-	barrel.CanTouch = false
-	barrel.CanQuery = false
-	barrel.Massless = true
-	barrel.CFrame = CFrame.new(0, 0, -1.2) * CFrame.Angles(0, math.rad(90), 0)
-	barrel.Parent = tool
-
-	local barrelWeld = Instance.new("WeldConstraint")
-	barrelWeld.Part0 = handle
-	barrelWeld.Part1 = barrel
-	barrelWeld.Parent = handle
-
-	local bell = Instance.new("Part")
-	bell.Name = "Bell"
-	bell.Shape = Enum.PartType.Ball
-	bell.Size = Vector3.new(1.0, 1.0, 1.0)
-	bell.Color = PuffadorConstants.PuffadorAccentColor
-	bell.Material = Enum.Material.SmoothPlastic
-	bell.CanCollide = false
-	bell.CanTouch = false
-	bell.CanQuery = false
-	bell.Massless = true
-	bell.CFrame = CFrame.new(0, 0, -2.1)
-	bell.Parent = tool
-
-	local bellWeld = Instance.new("WeldConstraint")
-	bellWeld.Part0 = handle
-	bellWeld.Part1 = bell
-	bellWeld.Parent = handle
-
-	local muzzle = Instance.new("Attachment")
-	muzzle.Name = PuffadorConstants.MuzzleAttachmentName
-	muzzle.CFrame = CFrame.new(0, 0, -2.6)
-	muzzle.Parent = handle
-
-	-- Um Puffador largado no chão não deve permanecer ali: em vez de depender
-	-- de uma API específica para impedir o descarte, removemos qualquer cópia
-	-- que acabe diretamente sob o Workspace (fora de Backpack/Character).
-	tool.AncestryChanged:Connect(function(descendant, newParent)
-		if descendant == tool and newParent == Workspace then
-			tool:Destroy()
-		end
-	end)
-
-	return tool
+local function buildPuffadorTool(variant: Variant): Tool
+	return PuffadorModel.build(variant, SERVICE_NAME)
 end
 
 local function clearCooldown(player: Player)
@@ -155,7 +74,14 @@ local function removeExistingToolCopies(player: Player)
 	end
 end
 
-local function grantToolToPlayer(player: Player)
+local function sendFeedback(player: Player, kind: string, value: number?)
+	local remote = feedbackRemote
+	if remote ~= nil and player.Parent ~= nil then
+		remote:FireClient(player, kind, value)
+	end
+end
+
+local function grantToolToPlayer(player: Player, variant: Variant?)
 	removeExistingToolCopies(player)
 
 	local backpack = player:FindFirstChildOfClass("Backpack")
@@ -164,7 +90,7 @@ local function grantToolToPlayer(player: Player)
 		return
 	end
 
-	local tool = buildPuffadorTool()
+	local tool = buildPuffadorTool(variant or "Standard")
 	tool.Parent = backpack
 	grantedTools[player] = tool
 
@@ -197,7 +123,44 @@ function PuffadorService.revokeFrom(player: Player)
 
 	removeExistingToolCopies(player)
 	clearCooldown(player)
+	superCharges[player] = nil
 	ProjectileService.clearForPlayer(player)
+end
+
+-- Troca o Puffador do jogador pelo Super, com `charges` tiros de poder dobrado.
+function PuffadorService.upgradeToSuper(player: Player, charges: number): boolean
+	if not acceptingRequests or grantedTools[player] == nil then
+		return false
+	end
+	superCharges[player] = charges
+	grantToolToPlayer(player, "Super")
+	sendFeedback(player, "Super", charges)
+	return true
+end
+
+function PuffadorService.hasSuper(player: Player): boolean
+	return superCharges[player] ~= nil
+end
+
+local function consumeSuperCharge(player: Player)
+	local remaining = superCharges[player]
+	if remaining == nil then
+		return
+	end
+	remaining -= 1
+	if remaining > 0 then
+		superCharges[player] = remaining
+		sendFeedback(player, "Super", remaining)
+		return
+	end
+	superCharges[player] = nil
+	sendFeedback(player, "Super", 0)
+	-- Espera o tiro sair antes de trocar a arma na mão do jogador.
+	task.delay(0.15, function()
+		if acceptingRequests and grantedTools[player] ~= nil and superCharges[player] == nil then
+			grantToolToPlayer(player, "Standard")
+		end
+	end)
 end
 
 local function revokeAllTracked()
@@ -221,6 +184,7 @@ end
 function PuffadorService.endRound()
 	acceptingRequests = false
 	revokeAllTracked()
+	table.clear(superCharges)
 	ProjectileService.clearAll()
 	currentRoundId = 0
 end
@@ -353,13 +317,16 @@ local function onRequestPuff(player: Player, rawAimTarget: unknown, rawAimOrigin
 	lastFireClock[player] = now
 
 	local direction = aimDelta.Unit
+	local isSuper = superCharges[player] ~= nil
+	local variant: Variant = if isSuper then "Super" else "Standard"
+	local power = if isSuper then GameConfig.SecretRoom.SuperPower else 1
 	ProjectileService.spawn(player, origin, aimOrigin, direction, currentRoundId, function()
 		incrementRoundBlocksDestroyed(player)
-		local remote = feedbackRemote
-		if remote ~= nil and player.Parent ~= nil then
-			remote:FireClient(player, "Hit")
-		end
-	end)
+		sendFeedback(player, "Hit")
+	end, power, PuffadorModel.getProjectileColor(variant))
+	if isSuper then
+		consumeSuperCharge(player)
+	end
 end
 
 local function ensureRemotesContainer(): Folder
@@ -401,6 +368,10 @@ function PuffadorService.start(worldRoot: Model)
 	requestConnection = remote.OnServerEvent:Connect(onRequestPuff)
 end
 
+function PuffadorService.getRemotesFolder(): Folder?
+	return remotesFolder
+end
+
 function PuffadorService.stop()
 	if requestConnection ~= nil then
 		requestConnection:Disconnect()
@@ -410,6 +381,7 @@ function PuffadorService.stop()
 	acceptingRequests = false
 	revokeAllTracked()
 	table.clear(lastFireClock)
+	table.clear(superCharges)
 	currentRoundId = 0
 
 	ProjectileService.stop()

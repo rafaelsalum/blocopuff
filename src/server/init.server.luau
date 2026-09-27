@@ -10,6 +10,7 @@ local ReplicatedStateService = require(script.services.ReplicatedStateService)
 local PuffadorService = require(script.services.PuffadorService)
 local EliminationService = require(script.services.EliminationService)
 local RoundService = require(script.services.RoundService)
+local VaultService = require(script.services.VaultService)
 local WorldVisualService = require(script.services.WorldVisualService)
 local BuildingService = require(script.services.BuildingService)
 local AdminService = require(script.services.AdminService)
@@ -70,6 +71,11 @@ print("[BlocoPuff] Puffador system started")
 -- RoundService.eliminateParticipant como callback, para não depender dele.
 EliminationService.start(world, RoundService.eliminateParticipant)
 print("[BlocoPuff] Elimination zone armed")
+
+-- Depende do PuffadorService (pasta de remotes) e usa a mesma eliminação
+-- centralizada do RoundService para quem leva tiro dentro do cofre.
+VaultService.start(world, RoundService.eliminateParticipant)
+print("[BlocoPuff] Baron's vault ready")
 
 RoundService.start()
 print("[BlocoPuff] Round cycle started")

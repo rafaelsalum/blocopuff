@@ -20,6 +20,16 @@ export type RoomBounds = {
 	ceilingY: number,
 }
 
+-- Porta secreta do andar mais baixo. `center` fica na face interna da
+-- parede, no nível do piso; `inward` aponta para dentro da sala e `along`
+-- corre ao longo da parede. A sala secreta fica do lado de fora (-inward).
+export type SecretDoor = {
+	name: string,
+	center: Vector3,
+	inward: Vector3,
+	along: Vector3,
+}
+
 export type GalleryLayout = {
 	floorY: number,
 	center: Vector3,
@@ -34,6 +44,11 @@ local GALLERY_SPAWN_INSET = 4
 local GALLERY_SPAWN_COLUMNS = 3
 
 local BuildingLayout = {}
+
+-- Vão da porta (largura, altura) e interior da sala (largura ao longo da
+-- parede, altura, profundidade para fora do prédio).
+BuildingLayout.SecretDoorSize = Vector2.new(5, 8.8)
+BuildingLayout.SecretRoomSize = Vector3.new(14, 11, 12)
 
 function BuildingLayout.getFloorSize(arena: ArenaConfig): (number, number)
 	local width = (arena.Columns * arena.BlockSize.X) + ((arena.Columns - 1) * arena.BlockGap)
@@ -198,6 +213,45 @@ function BuildingLayout.getGallerySpawnCFrames(arena: ArenaConfig, building: Bui
 		table.insert(cframes, CFrame.lookAt(position, position + facing))
 	end
 	return cframes
+end
+
+-- Uma porta no centro de cada parede externa do andar mais baixo (oeste,
+-- norte e sul). A parede leste é o bloco da galeria e não recebe porta.
+function BuildingLayout.getSecretDoors(arena: ArenaConfig, building: BuildingConfig): { SecretDoor }
+	local bounds = BuildingLayout.getRoomBounds(arena, building)
+	local floorY = BuildingLayout.getFloorSurfaceY(arena, 1)
+	local center = bounds.center
+	local definitions = {
+		{ name = "West", point = Vector3.new(center.X - bounds.halfWidth, floorY, center.Z), inward = Vector3.new(1, 0, 0) },
+		{ name = "North", point = Vector3.new(center.X, floorY, center.Z - bounds.halfDepth), inward = Vector3.new(0, 0, 1) },
+		{ name = "South", point = Vector3.new(center.X, floorY, center.Z + bounds.halfDepth), inward = Vector3.new(0, 0, -1) },
+	}
+
+	local doors: { SecretDoor } = {}
+	for _, definition in ipairs(definitions) do
+		table.insert(doors, {
+			name = definition.name,
+			center = definition.point,
+			inward = definition.inward,
+			along = definition.inward:Cross(Vector3.yAxis),
+		})
+	end
+	return doors
+end
+
+-- Verdadeiro se a posição está dentro da sala secreta (incluindo o vão da
+-- porta na espessura da parede).
+function BuildingLayout.isInsideSecretRoom(door: SecretDoor, building: BuildingConfig, position: Vector3): boolean
+	local room = BuildingLayout.SecretRoomSize
+	local relative = position - door.center
+	local outward = -relative:Dot(door.inward)
+	local sideways = math.abs(relative:Dot(door.along))
+	local height = relative.Y
+	return outward >= 0.3
+		and outward <= building.WallThickness + room.Z
+		and sideways <= room.X / 2
+		and height >= -2
+		and height <= room.Y
 end
 
 return table.freeze(BuildingLayout)

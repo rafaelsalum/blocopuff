@@ -13,6 +13,7 @@ local LobbyService = require(script.Parent.LobbyService)
 local ReplicatedState = require(script.Parent.ReplicatedStateService)
 local PuffadorService = require(script.Parent.PuffadorService)
 local EliminationService = require(script.Parent.EliminationService)
+local VaultService = require(script.Parent.VaultService)
 
 type RoundState = RoundTypes.RoundState
 type RoundTimings = GameConfig.RoundTimings
@@ -364,6 +365,7 @@ local function beginRound(timings: RoundTimings)
 	teleportParticipantsToArena(participantOrder)
 	connectParticipantDeathHandlers(participantOrder)
 	PuffadorService.beginRound(participantOrder, currentRoundId)
+	VaultService.beginRound(currentRoundId, timings.RoundDuration)
 
 	-- Só inicia o monitoramento da zona depois que os participantes já
 	-- estão posicionados na arena, evitando eliminar alguém ainda no lobby.
@@ -409,6 +411,7 @@ local function runEnding(timings: RoundTimings)
 	setState(RoundTypes.Ending)
 	EliminationService.endRound()
 	ArenaService.endRound()
+	VaultService.endRound()
 	PuffadorService.endRound()
 	disconnectParticipantDeathHandlers()
 
@@ -494,6 +497,7 @@ function RoundService.stop()
 	disconnectParticipantDeathHandlers()
 	EliminationService.stop()
 	ArenaService.endRound()
+	VaultService.stop()
 	PuffadorService.stop()
 	LobbyService.returnToLobby(participantOrder)
 	ArenaService.restoreAllBlocks()

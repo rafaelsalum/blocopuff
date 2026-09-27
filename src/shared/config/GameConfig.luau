@@ -85,6 +85,18 @@ export type EliminationZoneConfig = {
 	VisualizeInStudio: boolean,
 }
 
+export type SecretRoomConfig = {
+	UnlockMinFraction: number,
+	UnlockMaxFraction: number,
+	OpenHoldDuration: number,
+	GrabHoldDuration: number,
+	SuperCharges: number,
+	SuperPower: number,
+	MaxStaySeconds: number,
+	StayWarningSeconds: number,
+	AlertSoundId: string,
+}
+
 export type MusicConfig = {
 	SoundId: string,
 	LobbyVolume: number,
@@ -108,6 +120,7 @@ export type GameConfig = {
 	Puffador: PuffadorConfig,
 	EliminationZone: EliminationZoneConfig,
 	Music: MusicConfig,
+	SecretRoom: SecretRoomConfig,
 	getRoundTimings: () -> RoundTimings,
 }
 
@@ -227,6 +240,25 @@ local Music: MusicConfig = table.freeze({
 	FadeTime = 1.2,
 })
 
+-- Sala secreta do Barão Puff: uma das portas do andar de baixo, sorteada a
+-- cada rodada, destrava entre UnlockMinFraction e UnlockMaxFraction do tempo
+-- da rodada. Dentro dela está o Super Puffador, que quebra SuperPower blocos
+-- por tiro durante SuperCharges disparos. AlertSoundId toca para todos
+-- quando a sala é aberta; troque por um som da Creator Store se quiser.
+local SecretRoom: SecretRoomConfig = table.freeze({
+	UnlockMinFraction = 0.25,
+	UnlockMaxFraction = 0.5,
+	OpenHoldDuration = 1.5,
+	GrabHoldDuration = 0.8,
+	SuperCharges = 15,
+	SuperPower = 2,
+	-- Tempo total que cada jogador pode passar no cofre por rodada; depois
+	-- disso o Barão o expulsa de volta para o andar de baixo.
+	MaxStaySeconds = 15,
+	StayWarningSeconds = 10,
+	AlertSoundId = "rbxasset://sounds/electronicpingshort.wav",
+})
+
 local GameConfig = {} :: GameConfig
 
 GameConfig.GameName = "BlocoPuff"
@@ -247,6 +279,7 @@ GameConfig.Palette = Palette
 GameConfig.Puffador = Puffador
 GameConfig.EliminationZone = EliminationZone
 GameConfig.Music = Music
+GameConfig.SecretRoom = SecretRoom
 
 function GameConfig.getRoundTimings(): RoundTimings
 	if RunService:IsStudio() then

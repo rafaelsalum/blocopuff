@@ -4,10 +4,12 @@
 -- de rodada, participantes ou o RemoteEvent de disparo: apenas recebe uma
 -- origem e direção já validadas e devolve efeito visual ao impacto. O acerto
 -- percorre o raio da mira; o projétil visível sai do cano e converge nele.
--- Nenhum dano, impulso ou destruição de blocos ocorre aqui.
+-- Acertos em blocos são repassados ao ArenaService; acertos em personagens
+-- só são avisados ao handler registrado (sem dano aqui).
 
 local CollectionService = game:GetService("CollectionService")
 local Debris = game:GetService("Debris")
+local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
@@ -18,6 +20,10 @@ local PuffadorConstants = require(ReplicatedStorage.Shared.modules.PuffadorConst
 local ArenaService = require(script.Parent.ArenaService)
 
 type BlockDestructionContext = ArenaService.BlockDestructionContext
+
+-- Chamado quando um projétil acerta o personagem de outro jogador. Quem
+-- decide se isso elimina alguém (sala secreta) é o VaultService.
+export type CharacterHitHandler = (shooter: Player, victim: Player, position: Vector3) -> ()
 
 local GENERATED_BY_ATTRIBUTE = "GeneratedBy"
 local SERVICE_NAME = "ProjectileService"
@@ -42,6 +48,8 @@ type ProjectileRecord = {
 	spawnClock: number,
 	distanceTraveled: number,
 	onBlockHit: (() -> ())?,
+	-- Blocos quebrados por acerto: 1 no Puffador comum, 2 no Super.
+	power: number,
 }
 
 local ProjectileService = {}
@@ -50,6 +58,7 @@ local projectileContainer: Folder? = nil
 local activeProjectiles: { ProjectileRecord } = {}
 local nextProjectileSequence = 0
 local heartbeatConnection: RBXScriptConnection? = nil
+local characterHitHandler: CharacterHitHandler? = nil
 
 local function isOwned(instance: Instance): boolean
 	return instance:GetAttribute(GENERATED_BY_ATTRIBUTE) == SERVICE_NAME
@@ -124,6 +133,24 @@ local function createImpactEffect(position: Vector3, normal: Vector3)
 	end
 end
 
+local function notifyCharacterHit(record: ProjectileRecord, hitInstance: Instance, position: Vector3)
+	local handler = characterHitHandler
+	if handler == nil then
+		return
+	end
+	local model = hitInstance:FindFirstAncestorOfClass("Model")
+	while model ~= nil do
+		local victim = Players:GetPlayerFromCharacter(model)
+		if victim ~= nil then
+			if victim ~= record.ownerPlayer then
+				task.spawn(handler, record.ownerPlayer, victim, position)
+			end
+			return
+		end
+		model = model:FindFirstAncestorOfClass("Model")
+	end
+end
+
 local function updateProjectiles(deltaTime: number)
 	if #activeProjectiles == 0 then
 		return
@@ -152,9 +179,23 @@ local function updateProjectiles(deltaTime: number)
 					roundId = record.roundId,
 					projectileId = record.projectileId,
 				}
-				local destroyedBlock = ArenaService.tryDestroyBlock(raycastResult.Instance, context)
-				if destroyedBlock and record.onBlockHit ~= nil then
-					record.onBlockHit()
+				local hitInstance = raycastResult.Instance
+				local destroyedBlock = ArenaService.tryDestroyBlock(hitInstance, context)
+				if destroyedBlock then
+					if record.onBlockHit ~= nil then
+						record.onBlockHit()
+					end
+					for _ = 2, record.power do
+						local neighbor = ArenaService.getNeighborBlock(hitInstance, raycastResult.Position)
+						if neighbor == nil or not ArenaService.tryDestroyBlock(neighbor, context) then
+							break
+						end
+						if record.onBlockHit ~= nil then
+							record.onBlockHit()
+						end
+					end
+				else
+					notifyCharacterHit(record, hitInstance, raycastResult.Position)
 				end
 				createImpactEffect(raycastResult.Position, raycastResult.Normal)
 				return false
@@ -215,7 +256,9 @@ function ProjectileService.spawn(
 	aimOrigin: Vector3,
 	direction: Vector3,
 	roundId: number,
-	onBlockHit: (() -> ())?
+	onBlockHit: (() -> ())?,
+	power: number?,
+	color: Color3?
 )
 	if projectileContainer == nil then
 		return
@@ -228,7 +271,7 @@ function ProjectileService.spawn(
 	part.Name = PuffadorConstants.ProjectileName
 	part.Shape = Enum.PartType.Ball
 	part.Size = Vector3.new(diameter, diameter, diameter)
-	part.Color = PuffadorConstants.ProjectileColor
+	part.Color = if color ~= nil then color else PuffadorConstants.ProjectileColor
 	part.Material = Enum.Material.Neon
 	part.Anchored = true
 	part.CanCollide = false
@@ -305,9 +348,14 @@ function ProjectileService.spawn(
 		spawnClock = os.clock(),
 		distanceTraveled = 0,
 		onBlockHit = onBlockHit,
+		power = math.clamp(math.floor(power or 1), 1, 4),
 	}
 
 	table.insert(activeProjectiles, record)
+end
+
+function ProjectileService.setCharacterHitHandler(handler: CharacterHitHandler?)
+	characterHitHandler = handler
 end
 
 function ProjectileService.clearAll()

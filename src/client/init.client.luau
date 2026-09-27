@@ -6,6 +6,7 @@ local SpectatorController = require(script.controllers.SpectatorController)
 local AdminController = require(script.controllers.AdminController)
 local BlockCollapseController = require(script.controllers.BlockCollapseController)
 local MusicController = require(script.controllers.MusicController)
+local VaultController = require(script.controllers.VaultController)
 
 print("[BlocoPuff] Client initialized")
 
@@ -49,4 +50,11 @@ local musicOk, musicErr = pcall(function()
 end)
 if not musicOk then
 	warn(string.format("[BlocoPuff] Failed to start background music: %s", tostring(musicErr)))
+end
+
+local vaultOk, vaultErr = pcall(function()
+	VaultController.start()
+end)
+if not vaultOk then
+	warn(string.format("[BlocoPuff] Failed to start vault controller: %s", tostring(vaultErr)))
 end

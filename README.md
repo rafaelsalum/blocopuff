@@ -222,6 +222,18 @@ O lobby é a galeria envidraçada dentro do próprio prédio, com carpete, sofá
 
 O interior segue o estilo de mansão de jogos como Murder Mystery, usando somente materiais nativos: porão de tijolos no poço, papel de parede, lambri, rodapés, sancas, portas, quadros e janelas noturnas por andar (`BuildingDecor`), teto com vigas, lustres e arandelas com luz quente. O piso de cima é de taco de madeira e o de baixo de pedra fosca, sem reflexo, o que facilita enxergar os buracos. A iluminação usa `Lighting.Technology = Future` (em `default.project.json`) com base uniforme de luz ambiente; lustres e arandelas são acentos fracos e o andar de baixo recebe uma única luz de teto difusa.
 
+### O Cofre do Barão Puff
+
+A mansão pertence ao Barão Puff, inventor do Puffador. O protótipo dourado dele, o **Super Puffador**, fica guardado num cofre secreto atrás de uma das três portas do andar de baixo (paredes oeste, norte e sul).
+
+- A cada rodada uma porta é sorteada em segredo e destranca entre 25% e 50% do tempo da rodada. Todos recebem o aviso "O COFRE DESTRANCOU!", e um brilho dourado escapa por baixo da porta certa. As portas erradas respondem "TRANCADA".
+- Abrir exige segurar o prompt por 1,5 s. O primeiro a abrir dispara um alarme sonoro para a partida inteira, com o nome dele na tela, e a luz vermelha sobre a porta pisca até o fim da rodada.
+- Dentro do cofre o piso não cai, mas um único tiro elimina (motivo `ShotInSecretRoom`, "PEGO NO COFRE!").
+- No pedestal está o Super Puffador, um por rodada: 15 tiros que derrubam 2 blocos cada. Quem o carrega fica com contorno dourado, visível para todos.
+- Para ninguém acampar, cada jogador pode passar no máximo 15 s no cofre por rodada. Aos 10 s recebe um aviso; aos 15 s o Barão o expulsa para o andar de baixo.
+- Ajustes ficam em `GameConfig.SecretRoom`. `AlertSoundId` pode receber um som da Creator Store.
+- Código: `VaultService` (regras), `VaultProps` (porta, brilho, alarme e prêmio), `SecretRoomBuilder` (arquitetura), `PuffadorModel` (as duas versões do Puffador) e, no cliente, `VaultController` e `VaultView`.
+
 ### Identidade visual
 
 A interface segue uma identidade própria definida em `src/client/ui/UiTheme.luau`: "noite na mansão" (fundos roxo-escuros) com as duas cores do Puffador como marca, lilás Puff e dourado Puff; títulos em FredokaOne com contorno escuro; painéis com gradiente, borda em gradiente lilás→dourado e sombra sólida. O logotipo "BLOCO PUFF" aparece no lobby e no painel admin. `UiKit` oferece o botão 3D da marca (afunda ao clicar, cresce no hover, toca um clique e é selecionável por gamepad) e animações de destaque. O botão de tiro mobile é redondo, com recarga enchendo o círculo. `FeedbackView` mostra "+1" perto da mira a cada bloco derrubado, contador de combo, chamadas de sequência ("TRIPLO!", "EM CHAMAS!", "IMPARÁVEL!", "LENDÁRIO!") e notificações curtas para marcos de blocos. O painel admin usa cartões por seção, lista de jogadores com avatar e seleção destacada, contadores de caracteres e uma pílula de status para o retorno do servidor.

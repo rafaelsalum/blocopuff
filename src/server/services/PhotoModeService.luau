@@ -18,6 +18,7 @@ local BuildingLayout = require(ReplicatedStorage.Shared.modules.BuildingLayout)
 local ArenaConstants = require(ReplicatedStorage.Shared.modules.ArenaConstants)
 local PuffadorConstants = require(ReplicatedStorage.Shared.modules.PuffadorConstants)
 local ArenaService = require(script.Parent.ArenaService)
+local PuffadorModel = require(script.Parent.PuffadorModel)
 
 type Pose = "Aim" | "AimUp" | "Fall" | "Cheer" | "Idle"
 
@@ -137,16 +138,29 @@ local function attachPuffador(model: Model)
 	if hand == nil or not hand:IsA("BasePart") then
 		return
 	end
-	-- Mesma silhueta do Puffador real: cabo dourado, cano lilás e boca dourada,
-	-- apontando para onde a mão aponta.
-	local base = hand.CFrame * CFrame.new(0, -0.4, 0) * CFrame.Angles(math.rad(-90), 0, 0)
-	local parts = {
-		createPart(model, "PuffadorHandle", Vector3.new(0.6, 0.6, 2), base, PuffadorConstants.PuffadorAccentColor, Enum.Material.SmoothPlastic),
-		createPart(model, "PuffadorBarrel", Vector3.new(1.6, 0.9, 0.9), base * CFrame.new(0, 0, -1.2) * CFrame.Angles(0, math.rad(90), 0), PuffadorConstants.PuffadorPrimaryColor, Enum.Material.SmoothPlastic),
-		createPart(model, "PuffadorBell", Vector3.new(1, 1, 1), base * CFrame.new(0, 0, -2.1), PuffadorConstants.PuffadorAccentColor, Enum.Material.SmoothPlastic),
-	}
-	parts[2].Shape = Enum.PartType.Cylinder
-	parts[3].Shape = Enum.PartType.Ball
+	-- Usa o mesmo modelo da ferramenta real, encaixado como o Roblox faz ao
+	-- segurar uma Tool: mão × RightGripAttachment × Grip⁻¹.
+	local tool = PuffadorModel.build("Standard", "PhotoModeService")
+	local prop = Instance.new("Model")
+	prop.Name = "PuffadorProp"
+	local handle = tool:FindFirstChild(PuffadorConstants.HandleName) :: BasePart
+	for _, child in ipairs(tool:GetChildren()) do
+		child.Parent = prop
+	end
+	prop.PrimaryPart = handle
+	for _, descendant in ipairs(prop:GetDescendants()) do
+		if descendant:IsA("BasePart") then
+			descendant.Anchored = true
+		end
+	end
+
+	local gripAttachment = hand:FindFirstChild("RightGripAttachment")
+	local gripOffset = if gripAttachment ~= nil and gripAttachment:IsA("Attachment")
+		then gripAttachment.CFrame
+		else CFrame.new(0, -0.15, 0) * CFrame.Angles(math.rad(-90), 0, 0)
+	prop:PivotTo(hand.CFrame * gripOffset * tool.Grip:Inverse())
+	tool:Destroy()
+	prop.Parent = model
 end
 
 local function buildDescription(colorIndex: number): HumanoidDescription

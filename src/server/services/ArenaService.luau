@@ -423,6 +423,50 @@ function ArenaService.tryDestroyBlock(instance: Instance, context: BlockDestruct
 	return true
 end
 
+local function findActiveBlockAt(floorIndex: number, row: number, column: number): Part?
+	for part, record in pairs(blockRecords) do
+		if
+			record.floorIndex == floorIndex
+			and record.gridRow == row
+			and record.gridColumn == column
+			and not record.isDestroyed
+			and record.generation == arenaGeneration
+		then
+			return part
+		end
+	end
+	return nil
+end
+
+-- Vizinho do bloco atingido para o Super Puffador: segue o eixo em que o
+-- impacto ficou mais afastado do centro (coluna = X, linha = Z). Na borda
+-- da grade, ou se esse vizinho já caiu, tenta o lado oposto.
+function ArenaService.getNeighborBlock(instance: Instance, impactPosition: Vector3): Part?
+	local config = currentArenaConfig
+	if config == nil or not instance:IsA("Part") then
+		return nil
+	end
+	local record = blockRecords[instance]
+	if record == nil then
+		return nil
+	end
+
+	local offset = impactPosition - record.originalCFrame.Position
+	local alongColumns = math.abs(offset.X) >= math.abs(offset.Z)
+	local sign = if alongColumns then (if offset.X >= 0 then 1 else -1) else (if offset.Z >= 0 then 1 else -1)
+	for _, direction in ipairs({ sign, -sign }) do
+		local row = record.gridRow + (if alongColumns then 0 else direction)
+		local column = record.gridColumn + (if alongColumns then direction else 0)
+		if row >= 1 and row <= config.Rows and column >= 1 and column <= config.Columns then
+			local neighbor = findActiveBlockAt(record.floorIndex, row, column)
+			if neighbor ~= nil then
+				return neighbor
+			end
+		end
+	end
+	return nil
+end
+
 local function tryReparent(part: Part, parent: Instance): boolean
 	local ok = pcall(function()
 		part.Parent = parent
