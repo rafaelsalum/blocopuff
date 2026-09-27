@@ -30,6 +30,22 @@ export type SecretDoor = {
 	along: Vector3,
 }
 
+-- Corredor secreto do lado de fora de uma parede externa, ligando o andar de
+-- baixo ao de cima por uma rampa. `wallCenter` fica no centro da face interna
+-- da parede (Y = 0); `inward` aponta para a arena e `along` corre ao longo da
+-- parede. As entradas ficam em `lowerAlong` (andar 1) e `upperAlong` (andar
+-- de cima), sempre existentes mesmo antes de serem reveladas.
+export type Corridor = {
+	name: string,
+	wallCenter: Vector3,
+	inward: Vector3,
+	along: Vector3,
+	lowerY: number,
+	upperY: number,
+	lowerAlong: number,
+	upperAlong: number,
+}
+
 export type GalleryLayout = {
 	floorY: number,
 	center: Vector3,
@@ -49,6 +65,15 @@ local BuildingLayout = {}
 -- parede, altura, profundidade para fora do prédio).
 BuildingLayout.SecretDoorSize = Vector2.new(5, 8.8)
 BuildingLayout.SecretRoomSize = Vector3.new(14, 11, 12)
+
+-- Corredores secretos: largura interna, meio comprimento (ao longo da
+-- parede), meio comprimento da rampa, posição das entradas e pé-direito
+-- acima do andar de cima.
+BuildingLayout.CorridorWidth = 7
+BuildingLayout.CorridorHalfLength = 40
+BuildingLayout.CorridorRampHalfLength = 26
+BuildingLayout.CorridorEntranceAlong = 32
+BuildingLayout.CorridorHeadroom = 11
 
 function BuildingLayout.getFloorSize(arena: ArenaConfig): (number, number)
 	local width = (arena.Columns * arena.BlockSize.X) + ((arena.Columns - 1) * arena.BlockGap)
@@ -215,16 +240,58 @@ function BuildingLayout.getGallerySpawnCFrames(arena: ArenaConfig, building: Bui
 	return cframes
 end
 
--- Uma porta no centro de cada parede externa do andar mais baixo (oeste,
--- norte e sul). A parede leste é o bloco da galeria e não recebe porta.
+-- Referencial de uma parede vista de dentro: X ao longo, Y para cima e Z para
+-- fora do prédio (fromMatrix(along, up) deixa +Z = -inward).
+function BuildingLayout.getWallFrame(center: Vector3, along: Vector3): CFrame
+	return CFrame.fromMatrix(center, along, Vector3.yAxis)
+end
+
+-- Corredores secretos nas paredes norte e sul (a oeste fica o cofre).
+function BuildingLayout.getCorridors(arena: ArenaConfig, building: BuildingConfig): { Corridor }
+	local bounds = BuildingLayout.getRoomBounds(arena, building)
+	local center = bounds.center
+	local definitions = {
+		{ name = "North", point = Vector3.new(center.X, 0, center.Z - bounds.halfDepth), inward = Vector3.new(0, 0, 1) },
+		{ name = "South", point = Vector3.new(center.X, 0, center.Z + bounds.halfDepth), inward = Vector3.new(0, 0, -1) },
+	}
+	local corridors: { Corridor } = {}
+	for _, definition in ipairs(definitions) do
+		table.insert(corridors, {
+			name = definition.name,
+			wallCenter = definition.point,
+			inward = definition.inward,
+			along = definition.inward:Cross(Vector3.yAxis),
+			lowerY = BuildingLayout.getFloorSurfaceY(arena, 1),
+			upperY = BuildingLayout.getFloorSurfaceY(arena, arena.FloorCount),
+			lowerAlong = -BuildingLayout.CorridorEntranceAlong,
+			upperAlong = BuildingLayout.CorridorEntranceAlong,
+		})
+	end
+	return corridors
+end
+
+-- Verdadeiro se a posição está dentro do corredor (incluindo os vãos das
+-- entradas na espessura da parede). Usado pelo Barão e pela telemetria dos
+-- corredores (entrega 2.2).
+function BuildingLayout.isInsideCorridor(corridor: Corridor, building: BuildingConfig, position: Vector3): boolean
+	local relative = position - corridor.wallCenter
+	local outward = -relative:Dot(corridor.inward)
+	local sideways = relative:Dot(corridor.along)
+	return outward >= 0.3
+		and outward <= building.WallThickness + BuildingLayout.CorridorWidth
+		and math.abs(sideways) <= BuildingLayout.CorridorHalfLength
+		and position.Y >= corridor.lowerY - 2
+		and position.Y <= corridor.upperY + BuildingLayout.CorridorHeadroom
+end
+
+-- Porta do cofre: centro da parede oeste, no andar mais baixo. Norte e sul
+-- têm os corredores secretos; a leste fica o bloco da galeria.
 function BuildingLayout.getSecretDoors(arena: ArenaConfig, building: BuildingConfig): { SecretDoor }
 	local bounds = BuildingLayout.getRoomBounds(arena, building)
 	local floorY = BuildingLayout.getFloorSurfaceY(arena, 1)
 	local center = bounds.center
 	local definitions = {
 		{ name = "West", point = Vector3.new(center.X - bounds.halfWidth, floorY, center.Z), inward = Vector3.new(1, 0, 0) },
-		{ name = "North", point = Vector3.new(center.X, floorY, center.Z - bounds.halfDepth), inward = Vector3.new(0, 0, 1) },
-		{ name = "South", point = Vector3.new(center.X, floorY, center.Z + bounds.halfDepth), inward = Vector3.new(0, 0, -1) },
 	}
 
 	local doors: { SecretDoor } = {}

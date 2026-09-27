@@ -13,6 +13,7 @@ local RoundService = require(script.services.RoundService)
 local VaultService = require(script.services.VaultService)
 local KnockbackService = require(script.services.KnockbackService)
 local TelemetryService = require(script.services.TelemetryService)
+local SecretPassageService = require(script.services.SecretPassageService)
 local WorldVisualService = require(script.services.WorldVisualService)
 local BuildingService = require(script.services.BuildingService)
 local AdminService = require(script.services.AdminService)
@@ -71,6 +72,10 @@ print("[BlocoPuff] Puffador system started")
 
 TelemetryService.start(PuffadorService.getRemotesFolder())
 print("[BlocoPuff] Telemetry ready")
+
+-- Precisa do prédio (quadros marcados) e da pasta de remotes.
+SecretPassageService.start(world, PuffadorService.getRemotesFolder())
+print("[BlocoPuff] Secret passages ready")
 
 KnockbackService.start(PuffadorService.sendFeedback)
 print("[BlocoPuff] Puffador knockback armed")

@@ -23,6 +23,7 @@ export type PuffadorConstantsModule = {
 	VaultEventRemoteName: string,
 	RoundResultRemoteName: string,
 	ReportDeviceRemoteName: string,
+	SecretEventRemoteName: string,
 
 	OwnerUserIdAttribute: string,
 	RoundIdAttribute: string,
@@ -50,6 +51,7 @@ local PuffadorConstants: PuffadorConstantsModule = {
 	VaultEventRemoteName = "VaultEvent",
 	RoundResultRemoteName = "RoundResult",
 	ReportDeviceRemoteName = "ReportDevice",
+	SecretEventRemoteName = "SecretEvent",
 
 	OwnerUserIdAttribute = "OwnerUserId",
 	RoundIdAttribute = StateAttributeNames.RoundId,

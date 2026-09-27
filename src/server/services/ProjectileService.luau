@@ -24,6 +24,9 @@ type BlockDestructionContext = ArenaService.BlockDestructionContext
 -- Chamado quando um projétil acerta o personagem de outro jogador. Quem
 -- decide o efeito (empurrão, regra do cofre) são os serviços registrados.
 export type CharacterHitHandler = (shooter: Player, victim: Player, position: Vector3, direction: Vector3, power: number) -> ()
+-- Chamado quando o projétil acerta algo que não é bloco nem personagem
+-- (ex.: um quadro na parede).
+export type SurfaceHitHandler = (shooter: Player, instance: Instance, position: Vector3) -> ()
 
 local GENERATED_BY_ATTRIBUTE = "GeneratedBy"
 local SERVICE_NAME = "ProjectileService"
@@ -59,6 +62,7 @@ local activeProjectiles: { ProjectileRecord } = {}
 local nextProjectileSequence = 0
 local heartbeatConnection: RBXScriptConnection? = nil
 local characterHitHandlers: { [string]: CharacterHitHandler } = {}
+local surfaceHitHandlers: { [string]: SurfaceHitHandler } = {}
 
 local function isOwned(instance: Instance): boolean
 	return instance:GetAttribute(GENERATED_BY_ATTRIBUTE) == SERVICE_NAME
@@ -133,10 +137,9 @@ local function createImpactEffect(position: Vector3, normal: Vector3)
 	end
 end
 
-local function notifyCharacterHit(record: ProjectileRecord, hitInstance: Instance, position: Vector3)
-	if next(characterHitHandlers) == nil then
-		return
-	end
+-- Avisa os handlers do que foi atingido: personagem de outro jogador ou,
+-- se não for personagem, a superfície.
+local function notifyHit(record: ProjectileRecord, hitInstance: Instance, position: Vector3)
 	local model = hitInstance:FindFirstAncestorOfClass("Model")
 	while model ~= nil do
 		local victim = Players:GetPlayerFromCharacter(model)
@@ -149,6 +152,9 @@ local function notifyCharacterHit(record: ProjectileRecord, hitInstance: Instanc
 			return
 		end
 		model = model:FindFirstAncestorOfClass("Model")
+	end
+	for _, handler in pairs(surfaceHitHandlers) do
+		task.spawn(handler, record.ownerPlayer, hitInstance, position)
 	end
 end
 
@@ -196,7 +202,7 @@ local function updateProjectiles(deltaTime: number)
 						end
 					end
 				else
-					notifyCharacterHit(record, hitInstance, raycastResult.Position)
+					notifyHit(record, hitInstance, raycastResult.Position)
 				end
 				createImpactEffect(raycastResult.Position, raycastResult.Normal)
 				return false
@@ -360,6 +366,10 @@ function ProjectileService.setCharacterHitHandler(key: string, handler: Characte
 	characterHitHandlers[key] = handler
 end
 
+function ProjectileService.setSurfaceHitHandler(key: string, handler: SurfaceHitHandler?)
+	surfaceHitHandlers[key] = handler
+end
+
 function ProjectileService.clearAll()
 	for index = #activeProjectiles, 1, -1 do
 		removeProjectileAt(index)
@@ -377,6 +387,7 @@ end
 
 function ProjectileService.stop()
 	table.clear(characterHitHandlers)
+	table.clear(surfaceHitHandlers)
 	if heartbeatConnection ~= nil then
 		heartbeatConnection:Disconnect()
 		heartbeatConnection = nil

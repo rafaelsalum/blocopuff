@@ -300,6 +300,15 @@ Regras de cada canal:
 
 Os pop-ups de combate perto da mira ("+1", combo e marcos) seguem na `FeedbackView`, no canto direito, porque são reforços curtos que não competem com os alertas.
 
+### Corredores secretos e quadros (Fase 2, entrega 2.1)
+
+Escopo em `docs/FASE_2_SEGREDOS_COFRE_BARAO.md`.
+
+- **Corredores:** do lado de fora das paredes norte e sul há um corredor escondido (`CorridorBuilder`). Ele tem um patamar no nível do andar de baixo, uma rampa e um patamar no nível do andar de cima, e serve para subir, descer ou fugir. O cofre fica só na parede oeste, separado dos corredores.
+- **Entradas escondidas:** cada corredor tem uma entrada por andar. Elas sempre existem, mas começam atrás de um painel falso igual à parede, que não colide: quem conhece o lugar atravessa antes da revelação.
+- **Quadros:** a cada rodada um quadro de cada andar é sorteado em segredo. Acertá-lo com o Puffador revela, para todos, as entradas daquele andar: o painel some, surge uma moldura dourada acesa e aparece a faixa "PASSAGEM SECRETA!" com o nome de quem descobriu. Revelar um andar não revela o outro. Quadros errados respondem com um som e "NÃO ERA ESSE QUADRO".
+- **Código:** `SecretPassageService` (regras e painéis), `CorridorBuilder` (arquitetura), `BuildingLayout.getCorridors`, e `SecretPassageController` no cliente. Os quadros da arena são marcados com a tag `RevealPainting`.
+
 ### O Cofre do Barão Puff
 
 > **Desligado na Fase 1** (`GameConfig.SecretRoom.Enabled = false`): as portas ficam fechadas e sem interação. O cofre será refeito na Fase 2, conforme `docs/FASE_2_SEGREDOS_COFRE_BARAO.md`.

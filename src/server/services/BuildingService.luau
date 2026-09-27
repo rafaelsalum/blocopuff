@@ -13,10 +13,12 @@ local GameConfig = require(ReplicatedStorage.Shared.config.GameConfig)
 local BuildingLayout = require(ReplicatedStorage.Shared.modules.BuildingLayout)
 local BuildingDecor = require(script.Parent.BuildingDecor)
 local SecretRoomBuilder = require(script.Parent.SecretRoomBuilder)
+local CorridorBuilder = require(script.Parent.CorridorBuilder)
 
 type ArenaConfig = GameConfig.ArenaConfig
 type BuildingConfig = GameConfig.BuildingConfig
 type WallSegment = BuildingDecor.WallSegment
+type DoorGap = BuildingDecor.DoorGap
 
 local MODEL_NAME = "Building"
 local GENERATED_BY_ATTRIBUTE = "GeneratedBy"
@@ -105,14 +107,10 @@ local function createBox(parent: Instance, name: string, box: Box, color: Color3
 	createSolid(parent, name, size, (box.min + box.max) / 2, color, material)
 end
 
--- Parede sólida com um vão atravessando toda a espessura. `hole` deve estar
--- contido na parede nos eixos horizontal e vertical; vira até quatro peças:
--- dois lados, abaixo e acima do vão.
-local function createWallWithHole(parent: Instance, name: string, wall: Box, hole: Box?, color: Color3, material: Enum.Material)
-	if hole == nil then
-		createBox(parent, name, wall, color, material)
-		return
-	end
+-- Parede sólida com vãos atravessando toda a espessura. Os vãos devem
+-- estar contidos na parede e não se sobrepor ao longo dela. Vira colunas
+-- inteiras entre os vãos e, em cada vão, uma peça abaixo e outra acima.
+local function createWallWithHoles(parent: Instance, name: string, wall: Box, holes: { Box }, color: Color3, material: Enum.Material)
 	local runsAlongX = (wall.max.X - wall.min.X) > (wall.max.Z - wall.min.Z)
 	local function withAlong(v: Vector3, value: number): Vector3
 		return if runsAlongX then Vector3.new(value, v.Y, v.Z) else Vector3.new(v.X, v.Y, value)
@@ -120,23 +118,49 @@ local function createWallWithHole(parent: Instance, name: string, wall: Box, hol
 	local function along(v: Vector3): number
 		return if runsAlongX then v.X else v.Z
 	end
-	createBox(parent, `{name}A`, { min = wall.min, max = withAlong(wall.max, along(hole.min)) }, color, material)
-	createBox(parent, `{name}B`, { min = withAlong(wall.min, along(hole.max)), max = wall.max }, color, material)
-	local middleMin = withAlong(wall.min, along(hole.min))
-	local middleMax = withAlong(wall.max, along(hole.max))
-	createBox(parent, `{name}Below`, { min = middleMin, max = Vector3.new(middleMax.X, hole.min.Y, middleMax.Z) }, color, material)
-	createBox(parent, `{name}Above`, { min = Vector3.new(middleMin.X, hole.max.Y, middleMin.Z), max = middleMax }, color, material)
+
+	local sorted = table.clone(holes)
+	table.sort(sorted, function(a, b)
+		return along(a.min) < along(b.min)
+	end)
+
+	local cursor = along(wall.min)
+	for index, hole in ipairs(sorted) do
+		createBox(parent, `{name}Span{index}`, { min = withAlong(wall.min, cursor), max = withAlong(wall.max, along(hole.min)) }, color, material)
+		local columnMin = withAlong(wall.min, along(hole.min))
+		local columnMax = withAlong(wall.max, along(hole.max))
+		createBox(parent, `{name}Below{index}`, { min = columnMin, max = Vector3.new(columnMax.X, hole.min.Y, columnMax.Z) }, color, material)
+		createBox(parent, `{name}Above{index}`, { min = Vector3.new(columnMin.X, hole.max.Y, columnMin.Z), max = columnMax }, color, material)
+		cursor = along(hole.max)
+	end
+	createBox(parent, `{name}Span{#sorted + 1}`, { min = withAlong(wall.min, cursor), max = wall.max }, color, material)
 end
 
--- Vão da porta secreta de cada parede, atravessando a espessura inteira.
-local function getDoorHoles(arena: ArenaConfig, building: BuildingConfig): { [string]: Box }
-	local holes: { [string]: Box } = {}
+-- Vão de porta atravessando a parede inteira, centrado em `point` (face
+-- interna, no nível do piso).
+local function doorHole(point: Vector3, inward: Vector3, along: Vector3, thickness: number): Box
 	local size = BuildingLayout.SecretDoorSize
+	local cornerA = point + (along * (size.X / 2)) - (inward * (thickness + 0.5))
+	local cornerB = point - (along * (size.X / 2)) + (inward * 0.5) + Vector3.new(0, size.Y, 0)
+	return { min = cornerA:Min(cornerB), max = cornerA:Max(cornerB) }
+end
+
+-- Vãos de cada parede: a porta do cofre (oeste) e as duas entradas de cada
+-- corredor secreto (norte e sul).
+local function getDoorHoles(arena: ArenaConfig, building: BuildingConfig): { [string]: { Box } }
+	local holes: { [string]: { Box } } = {}
 	local thickness = building.WallThickness
 	for _, door in ipairs(BuildingLayout.getSecretDoors(arena, building)) do
-		local cornerA = door.center + (door.along * (size.X / 2)) - (door.inward * (thickness + 0.5))
-		local cornerB = door.center - (door.along * (size.X / 2)) + (door.inward * 0.5) + Vector3.new(0, size.Y, 0)
-		holes[door.name] = { min = cornerA:Min(cornerB), max = cornerA:Max(cornerB) }
+		holes[door.name] = holes[door.name] or {}
+		table.insert(holes[door.name], doorHole(door.center, door.inward, door.along, thickness))
+	end
+	for _, corridor in ipairs(BuildingLayout.getCorridors(arena, building)) do
+		local list = holes[corridor.name] or {}
+		holes[corridor.name] = list
+		local lower = corridor.wallCenter + (corridor.along * corridor.lowerAlong) + Vector3.new(0, corridor.lowerY, 0)
+		local upper = corridor.wallCenter + (corridor.along * corridor.upperAlong) + Vector3.new(0, corridor.upperY, 0)
+		table.insert(list, doorHole(lower, corridor.inward, corridor.along, thickness))
+		table.insert(list, doorHole(upper, corridor.inward, corridor.along, thickness))
 	end
 	return holes
 end
@@ -250,7 +274,7 @@ local function createShell(parent: Instance, arena: ArenaConfig, building: Build
 	local halfHeight = Vector3.new(0, height / 2, 0)
 	local westCenter = Vector3.new(center.X - bounds.halfWidth - (thickness / 2), midY, center.Z)
 	local westHalf = Vector3.new(thickness / 2, 0, innerDepth / 2) + halfHeight
-	createWallWithHole(parent, "WallWest", { min = westCenter - westHalf, max = westCenter + westHalf }, holes.West, wallColor, Enum.Material.Plaster)
+	createWallWithHoles(parent, "WallWest", { min = westCenter - westHalf, max = westCenter + westHalf }, holes.West or {}, wallColor, Enum.Material.Plaster)
 	createSolid(
 		parent,
 		"WallEast",
@@ -263,7 +287,7 @@ local function createShell(parent: Instance, arena: ArenaConfig, building: Build
 		local wallName = if side < 0 then "North" else "South"
 		local wallCenter = Vector3.new(outerCenterX, midY, center.Z + (side * (bounds.halfDepth + (thickness / 2))))
 		local wallHalf = Vector3.new(outerWidth / 2, 0, thickness / 2) + halfHeight
-		createWallWithHole(parent, `Wall{wallName}`, { min = wallCenter - wallHalf, max = wallCenter + wallHalf }, holes[wallName], wallColor, Enum.Material.Plaster)
+		createWallWithHoles(parent, `Wall{wallName}`, { min = wallCenter - wallHalf, max = wallCenter + wallHalf }, holes[wallName] or {}, wallColor, Enum.Material.Plaster)
 	end
 
 	local supportTopY = gallery.floorY - 1
@@ -283,6 +307,30 @@ local function createShell(parent: Instance, arena: ArenaConfig, building: Build
 		building.GalleryCarpetColor,
 		Enum.Material.Carpet
 	)
+end
+
+-- Vãos reais de porta na decoração de um andar de uma parede: a porta do
+-- cofre (com moldura) e as entradas dos corredores (escondidas, sem moldura).
+local function getStoryGaps(arena: ArenaConfig, building: BuildingConfig, segmentName: string, floorIndex: number): { DoorGap }
+	local gaps: { DoorGap } = {}
+	if floorIndex == 1 then
+		for _, door in ipairs(BuildingLayout.getSecretDoors(arena, building)) do
+			if door.name == segmentName then
+				table.insert(gaps, { offset = 0, frame = true })
+			end
+		end
+	end
+	for _, corridor in ipairs(BuildingLayout.getCorridors(arena, building)) do
+		if corridor.name == segmentName then
+			if floorIndex == 1 then
+				table.insert(gaps, { offset = corridor.lowerAlong, frame = false })
+			end
+			if floorIndex == arena.FloorCount then
+				table.insert(gaps, { offset = corridor.upperAlong, frame = false })
+			end
+		end
+	end
+	return gaps
 end
 
 -- Poço como porão de tijolos, um andar decorado por piso da arena e uma
@@ -325,7 +373,8 @@ local function decorateArenaWalls(parent: Instance, arena: ArenaConfig, building
 				art = true,
 				windows = isTop and isOuterWall,
 				door = not isTop and isOuterWall,
-				doorway = floorIndex == 1 and isOuterWall,
+				gaps = getStoryGaps(arena, building, segment.name, floorIndex),
+				paintingFloor = floorIndex,
 				lampRange = if isTop then ARENA_LAMP_RANGE else LOWER_LAMP_RANGE,
 				lampBrightness = if isTop then ARENA_LAMP_BRIGHTNESS else LOWER_LAMP_BRIGHTNESS,
 			}, rng)
@@ -519,6 +568,9 @@ function BuildingService.create(worldRoot: Model, arena: ArenaConfig, building: 
 	createFillLights(model, arena, building)
 	for _, door in ipairs(BuildingLayout.getSecretDoors(arena, building)) do
 		SecretRoomBuilder.build(model, door, building)
+	end
+	for _, corridor in ipairs(BuildingLayout.getCorridors(arena, building)) do
+		CorridorBuilder.build(model, corridor, building)
 	end
 
 	model.Parent = worldRoot

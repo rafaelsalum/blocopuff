@@ -10,6 +10,7 @@ local VaultController = require(script.controllers.VaultController)
 local KnockbackController = require(script.controllers.KnockbackController)
 local ResultsController = require(script.controllers.ResultsController)
 local TelemetryController = require(script.controllers.TelemetryController)
+local SecretPassageController = require(script.controllers.SecretPassageController)
 
 print("[BlocoPuff] Client initialized")
 
@@ -81,4 +82,11 @@ local telemetryOk, telemetryErr = pcall(function()
 end)
 if not telemetryOk then
 	warn(string.format("[BlocoPuff] Failed to start telemetry controller: %s", tostring(telemetryErr)))
+end
+
+local secretOk, secretErr = pcall(function()
+	SecretPassageController.start()
+end)
+if not secretOk then
+	warn(string.format("[BlocoPuff] Failed to start secret passage controller: %s", tostring(secretErr)))
 end
