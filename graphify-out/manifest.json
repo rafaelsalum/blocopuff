@@ -5,13 +5,13 @@
     "semantic_hash": ""
   },
   "src/client/controllers/HudController.luau": {
-    "mtime": 1790518922.1600025,
-    "ast_hash": "aa0fd92f9fad4f6a27e614f75618c141",
+    "mtime": 1790545752.8160346,
+    "ast_hash": "4e531232cdc191764390f333b4d3c111",
     "semantic_hash": ""
   },
   "src/client/controllers/PuffadorController.luau": {
-    "mtime": 1790505685.7353842,
-    "ast_hash": "d92a449807baa61a8c339a85bdc1a04c",
+    "mtime": 1790545695.245291,
+    "ast_hash": "ba94f91995cec66c0f906ab497be55e6",
     "semantic_hash": ""
   },
   "src/client/controllers/SpectatorController.luau": {
@@ -20,8 +20,8 @@
     "semantic_hash": ""
   },
   "src/client/init.client.luau": {
-    "mtime": 1790518922.159742,
-    "ast_hash": "4aca2311693c87e103e54daf4ea41e0c",
+    "mtime": 1790545695.2457309,
+    "ast_hash": "1f1009aa3931616ba655958190510c60",
     "semantic_hash": ""
   },
   "src/client/ui/CrosshairView.luau": {
@@ -35,8 +35,8 @@
     "semantic_hash": ""
   },
   "src/client/ui/HudView.luau": {
-    "mtime": 1787008609.826988,
-    "ast_hash": "4cef6374f13210118675e8ec66e88396",
+    "mtime": 1790545733.0513358,
+    "ast_hash": "5e2af7e9fe64fc4d53027f064d8a07fb",
     "semantic_hash": ""
   },
   "src/client/ui/SpectatorView.luau": {
@@ -45,13 +45,13 @@
     "semantic_hash": ""
   },
   "src/server/init.server.luau": {
-    "mtime": 1790518815.173117,
-    "ast_hash": "793f167a866fff30c488c9bb463e8903",
+    "mtime": 1790545656.8019652,
+    "ast_hash": "c255cc69457574acc6455d57a1c80385",
     "semantic_hash": ""
   },
   "src/server/services/ArenaService.luau": {
-    "mtime": 1790518385.4496822,
-    "ast_hash": "15190fb3740ca6cbffd66ecb16f44e32",
+    "mtime": 1790545577.4145036,
+    "ast_hash": "d2b72012f9af535d83da0e90f5ea0448",
     "semantic_hash": ""
   },
   "src/server/services/EliminationService.luau": {
@@ -65,28 +65,28 @@
     "semantic_hash": ""
   },
   "src/server/services/ProjectileService.luau": {
-    "mtime": 1790518402.3233612,
-    "ast_hash": "9da8bd6da5d7fdebab68234057c93fe5",
+    "mtime": 1790546011.469163,
+    "ast_hash": "456caa75afb990576b385ec35c5ad080",
     "semantic_hash": ""
   },
   "src/server/services/PuffadorService.luau": {
-    "mtime": 1790518526.2942302,
-    "ast_hash": "087fbb87d01be6dd8f66b326132d440a",
+    "mtime": 1790545620.2608747,
+    "ast_hash": "3adf3e6ba3840a8cacfb1e28e0befdcc",
     "semantic_hash": ""
   },
   "src/server/services/ReplicatedStateService.luau": {
-    "mtime": 1786909794.501761,
-    "ast_hash": "bb5c0722e956cf12ce95847e10c96629",
-    "semantic_hash": "bb5c0722e956cf12ce95847e10c96629"
+    "mtime": 1790545560.6774702,
+    "ast_hash": "102be61a01abc87583fd3899be407917",
+    "semantic_hash": ""
   },
   "src/server/services/RoundService.luau": {
-    "mtime": 1790518815.1728764,
-    "ast_hash": "12a97d76cfc685427a620983dab612df",
+    "mtime": 1790546011.469335,
+    "ast_hash": "46c15a533f4d833ea88515bac21b20dc",
     "semantic_hash": ""
   },
   "src/shared/config/GameConfig.luau": {
-    "mtime": 1790518702.91727,
-    "ast_hash": "0413d6a9f45c79dec803cb58b599ec7a",
+    "mtime": 1790546408.877254,
+    "ast_hash": "18cb36b7cf8f842372b9e1df9c30723d",
     "semantic_hash": ""
   },
   "src/shared/modules/PuffadorConstants.luau": {
@@ -110,8 +110,8 @@
     "semantic_hash": "35e80f4312710a8634558c8ff1d264b2"
   },
   "src/shared/types/StateAttributeNames.luau": {
-    "mtime": 1787008580.585378,
-    "ast_hash": "e455b0ce2ba5f4bf3b8829f402d68095",
+    "mtime": 1790545536.1326702,
+    "ast_hash": "cbe2f7397d92b7db677423c4254d4c91",
     "semantic_hash": ""
   },
   "AGENTS.md": {
@@ -125,8 +125,8 @@
     "semantic_hash": ""
   },
   "README.md": {
-    "mtime": 1790518990.1802723,
-    "ast_hash": "16ce46c2a388f67c612d8bae31a998ae",
+    "mtime": 1790546408.9914088,
+    "ast_hash": "3a2c41b03938fa7eb3df1727433a8cf6",
     "semantic_hash": ""
   },
   "src/client/controllers/CombatCameraController.luau": {
@@ -140,8 +140,8 @@
     "semantic_hash": ""
   },
   "src/client/ui/CombatHudView.luau": {
-    "mtime": 1790505519.5665228,
-    "ast_hash": "28dbebbf2782b7d215467976b97e0c7f",
+    "mtime": 1790545733.0507848,
+    "ast_hash": "b8efb9d6eaa9b99a66ab266eedfdfb5c",
     "semantic_hash": ""
   },
   "src/client/ui/ResponsiveScale.luau": {
@@ -165,8 +165,8 @@
     "semantic_hash": ""
   },
   "src/shared/modules/ArenaConstants.luau": {
-    "mtime": 1790459506.3855577,
-    "ast_hash": "7f3e05a9b39c4054d980f46db4af78ef",
+    "mtime": 1790545560.6776001,
+    "ast_hash": "3aeeefcd437988348b03343edf0d7cfb",
     "semantic_hash": ""
   },
   "src/client/ui/ControlHintView.luau": {
@@ -215,13 +215,13 @@
     "semantic_hash": ""
   },
   "src/server/services/BuildingDecor.luau": {
-    "mtime": 1790518591.5514474,
-    "ast_hash": "e37c736a8dee43a6e7eeec20326db306",
+    "mtime": 1790519310.3951306,
+    "ast_hash": "cdcd57ea453bc7a388b373e952d51726",
     "semantic_hash": ""
   },
   "src/client/controllers/BlockCollapseController.luau": {
-    "mtime": 1790462451.445547,
-    "ast_hash": "9079474c399d5dbf225be3aca3155827",
+    "mtime": 1790545711.1361227,
+    "ast_hash": "b66c3b9526253c4f5981c2d32770fc57",
     "semantic_hash": ""
   },
   "src/client/ui/FeedbackView.luau": {
@@ -275,8 +275,53 @@
     "semantic_hash": ""
   },
   "src/server/services/VaultService.luau": {
-    "mtime": 1790518882.9846873,
-    "ast_hash": "57349686f83749edecb8d1dff9e889d6",
+    "mtime": 1790546408.8774207,
+    "ast_hash": "d5ebe49ef1509162ec358b9386f86ede",
+    "semantic_hash": ""
+  },
+  "docs/FASE_1_CORE_GAMEPLAY_UX.md": {
+    "mtime": 1790555126.0,
+    "ast_hash": "589be8c15a60d5fc1b76abe8f7626496",
+    "semantic_hash": ""
+  },
+  "docs/FASE_2_SEGREDOS_COFRE_BARAO.md": {
+    "mtime": 1790555126.0,
+    "ast_hash": "22f4bdf8481b75aa1380f301ed21c727",
+    "semantic_hash": ""
+  },
+  "docs/FASE_3_PROGRESSAO_COMPETICAO.md": {
+    "mtime": 1790555126.0,
+    "ast_hash": "5fb9f4896ea320ce787bb9aee702e9ae",
+    "semantic_hash": ""
+  },
+  "docs/FASE_4_PUFFDEX_RECOMPENSAS_SOCIAL.md": {
+    "mtime": 1790555126.0,
+    "ast_hash": "d95971940aaea2f861c01f321fa43aba",
+    "semantic_hash": ""
+  },
+  "docs/FASE_5_LIVEOPS_TEMPORADAS_MONETIZACAO.md": {
+    "mtime": 1790555126.0,
+    "ast_hash": "40807db50b4a03c76c866640874bc97a",
+    "semantic_hash": ""
+  },
+  "docs/GAME_DESIGN.md": {
+    "mtime": 1790555126.0,
+    "ast_hash": "a3e8d63a0000fac1adc1e5b0b3520516",
+    "semantic_hash": ""
+  },
+  "src/client/controllers/KnockbackController.luau": {
+    "mtime": 1790545686.1515763,
+    "ast_hash": "eea9e5faae6f3e0ef7aadcf56f6755ea",
+    "semantic_hash": ""
+  },
+  "src/server/services/FinalChaosService.luau": {
+    "mtime": 1790545620.263956,
+    "ast_hash": "43a4f18cb152c124b08964d3e4d5e61d",
+    "semantic_hash": ""
+  },
+  "src/server/services/KnockbackService.luau": {
+    "mtime": 1790545605.1697605,
+    "ast_hash": "99b255d4047d596e0c4f3527a6911fc2",
     "semantic_hash": ""
   }
 }

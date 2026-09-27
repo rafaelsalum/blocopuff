@@ -370,7 +370,9 @@ function BuildingDecor.decorateStory(
 	end
 	if options.door and #offsets < 3 then
 		-- Trecho curto: a porta ocupa o centro e dispensa os demais detalhes.
-		createDoor(parent, segment, 0, bottom, style)
+		if options.doorway ~= true then
+			createDoor(parent, segment, 0, bottom, style)
+		end
 		return
 	end
 

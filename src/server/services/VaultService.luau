@@ -211,7 +211,7 @@ local function unlockChosen(token: number)
 end
 
 -- Um tiro que acerta alguém dentro do cofre aberto o elimina.
-local function onCharacterHit(shooter: Player, victim: Player, _position: Vector3)
+local function onCharacterHit(shooter: Player, victim: Player, _position: Vector3, _direction: Vector3, _power: number)
 	if not isActiveParticipant(shooter) or not isActiveParticipant(victim) then
 		return
 	end
@@ -302,7 +302,7 @@ end
 
 function VaultService.beginRound(newRoundId: number, roundDuration: number)
 	resetRoundState()
-	if #doors == 0 then
+	if not GameConfig.SecretRoom.Enabled or #doors == 0 then
 		return
 	end
 	roundActive = true
@@ -362,7 +362,9 @@ function VaultService.start(worldRoot: Model, eliminateCallback: EliminateCallba
 		warn("[BlocoPuff] VaultService: remotes folder not found; vault announcements disabled")
 	end
 
-	ProjectileService.setCharacterHitHandler(onCharacterHit)
+	if GameConfig.SecretRoom.Enabled then
+		ProjectileService.setCharacterHitHandler("Vault", onCharacterHit)
+	end
 	table.insert(connections, RunService.Heartbeat:Connect(onHeartbeat))
 	table.insert(connections, Players.PlayerRemoving:Connect(function(player)
 		stayTime[player] = nil
@@ -376,7 +378,7 @@ end
 
 function VaultService.stop()
 	resetRoundState()
-	ProjectileService.setCharacterHitHandler(nil)
+	ProjectileService.setCharacterHitHandler("Vault", nil)
 	for _, connection in ipairs(connections) do
 		connection:Disconnect()
 	end

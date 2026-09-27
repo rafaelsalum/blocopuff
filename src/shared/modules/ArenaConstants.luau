@@ -10,6 +10,7 @@ export type ArenaConstantsModule = {
 	GridColumnAttribute: string,
 	BlockIdAttribute: string,
 	FloorAttribute: string,
+	CollapseWarningAttribute: string,
 }
 
 local ArenaConstants: ArenaConstantsModule = {
@@ -19,6 +20,8 @@ local ArenaConstants: ArenaConstantsModule = {
 	GridColumnAttribute = "GridColumn",
 	BlockIdAttribute = "BlockId",
 	FloorAttribute = "FloorIndex",
+	-- Verdadeiro enquanto o bloco pisca antes de cair no Caos Final.
+	CollapseWarningAttribute = "CollapseWarning",
 }
 
 return table.freeze(ArenaConstants)

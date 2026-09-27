@@ -280,6 +280,7 @@ function ArenaService.create(worldRoot: Model, config: ArenaConfig, palette: Wor
 				block:SetAttribute(ArenaConstants.BlockIdAttribute, blockId)
 				block:SetAttribute(GENERATED_BY_ATTRIBUTE, SERVICE_NAME)
 				block:SetAttribute(ATTR_IS_DESTROYED, false)
+				block:SetAttribute(ArenaConstants.CollapseWarningAttribute, false)
 				CollectionService:AddTag(block, BLOCK_TAG)
 				block.Parent = blocksFolder
 
@@ -361,6 +362,37 @@ function ArenaService.isActiveBlock(instance: Instance): boolean
 	return not record.isDestroyed and record.generation == arenaGeneration
 end
 
+local function findActiveBlockAt(floorIndex: number, row: number, column: number): Part?
+	for part, record in pairs(blockRecords) do
+		if
+			record.floorIndex == floorIndex
+			and record.gridRow == row
+			and record.gridColumn == column
+			and not record.isDestroyed
+			and record.generation == arenaGeneration
+		then
+			return part
+		end
+	end
+	return nil
+end
+
+local function markDestroyed(instance: Part, record: BlockRecord)
+	record.isDestroyed = true
+	remainingBlockCount -= 1
+
+	instance.Transparency = 1
+	instance.CanCollide = false
+	instance.CanTouch = false
+	instance.CanQuery = false
+	instance:SetAttribute(ATTR_IS_DESTROYED, true)
+	instance:SetAttribute(ArenaConstants.CollapseWarningAttribute, false)
+	-- A animação de quebra roda no cliente (BlockCollapseController), a partir
+	-- do atributo IsDestroyed, para ficar fluida.
+
+	publishBlockCounts()
+end
+
 function ArenaService.tryDestroyBlock(instance: Instance, context: BlockDestructionContext): boolean
 	if not destructionEnabled then
 		return false
@@ -407,35 +439,96 @@ function ArenaService.tryDestroyBlock(instance: Instance, context: BlockDestruct
 		return false
 	end
 
-	record.isDestroyed = true
-	remainingBlockCount -= 1
-
-	instance.Transparency = 1
-	instance.CanCollide = false
-	instance.CanTouch = false
-	instance.CanQuery = false
-	instance:SetAttribute(ATTR_IS_DESTROYED, true)
-	-- A animação de quebra roda no cliente (BlockCollapseController), a partir
-	-- do atributo IsDestroyed, para ficar fluida.
-
-	publishBlockCounts()
-
+	markDestroyed(instance, record)
 	return true
 end
 
-local function findActiveBlockAt(floorIndex: number, row: number, column: number): Part?
-	for part, record in pairs(blockRecords) do
-		if
-			record.floorIndex == floorIndex
-			and record.gridRow == row
-			and record.gridColumn == column
-			and not record.isDestroyed
-			and record.generation == arenaGeneration
-		then
-			return part
+-- Bloco derrubado pelo próprio jogo (Caos Final), sem depender de um tiro.
+function ArenaService.collapseBlock(instance: Instance): boolean
+	if not destructionEnabled or not instance:IsA("Part") then
+		return false
+	end
+	local record = blockRecords[instance]
+	if record == nil or record.isDestroyed or record.generation ~= arenaGeneration then
+		return false
+	end
+	markDestroyed(instance, record)
+	return true
+end
+
+function ArenaService.getIntactBlocks(): { Part }
+	local intact: { Part } = {}
+	for _, block in ipairs(arenaBlocks) do
+		local record = blockRecords[block]
+		if record ~= nil and not record.isDestroyed and record.generation == arenaGeneration then
+			table.insert(intact, block)
 		end
 	end
-	return nil
+	return intact
+end
+
+-- Ponto seguro para a Segunda Chance: um bloco inteiro do andar pedido,
+-- preferindo os que ainda têm mais vizinhos inteiros (menos chance de cair
+-- de novo logo em seguida). Nil se o andar não tiver mais blocos.
+function ArenaService.getSafeRespawnCFrame(floorIndex: number): CFrame?
+	local config = currentArenaConfig
+	if config == nil then
+		return nil
+	end
+	local candidates: { Part } = {}
+	local intactCells: { [number]: boolean } = {}
+	local function cellKey(row: number, column: number): number
+		return (row * 1000) + column
+	end
+	for _, block in ipairs(arenaBlocks) do
+		local record = blockRecords[block]
+		if record ~= nil and record.floorIndex == floorIndex and not record.isDestroyed and record.generation == arenaGeneration then
+			table.insert(candidates, block)
+			intactCells[cellKey(record.gridRow, record.gridColumn)] = true
+		end
+	end
+
+	local best: { Part } = {}
+	local bestScore = -1
+	for _, block in ipairs(candidates) do
+		local record = blockRecords[block]
+		if record ~= nil then
+			local score = 0
+			for _, offset in ipairs({ { 1, 0 }, { -1, 0 }, { 0, 1 }, { 0, -1 } }) do
+				if intactCells[cellKey(record.gridRow + offset[1], record.gridColumn + offset[2])] then
+					score += 1
+				end
+			end
+			if score > bestScore then
+				bestScore = score
+				best = { block }
+			elseif score == bestScore then
+				table.insert(best, block)
+			end
+		end
+	end
+	if #best == 0 then
+		return nil
+	end
+	local chosen = best[spawnRandom:NextInteger(1, #best)]
+	local position = chosen.Position + Vector3.new(0, (config.BlockSize.Y / 2) + 3, 0)
+	local center = Vector3.new(config.Position.X, position.Y, config.Position.Z)
+	if (center - position).Magnitude < 0.1 then
+		return CFrame.new(position)
+	end
+	return CFrame.lookAt(position, center)
+end
+
+-- Marca (ou desmarca) um bloco piscando antes de cair no Caos Final.
+function ArenaService.setCollapseWarning(instance: Instance, warning: boolean)
+	if not instance:IsA("Part") then
+		return
+	end
+	local record = blockRecords[instance]
+	if record == nil or record.isDestroyed then
+		return
+	end
+	instance:SetAttribute(ArenaConstants.CollapseWarningAttribute, warning)
 end
 
 -- Vizinho do bloco atingido para o Super Puffador: segue o eixo em que o
@@ -503,6 +596,7 @@ local function recreateBlockFromRecord(record: BlockRecord): Part?
 	block:SetAttribute(ArenaConstants.BlockIdAttribute, record.blockId)
 	block:SetAttribute(GENERATED_BY_ATTRIBUTE, SERVICE_NAME)
 	block:SetAttribute(ATTR_IS_DESTROYED, false)
+	block:SetAttribute(ArenaConstants.CollapseWarningAttribute, false)
 	CollectionService:AddTag(block, BLOCK_TAG)
 	block.Parent = blocksFolder
 
@@ -561,6 +655,7 @@ local function restoreBlockAt(index: number)
 	block.CanTouch = record.originalCanTouch
 	block.CanQuery = record.originalCanQuery
 	block:SetAttribute(ATTR_IS_DESTROYED, false)
+	block:SetAttribute(ArenaConstants.CollapseWarningAttribute, false)
 
 	if shouldAnimateRestore and record.originalTransparency < 1 then
 		block.Transparency = math.max(record.originalTransparency, 0.55)

@@ -14,6 +14,8 @@ local ReplicatedState = require(script.Parent.ReplicatedStateService)
 local PuffadorService = require(script.Parent.PuffadorService)
 local EliminationService = require(script.Parent.EliminationService)
 local VaultService = require(script.Parent.VaultService)
+local KnockbackService = require(script.Parent.KnockbackService)
+local FinalChaosService = require(script.Parent.FinalChaosService)
 
 type RoundState = RoundTypes.RoundState
 type RoundTimings = GameConfig.RoundTimings
@@ -30,6 +32,9 @@ type Winner = {
 }
 
 local POLL_INTERVAL = 1
+-- Tempo em que quedas são ignoradas logo após a Segunda Chance: só cobre a
+-- posição antiga ainda chegando do cliente, não uma nova queda de verdade.
+local RESPAWN_FALL_GRACE = 1
 local TICK_INTERVAL = 1
 
 -- Atributos autoritativos escritos pelo servidor em cada Player, usados pelo
@@ -46,6 +51,8 @@ local ATTR_ELIMINATION_REASON = StateAttributeNames.PlayerEliminationReason
 local ATTR_ELIMINATED_AT_ROUND_ID = StateAttributeNames.PlayerEliminatedAtRoundId
 local ATTR_ROUNDS_UNTIL_TURN = StateAttributeNames.PlayerRoundsUntilTurn
 local ATTR_ROUND_BLOCKS_DESTROYED = StateAttributeNames.PlayerRoundBlocksDestroyed
+local ATTR_HAS_SECOND_CHANCE = StateAttributeNames.PlayerHasSecondChance
+local ATTR_ROUND_KNOCKOUTS = StateAttributeNames.PlayerRoundKnockouts
 
 local RoundService = {}
 
@@ -60,6 +67,7 @@ local deathConnections: { [Player]: RBXScriptConnection } = {}
 local playerRemovingConnection: RBXScriptConnection? = nil
 local playerAddedConnection: RBXScriptConnection? = nil
 local winner: Winner? = nil
+local respawnGraceUntil: { [Player]: number } = {}
 
 local function countConnectedPlayers(): number
 	return #Players:GetPlayers()
@@ -183,15 +191,21 @@ local function resetParticipantAttributes(player: Player)
 	player:SetAttribute(ATTR_ELIMINATION_REASON, EliminationTypes.None)
 	player:SetAttribute(ATTR_ELIMINATED_AT_ROUND_ID, 0)
 	player:SetAttribute(ATTR_ROUND_BLOCKS_DESTROYED, 0)
+	player:SetAttribute(ATTR_HAS_SECOND_CHANCE, false)
+	player:SetAttribute(ATTR_ROUND_KNOCKOUTS, 0)
 end
 
 local function markParticipantAttributes(player: Player, roundId: number)
+	-- Antes de IsRoundParticipant: o cliente não deve ver um participante
+	-- sem Segunda Chance nem por um instante.
+	player:SetAttribute(ATTR_HAS_SECOND_CHANCE, GameConfig.SecondChance.Enabled)
 	player:SetAttribute(ATTR_IS_PARTICIPANT, true)
 	player:SetAttribute(ATTR_PARTICIPATING_ROUND_ID, roundId)
 	player:SetAttribute(ATTR_IS_ELIMINATED, false)
 	player:SetAttribute(ATTR_ELIMINATION_REASON, EliminationTypes.None)
 	player:SetAttribute(ATTR_ELIMINATED_AT_ROUND_ID, 0)
 	player:SetAttribute(ATTR_ROUND_BLOCKS_DESTROYED, 0)
+	player:SetAttribute(ATTR_ROUND_KNOCKOUTS, 0)
 end
 
 local function onPlayerAdded(player: Player)
@@ -203,10 +217,68 @@ end
 -- (Humanoid.Died) quanto pelo callback fornecido ao EliminationService para
 -- a zona de queda. Marca o participante inativo antes de zerar o Humanoid,
 -- para que um Died disparado por essa própria chamada não sobrescreva a causa.
+-- Credita a derrubada a quem empurrou o jogador por último, se foi há pouco.
+local function creditKnockout(victim: Player)
+	local attacker = KnockbackService.getRecentAttacker(victim)
+	KnockbackService.forget(victim)
+	if attacker == nil or attacker == victim or participants[attacker] == nil then
+		return
+	end
+	local current = attacker:GetAttribute(ATTR_ROUND_KNOCKOUTS)
+	local count = if typeof(current) == "number" then current else 0
+	attacker:SetAttribute(ATTR_ROUND_KNOCKOUTS, count + 1)
+end
+
+-- Primeira queda para fora da arena: devolve o jogador a um bloco inteiro
+-- (de preferência no andar de baixo) em vez de eliminá-lo. Desligada no
+-- Caos Final. Retorna true se a Segunda Chance foi usada.
+local function trySecondChance(player: Player): boolean
+	if player:GetAttribute(ATTR_HAS_SECOND_CHANCE) ~= true or FinalChaosService.isRunning() then
+		return false
+	end
+	local character = player.Character
+	if character == nil then
+		return false
+	end
+
+	local cframe: CFrame? = nil
+	for floorIndex = 1, GameConfig.Arena.FloorCount do
+		cframe = ArenaService.getSafeRespawnCFrame(floorIndex)
+		if cframe ~= nil then
+			break
+		end
+	end
+	if cframe == nil or not moveCharacterTo(character, cframe) then
+		return false
+	end
+
+	player:SetAttribute(ATTR_HAS_SECOND_CHANCE, false)
+	respawnGraceUntil[player] = os.clock() + RESPAWN_FALL_GRACE
+	KnockbackService.protect(player, GameConfig.SecondChance.RespawnProtection)
+	-- O personagem é simulado pelo cliente: ele também zera a própria
+	-- velocidade de queda ao receber este aviso.
+	PuffadorService.sendFeedback(player, "Respawn", cframe)
+	print(string.format("[BlocoPuff] %s used their Second Chance", player.Name))
+	return true
+end
+
 local function eliminateParticipant(player: Player, reason: EliminationReason)
 	local participant = participants[player]
 	if participant == nil or not participant.alive then
 		return
+	end
+
+	if reason == EliminationTypes.FellFromArena then
+		-- Logo após a Segunda Chance o servidor ainda pode receber a posição
+		-- antiga (abaixo da zona) antes do teleporte chegar ao cliente.
+		local grace = respawnGraceUntil[player]
+		if grace ~= nil and os.clock() < grace then
+			return
+		end
+		creditKnockout(player)
+		if trySecondChance(player) then
+			return
+		end
 	end
 
 	participant.alive = false
@@ -256,6 +328,7 @@ local function disconnectParticipantDeathHandlers()
 end
 
 local function clearRoundParticipants()
+	table.clear(respawnGraceUntil)
 	table.clear(participants)
 	table.clear(participantOrder)
 end
@@ -365,6 +438,8 @@ local function beginRound(timings: RoundTimings)
 	teleportParticipantsToArena(participantOrder)
 	connectParticipantDeathHandlers(participantOrder)
 	PuffadorService.beginRound(participantOrder, currentRoundId)
+	KnockbackService.beginRound(currentRoundId)
+	ReplicatedState.setFinalChaos(false)
 	VaultService.beginRound(currentRoundId, timings.RoundDuration)
 
 	-- Só inicia o monitoramento da zona depois que os participantes já
@@ -380,8 +455,15 @@ local function beginRound(timings: RoundTimings)
 	print(string.format("[BlocoPuff] Round %d started with %d participants", currentRoundId, #participantOrder))
 end
 
+local function startFinalChaos(duration: number)
+	FinalChaosService.begin(duration)
+	ReplicatedState.setFinalChaos(true)
+	print(string.format("[BlocoPuff] Round %d entered Final Chaos (%ds)", currentRoundId, duration))
+end
+
 local function runActive(timings: RoundTimings)
 	local remaining = timings.RoundDuration
+	local chaosDuration = FinalChaosService.getDuration(timings.RoundDuration)
 
 	while isRunning do
 		local aliveCount, soleActive = evaluateActiveParticipants()
@@ -401,6 +483,10 @@ local function runActive(timings: RoundTimings)
 			break
 		end
 
+		if remaining <= chaosDuration and not FinalChaosService.isRunning() then
+			startFinalChaos(chaosDuration)
+		end
+
 		task.wait(TICK_INTERVAL)
 		remaining -= 1
 		ReplicatedState.setTimeRemaining(remaining)
@@ -410,6 +496,9 @@ end
 local function runEnding(timings: RoundTimings)
 	setState(RoundTypes.Ending)
 	EliminationService.endRound()
+	FinalChaosService.stop()
+	ReplicatedState.setFinalChaos(false)
+	KnockbackService.endRound()
 	ArenaService.endRound()
 	VaultService.endRound()
 	PuffadorService.endRound()
@@ -496,6 +585,9 @@ function RoundService.stop()
 
 	disconnectParticipantDeathHandlers()
 	EliminationService.stop()
+	FinalChaosService.stop()
+	ReplicatedState.setFinalChaos(false)
+	KnockbackService.stop()
 	ArenaService.endRound()
 	VaultService.stop()
 	PuffadorService.stop()

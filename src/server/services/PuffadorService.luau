@@ -74,7 +74,7 @@ local function removeExistingToolCopies(player: Player)
 	end
 end
 
-local function sendFeedback(player: Player, kind: string, value: number?)
+local function sendFeedback(player: Player, kind: string, value: any)
 	local remote = feedbackRemote
 	if remote ~= nil and player.Parent ~= nil then
 		remote:FireClient(player, kind, value)
@@ -366,6 +366,12 @@ function PuffadorService.start(worldRoot: Model)
 	requestPuffRemote = remote
 	feedbackRemote = newFeedbackRemote
 	requestConnection = remote.OnServerEvent:Connect(onRequestPuff)
+end
+
+-- Evento curto para um jogador (acerto, empurrão, Super). Usado também pelo
+-- KnockbackService.
+function PuffadorService.sendFeedback(player: Player, kind: string, value: any)
+	sendFeedback(player, kind, value)
 end
 
 function PuffadorService.getRemotesFolder(): Folder?

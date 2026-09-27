@@ -8,12 +8,17 @@ local UiTheme = require(script.Parent.UiTheme)
 
 type ResponsiveScaleHandle = ResponsiveScale.ResponsiveScaleHandle
 
+-- Situação de vidas do jogador local na rodada.
+export type LivesState = "Hidden" | "SecondChance" | "LastLife" | "Chaos"
+
 export type CombatHudViewHandle = {
 	setVisible: (visible: boolean) -> (),
 	setTimer: (text: string) -> (),
 	setParticipants: (count: number) -> (),
 	setArenaIntegrity: (remaining: number, total: number) -> (),
 	setPersonalScore: (count: number, visible: boolean) -> (),
+	setLives: (state: LivesState) -> (),
+	setTimerDanger: (danger: boolean) -> (),
 	destroy: () -> (),
 }
 
@@ -246,6 +251,24 @@ function CombatHudView.new(playerGui: PlayerGui): CombatHudViewHandle
 	UiTheme.addTextOutline(scoreValue, 2)
 	local lastPersonalScore = 0
 
+	local livesRoot, livesCard = createPanelRoot(
+		screenGui,
+		"LivesPanel",
+		Vector2.new(0, 0),
+		UDim2.new(0, 18, 0, 128),
+		UDim2.fromOffset(146, 34),
+		UiTheme.Colors.Green,
+		scaleHandles
+	)
+	livesRoot.Visible = false
+	local livesLabel = createLabel("LivesLabel", livesCard, "", UiTheme.Fonts.Display, 14, UiTheme.Colors.Green)
+	UiTheme.addTextOutline(livesLabel, 2)
+	local livesScale = Instance.new("UIScale")
+	livesScale.Name = "Pulse"
+	livesScale.Parent = livesCard
+	local lastLivesState: LivesState = "Hidden"
+	local timerPulse: Tween? = nil
+
 	local cameraConnection: RBXScriptConnection? = nil
 	local workspaceConnection: RBXScriptConnection? = nil
 
@@ -254,6 +277,7 @@ function CombatHudView.new(playerGui: PlayerGui): CombatHudViewHandle
 		local compact = camera ~= nil and camera.ViewportSize.X < 700
 		arenaRoot.Position = UDim2.new(0, if compact then 12 else 18, 0, 16)
 		scoreRoot.Position = UDim2.new(0, if compact then 12 else 18, 0, 82)
+		livesRoot.Position = UDim2.new(0, if compact then 12 else 18, 0, 128)
 		playersRoot.Position = UDim2.new(1, if compact then -12 else -18, 0, 16)
 		timerRoot.Position = UDim2.new(0.5, 0, 0, if compact then 106 else 16)
 	end
@@ -318,7 +342,47 @@ function CombatHudView.new(playerGui: PlayerGui): CombatHudViewHandle
 		lastPersonalScore = safeCount
 	end
 
+	handle.setLives = function(state: LivesState)
+		livesRoot.Visible = state ~= "Hidden"
+		if state == "SecondChance" then
+			livesLabel.Text = "♥♥ 2 VIDAS"
+			livesLabel.TextColor3 = UiTheme.Colors.Green
+		elseif state == "LastLife" then
+			livesLabel.Text = "♥ ÚLTIMA VIDA"
+			livesLabel.TextColor3 = UiTheme.Colors.Orange
+		elseif state == "Chaos" then
+			livesLabel.Text = "☠ SEM 2ª CHANCE"
+			livesLabel.TextColor3 = UiTheme.Colors.Danger
+		end
+		if state ~= lastLivesState and state ~= "Hidden" then
+			livesScale.Scale = 1.2
+			TweenService:Create(livesScale, TweenInfo.new(0.3, Enum.EasingStyle.Back), { Scale = 1 }):Play()
+		end
+		lastLivesState = state
+	end
+
+	handle.setTimerDanger = function(danger: boolean)
+		if danger and timerPulse == nil then
+			timerLabel.TextColor3 = UiTheme.Colors.Danger
+			local pulse = TweenService:Create(
+				timerLabel,
+				TweenInfo.new(0.45, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true),
+				{ TextSize = 28 }
+			)
+			pulse:Play()
+			timerPulse = pulse
+		elseif not danger and timerPulse ~= nil then
+			timerPulse:Cancel()
+			timerPulse = nil
+			timerLabel.TextSize = 24
+			timerLabel.TextColor3 = UiTheme.Colors.Ink
+		end
+	end
+
 	handle.destroy = function()
+		if timerPulse ~= nil then
+			timerPulse:Cancel()
+		end
 		if cameraConnection ~= nil then
 			cameraConnection:Disconnect()
 		end

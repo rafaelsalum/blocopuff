@@ -9,6 +9,7 @@ local RoundHudView = require(script.Parent.RoundHudView)
 
 type AnnouncementTone = AnnouncementView.AnnouncementTone
 type RoundHudMode = RoundHudView.RoundHudMode
+type LivesState = CombatHudView.LivesState
 
 export type HudViewHandle = {
 	setRoundMode: (mode: RoundHudMode) -> (),
@@ -22,6 +23,8 @@ export type HudViewHandle = {
 	setCombatParticipants: (count: number) -> (),
 	setArenaIntegrity: (remaining: number, total: number) -> (),
 	setPersonalScore: (count: number, visible: boolean) -> (),
+	setLives: (state: LivesState) -> (),
+	setTimerDanger: (danger: boolean) -> (),
 	showAnnouncement: (title: string, subtitle: string, tone: AnnouncementTone, duration: number?) -> (),
 	hideAnnouncement: () -> (),
 	destroy: () -> (),
@@ -46,6 +49,8 @@ function HudView.new(playerGui: PlayerGui): HudViewHandle
 	handle.setCombatParticipants = combatHud.setParticipants
 	handle.setArenaIntegrity = combatHud.setArenaIntegrity
 	handle.setPersonalScore = combatHud.setPersonalScore
+	handle.setLives = combatHud.setLives
+	handle.setTimerDanger = combatHud.setTimerDanger
 	handle.showAnnouncement = announcements.show
 	handle.hideAnnouncement = announcements.hide
 

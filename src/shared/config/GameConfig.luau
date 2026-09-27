@@ -86,6 +86,7 @@ export type EliminationZoneConfig = {
 }
 
 export type SecretRoomConfig = {
+	Enabled: boolean,
 	UnlockMinFraction: number,
 	UnlockMaxFraction: number,
 	OpenHoldDuration: number,
@@ -95,6 +96,28 @@ export type SecretRoomConfig = {
 	MaxStaySeconds: number,
 	StayWarningSeconds: number,
 	AlertSoundId: string,
+}
+
+export type KnockbackConfig = {
+	HorizontalSpeed: number,
+	VerticalSpeed: number,
+	Duration: number,
+	SuperMultiplier: number,
+	CreditWindow: number,
+}
+
+export type SecondChanceConfig = {
+	Enabled: boolean,
+	RespawnProtection: number,
+}
+
+export type FinalChaosConfig = {
+	Duration: number,
+	MaxRoundFraction: number,
+	CollapseInterval: number,
+	CollapseStartCount: number,
+	CollapseMaxCount: number,
+	WarningTime: number,
 }
 
 export type MusicConfig = {
@@ -121,6 +144,9 @@ export type GameConfig = {
 	EliminationZone: EliminationZoneConfig,
 	Music: MusicConfig,
 	SecretRoom: SecretRoomConfig,
+	Knockback: KnockbackConfig,
+	SecondChance: SecondChanceConfig,
+	FinalChaos: FinalChaosConfig,
 	getRoundTimings: () -> RoundTimings,
 }
 
@@ -246,6 +272,9 @@ local Music: MusicConfig = table.freeze({
 -- por tiro durante SuperCharges disparos. AlertSoundId toca para todos
 -- quando a sala é aberta; troque por um som da Creator Store se quiser.
 local SecretRoom: SecretRoomConfig = table.freeze({
+	-- Desligado na Fase 1 (o cofre é escopo da Fase 2 do game design). As
+	-- portas continuam no mapa, fechadas e sem interação.
+	Enabled = false,
 	UnlockMinFraction = 0.25,
 	UnlockMaxFraction = 0.5,
 	OpenHoldDuration = 1.5,
@@ -259,18 +288,49 @@ local SecretRoom: SecretRoomConfig = table.freeze({
 	AlertSoundId = "rbxasset://sounds/electronicpingshort.wav",
 })
 
+-- Empurrão do Puffador ao acertar outro jogador. A velocidade é aplicada
+-- pelo cliente dono do personagem (a física do personagem é dele), mas o
+-- servidor decide quando, em quem e com que força. CreditWindow: segundos
+-- em que uma queda ainda conta como derrubada de quem empurrou por último.
+local Knockback: KnockbackConfig = table.freeze({
+	HorizontalSpeed = 62,
+	VerticalSpeed = 26,
+	Duration = 0.18,
+	SuperMultiplier = 1.35,
+	CreditWindow = 6,
+})
+
+-- Cada jogador tem uma Segunda Chance por rodada: a primeira queda para fora
+-- da arena o devolve ao andar de baixo, com alguns segundos imune a empurrões.
+local SecondChance: SecondChanceConfig = table.freeze({
+	Enabled = true,
+	RespawnProtection = 2.5,
+})
+
+-- Caos Final: nos últimos segundos da rodada a Segunda Chance é desligada e
+-- blocos aleatórios piscam em vermelho e caem, cada vez em maior número.
+-- MaxRoundFraction limita o Caos a uma fração da rodada (rodadas curtas do Studio).
+local FinalChaos: FinalChaosConfig = table.freeze({
+	Duration = 30,
+	MaxRoundFraction = 0.34,
+	CollapseInterval = 2,
+	CollapseStartCount = 3,
+	CollapseMaxCount = 9,
+	WarningTime = 1.2,
+})
+
 local GameConfig = {} :: GameConfig
 
 GameConfig.GameName = "BlocoPuff"
 GameConfig.MinimumPlayers = 2
-GameConfig.MaximumPlayers = 10
+GameConfig.MaximumPlayers = 12
 GameConfig.LobbyCountdown = 20
-GameConfig.RoundDuration = 180
+GameConfig.RoundDuration = 210
 GameConfig.IntermissionDuration = 10
 
 -- Tempos reduzidos usados apenas quando RunService:IsStudio() for verdadeiro.
 GameConfig.StudioLobbyCountdown = 5
-GameConfig.StudioRoundDuration = 20
+GameConfig.StudioRoundDuration = 60
 GameConfig.StudioIntermissionDuration = 5
 
 GameConfig.Arena = Arena
@@ -280,6 +340,9 @@ GameConfig.Puffador = Puffador
 GameConfig.EliminationZone = EliminationZone
 GameConfig.Music = Music
 GameConfig.SecretRoom = SecretRoom
+GameConfig.Knockback = Knockback
+GameConfig.SecondChance = SecondChance
+GameConfig.FinalChaos = FinalChaos
 
 function GameConfig.getRoundTimings(): RoundTimings
 	if RunService:IsStudio() then

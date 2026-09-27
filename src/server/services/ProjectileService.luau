@@ -22,8 +22,8 @@ local ArenaService = require(script.Parent.ArenaService)
 type BlockDestructionContext = ArenaService.BlockDestructionContext
 
 -- Chamado quando um projétil acerta o personagem de outro jogador. Quem
--- decide se isso elimina alguém (sala secreta) é o VaultService.
-export type CharacterHitHandler = (shooter: Player, victim: Player, position: Vector3) -> ()
+-- decide o efeito (empurrão, regra do cofre) são os serviços registrados.
+export type CharacterHitHandler = (shooter: Player, victim: Player, position: Vector3, direction: Vector3, power: number) -> ()
 
 local GENERATED_BY_ATTRIBUTE = "GeneratedBy"
 local SERVICE_NAME = "ProjectileService"
@@ -58,7 +58,7 @@ local projectileContainer: Folder? = nil
 local activeProjectiles: { ProjectileRecord } = {}
 local nextProjectileSequence = 0
 local heartbeatConnection: RBXScriptConnection? = nil
-local characterHitHandler: CharacterHitHandler? = nil
+local characterHitHandlers: { [string]: CharacterHitHandler } = {}
 
 local function isOwned(instance: Instance): boolean
 	return instance:GetAttribute(GENERATED_BY_ATTRIBUTE) == SERVICE_NAME
@@ -134,8 +134,7 @@ local function createImpactEffect(position: Vector3, normal: Vector3)
 end
 
 local function notifyCharacterHit(record: ProjectileRecord, hitInstance: Instance, position: Vector3)
-	local handler = characterHitHandler
-	if handler == nil then
+	if next(characterHitHandlers) == nil then
 		return
 	end
 	local model = hitInstance:FindFirstAncestorOfClass("Model")
@@ -143,7 +142,9 @@ local function notifyCharacterHit(record: ProjectileRecord, hitInstance: Instanc
 		local victim = Players:GetPlayerFromCharacter(model)
 		if victim ~= nil then
 			if victim ~= record.ownerPlayer then
-				task.spawn(handler, record.ownerPlayer, victim, position)
+				for _, handler in pairs(characterHitHandlers) do
+					task.spawn(handler, record.ownerPlayer, victim, position, record.direction, record.power)
+				end
 			end
 			return
 		end
@@ -354,8 +355,9 @@ function ProjectileService.spawn(
 	table.insert(activeProjectiles, record)
 end
 
-function ProjectileService.setCharacterHitHandler(handler: CharacterHitHandler?)
-	characterHitHandler = handler
+-- Registra (ou remove, com nil) um handler de acerto em personagem por chave.
+function ProjectileService.setCharacterHitHandler(key: string, handler: CharacterHitHandler?)
+	characterHitHandlers[key] = handler
 end
 
 function ProjectileService.clearAll()
@@ -374,6 +376,7 @@ function ProjectileService.clearForPlayer(player: Player)
 end
 
 function ProjectileService.stop()
+	table.clear(characterHitHandlers)
 	if heartbeatConnection ~= nil then
 		heartbeatConnection:Disconnect()
 		heartbeatConnection = nil

@@ -25,12 +25,15 @@ local POP_DURATION = 0.06
 local POP_SCALE = 1.08
 local DUST_COUNT = 14
 local DUST_TEXTURE = "rbxasset://textures/particles/smoke_main.dds"
+local WARNING_COLOR = Color3.fromRGB(255, 70, 60)
+local WARNING_PULSE = 0.18
 
 local BlockCollapseController = {}
 
 local started = false
 local effectsFolder: Folder? = nil
-local blockConnections: { [Instance]: RBXScriptConnection } = {}
+local blockConnections: { [Instance]: { RBXScriptConnection } } = {}
+local warningOverlays: { [Instance]: Part } = {}
 local random = Random.new()
 
 local function getEffectsFolder(): Folder
@@ -152,28 +155,75 @@ local function playCollapse(block: BasePart)
 	emitDust(parent, block)
 end
 
+local function clearWarning(block: Instance)
+	local overlay = warningOverlays[block]
+	if overlay ~= nil then
+		overlay:Destroy()
+		warningOverlays[block] = nil
+	end
+end
+
+-- Caos Final: o bloco pisca em vermelho antes de cair, dando tempo de sair.
+local function showWarning(block: BasePart)
+	clearWarning(block)
+	local overlay = Instance.new("Part")
+	overlay.Name = "CollapseWarning"
+	overlay.Anchored = true
+	overlay.CanCollide = false
+	overlay.CanTouch = false
+	overlay.CanQuery = false
+	overlay.CastShadow = false
+	overlay.Material = Enum.Material.Neon
+	overlay.Color = WARNING_COLOR
+	overlay.Transparency = 0.75
+	overlay.Size = block.Size + Vector3.new(0.12, 0.12, 0.12)
+	overlay.CFrame = block.CFrame
+	overlay.Parent = getEffectsFolder()
+	warningOverlays[block] = overlay
+
+	local pulse = TweenService:Create(
+		overlay,
+		TweenInfo.new(WARNING_PULSE, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true),
+		{ Transparency = 0.2 }
+	)
+	pulse:Play()
+end
+
 local function watchBlock(instance: Instance)
 	if blockConnections[instance] ~= nil or not instance:IsA("BasePart") then
 		return
 	end
 
 	local block = instance :: BasePart
-	blockConnections[instance] = block:GetAttributeChangedSignal(ArenaConstants.IsDestroyedAttribute):Connect(function()
-		if block:GetAttribute(ArenaConstants.IsDestroyedAttribute) == true then
-			local ok, failure = pcall(playCollapse, block)
-			if not ok then
-				warn(string.format("[BlocoPuff] Block collapse effect failed: %s", tostring(failure)))
+	blockConnections[instance] = {
+		block:GetAttributeChangedSignal(ArenaConstants.IsDestroyedAttribute):Connect(function()
+			if block:GetAttribute(ArenaConstants.IsDestroyedAttribute) == true then
+				clearWarning(block)
+				local ok, failure = pcall(playCollapse, block)
+				if not ok then
+					warn(string.format("[BlocoPuff] Block collapse effect failed: %s", tostring(failure)))
+				end
 			end
-		end
-	end)
+		end),
+		block:GetAttributeChangedSignal(ArenaConstants.CollapseWarningAttribute):Connect(function()
+			if block:GetAttribute(ArenaConstants.CollapseWarningAttribute) == true then
+				showWarning(block)
+			else
+				clearWarning(block)
+			end
+		end),
+	}
 end
 
 local function unwatchBlock(instance: Instance)
-	local connection = blockConnections[instance]
-	if connection ~= nil then
-		connection:Disconnect()
+	local connections = blockConnections[instance]
+	if connections ~= nil then
+		for _, connection in ipairs(connections) do
+			connection:Disconnect()
+		end
 		blockConnections[instance] = nil
 	end
+	clearWarning(instance)
 end
 
 function BlockCollapseController.start()

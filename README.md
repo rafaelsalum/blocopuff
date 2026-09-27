@@ -222,7 +222,19 @@ O lobby é a galeria envidraçada dentro do próprio prédio, com carpete, sofá
 
 O interior segue o estilo de mansão de jogos como Murder Mystery, usando somente materiais nativos: porão de tijolos no poço, papel de parede, lambri, rodapés, sancas, portas, quadros e janelas noturnas por andar (`BuildingDecor`), teto com vigas, lustres e arandelas com luz quente. O piso de cima é de taco de madeira e o de baixo de pedra fosca, sem reflexo, o que facilita enxergar os buracos. A iluminação usa `Lighting.Technology = Future` (em `default.project.json`) com base uniforme de luz ambiente; lustres e arandelas são acentos fracos e o andar de baixo recebe uma única luz de teto difusa.
 
+### Regras do core (Fase 1, entrega 1.1)
+
+Direção de produto em `docs/GAME_DESIGN.md`; escopo da fase em `docs/FASE_1_CORE_GAMEPLAY_UX.md`.
+
+- Até 12 jogadores por rodada; rodada de 3:30 (60 s no Studio).
+- **Empurrão:** acertar outro jogador com o Puffador o empurra (`KnockbackService`, `GameConfig.Knockback`). O servidor valida e calcula; o cliente dono do personagem aplica a velocidade (`KnockbackController`). Não há dano: elimina-se caindo.
+- **Derrubadas:** quem empurrou alguém nos últimos 6 s recebe o crédito se ele cair (atributo `RoundKnockouts`).
+- **Segunda Chance:** a primeira queda para fora da arena devolve o jogador a um bloco inteiro do andar de baixo, com 2,5 s de imunidade a empurrões; a segunda queda elimina. A HUD mostra "2 VIDAS" / "ÚLTIMA VIDA".
+- **Caos Final:** nos últimos 30 s a Segunda Chance é desligada e, a cada 2 s, blocos aleatórios piscam em vermelho por 1,2 s e caem (3 no início, até 9 no fim). O cronômetro fica vermelho (`FinalChaosService`, `GameConfig.FinalChaos`).
+
 ### O Cofre do Barão Puff
+
+> **Desligado na Fase 1** (`GameConfig.SecretRoom.Enabled = false`): as portas ficam fechadas e sem interação. O cofre será refeito na Fase 2, conforme `docs/FASE_2_SEGREDOS_COFRE_BARAO.md`.
 
 A mansão pertence ao Barão Puff, inventor do Puffador. O protótipo dourado dele, o **Super Puffador**, fica guardado num cofre secreto atrás de uma das três portas do andar de baixo (paredes oeste, norte e sul).
 

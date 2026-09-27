@@ -6,6 +6,7 @@
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
+local GameConfig = require(ReplicatedStorage.Shared.config.GameConfig)
 local EliminationTypes = require(ReplicatedStorage.Shared.types.EliminationTypes)
 local RoundTypes = require(ReplicatedStorage.Shared.types.RoundTypes)
 local StateAttributeNames = require(ReplicatedStorage.Shared.types.StateAttributeNames)
@@ -39,6 +40,8 @@ local cached = {
 	eliminationReason = "",
 	roundsUntilTurn = 0,
 	roundBlocksDestroyed = 0,
+	finalChaos = false,
+	hasSecondChance = false,
 }
 
 local function readRoundState(instance: Instance): RoundState
@@ -153,6 +156,19 @@ local function renderActive(currentView: HudViewHandle)
 	currentView.setCombatParticipants(cached.participantCount)
 	currentView.setArenaIntegrity(cached.remainingBlockCount, cached.totalBlockCount)
 	currentView.setPersonalScore(cached.roundBlocksDestroyed, cached.isParticipant)
+	currentView.setTimerDanger(cached.finalChaos)
+
+	local competing = cached.isParticipant and not cached.isEliminated
+	local secondChanceUsed = competing and GameConfig.SecondChance.Enabled and not cached.hasSecondChance
+	if not competing then
+		currentView.setLives("Hidden")
+	elseif cached.finalChaos then
+		currentView.setLives("Chaos")
+	elseif cached.hasSecondChance then
+		currentView.setLives("SecondChance")
+	else
+		currentView.setLives("LastLife")
+	end
 
 	if not cached.isParticipant then
 		showAnnouncement(
@@ -177,12 +193,30 @@ local function renderActive(currentView: HudViewHandle)
 			"Danger",
 			2.6
 		)
+	elseif cached.finalChaos then
+		showAnnouncement(
+			currentView,
+			string.format("%d:chaos", cached.roundId),
+			"CAOS FINAL!",
+			"Sem Segunda Chance • blocos vermelhos vão cair",
+			"Danger",
+			3
+		)
+	elseif secondChanceUsed then
+		showAnnouncement(
+			currentView,
+			string.format("%d:second-chance", cached.roundId),
+			"SEGUNDA CHANCE!",
+			"Você voltou para a arena • agora é sua última vida",
+			"Warning",
+			2.6
+		)
 	else
 		showAnnouncement(
 			currentView,
 			string.format("%d:active", cached.roundId),
 			"VALENDO!",
-			"Mire nos blocos e continue na arena",
+			"Empurre os rivais e derrube os blocos embaixo deles",
 			"Info",
 			1.5
 		)
@@ -193,6 +227,7 @@ local function renderEnding(currentView: HudViewHandle)
 	currentView.setRoundMode("Hidden")
 	currentView.setQueueVisible(false)
 	currentView.setCombatVisible(false)
+	currentView.setTimerDanger(false)
 
 	local scoreSummary = getPersonalScoreSummary()
 	if cached.winnerUserId ~= 0 and cached.winnerName ~= "" then
@@ -282,6 +317,7 @@ function HudController.start()
 		cached.statusMessage = readStringAttribute(containerInstance, StateAttributeNames.StatusMessage)
 		cached.remainingBlockCount = readNumberAttribute(containerInstance, StateAttributeNames.RemainingBlockCount)
 		cached.totalBlockCount = readNumberAttribute(containerInstance, StateAttributeNames.TotalBlockCount)
+		cached.finalChaos = readBooleanAttribute(containerInstance, StateAttributeNames.FinalChaos)
 	end
 
 	local function refreshFromPlayer()
@@ -293,6 +329,7 @@ function HudController.start()
 			localPlayer,
 			StateAttributeNames.PlayerRoundBlocksDestroyed
 		)
+		cached.hasSecondChance = readBooleanAttribute(localPlayer, StateAttributeNames.PlayerHasSecondChance)
 	end
 
 	refreshFromContainer()
@@ -310,6 +347,7 @@ function HudController.start()
 		StateAttributeNames.StatusMessage,
 		StateAttributeNames.RemainingBlockCount,
 		StateAttributeNames.TotalBlockCount,
+		StateAttributeNames.FinalChaos,
 	}
 	for _, attributeName in ipairs(containerAttributeNames) do
 		connectAttribute(containerInstance, attributeName, function()
@@ -324,6 +362,7 @@ function HudController.start()
 		StateAttributeNames.PlayerEliminationReason,
 		StateAttributeNames.PlayerRoundsUntilTurn,
 		StateAttributeNames.PlayerRoundBlocksDestroyed,
+		StateAttributeNames.PlayerHasSecondChance,
 	}
 	for _, attributeName in ipairs(playerAttributeNames) do
 		connectAttribute(localPlayer, attributeName, function()

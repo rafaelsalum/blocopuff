@@ -11,6 +11,7 @@ local PuffadorService = require(script.services.PuffadorService)
 local EliminationService = require(script.services.EliminationService)
 local RoundService = require(script.services.RoundService)
 local VaultService = require(script.services.VaultService)
+local KnockbackService = require(script.services.KnockbackService)
 local WorldVisualService = require(script.services.WorldVisualService)
 local BuildingService = require(script.services.BuildingService)
 local AdminService = require(script.services.AdminService)
@@ -66,6 +67,9 @@ print(string.format("[BlocoPuff] Arena created with %d blocks", #ArenaService.ge
 
 PuffadorService.start(world)
 print("[BlocoPuff] Puffador system started")
+
+KnockbackService.start(PuffadorService.sendFeedback)
+print("[BlocoPuff] Puffador knockback armed")
 
 -- Precisa da Arena já criada (usa ArenaService.getEliminationY) e do
 -- RoundService.eliminateParticipant como callback, para não depender dele.

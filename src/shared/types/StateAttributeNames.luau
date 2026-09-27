@@ -19,6 +19,7 @@ export type StateAttributeNames = {
 	TotalBlockCount: string,
 	RemainingBlockCount: string,
 	DestroyedBlockCount: string,
+	FinalChaos: string,
 
 	PlayerIsParticipant: string,
 	PlayerParticipatingRoundId: string,
@@ -27,6 +28,8 @@ export type StateAttributeNames = {
 	PlayerEliminatedAtRoundId: string,
 	PlayerRoundsUntilTurn: string,
 	PlayerRoundBlocksDestroyed: string,
+	PlayerHasSecondChance: string,
+	PlayerRoundKnockouts: string,
 }
 
 local StateAttributeNames: StateAttributeNames = {
@@ -45,6 +48,7 @@ local StateAttributeNames: StateAttributeNames = {
 	TotalBlockCount = "TotalBlockCount",
 	RemainingBlockCount = "RemainingBlockCount",
 	DestroyedBlockCount = "DestroyedBlockCount",
+	FinalChaos = "FinalChaos",
 
 	PlayerIsParticipant = "IsRoundParticipant",
 	PlayerParticipatingRoundId = "ParticipatingRoundId",
@@ -53,6 +57,8 @@ local StateAttributeNames: StateAttributeNames = {
 	PlayerEliminatedAtRoundId = "EliminatedAtRoundId",
 	PlayerRoundsUntilTurn = "RoundsUntilTurn",
 	PlayerRoundBlocksDestroyed = "RoundBlocksDestroyed",
+	PlayerHasSecondChance = "HasSecondChance",
+	PlayerRoundKnockouts = "RoundKnockouts",
 }
 
 return table.freeze(StateAttributeNames)

@@ -367,6 +367,17 @@ local function connectRemotes(): boolean
 	requestPuffRemote = requestInstance
 	feedbackRemote = feedbackInstance
 	feedbackInstance.OnClientEvent:Connect(function(feedbackType: unknown)
+		if feedbackType == "PlayerHit" then
+			-- Acertou outro jogador: marcador na mira e som, sem somar bloco.
+			if crosshair ~= nil then
+				crosshair.playHit()
+			end
+			local hitTool = equippedTool
+			if hitTool ~= nil then
+				playToolSound(hitTool, PuffadorConstants.HitSoundName)
+			end
+			return
+		end
 		if feedbackType ~= "Hit" then
 			return
 		end

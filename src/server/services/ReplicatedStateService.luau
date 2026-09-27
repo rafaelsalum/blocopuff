@@ -25,6 +25,7 @@ local ATTR_STATUS_MESSAGE = StateAttributeNames.StatusMessage
 local ATTR_TOTAL_BLOCK_COUNT = StateAttributeNames.TotalBlockCount
 local ATTR_REMAINING_BLOCK_COUNT = StateAttributeNames.RemainingBlockCount
 local ATTR_DESTROYED_BLOCK_COUNT = StateAttributeNames.DestroyedBlockCount
+local ATTR_FINAL_CHAOS = StateAttributeNames.FinalChaos
 
 local ReplicatedStateService = {}
 
@@ -95,6 +96,7 @@ function ReplicatedStateService.create(): Configuration
 	setAttribute(ATTR_TOTAL_BLOCK_COUNT, 0)
 	setAttribute(ATTR_REMAINING_BLOCK_COUNT, 0)
 	setAttribute(ATTR_DESTROYED_BLOCK_COUNT, 0)
+	setAttribute(ATTR_FINAL_CHAOS, false)
 
 	return container
 end
@@ -133,6 +135,10 @@ function ReplicatedStateService.setBlockCounts(total: number, remaining: number,
 	setAttribute(ATTR_TOTAL_BLOCK_COUNT, total)
 	setAttribute(ATTR_REMAINING_BLOCK_COUNT, remaining)
 	setAttribute(ATTR_DESTROYED_BLOCK_COUNT, destroyed)
+end
+
+function ReplicatedStateService.setFinalChaos(active: boolean)
+	setAttribute(ATTR_FINAL_CHAOS, active)
 end
 
 function ReplicatedStateService.getContainer(): Configuration?
