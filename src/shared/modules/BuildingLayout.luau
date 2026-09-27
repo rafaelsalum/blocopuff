@@ -31,6 +31,7 @@ local SPAWN_HEIGHT_OFFSET = 5
 local SPAWN_EDGE_BLOCKS = 1
 local SPREAD_TOLERANCE = 0.9
 local GALLERY_SPAWN_INSET = 4
+local GALLERY_SPAWN_COLUMNS = 3
 
 local BuildingLayout = {}
 
@@ -172,19 +173,31 @@ function BuildingLayout.getSpreadSpawnCFrames(arena: ArenaConfig, floorIndex: nu
 	return cframes
 end
 
+-- Grade de posições no piso da galeria (lobby): poucas colunas na largura e
+-- muitas linhas no comprimento, acompanhando o formato comprido da galeria.
+-- Todos olham para o vidro, de frente para a arena.
 function BuildingLayout.getGallerySpawnCFrames(arena: ArenaConfig, building: BuildingConfig, count: number): { CFrame }
 	local gallery = BuildingLayout.getGallery(arena, building)
 	local spanZ = math.max(0, gallery.size.Z - (GALLERY_SPAWN_INSET * 2))
 	local spanX = math.max(0, gallery.size.X - (GALLERY_SPAWN_INSET * 2))
+	local columns = math.max(1, math.min(GALLERY_SPAWN_COLUMNS, count))
+	local rows = math.max(1, math.ceil(count / columns))
+	local minX = gallery.center.X - (spanX / 2)
+	local minZ = gallery.center.Z - (spanZ / 2)
+	local y = gallery.floorY + SPAWN_HEIGHT_OFFSET
+	local facing = Vector3.new(-1, 0, 0)
 
-	return distributeOnGrid(
-		count,
-		gallery.center.X - (spanX / 2),
-		gallery.center.Z - (spanZ / 2),
-		spanX,
-		spanZ,
-		gallery.floorY + SPAWN_HEIGHT_OFFSET
-	)
+	local cframes: { CFrame } = {}
+	for index = 1, count do
+		local zeroBased = index - 1
+		local column = zeroBased % columns
+		local row = math.floor(zeroBased / columns)
+		local xRatio = if columns > 1 then column / (columns - 1) else 0.5
+		local zRatio = if rows > 1 then row / (rows - 1) else 0.5
+		local position = Vector3.new(minX + (xRatio * spanX), y, minZ + (zRatio * spanZ))
+		table.insert(cframes, CFrame.lookAt(position, position + facing))
+	end
+	return cframes
 end
 
 return table.freeze(BuildingLayout)

@@ -19,7 +19,11 @@ local LOBBY_NAME = "Lobby"
 local GENERATED_BY_ATTRIBUTE = "GeneratedBy"
 local SERVICE_NAME = "LobbyService"
 local SPAWN_SIZE = Vector3.new(6, 1, 6)
-local TELEPORT_SLOT_COUNT = 16
+-- Posições candidatas no lobby. Mais posições que jogadores permitem sempre
+-- escolher um lugar livre, longe de quem já está na galeria.
+local TELEPORT_SLOT_COUNT = 45
+local SLOT_SPREAD_TOLERANCE = 0.85
+local ROOT_WAIT_TIMEOUT = 5
 local RECOVERY_INTERVAL = 0.2
 local ATTR_IS_PARTICIPANT = StateAttributeNames.PlayerIsParticipant
 local ATTR_IS_ELIMINATED = StateAttributeNames.PlayerIsEliminated
@@ -32,7 +36,10 @@ local currentBuilding: BuildingConfig? = nil
 local lobbyModel: Model? = nil
 local gallerySpawn: SpawnLocation? = nil
 local playerAddedConnection: RBXScriptConnection? = nil
+local playerRemovingConnection: RBXScriptConnection? = nil
+local characterConnections: { [Player]: RBXScriptConnection } = {}
 local recoveryGeneration = 0
+local slotRandom = Random.new()
 
 local function isOwned(instance: Instance): boolean
 	return instance:GetAttribute(GENERATED_BY_ATTRIBUTE) == SERVICE_NAME
@@ -118,6 +125,114 @@ local function isActiveCompetitor(player: Player): boolean
 	return player:GetAttribute(ATTR_IS_PARTICIPANT) == true and player:GetAttribute(ATTR_IS_ELIMINATED) == false
 end
 
+-- Posições dos outros jogadores vivos que estão na galeria agora.
+local function getOccupiedPositions(except: { [Player]: boolean }): { Vector3 }
+	local arena = currentArena
+	local building = currentBuilding
+	if arena == nil or building == nil then
+		return {}
+	end
+	local gallery = BuildingLayout.getGallery(arena, building)
+
+	local occupied: { Vector3 } = {}
+	for _, player in ipairs(Players:GetPlayers()) do
+		if not except[player] then
+			local _, rootPart = getLivingRoot(player)
+			if rootPart ~= nil and rootPart.Position.X >= gallery.innerX and rootPart.Position.Y >= gallery.floorY - 2 then
+				table.insert(occupied, rootPart.Position)
+			end
+		end
+	end
+	return occupied
+end
+
+local function getHorizontalDistance(a: Vector3, b: Vector3): number
+	return Vector2.new(a.X - b.X, a.Z - b.Z).Magnitude
+end
+
+-- Escolhe a posição do lobby mais distante de todos os ocupados (sorteando
+-- entre as quase tão boas), garantindo que ninguém nasça em cima de outro.
+local function pickFreeSlot(occupied: { Vector3 }): CFrame?
+	local slots = getGallerySlots()
+	if #slots == 0 then
+		return nil
+	end
+	if #occupied == 0 then
+		return slots[slotRandom:NextInteger(1, #slots)]
+	end
+
+	local distances: { number } = {}
+	local best = 0
+	for index, slot in ipairs(slots) do
+		local nearest = math.huge
+		for _, position in ipairs(occupied) do
+			nearest = math.min(nearest, getHorizontalDistance(slot.Position, position))
+		end
+		distances[index] = nearest
+		best = math.max(best, nearest)
+	end
+
+	local candidates: { CFrame } = {}
+	for index, slot in ipairs(slots) do
+		if distances[index] >= best * SLOT_SPREAD_TOLERANCE then
+			table.insert(candidates, slot)
+		end
+	end
+	return candidates[slotRandom:NextInteger(1, #candidates)]
+end
+
+-- Leva os jogadores para lugares livres do lobby, um de cada vez, contando
+-- cada lugar já escolhido como ocupado para o próximo.
+local function placeInLobby(players: { Player })
+	local moving: { [Player]: boolean } = {}
+	for _, player in ipairs(players) do
+		moving[player] = true
+	end
+	local occupied = getOccupiedPositions(moving)
+
+	for _, player in ipairs(players) do
+		local slot = pickFreeSlot(occupied)
+		if slot == nil then
+			return
+		end
+		moveCharacterTo(player, slot)
+		table.insert(occupied, slot.Position)
+	end
+end
+
+-- Todo personagem nasce no único SpawnLocation do lobby; logo em seguida o
+-- servidor o move para um lugar livre, evitando jogadores empilhados.
+local function onCharacterAdded(player: Player, character: Model)
+	local rootPart = character:WaitForChild("HumanoidRootPart", ROOT_WAIT_TIMEOUT)
+	if rootPart == nil or character.Parent == nil then
+		return
+	end
+	-- Aguarda o Roblox terminar de posicionar o personagem no SpawnLocation.
+	task.wait()
+	if player.Character ~= character or isActiveCompetitor(player) then
+		return
+	end
+	placeInLobby({ player })
+end
+
+local function watchCharacters(player: Player)
+	assignActiveSpawn(player)
+	if characterConnections[player] ~= nil then
+		return
+	end
+	characterConnections[player] = player.CharacterAdded:Connect(function(character)
+		onCharacterAdded(player, character)
+	end)
+end
+
+local function unwatchCharacters(player: Player)
+	local connection = characterConnections[player]
+	if connection ~= nil then
+		connection:Disconnect()
+		characterConnections[player] = nil
+	end
+end
+
 -- Rede de segurança: quem não está competindo e acaba abaixo do piso mais
 -- baixo volta para o ponto de nascimento atual em vez de ficar preso no poço.
 local function recoverFallenSpectators(generation: number)
@@ -130,7 +245,7 @@ local function recoverFallenSpectators(generation: number)
 				if not isActiveCompetitor(player) then
 					local _, rootPart = getLivingRoot(player)
 					if rootPart ~= nil and rootPart.Position.Y < recoveryY then
-						moveCharacterTo(player, CFrame.new(spawn.Position + Vector3.new(0, 4, 0)))
+						placeInLobby({ player })
 					end
 				end
 			end
@@ -144,6 +259,13 @@ function LobbyService.destroy()
 	if playerAddedConnection ~= nil then
 		playerAddedConnection:Disconnect()
 		playerAddedConnection = nil
+	end
+	if playerRemovingConnection ~= nil then
+		playerRemovingConnection:Disconnect()
+		playerRemovingConnection = nil
+	end
+	for player in pairs(characterConnections) do
+		unwatchCharacters(player)
 	end
 
 	for _, player in ipairs(Players:GetPlayers()) do
@@ -184,9 +306,10 @@ function LobbyService.create(worldRoot: Model, arena: ArenaConfig, building: Bui
 
 	lobbyModel = model
 	for _, player in ipairs(Players:GetPlayers()) do
-		assignActiveSpawn(player)
+		watchCharacters(player)
 	end
-	playerAddedConnection = Players.PlayerAdded:Connect(assignActiveSpawn)
+	playerAddedConnection = Players.PlayerAdded:Connect(watchCharacters)
+	playerRemovingConnection = Players.PlayerRemoving:Connect(unwatchCharacters)
 
 	recoveryGeneration += 1
 	local generation = recoveryGeneration
@@ -200,13 +323,7 @@ end
 -- Chamado quando a partida termina, antes de restaurar os pisos: quem
 -- ainda está na arena volta para a galeria.
 function LobbyService.returnToLobby(players: { Player })
-	local slots = getGallerySlots()
-	if #slots == 0 then
-		return
-	end
-	for index, player in ipairs(players) do
-		moveCharacterTo(player, slots[((index - 1) % #slots) + 1])
-	end
+	placeInLobby(players)
 end
 
 function LobbyService.getModel(): Model?
