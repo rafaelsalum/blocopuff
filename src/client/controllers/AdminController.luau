@@ -100,8 +100,9 @@ function AdminController.start()
 		if #payload.message > AdminConstants.MaximumAnnouncementLength or #payload.sender > 50 then
 			return
 		end
-		-- Aviso de administrador na faixa do topo, com prioridade alta: não
-		-- se sobrepõe aos avisos do jogo, apenas entra na fila deles.
+		-- Aviso de administrador na faixa do topo, com prioridade alta: nunca
+		-- aparece por cima de outro aviso; interrompe avisos menos importantes
+		-- e espera na fila atrás dos críticos.
 		NotificationManager.notify({
 			channel = "Banner",
 			category = "Admin",

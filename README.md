@@ -272,7 +272,7 @@ A mansão pertence ao Barão Puff, inventor do Puffador. O protótipo dourado de
 - No pedestal está o Super Puffador, um por rodada: 15 tiros que derrubam 2 blocos cada. Quem o carrega fica com contorno dourado, visível para todos.
 - Para ninguém acampar, cada jogador pode passar no máximo 15 s no cofre por rodada. Aos 10 s recebe um aviso; aos 15 s o Barão o expulsa para o andar de baixo.
 - Ajustes ficam em `GameConfig.SecretRoom`. `AlertSoundId` pode receber um som da Creator Store.
-- Código: `VaultService` (regras), `VaultProps` (porta, brilho, alarme e prêmio), `SecretRoomBuilder` (arquitetura), `PuffadorModel` (as duas versões do Puffador) e, no cliente, `VaultController` e `VaultView`.
+- Código: `VaultService` (regras), `VaultProps` (porta, brilho, alarme e prêmio), `SecretRoomBuilder` (arquitetura), `PuffadorModel` (as duas versões do Puffador) e, no cliente, `VaultController` (faixas via `NotificationManager`) e `SuperChargeView`.
 
 ### Identidade visual
 
