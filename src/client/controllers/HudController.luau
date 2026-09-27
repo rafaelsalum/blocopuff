@@ -199,10 +199,7 @@ local function renderActive(currentView: HudViewHandle)
 		)
 	elseif cached.isEliminated then
 		local reason = cached.eliminationReason
-		local title = if reason == EliminationTypes.FellFromArena
-			then "VOCÊ CAIU!"
-			elseif reason == EliminationTypes.ShotInSecretRoom then "PEGO NO COFRE!"
-			else "ELIMINADO!"
+		local title = if reason == EliminationTypes.FellFromArena then "VOCÊ CAIU!" else "ELIMINADO!"
 		showAnnouncement(
 			currentView,
 			string.format("%d:eliminated:%s", cached.roundId, reason),

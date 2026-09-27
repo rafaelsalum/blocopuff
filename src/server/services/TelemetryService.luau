@@ -200,6 +200,19 @@ function TelemetryService.finalChaosStarted(alivePlayers: { Player })
 	end
 end
 
+-- Eventos do cofre e do Puffador do Cofre.
+function TelemetryService.vaultOpened(player: Player)
+	log(player, "VaultOpened", elapsed())
+end
+
+function TelemetryService.vaultPrizeTaken(player: Player)
+	log(player, "VaultPrizeTaken", elapsed())
+end
+
+function TelemetryService.blockBuilt(player: Player, floor: number)
+	log(player, "BlockBuilt", 1, `Floor{floor}`)
+end
+
 function TelemetryService.leftMidRound(player: Player)
 	if roundActive then
 		log(player, "LeftMidRound", elapsed())

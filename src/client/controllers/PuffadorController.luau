@@ -18,6 +18,7 @@ local GameConfig = require(ReplicatedStorage.Shared.config.GameConfig)
 local ArenaConstants = require(ReplicatedStorage.Shared.modules.ArenaConstants)
 local PuffadorConstants = require(ReplicatedStorage.Shared.modules.PuffadorConstants)
 local CombatCameraController = require(script.Parent.CombatCameraController)
+local BuildModeController = require(script.Parent.BuildModeController)
 local CrosshairView = require(script.Parent.Parent.ui.CrosshairView)
 local ControlHintView = require(script.Parent.Parent.ui.ControlHintView)
 local FireButtonView = require(script.Parent.Parent.ui.FireButtonView)
@@ -253,6 +254,11 @@ local function onToolActivated()
 	if remote == nil or tool == nil then
 		return
 	end
+	-- Puffador do Cofre no modo Construir: o disparo vira construção.
+	if BuildModeController.isActive() then
+		BuildModeController.tryBuild(holdSequence)
+		return
+	end
 
 	local now = os.clock()
 	if now - lastLocalFireClock < GameConfig.Puffador.FireCooldown then
@@ -322,6 +328,7 @@ local function setToolEquipped(tool: Tool)
 	if fireButton ~= nil then
 		fireButton.setVisible(UserInputService.TouchEnabled)
 	end
+	BuildModeController.setEquipped(tool)
 end
 
 local function clearToolEquipped(tool: Tool)
@@ -332,6 +339,7 @@ local function clearToolEquipped(tool: Tool)
 	equippedTool = nil
 	stopFiring()
 	stopTargetingFeedback()
+	BuildModeController.setEquipped(nil)
 	if feedback ~= nil then
 		feedback.resetCombo()
 	end
@@ -456,12 +464,14 @@ function PuffadorController.start()
 	if playerGuiInstance ~= nil and playerGuiInstance:IsA("PlayerGui") then
 		crosshair = CrosshairView.new(playerGuiInstance)
 		fireButton = FireButtonView.new(playerGuiInstance, startFiring, stopFiring)
+		BuildModeController.attach(playerGuiInstance, fireButton)
 		controlHint = ControlHintView.new(playerGuiInstance)
 		feedback = FeedbackView.new(playerGuiInstance)
 	else
 		warn("[BlocoPuff] Puffador UI not started: PlayerGui unavailable")
 	end
 
+	BuildModeController.start()
 	if not connectRemotes() then
 		warn("[BlocoPuff] Puffador controller not started: remotes unavailable")
 		return
@@ -488,6 +498,7 @@ function PuffadorController.start()
 		setCombatBackpackHidden(false)
 		CombatCameraController.disable()
 		equippedTool = nil
+		BuildModeController.setEquipped(nil)
 		scanExistingChildren(character)
 		character.ChildAdded:Connect(tryConnectTool)
 	end)

@@ -87,12 +87,13 @@ export type EliminationZoneConfig = {
 
 export type SecretRoomConfig = {
 	Enabled: boolean,
-	UnlockMinFraction: number,
-	UnlockMaxFraction: number,
 	OpenHoldDuration: number,
 	GrabHoldDuration: number,
 	SuperCharges: number,
 	SuperPower: number,
+	BuildCharges: number,
+	BuildRange: number,
+	BuildCooldown: number,
 	MaxStaySeconds: number,
 	StayWarningSeconds: number,
 	AlertSoundId: string,
@@ -122,7 +123,10 @@ export type FinalChaosConfig = {
 
 export type BaraoConfig = {
 	Enabled: boolean,
-	WakeDelay: number,
+	WakeMinFraction: number,
+	WakeMaxFraction: number,
+	EnragedDuration: number,
+	EnragedSpeedMultiplier: number,
 	PatrolSpeed: number,
 	ChaseSpeed: number,
 	LateralSpeed: number,
@@ -302,21 +306,21 @@ local Music: MusicConfig = table.freeze({
 	FadeTime = 1.2,
 })
 
--- Sala secreta do Barão Puff: uma das portas do andar de baixo, sorteada a
--- cada rodada, destrava entre UnlockMinFraction e UnlockMaxFraction do tempo
--- da rodada. Dentro dela está o Super Puffador, que quebra SuperPower blocos
--- por tiro durante SuperCharges disparos. AlertSoundId toca para todos
--- quando a sala é aberta; troque por um som da Creator Store se quiser.
+-- Cofre do Barão, na parede oeste do andar de baixo. Destranca no instante
+-- em que o Barão acorda (GameConfig.Barao.WakeMin/MaxFraction). Dentro está
+-- o Puffador do Cofre: SuperCharges disparos que quebram SuperPower blocos
+-- cada e empurram mais forte, e BuildCharges construções (reconstrói um
+-- bloco derrubado da grade a até BuildRange studs). AlertSoundId toca para
+-- todos quando o cofre é aberto; troque por um som da Creator Store se quiser.
 local SecretRoom: SecretRoomConfig = table.freeze({
-	-- Desligado na Fase 1 (o cofre é escopo da Fase 2 do game design). As
-	-- portas continuam no mapa, fechadas e sem interação.
-	Enabled = false,
-	UnlockMinFraction = 0.25,
-	UnlockMaxFraction = 0.5,
+	Enabled = true,
 	OpenHoldDuration = 1.5,
 	GrabHoldDuration = 0.8,
 	SuperCharges = 15,
 	SuperPower = 2,
+	BuildCharges = 3,
+	BuildRange = 40,
+	BuildCooldown = 0.5,
 	-- Tempo total que cada jogador pode passar no cofre por rodada; depois
 	-- disso o Barão o expulsa de volta para o andar de baixo.
 	MaxStaySeconds = 15,
@@ -363,14 +367,21 @@ local Telemetry: TelemetryConfig = table.freeze({
 })
 
 -- Barão: mascote que patrulha os corredores secretos. Dorme no começo da
--- rodada, acorda com um latido e expulsa quem encontra, sem dano. A
+-- rodada, acorda com um latido (no mesmo instante o cofre destranca) e
+-- expulsa quem encontra, sem dano. A
 -- perseguição é mais lenta que o jogador (WalkSpeed 16) para dar chance de
 -- fugir, e dá para pular por cima dele (JumpClearance: altura dos pés acima
 -- do piso que já passa sobre ele). Os sons são provisórios, embutidos no
 -- Roblox: troque por latidos reais (rbxassetid://...) quando houver.
 local Barao: BaraoConfig = table.freeze({
 	Enabled = true,
-	WakeDelay = 20,
+	-- Acorda (e destranca o cofre) entre 20% e 35% do tempo da rodada.
+	WakeMinFraction = 0.2,
+	WakeMaxFraction = 0.35,
+	-- Quando alguém abre o cofre, o Barão fica bravo por um tempo: late
+	-- mais e corre um pouco mais (ainda mais devagar que o jogador).
+	EnragedDuration = 25,
+	EnragedSpeedMultiplier = 1.1,
 	PatrolSpeed = 8,
 	ChaseSpeed = 14,
 	LateralSpeed = 6,

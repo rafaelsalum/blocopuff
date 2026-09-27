@@ -34,8 +34,11 @@ local currentRoundId = 0
 
 local grantedTools: { [Player]: Tool } = {}
 local lastFireClock: { [Player]: number } = {}
--- Tiros restantes do Super Puffador de cada jogador; ao zerar, volta ao comum.
+-- Tiros restantes do Puffador do Cofre de cada jogador; ao zerar, volta ao
+-- comum (e as construções que sobraram se perdem).
 local superCharges: { [Player]: number } = {}
+-- Construções restantes do modo Construir do Puffador do Cofre.
+local buildCharges: { [Player]: number } = {}
 
 local function isOwned(instance: Instance): boolean
 	return instance:GetAttribute(GENERATED_BY_ATTRIBUTE) == SERVICE_NAME
@@ -124,23 +127,61 @@ function PuffadorService.revokeFrom(player: Player)
 
 	removeExistingToolCopies(player)
 	clearCooldown(player)
+	-- Zera o modo Construir no cliente (o aviso de "esgotado" é só para
+	-- quando os Puffs acabam de verdade).
+	if superCharges[player] ~= nil then
+		sendFeedback(player, "Builds", 0)
+	end
 	superCharges[player] = nil
+	buildCharges[player] = nil
 	ProjectileService.clearForPlayer(player)
 end
 
--- Troca o Puffador do jogador pelo Super, com `charges` tiros de poder dobrado.
-function PuffadorService.upgradeToSuper(player: Player, charges: number): boolean
+-- Troca o Puffador do jogador pelo Puffador do Cofre, com `charges` tiros
+-- de poder dobrado e `builds` construções.
+function PuffadorService.upgradeToSuper(player: Player, charges: number, builds: number): boolean
 	if not acceptingRequests or grantedTools[player] == nil then
 		return false
 	end
 	superCharges[player] = charges
+	buildCharges[player] = builds
 	grantToolToPlayer(player, "Super")
 	sendFeedback(player, "Super", charges)
+	sendFeedback(player, "Builds", builds)
 	return true
 end
 
 function PuffadorService.hasSuper(player: Player): boolean
 	return superCharges[player] ~= nil
+end
+
+-- Verdadeiro se o jogador está participando e com o Puffador na mão.
+function PuffadorService.isHoldingPuffador(player: Player): boolean
+	local tool = grantedTools[player]
+	local character = player.Character
+	return acceptingRequests
+		and tool ~= nil
+		and character ~= nil
+		and tool.Parent == character
+		and player:GetAttribute(StateAttributeNames.PlayerIsParticipant) == true
+		and player:GetAttribute(StateAttributeNames.PlayerParticipatingRoundId) == currentRoundId
+		and player:GetAttribute(StateAttributeNames.PlayerIsEliminated) == false
+end
+
+function PuffadorService.getBuildCharges(player: Player): number
+	return if superCharges[player] ~= nil then buildCharges[player] or 0 else 0
+end
+
+-- Gasta uma construção; devolve quantas sobraram.
+function PuffadorService.consumeBuildCharge(player: Player): number
+	local remaining = math.max(0, PuffadorService.getBuildCharges(player) - 1)
+	buildCharges[player] = remaining
+	sendFeedback(player, "Builds", remaining)
+	return remaining
+end
+
+function PuffadorService.getRoundId(): number
+	return currentRoundId
 end
 
 local function consumeSuperCharge(player: Player)
@@ -155,7 +196,9 @@ local function consumeSuperCharge(player: Player)
 		return
 	end
 	superCharges[player] = nil
+	buildCharges[player] = nil
 	sendFeedback(player, "Super", 0)
+	sendFeedback(player, "Builds", 0)
 	-- Espera o tiro sair antes de trocar a arma na mão do jogador.
 	task.delay(0.15, function()
 		if acceptingRequests and grantedTools[player] ~= nil and superCharges[player] == nil then
@@ -186,6 +229,7 @@ function PuffadorService.endRound()
 	acceptingRequests = false
 	revokeAllTracked()
 	table.clear(superCharges)
+	table.clear(buildCharges)
 	ProjectileService.clearAll()
 	currentRoundId = 0
 end
@@ -379,6 +423,21 @@ function PuffadorService.sendFeedback(player: Player, kind: string, value: any)
 	sendFeedback(player, kind, value)
 end
 
+-- Origem validada da mira de um jogador (câmera perto da cabeça e com
+-- linha livre, senão o cano). Usado também pelo modo Construir.
+function PuffadorService.resolveAimOrigin(player: Player, rawAimOrigin: unknown): Vector3?
+	local character = player.Character
+	local tool = grantedTools[player]
+	if character == nil or tool == nil then
+		return nil
+	end
+	local rootPart = character:FindFirstChild("HumanoidRootPart")
+	if rootPart == nil or not rootPart:IsA("BasePart") then
+		return nil
+	end
+	return resolveAimOrigin(character, rootPart, rawAimOrigin, computeOrigin(rootPart, tool))
+end
+
 function PuffadorService.getRemotesFolder(): Folder?
 	return remotesFolder
 end
@@ -393,6 +452,7 @@ function PuffadorService.stop()
 	revokeAllTracked()
 	table.clear(lastFireClock)
 	table.clear(superCharges)
+	table.clear(buildCharges)
 	currentRoundId = 0
 
 	ProjectileService.stop()

@@ -21,6 +21,9 @@ local TelemetryService = require(script.Parent.TelemetryService)
 local SecretPassageService = require(script.Parent.SecretPassageService)
 local TocaService = require(script.Parent.TocaService)
 local BaraoService = require(script.Parent.BaraoService)
+local BuildModeService = require(script.Parent.BuildModeService)
+
+local awakeningRandom = Random.new()
 local PuffadorConstants = require(ReplicatedStorage.Shared.modules.PuffadorConstants)
 
 type RoundState = RoundTypes.RoundState
@@ -473,10 +476,12 @@ local function beginRound(timings: RoundTimings)
 	KnockbackService.beginRound(currentRoundId)
 	SecretPassageService.beginRound(currentRoundId)
 	TocaService.beginRound(currentRoundId)
-	BaraoService.beginRound(currentRoundId)
+	-- O Barão acorda e o cofre destranca no mesmo instante sorteado.
+	local awakening = timings.RoundDuration * awakeningRandom:NextNumber(GameConfig.Barao.WakeMinFraction, GameConfig.Barao.WakeMaxFraction)
+	BaraoService.beginRound(currentRoundId, awakening)
 	TelemetryService.roundStarted(participantOrder)
 	ReplicatedState.setFinalChaos(false)
-	VaultService.beginRound(currentRoundId, timings.RoundDuration)
+	VaultService.beginRound(currentRoundId, awakening)
 
 	-- Só inicia o monitoramento da zona depois que os participantes já
 	-- estão posicionados na arena, evitando eliminar alguém ainda no lobby.
@@ -706,6 +711,7 @@ function RoundService.stop()
 	TocaService.stop()
 	ArenaService.endRound()
 	VaultService.stop()
+	BuildModeService.stop()
 	PuffadorService.stop()
 	LobbyService.returnToLobby(participantOrder)
 	ArenaService.restoreAllBlocks()

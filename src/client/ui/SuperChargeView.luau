@@ -1,7 +1,7 @@
 --!strict
 
--- Pílula dourada "⚡ SUPER × n" com os tiros restantes do Super Puffador.
--- Só visual.
+-- Pílula dourada com os Puffs e as construções restantes do Puffador do
+-- Cofre ("⚡ 12  🧱 3"). Só visual.
 
 local TweenService = game:GetService("TweenService")
 
@@ -9,7 +9,7 @@ local ResponsiveScale = require(script.Parent.ResponsiveScale)
 local UiTheme = require(script.Parent.UiTheme)
 
 export type SuperChargeViewHandle = {
-	setSuperCharges: (charges: number) -> (),
+	setCharges: (puffs: number, builds: number) -> (),
 	destroy: () -> (),
 }
 
@@ -22,7 +22,7 @@ local function createSuperPill(screenGui: ScreenGui)
 	pill.Name = "SuperPill"
 	pill.AnchorPoint = Vector2.new(0.5, 1)
 	pill.Position = UDim2.new(0.5, 0, 1, -150)
-	pill.Size = UDim2.fromOffset(210, 46)
+	pill.Size = UDim2.fromOffset(230, 46)
 	pill.BackgroundColor3 = UiTheme.Colors.White
 	pill.BorderSizePixel = 0
 	pill.Visible = false
@@ -48,12 +48,12 @@ function SuperChargeView.new(playerGui: PlayerGui): SuperChargeViewHandle
 
 	local handle = {} :: SuperChargeViewHandle
 
-	handle.setSuperCharges = function(charges: number)
-		if charges <= 0 then
+	handle.setCharges = function(puffs: number, builds: number)
+		if puffs <= 0 then
 			pill.Visible = false
 			return
 		end
-		pillLabel.Text = string.format("⚡ SUPER × %d", charges)
+		pillLabel.Text = string.format("⚡ %d   🧱 %d", puffs, math.max(0, builds))
 		pill.Visible = true
 		pillScale.Scale = 1.15
 		TweenService:Create(pillScale, TweenInfo.new(0.25, Enum.EasingStyle.Back), { Scale = 1 }):Play()

@@ -56,6 +56,8 @@ local ENERGY_HEIGHT_OFFSET = 1.15
 local ENERGY_BEAM_WIDTH = 0.34
 local ENERGY_WALL_INSET = 1
 local RESTORE_FADE_DURATION = 0.22
+local REBUILD_FLASH_COLOR = Color3.fromRGB(255, 214, 90)
+local REBUILD_FLASH_DURATION = 0.9
 
 local ArenaService = {}
 
@@ -531,7 +533,7 @@ function ArenaService.setCollapseWarning(instance: Instance, warning: boolean)
 	instance:SetAttribute(ArenaConstants.CollapseWarningAttribute, warning)
 end
 
--- Vizinho do bloco atingido para o Super Puffador: segue o eixo em que o
+-- Vizinho do bloco atingido para o Puffador do Cofre: segue o eixo em que o
 -- impacto ficou mais afastado do centro (coluna = X, linha = Z). Na borda
 -- da grade, ou se esse vizinho já caiu, tenta o lado oposto.
 function ArenaService.getNeighborBlock(instance: Instance, impactPosition: Vector3): Part?
@@ -558,6 +560,55 @@ function ArenaService.getNeighborBlock(instance: Instance, impactPosition: Vecto
 		end
 	end
 	return nil
+end
+
+local function findBlockAt(floorIndex: number, row: number, column: number): (Part?, BlockRecord?)
+	for part, record in pairs(blockRecords) do
+		if record.floorIndex == floorIndex and record.gridRow == row and record.gridColumn == column and record.generation == arenaGeneration then
+			return part, record
+		end
+	end
+	return nil, nil
+end
+
+-- Estado de uma célula da grade (para o modo Construir), ou nil se não existir.
+function ArenaService.getCellState(floorIndex: number, row: number, column: number): ("Destroyed" | "Intact")?
+	local _, record = findBlockAt(floorIndex, row, column)
+	if record == nil then
+		return nil
+	end
+	return if record.isDestroyed then "Destroyed" else "Intact"
+end
+
+-- Reconstrói um bloco derrubado no seu lugar original (modo Construir do
+-- Puffador do Cofre). Pisca dourado ao voltar. Falso se não der.
+function ArenaService.rebuildBlock(floorIndex: number, row: number, column: number): boolean
+	if not destructionEnabled then
+		return false
+	end
+	local block, record = findBlockAt(floorIndex, row, column)
+	if block == nil or record == nil or not record.isDestroyed or block.Parent == nil then
+		return false
+	end
+
+	record.isDestroyed = false
+	remainingBlockCount += 1
+	block.CFrame = record.originalCFrame
+	block.Size = record.originalSize
+	block.Material = record.originalMaterial
+	block.Transparency = record.originalTransparency
+	block.CanCollide = record.originalCanCollide
+	block.CanTouch = record.originalCanTouch
+	block.CanQuery = record.originalCanQuery
+	block:SetAttribute(ATTR_IS_DESTROYED, false)
+	block:SetAttribute(ArenaConstants.CollapseWarningAttribute, false)
+	block.Color = REBUILD_FLASH_COLOR
+	TweenService:Create(block, TweenInfo.new(REBUILD_FLASH_DURATION, Enum.EasingStyle.Quad), {
+		Color = record.originalColor,
+	}):Play()
+
+	publishBlockCounts()
+	return true
 end
 
 local function tryReparent(part: Part, parent: Instance): boolean

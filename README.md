@@ -320,19 +320,22 @@ Escopo em `docs/FASE_2_SEGREDOS_COFRE_BARAO.md`.
 - **Ajustes:** ficam em `GameConfig.Barao` e `GameConfig.Toca`. Os sons atuais são provisórios, embutidos no Roblox; troque `BarkSoundIds`, `FunnySoundIds` e `FootstepSoundId` por áudios da Creator Store (`rbxassetid://...`).
 - **Código:** `BaraoService` (comportamento), `BaraoModel`, `TocaService`, `CorridorBuilder` (nichos) e `BuildingLayout.getTocas` / `isInsideToca` / `getCorridorFloorY`. No cliente, `BaraoController` mostra os avisos.
 
-### O Cofre do Barão Puff
+### O Cofre e o Puffador do Cofre (Fase 2, entrega 2.3)
 
-> **Desligado na Fase 1** (`GameConfig.SecretRoom.Enabled = false`): as portas ficam fechadas e sem interação. O cofre será refeito na Fase 2, conforme `docs/FASE_2_SEGREDOS_COFRE_BARAO.md`.
+A mansão pertence ao Barão Puff, inventor do Puffador. O protótipo dele, o **Puffador do Cofre**, fica guardado num cofre atrás da porta da parede oeste do andar de baixo, separado dos corredores secretos.
 
-A mansão pertence ao Barão Puff, inventor do Puffador. O protótipo dourado dele, o **Super Puffador**, fica guardado num cofre secreto atrás de uma das três portas do andar de baixo (paredes oeste, norte e sul).
-
-- A cada rodada uma porta é sorteada em segredo e destranca entre 25% e 50% do tempo da rodada. Todos recebem o aviso "O COFRE DESTRANCOU!", e um brilho dourado escapa por baixo da porta certa. As portas erradas respondem "TRANCADA".
-- Abrir exige segurar o prompt por 1,5 s. O primeiro a abrir dispara um alarme sonoro para a partida inteira, com o nome dele na tela, e a luz vermelha sobre a porta pisca até o fim da rodada.
-- Dentro do cofre o piso não cai, mas um único tiro elimina (motivo `ShotInSecretRoom`, "PEGO NO COFRE!").
-- No pedestal está o Super Puffador, um por rodada: 15 tiros que derrubam 2 blocos cada. Quem o carrega fica com contorno dourado, visível para todos.
-- Para ninguém acampar, cada jogador pode passar no máximo 15 s no cofre por rodada. Aos 10 s recebe um aviso; aos 15 s o Barão o expulsa para o andar de baixo.
-- Ajustes ficam em `GameConfig.SecretRoom`. `AlertSoundId` pode receber um som da Creator Store.
-- Código: `VaultService` (regras), `VaultProps` (porta, brilho, alarme e prêmio), `SecretRoomBuilder` (arquitetura), `PuffadorModel` (as duas versões do Puffador) e, no cliente, `VaultController` (faixas via `NotificationManager`) e `SuperChargeView`.
+- **Relação com o Barão:** o cofre destranca no instante em que o Barão acorda, sorteado entre 20% e 35% da rodada (`GameConfig.Barao.WakeMin/MaxFraction`). Todos recebem "O BARÃO ACORDOU!" e um brilho dourado escapa por baixo da porta. Antes disso, a porta responde "O cofre abre quando o Barão acordar…".
+- **Abrir:** exige segurar o prompt por 1,5 s. O primeiro a abrir dispara o alarme para a partida inteira (aviso crítico, com o nome dele) e deixa o Barão **bravo** por 25 s: ele acorda na hora se ainda dormia, late mais e corre 10% mais rápido, ainda mais devagar que o jogador.
+- **Disputa:** o prêmio é um por rodada e exige segurar o prompt do pedestal por 0,8 s; a briga é no empurrão. Não existe mais eliminação por tiro dentro do cofre. Cada jogador pode ficar no máximo 15 s no cofre por rodada, com aviso aos 10 s; depois o Barão o põe para fora.
+- **Puffador do Cofre:** tem 15 Puffs que derrubam 2 blocos cada e empurram 35% mais forte, e 3 construções. Quem o carrega fica com contorno dourado, visível para todos. Quando os Puffs acabam, volta ao Puffador comum e as construções que sobraram se perdem.
+- **Modo Construir:**
+  - **Como usar:** Q (teclado), Y (controle) ou o botão 🧱 acima do PUFF (toque) alternam entre Puff e Construir. No modo Construir, cada aperto do disparo reconstrói um bloco, e um bloco fantasma dourado mostra onde ele vai voltar.
+  - **O que dá para construir:** só blocos derrubados da própria grade da arena, no lugar original, a até 40 studs: o primeiro buraco que a mira atravessa antes de bater em algo. Isso serve para refazer passagem, criar apoio, fazer ponte curta ou recuperar rota. Não dá para criar paredes nem blocos soltos, então não dá para prender ninguém.
+  - **Quando é recusado:** se houver alguém no espaço do bloco ou logo acima (quem está caindo no buraco), para ninguém ficar enterrado.
+  - **Limites:** 3 construções por posse e 0,5 s entre elas. O servidor valida tudo.
+- **Estatísticas:** telemetria `VaultOpened`, `VaultPrizeTaken` e `BlockBuilt`.
+- **Ajustes:** `GameConfig.SecretRoom` (cargas, alcance, tempos e `AlertSoundId`) e `GameConfig.Barao` (despertar e fúria).
+- **Código:** `VaultService` (regras), `VaultProps` (porta, brilho, alarme e prêmio), `SecretRoomBuilder` (arquitetura), `BuildModeService` (validação da construção), `BuildTargeting` (alvo compartilhado entre servidor e cliente), `ArenaService.rebuildBlock` e `PuffadorModel`. No cliente, `VaultController`, `BuildModeController`, `BuildToggleView` e `SuperChargeView`.
 
 ### Identidade visual
 

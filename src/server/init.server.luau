@@ -16,6 +16,7 @@ local TelemetryService = require(script.services.TelemetryService)
 local SecretPassageService = require(script.services.SecretPassageService)
 local TocaService = require(script.services.TocaService)
 local BaraoService = require(script.services.BaraoService)
+local BuildModeService = require(script.services.BuildModeService)
 local WorldVisualService = require(script.services.WorldVisualService)
 local BuildingService = require(script.services.BuildingService)
 local AdminService = require(script.services.AdminService)
@@ -92,10 +93,14 @@ print("[BlocoPuff] Barao and safe dens ready")
 EliminationService.start(world, RoundService.eliminateParticipant)
 print("[BlocoPuff] Elimination zone armed")
 
--- Depende do PuffadorService (pasta de remotes) e usa a mesma eliminação
--- centralizada do RoundService para quem leva tiro dentro do cofre.
-VaultService.start(world, RoundService.eliminateParticipant)
-print("[BlocoPuff] Baron's vault ready")
+-- Depende do PuffadorService (pasta de remotes). Abrir o cofre deixa o
+-- Barão bravo.
+VaultService.start(world)
+VaultService.setOpenedListener(function()
+	BaraoService.enrage()
+end)
+BuildModeService.start()
+print("[BlocoPuff] Baron's vault and build mode ready")
 
 RoundService.start()
 print("[BlocoPuff] Round cycle started")

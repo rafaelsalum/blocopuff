@@ -2,7 +2,7 @@
 
 -- Peças dinâmicas do Cofre do Barão: a folha da porta (que colide enquanto
 -- fechada e abre girando na dobradiça), o brilho dourado que escapa por baixo
--- da porta certa, a luz de alarme e o Super Puffador girando no pedestal.
+-- da porta certa, a luz de alarme e o Puffador do Cofre girando no pedestal.
 -- Só cuida da aparência; as regras ficam no VaultService.
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -225,7 +225,7 @@ function VaultProps.playSound(props: DoorProps, soundId: string, speed: number, 
 	end)
 end
 
--- Super Puffador girando sobre o pedestal, com o prompt para pegá-lo.
+-- Puffador do Cofre girando sobre o pedestal, com o prompt para pegá-lo.
 function VaultProps.createPrize(parent: Instance, door: SecretDoor, building: BuildingConfig): (Model, ProximityPrompt, Part)
 	local tool = PuffadorModel.build("Super", "VaultService")
 	local prize = Instance.new("Model")
@@ -244,7 +244,7 @@ function VaultProps.createPrize(parent: Instance, door: SecretDoor, building: Bu
 	local prompt = Instance.new("ProximityPrompt")
 	prompt.Name = "GrabPrompt"
 	prompt.ActionText = "Pegar"
-	prompt.ObjectText = "Super Puffador"
+	prompt.ObjectText = "Puffador do Cofre"
 	prompt.HoldDuration = GameConfig.SecretRoom.GrabHoldDuration
 	prompt.MaxActivationDistance = 7
 	prompt.RequiresLineOfSight = false

@@ -23,6 +23,8 @@ export type FireButtonViewHandle = {
 	screenGui: ScreenGui,
 	setVisible: (visible: boolean) -> (),
 	startCooldown: (duration: number) -> (),
+	-- Troca o texto do botão (modo Construir do Puffador do Cofre).
+	setLabel: (title: string, caption: string) -> (),
 	destroy: () -> (),
 }
 
@@ -234,8 +236,17 @@ function FireButtonView.new(playerGui: PlayerGui, onPress: () -> (), onRelease: 
 		end
 	end)
 
+	local idleCaption = "ATIRAR"
+
 	local handle = {} :: FireButtonViewHandle
 	handle.screenGui = screenGui
+
+	handle.setLabel = function(title: string, newCaption: string)
+		idleCaption = newCaption
+		label.Text = title
+		caption.Text = newCaption
+		button.Text = newCaption
+	end
 
 	handle.setVisible = function(visible: boolean)
 		screenGui.Enabled = visible
@@ -262,8 +273,8 @@ function FireButtonView.new(playerGui: PlayerGui, onPress: () -> (), onRelease: 
 			if screenGui.Parent == nil then
 				return
 			end
-			button.Text = "ATIRAR"
-			caption.Text = "ATIRAR"
+			button.Text = idleCaption
+			caption.Text = idleCaption
 			ringStroke.Color = UiTheme.Colors.Gold
 			-- Pulso curto avisando que já pode atirar de novo.
 			rootScale.Scale = 1.08

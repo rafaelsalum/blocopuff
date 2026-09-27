@@ -2,7 +2,9 @@
 
 -- Barão, o mascote que guarda os corredores secretos. Há um só Barão por
 -- rodada: ele começa dormindo no patamar de baixo de um corredor, acorda
--- depois de GameConfig.Barao.WakeDelay segundos e passa a patrulhar. Quando
+-- no instante sorteado pelo RoundService (o mesmo em que o cofre destranca)
+-- e passa a patrulhar. Quando alguém abre o cofre ele fica bravo por um
+-- tempo: late mais e corre um pouco mais. Quando
 -- vê alguém no mesmo corredor, persegue; se só houver gente no outro
 -- corredor por um tempo, ele reaparece lá, pela ponta oposta.
 --
@@ -76,6 +78,7 @@ local pauseUntil = 0
 local patrolTarget = 0
 local nextBarkAt = 0
 local otherCorridorSince: number? = nil
+local enragedUntil = 0
 local lastContact: { [Player]: number } = {}
 
 local function isActiveParticipant(player: Player): boolean
@@ -161,8 +164,12 @@ local function bark()
 	end
 end
 
+local function isEnraged(now: number): boolean
+	return now < enragedUntil
+end
+
 local function scheduleBark(now: number)
-	local range = if mode == "Chase" then GameConfig.Barao.BarkIntervalChase else GameConfig.Barao.BarkIntervalPatrol
+	local range = if mode == "Chase" or isEnraged(now) then GameConfig.Barao.BarkIntervalChase else GameConfig.Barao.BarkIntervalPatrol
 	nextBarkAt = now + random:NextNumber(range.Min, range.Max)
 end
 
@@ -389,7 +396,8 @@ local function step(dt: number)
 				scheduleBark(now)
 			end
 			otherCorridorSince = nil
-			moved = moveTowards(target.along, target.lateral, GameConfig.Barao.ChaseSpeed, dt)
+			local multiplier = if isEnraged(now) then GameConfig.Barao.EnragedSpeedMultiplier else 1
+			moved = moveTowards(target.along, target.lateral, GameConfig.Barao.ChaseSpeed * multiplier, dt)
 		else
 			if mode == "Chase" then
 				setMode("Patrol")
@@ -424,19 +432,37 @@ local function step(dt: number)
 	place(bob)
 end
 
-function BaraoService.beginRound(newRoundId: number)
+function BaraoService.beginRound(newRoundId: number, wakeDelay: number)
 	if model == nil then
 		return
 	end
 	roundId = newRoundId
 	active = true
+	enragedUntil = 0
 	goToSleep()
-	wakeAt = os.clock() + GameConfig.Barao.WakeDelay
+	wakeAt = os.clock() + math.max(0, wakeDelay)
 	nextBarkAt = wakeAt
+end
+
+-- Chamado quando alguém abre o cofre: acorda na hora (se ainda dormia),
+-- late e fica bravo por EnragedDuration segundos.
+function BaraoService.enrage()
+	if not active or model == nil then
+		return
+	end
+	local now = os.clock()
+	if mode == "Sleeping" then
+		wakeAt = now
+		wake(now)
+	end
+	enragedUntil = now + GameConfig.Barao.EnragedDuration
+	bark()
+	scheduleBark(now)
 end
 
 function BaraoService.endRound()
 	active = false
+	enragedUntil = 0
 	if model ~= nil then
 		goToSleep()
 	end

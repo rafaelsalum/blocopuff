@@ -3,7 +3,7 @@
 -- Arquitetura estática de cada sala secreta ("Cofre do Barão Puff"), do lado
 -- de fora das portas do andar de baixo: piso firme, paredes com lambri
 -- escuro, cofres de parede, o grande disco de cofre ao fundo e o pedestal
--- onde o VaultService expõe o Super Puffador. Nada aqui muda durante a
+-- onde o VaultService expõe o Puffador do Cofre. Nada aqui muda durante a
 -- partida; portas, alarmes e prêmio são do VaultService.
 --
 -- Espaço local da sala: X ao longo da parede, Y para cima e Z para fora do

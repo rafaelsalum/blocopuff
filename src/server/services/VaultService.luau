@@ -1,14 +1,15 @@
 --!strict
 
--- O Cofre do Barão Puff. A cada rodada uma das três portas do andar de baixo
--- é sorteada em segredo e destranca em um momento aleatório (entre 25% e 50%
--- da rodada). Todos são avisados de que o cofre abriu "em algum lugar", e um
--- brilho dourado escapa por baixo da porta certa. Quem segurar o prompt e
--- abrir primeiro dispara o alarme para a partida inteira.
+-- O Cofre do Barão Puff, atrás da porta da parede oeste do andar de baixo
+-- (separado dos corredores secretos). Ele destranca no instante em que o
+-- Barão acorda: todos recebem o aviso e um brilho dourado escapa por baixo
+-- da porta. Quem segurar o prompt e abrir primeiro dispara o alarme para a
+-- partida inteira e deixa o Barão bravo por um tempo.
 --
--- Dentro do cofre o piso não cai, mas um único tiro elimina. Lá está o
--- Super Puffador (um por rodada), que quebra dois blocos por disparo e deixa
--- quem o carrega brilhando em dourado. Para ninguém acampar lá dentro, cada
+-- Lá dentro está o Puffador do Cofre (um por rodada): quebra dois blocos por
+-- disparo, empurra mais forte, tem o modo Construir e deixa quem o carrega
+-- brilhando em dourado, visível para todos. A disputa é no empurrão; não há
+-- eliminação especial no cofre. Para ninguém acampar lá dentro, cada
 -- jogador tem um tempo total limitado no cofre por rodada; depois disso o
 -- Barão o põe para fora.
 
@@ -20,14 +21,12 @@ local GameConfig = require(ReplicatedStorage.Shared.config.GameConfig)
 local BuildingLayout = require(ReplicatedStorage.Shared.modules.BuildingLayout)
 local PuffadorConstants = require(ReplicatedStorage.Shared.modules.PuffadorConstants)
 local StateAttributeNames = require(ReplicatedStorage.Shared.types.StateAttributeNames)
-local EliminationTypes = require(ReplicatedStorage.Shared.types.EliminationTypes)
-local ProjectileService = require(script.Parent.ProjectileService)
 local PuffadorService = require(script.Parent.PuffadorService)
+local TelemetryService = require(script.Parent.TelemetryService)
 local VaultProps = require(script.Parent.VaultProps)
 
-type EliminationReason = EliminationTypes.EliminationReason
 type DoorProps = VaultProps.DoorProps
-type EliminateCallback = (player: Player, reason: EliminationReason) -> ()
+type OpenedListener = (player: Player) -> ()
 
 local FOLDER_NAME = "Vaults"
 local GENERATED_BY_ATTRIBUTE = "GeneratedBy"
@@ -43,7 +42,7 @@ local VaultService = {}
 local folder: Folder? = nil
 local vaultRemote: RemoteEvent? = nil
 local doors: { DoorProps } = {}
-local eliminate: EliminateCallback? = nil
+local openedListener: OpenedListener? = nil
 local connections: { RBXScriptConnection } = {}
 local random = Random.new()
 
@@ -147,12 +146,13 @@ local function onPrizeTriggered(player: Player)
 	if not isActiveParticipant(player) or prize == nil or not isInsideOpenVault(player) then
 		return
 	end
-	if not PuffadorService.upgradeToSuper(player, GameConfig.SecretRoom.SuperCharges) then
+	if not PuffadorService.upgradeToSuper(player, GameConfig.SecretRoom.SuperCharges, GameConfig.SecretRoom.BuildCharges) then
 		return
 	end
 	destroyPrize()
 	markHolder(player)
 	fireAll("SuperTaken", player.DisplayName, player.UserId)
+	TelemetryService.vaultPrizeTaken(player)
 end
 
 local function spawnPrize(door: DoorProps)
@@ -179,6 +179,11 @@ local function openVault(door: DoorProps, player: Player)
 		prizePrompt.Enabled = true
 	end
 	fireAll("Opened", player.DisplayName, player.UserId)
+	TelemetryService.vaultOpened(player)
+	local listener = openedListener
+	if listener ~= nil then
+		task.spawn(listener, player)
+	end
 end
 
 local function onDoorTriggered(door: DoorProps, player: Player)
@@ -208,22 +213,6 @@ local function unlockChosen(token: number)
 	unlocked = true
 	VaultProps.setGlow(door, true)
 	fireAll("Unlocked")
-end
-
--- Um tiro que acerta alguém dentro do cofre aberto o elimina.
-local function onCharacterHit(shooter: Player, victim: Player, _position: Vector3, _direction: Vector3, _power: number)
-	if not isActiveParticipant(shooter) or not isActiveParticipant(victim) then
-		return
-	end
-	if not isInsideOpenVault(victim) then
-		return
-	end
-	local callback = eliminate
-	if callback == nil then
-		return
-	end
-	callback(victim, EliminationTypes.ShotInSecretRoom)
-	fireAll("ShotInVault", victim.DisplayName, shooter.DisplayName)
 end
 
 local function expel(player: Player, door: DoorProps)
@@ -300,7 +289,8 @@ local function resetRoundState()
 	resetDoors()
 end
 
-function VaultService.beginRound(newRoundId: number, roundDuration: number)
+-- `unlockDelay`: segundos até destrancar, o mesmo instante em que o Barão acorda.
+function VaultService.beginRound(newRoundId: number, unlockDelay: number)
 	resetRoundState()
 	if not GameConfig.SecretRoom.Enabled or #doors == 0 then
 		return
@@ -315,20 +305,22 @@ function VaultService.beginRound(newRoundId: number, roundDuration: number)
 		candidate.prompt.Enabled = true
 	end
 
-	local config = GameConfig.SecretRoom
-	local unlockDelay = roundDuration * random:NextNumber(config.UnlockMinFraction, config.UnlockMaxFraction)
-	task.delay(unlockDelay, unlockChosen, roundToken)
+	task.delay(math.max(0, unlockDelay), unlockChosen, roundToken)
 end
 
 function VaultService.endRound()
 	resetRoundState()
 end
 
-function VaultService.start(worldRoot: Model, eliminateCallback: EliminateCallback)
+-- Avisado quando alguém abre o cofre (o Barão fica bravo).
+function VaultService.setOpenedListener(listener: OpenedListener?)
+	openedListener = listener
+end
+
+function VaultService.start(worldRoot: Model)
 	if folder ~= nil then
 		return
 	end
-	eliminate = eliminateCallback
 
 	local existing = worldRoot:FindFirstChild(FOLDER_NAME)
 	if existing ~= nil then
@@ -362,9 +354,6 @@ function VaultService.start(worldRoot: Model, eliminateCallback: EliminateCallba
 		warn("[BlocoPuff] VaultService: remotes folder not found; vault announcements disabled")
 	end
 
-	if GameConfig.SecretRoom.Enabled then
-		ProjectileService.setCharacterHitHandler("Vault", onCharacterHit)
-	end
 	table.insert(connections, RunService.Heartbeat:Connect(onHeartbeat))
 	table.insert(connections, Players.PlayerRemoving:Connect(function(player)
 		stayTime[player] = nil
@@ -378,7 +367,6 @@ end
 
 function VaultService.stop()
 	resetRoundState()
-	ProjectileService.setCharacterHitHandler("Vault", nil)
 	for _, connection in ipairs(connections) do
 		connection:Disconnect()
 	end
@@ -392,7 +380,7 @@ function VaultService.stop()
 		folder:Destroy()
 		folder = nil
 	end
-	eliminate = nil
+	openedListener = nil
 end
 
 return table.freeze(VaultService)

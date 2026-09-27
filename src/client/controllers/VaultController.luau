@@ -1,8 +1,9 @@
 --!strict
 
 -- Reage aos eventos do Cofre do Barão enviados pelo servidor: faixas de
--- aviso, alarme sonoro para a partida inteira quando alguém invade o cofre
--- e a contagem de tiros do Super Puffador. Não decide nada; só apresenta.
+-- aviso, alarme sonoro para a partida inteira quando alguém abre o cofre
+-- e a contagem de Puffs e construções do Puffador do Cofre. Não decide
+-- nada; só apresenta.
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -26,6 +27,8 @@ local VaultController = {}
 
 local started = false
 local view: SuperChargeViewHandle? = nil
+local puffs = 0
+local builds = 0
 
 -- Faixa do topo, via NotificationManager (fila e prioridade compartilhadas
 -- com os avisos de administrador).
@@ -83,25 +86,23 @@ local function onVaultEvent(kind: unknown, first: unknown, second: unknown)
 	if kind == "Unlocked" then
 		playSound(CHIME_SOUND, 1.6, 0.6)
 		playSound(CHIME_SOUND, 2, 0.6, 0.18)
-		banner("🔓", "O COFRE DESTRANCOU!", "Uma porta do andar de baixo está brilhando…", "Gold", 5, "High", "vault-unlocked")
+		banner("🐶", "O BARÃO ACORDOU!", "E o cofre destrancou: porta dourada no andar de baixo", "Gold", 5, "High", "vault-unlocked")
 	elseif kind == "Opened" then
 		playAlarm()
 		if isLocalUser(second) then
-			banner("🗝️", "VOCÊ ACHOU O COFRE!", "Pegue o Super Puffador no pedestal. Cuidado: aqui um tiro elimina!", "Gold", 5, "Critical", "vault-opened")
+			banner("🗝️", "VOCÊ ABRIU O COFRE!", "Pegue o Puffador do Cofre no pedestal. O Barão ficou bravo!", "Gold", 5, "Critical", "vault-opened")
 		else
-			banner("🚨", "COFRE INVADIDO!", `{asText(first)} abriu o cofre do Barão!`, "Danger", 5, "Critical", "vault-opened")
+			banner("🚨", "COFRE ABERTO!", `{asText(first)} abriu o cofre. O Barão ficou bravo!`, "Danger", 5, "Critical", "vault-opened")
 		end
 	elseif kind == "SuperTaken" then
 		playSound(SUPER_SOUND, 0.8, 0.8)
 		if isLocalUser(second) then
-			banner("⚡", "SUPER PUFFADOR!", "Cada tiro derruba 2 blocos. Todos veem seu brilho dourado!", "Gold", 4.5, "High", "vault-super")
+			banner("⚡", "PUFFADOR DO COFRE!", "2 blocos por Puff. Q, Y ou 🧱 troca para Construir", "Gold", 5, "High", "vault-super")
 		else
-			banner("⚡", "SUPER PUFFADOR!", `{asText(first)} pegou o Super Puffador. Derrube-o!`, "Gold", 4.5, "High", "vault-super")
+			banner("⚡", "PUFFADOR DO COFRE!", `{asText(first)} pegou o Puffador do Cofre. Derrube-o!`, "Gold", 4.5, "High", "vault-super")
 		end
-	elseif kind == "ShotInVault" then
-		banner("🎯", "PEGO NO COFRE!", `{asText(second)} acertou {asText(first)} dentro do cofre`, "Danger", 3.5, "High")
 	elseif kind == "Locked" then
-		local subtitle = if first == true then "O cofre está atrás de outra porta!" else "O cofre do Barão ainda está trancado…"
+		local subtitle = if first == true then "O cofre está atrás de outra porta!" else "O cofre abre quando o Barão acordar…"
 		banner("🔒", "TRANCADA", subtitle, "Info", 2.2, "Low", "vault-locked")
 	elseif kind == "StayWarning" then
 		local seconds = if typeof(first) == "number" then first else 5
@@ -111,15 +112,22 @@ local function onVaultEvent(kind: unknown, first: unknown, second: unknown)
 	end
 end
 
-local function onPuffFeedback(kind: unknown, charges: unknown)
+local function onPuffFeedback(kind: unknown, value: unknown)
 	local current = view
-	if current == nil or kind ~= "Super" then
+	if current == nil or (kind ~= "Super" and kind ~= "Builds") then
 		return
 	end
-	local remaining = if typeof(charges) == "number" then charges else 0
-	current.setSuperCharges(remaining)
-	if remaining == 0 then
-		banner("⚡", "SUPER ESGOTADO", "Seu Puffador voltou ao normal", "Info", 2, "Normal")
+	local remaining = if typeof(value) == "number" and value == value then math.max(0, math.floor(value)) else 0
+	if kind == "Builds" then
+		builds = remaining
+		current.setCharges(puffs, builds)
+		return
+	end
+	local hadSuper = puffs > 0
+	puffs = remaining
+	current.setCharges(puffs, builds)
+	if remaining == 0 and hadSuper then
+		banner("⚡", "PUFFADOR DO COFRE ESGOTADO", "Seu Puffador voltou ao normal", "Info", 2, "Normal")
 	end
 end
 
@@ -162,7 +170,9 @@ function VaultController.start()
 		local competing = player:GetAttribute(StateAttributeNames.PlayerIsParticipant) == true
 			and player:GetAttribute(StateAttributeNames.PlayerIsEliminated) ~= true
 		if not competing and view ~= nil then
-			view.setSuperCharges(0)
+			puffs = 0
+			builds = 0
+			view.setCharges(0, 0)
 		end
 	end
 	player:GetAttributeChangedSignal(StateAttributeNames.PlayerIsParticipant):Connect(hideSuperWhenOut)
