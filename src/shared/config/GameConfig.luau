@@ -114,13 +114,14 @@ local Arena: ArenaConfig = table.freeze({
 	FloorCount = 2,
 	FloorSpacing = 28,
 	FloorStyles = {
-		-- Piso de baixo: cerâmica em xadrez claro, contrastando com o poço escuro.
+		-- Piso de baixo: pedra fosca em xadrez de tons médios. Material sem
+		-- brilho para não refletir as luzes; ainda contrasta com o poço escuro.
 		{
-			Material = Enum.Material.CeramicTiles,
-			Colors = { Color3.fromRGB(176, 166, 146), Color3.fromRGB(84, 98, 100) },
+			Material = Enum.Material.Slate,
+			Colors = { Color3.fromRGB(122, 116, 106), Color3.fromRGB(80, 88, 92) },
 		},
 		-- Piso de cima: taco de madeira em dois tons; os buracos revelam a
-		-- cerâmica clara de baixo, o que facilita a leitura do mapa.
+		-- pedra de baixo, o que facilita a leitura do mapa.
 		{
 			Material = Enum.Material.WoodPlanks,
 			Colors = { Color3.fromRGB(168, 116, 68), Color3.fromRGB(116, 76, 46) },

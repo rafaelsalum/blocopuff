@@ -85,8 +85,8 @@
     "semantic_hash": ""
   },
   "src/shared/config/GameConfig.luau": {
-    "mtime": 1790504707.0605352,
-    "ast_hash": "882b6d99dbeb77d77f46f55afb9cd7ce",
+    "mtime": 1790504982.256245,
+    "ast_hash": "5cab07cef68bc44340c5857eb52c3507",
     "semantic_hash": ""
   },
   "src/shared/modules/PuffadorConstants.luau": {
@@ -125,8 +125,8 @@
     "semantic_hash": ""
   },
   "README.md": {
-    "mtime": 1790462462.282608,
-    "ast_hash": "2710a058ce225387f190acd53264184e",
+    "mtime": 1790504989.3135803,
+    "ast_hash": "f84d1a1d80c9fe7fcd7969a74823b31e",
     "semantic_hash": ""
   },
   "src/client/controllers/CombatCameraController.luau": {
@@ -205,8 +205,8 @@
     "semantic_hash": ""
   },
   "src/server/services/BuildingService.luau": {
-    "mtime": 1790504707.0598066,
-    "ast_hash": "8789966fef11a95a9158e6e67bbb8152",
+    "mtime": 1790504982.2560036,
+    "ast_hash": "0d426e3d7b9d56a0fec4289b1b5bbf2b",
     "semantic_hash": ""
   },
   "src/shared/modules/BuildingLayout.luau": {

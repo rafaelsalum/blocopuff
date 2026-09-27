@@ -40,13 +40,13 @@ local ARENA_LAMP_BRIGHTNESS = 0.45
 -- e luzes de preenchimento compensam.
 local LOWER_LAMP_RANGE = 16
 local LOWER_LAMP_BRIGHTNESS = 0.5
--- Preenchimento suave: poucas luzes, altas e com alcance longo e brilho
--- baixo, longe da cabeça dos jogadores para iluminar por igual, sem o
--- efeito de "lâmpada presa no personagem".
-local FILL_LIGHT_GRID = 3
-local FILL_LIGHT_HEIGHT = 20
-local FILL_LIGHT_RANGE = 48
-local FILL_LIGHT_BRIGHTNESS = 0.35
+-- Preenchimento do andar de baixo: um único painel invisível do tamanho da
+-- sala, logo abaixo do piso de cima, com SurfaceLight voltada para baixo.
+-- Luz difusa e uniforme, sem somar vários pontos de luz no chão.
+local FILL_PANEL_DROP = 1.5
+local FILL_PANEL_RANGE = 32
+local FILL_PANEL_ANGLE = 90
+local FILL_PANEL_BRIGHTNESS = 0.3
 local GALLERY_LAMP_RANGE = 12
 local GALLERY_LAMP_BRIGHTNESS = 0.4
 local CHANDELIER_DROP = 5
@@ -432,37 +432,28 @@ local function decorateCeiling(parent: Instance, arena: ArenaConfig, building: B
 	end
 end
 
--- Luzes invisíveis a meia altura de cada andar inferior, fazendo o papel de
--- luminárias de teto. Ficam fora do alcance de tiros e
+-- Luz de teto invisível para cada andar inferior. Ficam fora do alcance de tiros e
 -- colisões e não dependem dos blocos, que podem ser destruídos.
 local function createFillLights(parent: Instance, arena: ArenaConfig, building: BuildingConfig)
 	local bounds = BuildingLayout.getRoomBounds(arena, building)
 	for floorIndex = 1, arena.FloorCount - 1 do
-		local y = BuildingLayout.getFloorSurfaceY(arena, floorIndex) + FILL_LIGHT_HEIGHT
-		for row = 1, FILL_LIGHT_GRID do
-			for column = 1, FILL_LIGHT_GRID do
-				local xRatio = ((column - 0.5) / FILL_LIGHT_GRID) - 0.5
-				local zRatio = ((row - 0.5) / FILL_LIGHT_GRID) - 0.5
-				local source = BuildingDecor.createPart(
-					parent,
-					string.format("FillLightF%d_%d_%d", floorIndex, row, column),
-					Vector3.new(0.2, 0.2, 0.2),
-					CFrame.new(
-						bounds.center.X + (xRatio * bounds.halfWidth * 2),
-						y,
-						bounds.center.Z + (zRatio * bounds.halfDepth * 2)
-					),
-					building.LampColor,
-					{ transparency = 1 }
-				)
-				local light = Instance.new("PointLight")
-				light.Color = building.LampColor
-				light.Range = FILL_LIGHT_RANGE
-				light.Brightness = FILL_LIGHT_BRIGHTNESS
-				light.Shadows = false
-				light.Parent = source
-			end
-		end
+		local y = BuildingLayout.getFloorY(arena, floorIndex + 1) - FILL_PANEL_DROP
+		local panel = BuildingDecor.createPart(
+			parent,
+			string.format("FillLightF%d", floorIndex),
+			Vector3.new(bounds.halfWidth * 2, 0.2, bounds.halfDepth * 2),
+			CFrame.new(bounds.center.X, y, bounds.center.Z),
+			building.LampColor,
+			{ transparency = 1 }
+		)
+		local light = Instance.new("SurfaceLight")
+		light.Face = Enum.NormalId.Bottom
+		light.Color = building.LampColor
+		light.Range = FILL_PANEL_RANGE
+		light.Angle = FILL_PANEL_ANGLE
+		light.Brightness = FILL_PANEL_BRIGHTNESS
+		light.Shadows = false
+		light.Parent = panel
 	end
 end
 
