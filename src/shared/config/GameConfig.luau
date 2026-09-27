@@ -326,7 +326,8 @@ GameConfig.MinimumPlayers = 2
 GameConfig.MaximumPlayers = 12
 GameConfig.LobbyCountdown = 20
 GameConfig.RoundDuration = 210
-GameConfig.IntermissionDuration = 10
+-- Encerramento: tempo para ler o resultado antes de voltar ao lobby.
+GameConfig.IntermissionDuration = 12
 
 -- Tempos reduzidos usados apenas quando RunService:IsStudio() for verdadeiro.
 GameConfig.StudioLobbyCountdown = 5

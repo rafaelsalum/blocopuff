@@ -16,6 +16,8 @@ local EliminationService = require(script.Parent.EliminationService)
 local VaultService = require(script.Parent.VaultService)
 local KnockbackService = require(script.Parent.KnockbackService)
 local FinalChaosService = require(script.Parent.FinalChaosService)
+local RoundResultBuilder = require(script.Parent.RoundResultBuilder)
+local PuffadorConstants = require(ReplicatedStorage.Shared.modules.PuffadorConstants)
 
 type RoundState = RoundTypes.RoundState
 type RoundTimings = GameConfig.RoundTimings
@@ -68,6 +70,10 @@ local playerRemovingConnection: RBXScriptConnection? = nil
 local playerAddedConnection: RBXScriptConnection? = nil
 local winner: Winner? = nil
 local respawnGraceUntil: { [Player]: number } = {}
+-- Posição final de quem foi eliminado (1 = vencedor): quantos seguiam vivos
+-- depois da eliminação + 1.
+local eliminationPositions: { [Player]: number } = {}
+local resultRemote: RemoteEvent? = nil
 
 local function countConnectedPlayers(): number
 	return #Players:GetPlayers()
@@ -282,6 +288,13 @@ local function eliminateParticipant(player: Player, reason: EliminationReason)
 	end
 
 	participant.alive = false
+	local stillAlive = 0
+	for _, other in pairs(participants) do
+		if other.alive then
+			stillAlive += 1
+		end
+	end
+	eliminationPositions[player] = stillAlive + 1
 	player:SetAttribute(ATTR_IS_ELIMINATED, true)
 	player:SetAttribute(ATTR_ELIMINATION_REASON, reason)
 	player:SetAttribute(ATTR_ELIMINATED_AT_ROUND_ID, currentRoundId)
@@ -329,6 +342,7 @@ end
 
 local function clearRoundParticipants()
 	table.clear(respawnGraceUntil)
+	table.clear(eliminationPositions)
 	table.clear(participants)
 	table.clear(participantOrder)
 end
@@ -493,6 +507,34 @@ local function runActive(timings: RoundTimings)
 	end
 end
 
+local function publishResult()
+	local remote = resultRemote
+	if remote == nil then
+		return
+	end
+	local snapshots: { RoundResultBuilder.ParticipantSnapshot } = {}
+	local winnerPlayer: Player? = nil
+	for _, player in ipairs(participantOrder) do
+		local participant = participants[player]
+		if participant ~= nil and player.Parent ~= nil then
+			table.insert(snapshots, {
+				player = player,
+				alive = participant.alive,
+				eliminatedPosition = eliminationPositions[player],
+			})
+			if winner ~= nil and player.UserId == winner.userId then
+				winnerPlayer = player
+			end
+		end
+	end
+	local ok, failure = pcall(function()
+		remote:FireAllClients(RoundResultBuilder.build(currentRoundId, snapshots, winnerPlayer))
+	end)
+	if not ok then
+		warn(string.format("[BlocoPuff] Could not publish round result: %s", tostring(failure)))
+	end
+end
+
 local function runEnding(timings: RoundTimings)
 	setState(RoundTypes.Ending)
 	EliminationService.endRound()
@@ -501,6 +543,7 @@ local function runEnding(timings: RoundTimings)
 	KnockbackService.endRound()
 	ArenaService.endRound()
 	VaultService.endRound()
+	publishResult()
 	PuffadorService.endRound()
 	disconnectParticipantDeathHandlers()
 
@@ -562,6 +605,15 @@ function RoundService.start()
 	end
 
 	isRunning = true
+	local remotes = PuffadorService.getRemotesFolder()
+	if remotes ~= nil and resultRemote == nil then
+		local remote = Instance.new("RemoteEvent")
+		remote.Name = PuffadorConstants.RoundResultRemoteName
+		remote.Parent = remotes
+		resultRemote = remote
+	elseif remotes == nil then
+		warn("[BlocoPuff] RoundService: remotes folder not found; round results disabled")
+	end
 	playerRemovingConnection = Players.PlayerRemoving:Connect(onPlayerRemoving)
 	playerAddedConnection = Players.PlayerAdded:Connect(onPlayerAdded)
 	for _, player in ipairs(Players:GetPlayers()) do
@@ -572,6 +624,7 @@ end
 
 function RoundService.stop()
 	isRunning = false
+	resultRemote = nil
 
 	if playerRemovingConnection ~= nil then
 		playerRemovingConnection:Disconnect()

@@ -255,34 +255,10 @@ local function renderEnding(currentView: HudViewHandle)
 	currentView.setCombatVisible(false)
 	currentView.setTimerDanger(false)
 
-	local scoreSummary = getPersonalScoreSummary()
-	if cached.winnerUserId ~= 0 and cached.winnerName ~= "" then
-		local localPlayer = Players.LocalPlayer
-		local localPlayerWon = localPlayer ~= nil and localPlayer.UserId == cached.winnerUserId
-		showAnnouncement(
-			currentView,
-			string.format("%d:winner:%d", cached.roundId, cached.winnerUserId),
-			if localPlayerWon then "VITÓRIA!" else "FIM DA RODADA",
-			if localPlayerWon
-				then string.format("Último na arena • %s", scoreSummary)
-				else string.format("%s venceu • %s", cached.winnerName, scoreSummary),
-			"Winner",
-			4,
-			"Result",
-			"Critical"
-		)
-	else
-		showAnnouncement(
-			currentView,
-			string.format("%d:no-winner", cached.roundId),
-			"FIM DA RODADA",
-			scoreSummary,
-			"Info",
-			3,
-			"Result",
-			"High"
-		)
-	end
+	-- O resultado aparece no painel de pós-partida (ResultsController), no
+	-- centro da tela; nenhum anúncio central pode ficar por cima dele.
+	lastAnnouncementKey = ""
+	NotificationManager.clear("Center")
 end
 
 local function render()

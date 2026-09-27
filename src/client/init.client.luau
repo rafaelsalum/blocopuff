@@ -8,6 +8,7 @@ local BlockCollapseController = require(script.controllers.BlockCollapseControll
 local MusicController = require(script.controllers.MusicController)
 local VaultController = require(script.controllers.VaultController)
 local KnockbackController = require(script.controllers.KnockbackController)
+local ResultsController = require(script.controllers.ResultsController)
 
 print("[BlocoPuff] Client initialized")
 
@@ -65,4 +66,11 @@ local knockbackOk, knockbackErr = pcall(function()
 end)
 if not knockbackOk then
 	warn(string.format("[BlocoPuff] Failed to start knockback controller: %s", tostring(knockbackErr)))
+end
+
+local resultsOk, resultsErr = pcall(function()
+	ResultsController.start()
+end)
+if not resultsOk then
+	warn(string.format("[BlocoPuff] Failed to start results controller: %s", tostring(resultsErr)))
 end
