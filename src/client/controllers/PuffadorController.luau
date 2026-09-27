@@ -481,6 +481,7 @@ function PuffadorController.start()
 
 	localPlayer.CharacterAdded:Connect(function(character)
 		stopTargetingFeedback()
+		stopFiring()
 		if controlHint ~= nil then
 			controlHint.hide()
 		end

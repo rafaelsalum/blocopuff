@@ -1,16 +1,16 @@
 # Graph Report - blocopuff  (2026-09-27)
 
 ## Corpus Check
-- 71 files · ~63,333 words
+- 71 files · ~63,504 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 688 nodes · 1157 edges · 58 communities (50 shown, 8 thin omitted)
+- 688 nodes · 1158 edges · 58 communities (50 shown, 8 thin omitted)
 - Extraction: 86% EXTRACTED · 14% INFERRED · 0% AMBIGUOUS · INFERRED: 160 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `e200882d`
+- Built from commit: `761e5a3c`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -70,7 +70,7 @@
 7. `UiTheme.stylePanel()` - 12 edges
 8. `Escopo` - 12 edges
 9. `Escopo` - 12 edges
-10. `refreshSpectator()` - 11 edges
+10. `PuffadorController.start()` - 11 edges
 
 ## Surprising Connections (you probably didn't know these)
 - `label()` --calls--> `UiTheme.createLabel()`  [INFERRED]
@@ -79,10 +79,10 @@
   src/server/services/RoundService.luau → src/server/services/EliminationService.luau
 - `onHeartbeat()` --calls--> `PuffadorService.hasSuper()`  [INFERRED]
   src/server/services/VaultService.luau → src/server/services/PuffadorService.luau
+- `openVault()` --calls--> `VaultProps.startAlarm()`  [INFERRED]
+  src/server/services/VaultService.luau → src/server/services/VaultProps.luau
 - `playLocalShotFeedback()` --calls--> `CombatCameraController.addRecoil()`  [INFERRED]
   src/client/controllers/PuffadorController.luau → src/client/controllers/CombatCameraController.luau
-- `showAnnouncement()` --calls--> `NotificationManager.notify()`  [INFERRED]
-  src/client/controllers/HudController.luau → src/client/notifications/NotificationManager.luau
 
 ## Import Cycles
 - None detected.
@@ -150,8 +150,8 @@ Cohesion: 0.35
 Nodes (9): BlockCollapseController.start(), clearWarning(), createFragment(), emitDust(), getEffectsFolder(), playCollapse(), showWarning(), unwatchBlock() (+1 more)
 
 ### Community 25 - "BuildingDecor.createPart"
-Cohesion: 0.17
-Nodes (25): addPointLight(), BuildingDecor.createChandelier(), BuildingDecor.createPart(), BuildingDecor.createPlant(), BuildingDecor.createSideTable(), BuildingDecor.createSofa(), BuildingDecor.decorateStory(), BuildingDecor.wallCFrame() (+17 more)
+Cohesion: 0.12
+Nodes (35): addPointLight(), BuildingDecor.createChandelier(), BuildingDecor.createPart(), BuildingDecor.createPlant(), BuildingDecor.createSideTable(), BuildingDecor.createSofa(), BuildingDecor.decorateStory(), BuildingDecor.wallCFrame() (+27 more)
 
 ### Community 28 - "PhotoModeService.luau"
 Cohesion: 0.22
@@ -162,8 +162,8 @@ Cohesion: 0.10
 Nodes (20): 10. Espectador social, 11. Trading — preparação, não ativação, 1. Puffdex, 2. Primeira coleção, 3. Equipamento cosmético, 4. Puff Machine, 5. Desafios, 6. Retorno diário (+12 more)
 
 ### Community 30 - "VaultService.luau"
-Cohesion: 0.12
-Nodes (38): KnockbackService.start(), ProjectileService.setCharacterHitHandler(), SecretRoomBuilder.getFrame(), SecretRoomBuilder.getPedestalTop(), attachToPanel(), createAlarm(), createGlow(), createPanel() (+30 more)
+Cohesion: 0.17
+Nodes (28): KnockbackService.start(), ProjectileService.setCharacterHitHandler(), VaultProps.playSound(), VaultProps.setGlow(), VaultProps.setOpen(), clearHolder(), destroyPrize(), expel() (+20 more)
 
 ### Community 31 - "BuildingService.luau"
 Cohesion: 0.31
@@ -245,7 +245,7 @@ _Questions this graph is uniquely positioned to answer:_
   _High betweenness centrality (0.059) - this node is a cross-community bridge._
 - **Why does `VaultService.beginRound()` connect `VaultService.luau` to `RoundService.luau`?**
   _High betweenness centrality (0.033) - this node is a cross-community bridge._
-- **Why does `BuildingDecor.createPart()` connect `BuildingDecor.createPart` to `VaultService.luau`, `BuildingService.luau`?**
+- **Why does `BuildingDecor.createPart()` connect `BuildingDecor.createPart` to `BuildingService.luau`?**
   _High betweenness centrality (0.024) - this node is a cross-community bridge._
 - **Are the 7 inferred relationships involving `BuildingDecor.createPart()` (e.g. with `createSolid()` and `buildVaultDisk()`) actually correct?**
   _`BuildingDecor.createPart()` has 7 INFERRED edges - model-reasoned connections that need verification._

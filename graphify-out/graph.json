@@ -4564,8 +4564,8 @@
       "source_location": "L35",
       "_origin": "ast",
       "id": "src_server_services_secretroombuilder_secretroombuilder_getframe",
-      "community": 30,
-      "community_name": "VaultService.luau",
+      "community": 25,
+      "community_name": "BuildingDecor.createPart",
       "norm_label": "secretroombuilder.getframe()"
     },
     {
@@ -4575,8 +4575,8 @@
       "source_location": "L40",
       "_origin": "ast",
       "id": "src_server_services_secretroombuilder_secretroombuilder_getpedestaltop",
-      "community": 30,
-      "community_name": "VaultService.luau",
+      "community": 25,
+      "community_name": "BuildingDecor.createPart",
       "norm_label": "secretroombuilder.getpedestaltop()"
     },
     {
@@ -4817,8 +4817,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_server_services_vaultprops",
-      "community": 30,
-      "community_name": "VaultService.luau",
+      "community": 25,
+      "community_name": "BuildingDecor.createPart",
       "norm_label": "vaultprops.luau"
     },
     {
@@ -4828,8 +4828,8 @@
       "source_location": "L43",
       "_origin": "ast",
       "id": "src_server_services_vaultprops_attachtopanel",
-      "community": 30,
-      "community_name": "VaultService.luau",
+      "community": 25,
+      "community_name": "BuildingDecor.createPart",
       "norm_label": "attachtopanel()"
     },
     {
@@ -4839,8 +4839,8 @@
       "source_location": "L52",
       "_origin": "ast",
       "id": "src_server_services_vaultprops_createpanel",
-      "community": 30,
-      "community_name": "VaultService.luau",
+      "community": 25,
+      "community_name": "BuildingDecor.createPart",
       "norm_label": "createpanel()"
     },
     {
@@ -4850,8 +4850,8 @@
       "source_location": "L88",
       "_origin": "ast",
       "id": "src_server_services_vaultprops_createprompt",
-      "community": 30,
-      "community_name": "VaultService.luau",
+      "community": 25,
+      "community_name": "BuildingDecor.createPart",
       "norm_label": "createprompt()"
     },
     {
@@ -4861,8 +4861,8 @@
       "source_location": "L103",
       "_origin": "ast",
       "id": "src_server_services_vaultprops_createglow",
-      "community": 30,
-      "community_name": "VaultService.luau",
+      "community": 25,
+      "community_name": "BuildingDecor.createPart",
       "norm_label": "createglow()"
     },
     {
@@ -4872,8 +4872,8 @@
       "source_location": "L133",
       "_origin": "ast",
       "id": "src_server_services_vaultprops_createalarm",
-      "community": 30,
-      "community_name": "VaultService.luau",
+      "community": 25,
+      "community_name": "BuildingDecor.createPart",
       "norm_label": "createalarm()"
     },
     {
@@ -4883,8 +4883,8 @@
       "source_location": "L150",
       "_origin": "ast",
       "id": "src_server_services_vaultprops_vaultprops_create",
-      "community": 30,
-      "community_name": "VaultService.luau",
+      "community": 25,
+      "community_name": "BuildingDecor.createPart",
       "norm_label": "vaultprops.create()"
     },
     {
@@ -4916,8 +4916,8 @@
       "source_location": "L196",
       "_origin": "ast",
       "id": "src_server_services_vaultprops_vaultprops_startalarm",
-      "community": 30,
-      "community_name": "VaultService.luau",
+      "community": 25,
+      "community_name": "BuildingDecor.createPart",
       "norm_label": "vaultprops.startalarm()"
     },
     {
@@ -4938,8 +4938,8 @@
       "source_location": "L229",
       "_origin": "ast",
       "id": "src_server_services_vaultprops_vaultprops_createprize",
-      "community": 30,
-      "community_name": "VaultService.luau",
+      "community": 25,
+      "community_name": "BuildingDecor.createPart",
       "norm_label": "vaultprops.createprize()"
     },
     {
@@ -8107,7 +8107,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.8,
       "source_file": "src/client/controllers/PuffadorController.luau",
-      "source_location": "L488",
+      "source_location": "L489",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_client_controllers_puffadorcontroller_puffadorcontroller_start",
@@ -8726,7 +8726,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/client/controllers/PuffadorController.luau",
-      "source_location": "L487",
+      "source_location": "L488",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_client_controllers_puffadorcontroller_puffadorcontroller_start",
@@ -8934,6 +8934,18 @@
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_client_controllers_puffadorcontroller_cleartoolequipped",
+      "target": "src_client_controllers_puffadorcontroller_stopfiring",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/client/controllers/PuffadorController.luau",
+      "source_location": "L484",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_client_controllers_puffadorcontroller_puffadorcontroller_start",
       "target": "src_client_controllers_puffadorcontroller_stopfiring",
       "confidence_score": 1.0
     },
@@ -20839,5 +20851,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "e200882dc9d515340f5fd4a0ac4bc85a9b4cd2fd"
+  "built_at_commit": "761e5a3cb4bf4a673f6aae200c8b8da443585795"
 }

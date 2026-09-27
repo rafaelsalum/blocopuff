@@ -163,24 +163,50 @@ function FireButtonView.new(playerGui: PlayerGui, onPress: () -> (), onRelease: 
 		}):Play()
 	end
 
-	local holding = false
-	local function release()
-		if holding then
-			holding = false
+	-- Cada toque (ou o mouse) que está segurando o botão. O disparo só para
+	-- quando o último for solto: com dois dedos no botão, tirar um não para.
+	local activeInputs: { [InputObject]: boolean } = {}
+	local function isPressInput(input: InputObject): boolean
+		return input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1
+	end
+	local function endInput(input: InputObject)
+		if activeInputs[input] == nil then
+			return
+		end
+		activeInputs[input] = nil
+		if next(activeInputs) == nil then
 			press(false)
 			onRelease()
 		end
 	end
+	local function release()
+		if next(activeInputs) == nil then
+			return
+		end
+		table.clear(activeInputs)
+		press(false)
+		onRelease()
+	end
 	button.InputBegan:Connect(function(input)
-		if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then
-			holding = true
+		if not isPressInput(input) then
+			return
+		end
+		local wasIdle = next(activeInputs) == nil
+		activeInputs[input] = true
+		if wasIdle then
 			press(true)
 			onPress()
 		end
 	end)
-	button.InputEnded:Connect(release)
-	-- O dedo pode sair do botão antes de soltar; também para o disparo.
-	button.MouseLeave:Connect(release)
+	button.InputEnded:Connect(endInput)
+	-- Mouse arrastado para fora do botão antes de soltar também para.
+	button.MouseLeave:Connect(function()
+		for input in pairs(activeInputs) do
+			if input.UserInputType == Enum.UserInputType.MouseButton1 then
+				endInput(input)
+			end
+		end
+	end)
 
 	-- Reposiciona ao lado do botão de pulo nativo (ele muda de tamanho com a
 	-- tela e só existe depois que a interface de toque carrega).
