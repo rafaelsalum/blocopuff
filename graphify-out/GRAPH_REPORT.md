@@ -1,16 +1,16 @@
 # Graph Report - blocopuff  (2026-09-27)
 
 ## Corpus Check
-- 49 files · ~39,405 words
+- 49 files · ~39,540 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 374 nodes · 741 edges · 30 communities (29 shown, 1 thin omitted)
+- 374 nodes · 742 edges · 30 communities (29 shown, 1 thin omitted)
 - Extraction: 83% EXTRACTED · 17% INFERRED · 0% AMBIGUOUS · INFERRED: 128 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `d78526ac`
+- Built from commit: `24be1944`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -77,7 +77,7 @@ Cohesion: 0.17
 Nodes (14): ArenaService.beginRound(), ArenaService.create(), ArenaService.destroy(), ArenaService.getPlayerSpawnCFrames(), ArenaService.tryDestroyBlock(), createArenaVisuals(), destroyOwnedChild(), getFloorStyle() (+6 more)
 
 ### Community 3 - "SpectatorController.luau"
-Cohesion: 0.31
+Cohesion: 0.32
 Nodes (15): connectContainerAttribute(), cycleTarget(), getActiveParticipantList(), getHumanoid(), isActiveParticipant(), onInputBegan(), onRenderStep(), readBooleanAttribute() (+7 more)
 
 ### Community 4 - "HudController.luau"

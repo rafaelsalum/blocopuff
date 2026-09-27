@@ -15,8 +15,8 @@
     "semantic_hash": ""
   },
   "src/client/controllers/SpectatorController.luau": {
-    "mtime": 1787006369.6012673,
-    "ast_hash": "ce5d8dab32a7b00d046a98e52c5d3cf5",
+    "mtime": 1790517699.025595,
+    "ast_hash": "a4a5d400555a22b8135a0ed98907d51b",
     "semantic_hash": ""
   },
   "src/client/init.client.luau": {

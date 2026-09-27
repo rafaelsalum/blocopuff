@@ -45,6 +45,11 @@ local connections: { RBXScriptConnection } = {}
 local playerConnections: { [Player]: { RBXScriptConnection } } = {}
 local currentTarget: Player? = nil
 local spectating = false
+-- Verdadeiro enquanto a câmera segue o personagem de outro jogador. É o que
+-- decide se é preciso devolver a câmera, e não currentTarget: o alvo pode
+-- ser apagado antes (ex.: o servidor limpa os atributos do jogador assistido
+-- no fim da rodada, ou ele sai do jogo) e a câmera ficaria presa nele.
+local cameraOverridden = false
 
 local function readRoundState(instance: Instance): RoundState
 	local value = instance:GetAttribute(ATTR_ROUND_STATE)
@@ -101,18 +106,22 @@ local function getHumanoid(player: Player): Humanoid?
 	return character:FindFirstChildOfClass("Humanoid")
 end
 
+-- Devolve a câmera ao próprio personagem. Se ele ainda não existir (está
+-- renascendo), mantém a marcação para tentar de novo no próximo quadro.
 local function resetCameraToOwnCharacter()
 	local player = localPlayer
-	if player == nil then
-		return
-	end
-
 	local camera = Workspace.CurrentCamera
-	if camera == nil then
+	if player == nil or camera == nil then
 		return
 	end
 
-	camera.CameraSubject = getHumanoid(player)
+	local ownHumanoid = getHumanoid(player)
+	if ownHumanoid == nil then
+		return
+	end
+
+	camera.CameraSubject = ownHumanoid
+	cameraOverridden = false
 end
 
 -- Lista estável (ordenada por UserId) dos participantes ainda ativos,
@@ -154,8 +163,8 @@ local function refreshSpectator()
 	spectating = isEliminatedParticipant
 
 	if not isEliminatedParticipant then
-		if currentTarget ~= nil then
-			currentTarget = nil
+		currentTarget = nil
+		if cameraOverridden then
 			resetCameraToOwnCharacter()
 		end
 		if view ~= nil then
@@ -228,17 +237,28 @@ local function onRenderStep()
 		return
 	end
 
-	if currentTarget == nil then
+	-- Fora do modo espectador, garante que a câmera volte ao próprio
+	-- personagem, mesmo que o alvo já tenha sido apagado.
+	if not spectating then
+		if cameraOverridden then
+			resetCameraToOwnCharacter()
+		end
 		return
 	end
 
-	local humanoid = getHumanoid(currentTarget)
+	local target = currentTarget
+	if target == nil then
+		return
+	end
+
+	local humanoid = getHumanoid(target)
 	if humanoid == nil then
 		refreshSpectator()
 		return
 	end
 
 	camera.CameraSubject = humanoid
+	cameraOverridden = true
 end
 
 local function onInputBegan(input: InputObject, gameProcessedEvent: boolean)
