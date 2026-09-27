@@ -1,16 +1,16 @@
 # Graph Report - blocopuff  (2026-09-27)
 
 ## Corpus Check
-- 48 files · ~34,738 words
+- 48 files · ~34,898 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 356 nodes · 703 edges · 28 communities
+- 357 nodes · 705 edges · 28 communities (27 shown, 1 thin omitted)
 - Extraction: 82% EXTRACTED · 18% INFERRED · 0% AMBIGUOUS · INFERRED: 126 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `ee2970be`
+- Built from commit: `44d8976a`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -31,6 +31,7 @@
 - AdminController.luau
 - BlockCollapseController.luau
 - BuildingDecor.luau
+- MusicController.luau
 
 ## God Nodes (most connected - your core abstractions)
 1. `BuildingDecor.createPart()` - 15 edges
@@ -59,19 +60,19 @@
 ## Import Cycles
 - None detected.
 
-## Communities (28 total, 0 thin omitted)
+## Communities (28 total, 1 thin omitted)
 
 ### Community 0 - "RoundService.luau"
-Cohesion: 0.12
-Nodes (30): ArenaService.endRound(), ArenaService.restoreAllBlocks(), beginRound(), clearRoundParticipants(), connectParticipantDeathHandlers(), countConnectedPlayers(), dequeuePlayer(), disconnectParticipantDeathHandlers() (+22 more)
+Cohesion: 0.11
+Nodes (33): ArenaService.endRound(), ArenaService.getPlayerSpawnCFrames(), ArenaService.restoreAllBlocks(), LobbyService.returnToLobby(), PuffadorService.beginRound(), beginRound(), clearRoundParticipants(), connectParticipantDeathHandlers() (+25 more)
 
 ### Community 1 - "PuffadorService.luau"
-Cohesion: 0.14
-Nodes (25): createImpactEffect(), isOwned(), ProjectileService.clearAll(), ProjectileService.clearForPlayer(), ProjectileService.spawn(), ProjectileService.start(), ProjectileService.stop(), removeProjectileAt() (+17 more)
+Cohesion: 0.15
+Nodes (24): createImpactEffect(), isOwned(), ProjectileService.clearAll(), ProjectileService.clearForPlayer(), ProjectileService.spawn(), ProjectileService.start(), ProjectileService.stop(), removeProjectileAt() (+16 more)
 
 ### Community 2 - "ArenaService.luau"
-Cohesion: 0.16
-Nodes (14): ArenaService.beginRound(), ArenaService.create(), ArenaService.destroy(), ArenaService.getPlayerSpawnCFrames(), ArenaService.tryDestroyBlock(), createArenaVisuals(), destroyOwnedChild(), getFloorStyle() (+6 more)
+Cohesion: 0.17
+Nodes (13): ArenaService.beginRound(), ArenaService.create(), ArenaService.destroy(), ArenaService.tryDestroyBlock(), createArenaVisuals(), destroyOwnedChild(), getFloorStyle(), isOwned() (+5 more)
 
 ### Community 3 - "SpectatorController.luau"
 Cohesion: 0.31
@@ -94,8 +95,8 @@ Cohesion: 0.29
 Nodes (10): ArenaService.getModel(), checkParticipants(), createVisualZoneIfNeeded(), destroyOwnedVisual(), EliminationService.beginRound(), EliminationService.endRound(), EliminationService.start(), EliminationService.stop() (+2 more)
 
 ### Community 8 - "LobbyService.luau"
-Cohesion: 0.20
-Nodes (20): assignActiveSpawn(), createSpawn(), destroyOwnedChild(), getActiveSpawn(), getGallerySlots(), getHorizontalDistance(), getLivingRoot(), getOccupiedPositions() (+12 more)
+Cohesion: 0.21
+Nodes (19): assignActiveSpawn(), createSpawn(), destroyOwnedChild(), getActiveSpawn(), getGallerySlots(), getHorizontalDistance(), getLivingRoot(), getOccupiedPositions() (+11 more)
 
 ### Community 9 - "AdminPanelView.new"
 Cohesion: 0.11
@@ -128,15 +129,16 @@ Nodes (26): addPointLight(), BuildingDecor.createChandelier(), BuildingDecor.cre
 ## Knowledge Gaps
 - **20 isolated node(s):** `Linguagem e comunicação`, `Arquitetura`, `Segurança e dependências`, `Escopo e compatibilidade`, `Validação e entrega` (+15 more)
   These have ≤1 connection - possible missing edges or undocumented components.
+- **1 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `PuffadorController.start()` connect `PuffadorController.luau` to `AdminPanelView.new`?**
   _High betweenness centrality (0.037) - this node is a cross-community bridge._
-- **Why does `LobbyService.returnToLobby()` connect `LobbyService.luau` to `RoundService.luau`?**
+- **Why does `LobbyService.returnToLobby()` connect `RoundService.luau` to `LobbyService.luau`?**
   _High betweenness centrality (0.031) - this node is a cross-community bridge._
-- **Why does `runEnding()` connect `RoundService.luau` to `LobbyService.luau`, `PuffadorService.luau`, `EliminationService.luau`?**
+- **Why does `runEnding()` connect `RoundService.luau` to `PuffadorService.luau`, `EliminationService.luau`?**
   _High betweenness centrality (0.029) - this node is a cross-community bridge._
 - **Are the 5 inferred relationships involving `BuildingDecor.createPart()` (e.g. with `createFillLights()` and `createSolid()`) actually correct?**
   _`BuildingDecor.createPart()` has 5 INFERRED edges - model-reasoned connections that need verification._

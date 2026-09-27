@@ -411,10 +411,21 @@
       "norm_label": "musiccontroller.luau"
     },
     {
+      "label": "isCompeting()",
+      "file_type": "code",
+      "source_file": "src/client/controllers/MusicController.luau",
+      "source_location": "L27",
+      "_origin": "ast",
+      "id": "src_client_controllers_musiccontroller_iscompeting",
+      "community": 27,
+      "community_name": "MusicController.luau",
+      "norm_label": "iscompeting()"
+    },
+    {
       "label": "MusicController.start()",
       "file_type": "code",
       "source_file": "src/client/controllers/MusicController.luau",
-      "source_location": "L19",
+      "source_location": "L31",
       "_origin": "ast",
       "id": "src_client_controllers_musiccontroller_musiccontroller_start",
       "community": 27,
@@ -1836,8 +1847,8 @@
       "source_location": "L330",
       "_origin": "ast",
       "id": "src_server_services_arenaservice_arenaservice_getplayerspawncframes",
-      "community": 2,
-      "community_name": "ArenaService.luau",
+      "community": 0,
+      "community_name": "RoundService.luau",
       "norm_label": "arenaservice.getplayerspawncframes()"
     },
     {
@@ -2639,8 +2650,8 @@
       "source_location": "L325",
       "_origin": "ast",
       "id": "src_server_services_lobbyservice_lobbyservice_returntolobby",
-      "community": 8,
-      "community_name": "LobbyService.luau",
+      "community": 0,
+      "community_name": "RoundService.luau",
       "norm_label": "lobbyservice.returntolobby()"
     },
     {
@@ -2870,8 +2881,8 @@
       "source_location": "L214",
       "_origin": "ast",
       "id": "src_server_services_puffadorservice_puffadorservice_beginround",
-      "community": 1,
-      "community_name": "PuffadorService.luau",
+      "community": 0,
+      "community_name": "RoundService.luau",
       "norm_label": "puffadorservice.beginround()"
     },
     {
@@ -3527,7 +3538,7 @@
       "label": "GameConfig.getRoundTimings()",
       "file_type": "code",
       "source_file": "src/shared/config/GameConfig.luau",
-      "source_location": "L246",
+      "source_location": "L251",
       "_origin": "ast",
       "id": "src_shared_config_gameconfig_gameconfig_getroundtimings",
       "community": 0,
@@ -4529,11 +4540,34 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/client/controllers/MusicController.luau",
-      "source_location": "L19",
+      "source_location": "L27",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_client_controllers_musiccontroller",
+      "target": "src_client_controllers_musiccontroller_iscompeting",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/client/controllers/MusicController.luau",
+      "source_location": "L31",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_client_controllers_musiccontroller",
       "target": "src_client_controllers_musiccontroller_musiccontroller_start",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/client/controllers/MusicController.luau",
+      "source_location": "L48",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_client_controllers_musiccontroller_musiccontroller_start",
+      "target": "src_client_controllers_musiccontroller_iscompeting",
       "confidence_score": 1.0
     },
     {
@@ -11753,7 +11787,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/shared/config/GameConfig.luau",
-      "source_location": "L246",
+      "source_location": "L251",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_shared_config_gameconfig",
@@ -12048,5 +12082,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "ee2970be97ff87151fd6e55c56d34cd848f08c6a"
+  "built_at_commit": "44d8976aa67ec2252ee99d361d310948fa4bc208"
 }

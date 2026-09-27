@@ -87,7 +87,9 @@ export type EliminationZoneConfig = {
 
 export type MusicConfig = {
 	SoundId: string,
-	Volume: number,
+	LobbyVolume: number,
+	MatchVolume: number,
+	FadeTime: number,
 }
 
 export type GameConfig = {
@@ -215,11 +217,14 @@ local EliminationZone: EliminationZoneConfig = table.freeze({
 	VisualizeInStudio = false,
 })
 
--- Trilha de fundo tocada localmente em cada cliente, em loop e com volume
--- baixo fixo para não competir com os sons do jogo.
+-- Trilha de fundo tocada localmente em cada cliente, em loop. Fica baixa no
+-- lobby e quase some enquanto o jogador está competindo, para não competir
+-- com os sons da partida.
 local Music: MusicConfig = table.freeze({
 	SoundId = "rbxassetid://1846613120",
-	Volume = 0.15,
+	LobbyVolume = 0.06,
+	MatchVolume = 0.015,
+	FadeTime = 1.2,
 })
 
 local GameConfig = {} :: GameConfig
