@@ -11,9 +11,12 @@ local SoundService = game:GetService("SoundService")
 local GameConfig = require(ReplicatedStorage.Shared.config.GameConfig)
 local PuffadorConstants = require(ReplicatedStorage.Shared.modules.PuffadorConstants)
 local StateAttributeNames = require(ReplicatedStorage.Shared.types.StateAttributeNames)
-local VaultView = require(script.Parent.Parent.ui.VaultView)
+local SuperChargeView = require(script.Parent.Parent.ui.SuperChargeView)
+local NotificationManager = require(script.Parent.Parent.notifications.NotificationManager)
 
-type VaultViewHandle = VaultView.VaultViewHandle
+type SuperChargeViewHandle = SuperChargeView.SuperChargeViewHandle
+type Priority = NotificationManager.Priority
+type Tone = NotificationManager.Tone
 
 local WAIT_TIMEOUT = 15
 local CHIME_SOUND = "rbxasset://sounds/electronicpingshort.wav"
@@ -22,7 +25,23 @@ local SUPER_SOUND = "rbxasset://sounds/button.wav"
 local VaultController = {}
 
 local started = false
-local view: VaultViewHandle? = nil
+local view: SuperChargeViewHandle? = nil
+
+-- Faixa do topo, via NotificationManager (fila e prioridade compartilhadas
+-- com os avisos de administrador).
+local function banner(icon: string, title: string, subtitle: string, tone: Tone, duration: number, priority: Priority, key: string?)
+	NotificationManager.notify({
+		channel = "Banner",
+		category = "Vault",
+		priority = priority,
+		key = key,
+		icon = icon,
+		title = title,
+		subtitle = subtitle,
+		tone = tone,
+		duration = duration,
+	})
+end
 
 local function playSound(soundId: string, speed: number, volume: number, delaySeconds: number?)
 	task.delay(delaySeconds or 0, function()
@@ -64,31 +83,31 @@ local function onVaultEvent(kind: unknown, first: unknown, second: unknown)
 	if kind == "Unlocked" then
 		playSound(CHIME_SOUND, 1.6, 0.6)
 		playSound(CHIME_SOUND, 2, 0.6, 0.18)
-		current.showBanner("🔓", "O COFRE DESTRANCOU!", "Uma porta do andar de baixo está brilhando…", "Gold", 5)
+		banner("🔓", "O COFRE DESTRANCOU!", "Uma porta do andar de baixo está brilhando…", "Gold", 5, "High", "vault-unlocked")
 	elseif kind == "Opened" then
 		playAlarm()
 		if isLocalUser(second) then
-			current.showBanner("🗝️", "VOCÊ ACHOU O COFRE!", "Pegue o Super Puffador no pedestal. Cuidado: aqui um tiro elimina!", "Gold", 5)
+			banner("🗝️", "VOCÊ ACHOU O COFRE!", "Pegue o Super Puffador no pedestal. Cuidado: aqui um tiro elimina!", "Gold", 5, "Critical", "vault-opened")
 		else
-			current.showBanner("🚨", "COFRE INVADIDO!", `{asText(first)} abriu o cofre do Barão!`, "Danger", 5)
+			banner("🚨", "COFRE INVADIDO!", `{asText(first)} abriu o cofre do Barão!`, "Danger", 5, "Critical", "vault-opened")
 		end
 	elseif kind == "SuperTaken" then
 		playSound(SUPER_SOUND, 0.8, 0.8)
 		if isLocalUser(second) then
-			current.showBanner("⚡", "SUPER PUFFADOR!", "Cada tiro derruba 2 blocos. Todos veem seu brilho dourado!", "Gold", 4.5)
+			banner("⚡", "SUPER PUFFADOR!", "Cada tiro derruba 2 blocos. Todos veem seu brilho dourado!", "Gold", 4.5, "High", "vault-super")
 		else
-			current.showBanner("⚡", "SUPER PUFFADOR!", `{asText(first)} pegou o Super Puffador. Derrube-o!`, "Gold", 4.5)
+			banner("⚡", "SUPER PUFFADOR!", `{asText(first)} pegou o Super Puffador. Derrube-o!`, "Gold", 4.5, "High", "vault-super")
 		end
 	elseif kind == "ShotInVault" then
-		current.showBanner("🎯", "PEGO NO COFRE!", `{asText(second)} acertou {asText(first)} dentro do cofre`, "Danger", 3.5)
+		banner("🎯", "PEGO NO COFRE!", `{asText(second)} acertou {asText(first)} dentro do cofre`, "Danger", 3.5, "High")
 	elseif kind == "Locked" then
 		local subtitle = if first == true then "O cofre está atrás de outra porta!" else "O cofre do Barão ainda está trancado…"
-		current.showBanner("🔒", "TRANCADA", subtitle, "Info", 2.2)
+		banner("🔒", "TRANCADA", subtitle, "Info", 2.2, "Low", "vault-locked")
 	elseif kind == "StayWarning" then
 		local seconds = if typeof(first) == "number" then first else 5
-		current.showBanner("⏳", "SAIA DO COFRE!", string.format("O Barão vai te expulsar em %d s", seconds), "Danger", 2.5)
+		banner("⏳", "SAIA DO COFRE!", string.format("O Barão vai te expulsar em %d s", seconds), "Danger", 2.5, "High", "vault-stay")
 	elseif kind == "Expelled" then
-		current.showBanner("👢", "EXPULSO DO COFRE!", "Seu tempo no cofre acabou nesta rodada", "Info", 2.5)
+		banner("👢", "EXPULSO DO COFRE!", "Seu tempo no cofre acabou nesta rodada", "Info", 2.5, "Normal")
 	end
 end
 
@@ -100,7 +119,7 @@ local function onPuffFeedback(kind: unknown, charges: unknown)
 	local remaining = if typeof(charges) == "number" then charges else 0
 	current.setSuperCharges(remaining)
 	if remaining == 0 then
-		current.showBanner("⚡", "SUPER ESGOTADO", "Seu Puffador voltou ao normal", "Info", 2)
+		banner("⚡", "SUPER ESGOTADO", "Seu Puffador voltou ao normal", "Info", 2, "Normal")
 	end
 end
 
@@ -119,7 +138,8 @@ function VaultController.start()
 		warn("[BlocoPuff] Vault controller not started: PlayerGui unavailable")
 		return
 	end
-	view = VaultView.new(playerGui)
+	NotificationManager.init(playerGui)
+	view = SuperChargeView.new(playerGui)
 
 	task.spawn(function()
 		local remotes = ReplicatedStorage:WaitForChild(PuffadorConstants.RemotesContainerName, WAIT_TIMEOUT)

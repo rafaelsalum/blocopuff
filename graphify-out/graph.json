@@ -10,8 +10,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_client_controllers_admincontroller",
-      "community": 21,
-      "community_name": "AdminController.luau",
+      "community": 4,
+      "community_name": "NotificationManager.luau",
       "norm_label": "admincontroller.luau"
     },
     {
@@ -21,8 +21,8 @@
       "source_location": "L25",
       "_origin": "ast",
       "id": "src_client_controllers_admincontroller_getremote",
-      "community": 21,
-      "community_name": "AdminController.luau",
+      "community": 4,
+      "community_name": "NotificationManager.luau",
       "norm_label": "getremote()"
     },
     {
@@ -32,8 +32,8 @@
       "source_location": "L33",
       "_origin": "ast",
       "id": "src_client_controllers_admincontroller_buildplayerentries",
-      "community": 21,
-      "community_name": "AdminController.luau",
+      "community": 4,
+      "community_name": "NotificationManager.luau",
       "norm_label": "buildplayerentries()"
     },
     {
@@ -43,19 +43,19 @@
       "source_location": "L50",
       "_origin": "ast",
       "id": "src_client_controllers_admincontroller_admincontroller_start",
-      "community": 21,
-      "community_name": "AdminController.luau",
+      "community": 4,
+      "community_name": "NotificationManager.luau",
       "norm_label": "admincontroller.start()"
     },
     {
       "label": "refreshPlayers()",
       "file_type": "code",
       "source_file": "src/client/controllers/AdminController.luau",
-      "source_location": "L171",
+      "source_location": "L182",
       "_origin": "ast",
       "id": "src_client_controllers_admincontroller_refreshplayers",
-      "community": 21,
-      "community_name": "AdminController.luau",
+      "community": 4,
+      "community_name": "NotificationManager.luau",
       "norm_label": "refreshplayers()"
     },
     {
@@ -308,117 +308,117 @@
       "_origin": "ast",
       "id": "src_client_controllers_hudcontroller",
       "community": 4,
-      "community_name": "HudController.luau",
+      "community_name": "NotificationManager.luau",
       "norm_label": "hudcontroller.luau"
     },
     {
       "label": "readRoundState()",
       "file_type": "code",
       "source_file": "src/client/controllers/HudController.luau",
-      "source_location": "L47",
+      "source_location": "L49",
       "_origin": "ast",
       "id": "src_client_controllers_hudcontroller_readroundstate",
       "community": 4,
-      "community_name": "HudController.luau",
+      "community_name": "NotificationManager.luau",
       "norm_label": "readroundstate()"
     },
     {
       "label": "readNumberAttribute()",
       "file_type": "code",
       "source_file": "src/client/controllers/HudController.luau",
-      "source_location": "L61",
+      "source_location": "L63",
       "_origin": "ast",
       "id": "src_client_controllers_hudcontroller_readnumberattribute",
       "community": 4,
-      "community_name": "HudController.luau",
+      "community_name": "NotificationManager.luau",
       "norm_label": "readnumberattribute()"
     },
     {
       "label": "readStringAttribute()",
       "file_type": "code",
       "source_file": "src/client/controllers/HudController.luau",
-      "source_location": "L69",
+      "source_location": "L71",
       "_origin": "ast",
       "id": "src_client_controllers_hudcontroller_readstringattribute",
       "community": 4,
-      "community_name": "HudController.luau",
+      "community_name": "NotificationManager.luau",
       "norm_label": "readstringattribute()"
     },
     {
       "label": "readBooleanAttribute()",
       "file_type": "code",
       "source_file": "src/client/controllers/HudController.luau",
-      "source_location": "L77",
+      "source_location": "L79",
       "_origin": "ast",
       "id": "src_client_controllers_hudcontroller_readbooleanattribute",
       "community": 4,
-      "community_name": "HudController.luau",
+      "community_name": "NotificationManager.luau",
       "norm_label": "readbooleanattribute()"
     },
     {
       "label": "formatMinutesSeconds()",
       "file_type": "code",
       "source_file": "src/client/controllers/HudController.luau",
-      "source_location": "L85",
+      "source_location": "L87",
       "_origin": "ast",
       "id": "src_client_controllers_hudcontroller_formatminutesseconds",
       "community": 4,
-      "community_name": "HudController.luau",
+      "community_name": "NotificationManager.luau",
       "norm_label": "formatminutesseconds()"
     },
     {
       "label": "getQueueMessage()",
       "file_type": "code",
       "source_file": "src/client/controllers/HudController.luau",
-      "source_location": "L92",
+      "source_location": "L94",
       "_origin": "ast",
       "id": "src_client_controllers_hudcontroller_getqueuemessage",
       "community": 4,
-      "community_name": "HudController.luau",
+      "community_name": "NotificationManager.luau",
       "norm_label": "getqueuemessage()"
     },
     {
       "label": "clearAnnouncement()",
       "file_type": "code",
       "source_file": "src/client/controllers/HudController.luau",
-      "source_location": "L99",
+      "source_location": "L101",
       "_origin": "ast",
       "id": "src_client_controllers_hudcontroller_clearannouncement",
       "community": 4,
-      "community_name": "HudController.luau",
+      "community_name": "NotificationManager.luau",
       "norm_label": "clearannouncement()"
     },
     {
       "label": "showAnnouncement()",
       "file_type": "code",
       "source_file": "src/client/controllers/HudController.luau",
-      "source_location": "L107",
+      "source_location": "L112",
       "_origin": "ast",
       "id": "src_client_controllers_hudcontroller_showannouncement",
       "community": 4,
-      "community_name": "HudController.luau",
+      "community_name": "NotificationManager.luau",
       "norm_label": "showannouncement()"
     },
     {
       "label": "renderWaiting()",
       "file_type": "code",
       "source_file": "src/client/controllers/HudController.luau",
-      "source_location": "L122",
+      "source_location": "L138",
       "_origin": "ast",
       "id": "src_client_controllers_hudcontroller_renderwaiting",
       "community": 4,
-      "community_name": "HudController.luau",
+      "community_name": "NotificationManager.luau",
       "norm_label": "renderwaiting()"
     },
     {
       "label": "renderCountdown()",
       "file_type": "code",
       "source_file": "src/client/controllers/HudController.luau",
-      "source_location": "L134",
+      "source_location": "L150",
       "_origin": "ast",
       "id": "src_client_controllers_hudcontroller_rendercountdown",
       "community": 4,
-      "community_name": "HudController.luau",
+      "community_name": "NotificationManager.luau",
       "norm_label": "rendercountdown()"
     },
     {
@@ -934,41 +934,52 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_client_controllers_vaultcontroller",
-      "community": 33,
-      "community_name": "VaultController.luau",
+      "community": 4,
+      "community_name": "NotificationManager.luau",
       "norm_label": "vaultcontroller.luau"
+    },
+    {
+      "label": "banner()",
+      "file_type": "code",
+      "source_file": "src/client/controllers/VaultController.luau",
+      "source_location": "L32",
+      "_origin": "ast",
+      "id": "src_client_controllers_vaultcontroller_banner",
+      "community": 4,
+      "community_name": "NotificationManager.luau",
+      "norm_label": "banner()"
     },
     {
       "label": "playSound()",
       "file_type": "code",
       "source_file": "src/client/controllers/VaultController.luau",
-      "source_location": "L27",
+      "source_location": "L46",
       "_origin": "ast",
       "id": "src_client_controllers_vaultcontroller_playsound",
-      "community": 33,
-      "community_name": "VaultController.luau",
+      "community": 4,
+      "community_name": "NotificationManager.luau",
       "norm_label": "playsound()"
     },
     {
       "label": "playAlarm()",
       "file_type": "code",
       "source_file": "src/client/controllers/VaultController.luau",
-      "source_location": "L42",
+      "source_location": "L61",
       "_origin": "ast",
       "id": "src_client_controllers_vaultcontroller_playalarm",
-      "community": 33,
-      "community_name": "VaultController.luau",
+      "community": 4,
+      "community_name": "NotificationManager.luau",
       "norm_label": "playalarm()"
     },
     {
       "label": "isLocalUser()",
       "file_type": "code",
       "source_file": "src/client/controllers/VaultController.luau",
-      "source_location": "L49",
+      "source_location": "L68",
       "_origin": "ast",
       "id": "src_client_controllers_vaultcontroller_islocaluser",
-      "community": 33,
-      "community_name": "VaultController.luau",
+      "community": 4,
+      "community_name": "NotificationManager.luau",
       "norm_label": "islocaluser()"
     },
     {
@@ -983,26 +994,136 @@
       "norm_label": "init.client.luau"
     },
     {
-      "label": "AdminBroadcastView.luau",
+      "label": "NotificationManager.luau",
       "file_type": "code",
-      "source_file": "src/client/ui/AdminBroadcastView.luau",
+      "source_file": "src/client/notifications/NotificationManager.luau",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "src_client_ui_adminbroadcastview",
-      "community": 9,
-      "community_name": "UiTheme.addCorner",
-      "norm_label": "adminbroadcastview.luau"
+      "id": "src_client_notifications_notificationmanager",
+      "community": 4,
+      "community_name": "NotificationManager.luau",
+      "norm_label": "notificationmanager.luau"
     },
     {
-      "label": "AdminBroadcastView.new()",
+      "label": "rank()",
       "file_type": "code",
-      "source_file": "src/client/ui/AdminBroadcastView.luau",
-      "source_location": "L23",
+      "source_file": "src/client/notifications/NotificationManager.luau",
+      "source_location": "L85",
       "_origin": "ast",
-      "id": "src_client_ui_adminbroadcastview_adminbroadcastview_new",
-      "community": 9,
-      "community_name": "UiTheme.addCorner",
-      "norm_label": "adminbroadcastview.new()"
+      "id": "src_client_notifications_notificationmanager_rank",
+      "community": 4,
+      "community_name": "NotificationManager.luau",
+      "norm_label": "rank()"
+    },
+    {
+      "label": "maxWait()",
+      "file_type": "code",
+      "source_file": "src/client/notifications/NotificationManager.luau",
+      "source_location": "L89",
+      "_origin": "ast",
+      "id": "src_client_notifications_notificationmanager_maxwait",
+      "community": 4,
+      "community_name": "NotificationManager.luau",
+      "norm_label": "maxwait()"
+    },
+    {
+      "label": "sameKey()",
+      "file_type": "code",
+      "source_file": "src/client/notifications/NotificationManager.luau",
+      "source_location": "L93",
+      "_origin": "ast",
+      "id": "src_client_notifications_notificationmanager_samekey",
+      "community": 4,
+      "community_name": "NotificationManager.luau",
+      "norm_label": "samekey()"
+    },
+    {
+      "label": "insertSorted()",
+      "file_type": "code",
+      "source_file": "src/client/notifications/NotificationManager.luau",
+      "source_location": "L97",
+      "_origin": "ast",
+      "id": "src_client_notifications_notificationmanager_insertsorted",
+      "community": 4,
+      "community_name": "NotificationManager.luau",
+      "norm_label": "insertsorted()"
+    },
+    {
+      "label": "showNext()",
+      "file_type": "code",
+      "source_file": "src/client/notifications/NotificationManager.luau",
+      "source_location": "L115",
+      "_origin": "ast",
+      "id": "src_client_notifications_notificationmanager_shownext",
+      "community": 4,
+      "community_name": "NotificationManager.luau",
+      "norm_label": "shownext()"
+    },
+    {
+      "label": "finishCurrent()",
+      "file_type": "code",
+      "source_file": "src/client/notifications/NotificationManager.luau",
+      "source_location": "L127",
+      "_origin": "ast",
+      "id": "src_client_notifications_notificationmanager_finishcurrent",
+      "community": 4,
+      "community_name": "NotificationManager.luau",
+      "norm_label": "finishcurrent()"
+    },
+    {
+      "label": "NotificationManager.notify()",
+      "file_type": "code",
+      "source_file": "src/client/notifications/NotificationManager.luau",
+      "source_location": "L162",
+      "_origin": "ast",
+      "id": "src_client_notifications_notificationmanager_notificationmanager_notify",
+      "community": 4,
+      "community_name": "NotificationManager.luau",
+      "norm_label": "notificationmanager.notify()"
+    },
+    {
+      "label": "NotificationManager.clear()",
+      "file_type": "code",
+      "source_file": "src/client/notifications/NotificationManager.luau",
+      "source_location": "L204",
+      "_origin": "ast",
+      "id": "src_client_notifications_notificationmanager_notificationmanager_clear",
+      "community": 4,
+      "community_name": "NotificationManager.luau",
+      "norm_label": "notificationmanager.clear()"
+    },
+    {
+      "label": "toAnnouncementTone()",
+      "file_type": "code",
+      "source_file": "src/client/notifications/NotificationManager.luau",
+      "source_location": "L220",
+      "_origin": "ast",
+      "id": "src_client_notifications_notificationmanager_toannouncementtone",
+      "community": 4,
+      "community_name": "NotificationManager.luau",
+      "norm_label": "toannouncementtone()"
+    },
+    {
+      "label": "toBannerTone()",
+      "file_type": "code",
+      "source_file": "src/client/notifications/NotificationManager.luau",
+      "source_location": "L231",
+      "_origin": "ast",
+      "id": "src_client_notifications_notificationmanager_tobannertone",
+      "community": 4,
+      "community_name": "NotificationManager.luau",
+      "norm_label": "tobannertone()"
+    },
+    {
+      "label": "NotificationManager.init()",
+      "file_type": "code",
+      "source_file": "src/client/notifications/NotificationManager.luau",
+      "source_location": "L241",
+      "_origin": "ast",
+      "id": "src_client_notifications_notificationmanager_notificationmanager_init",
+      "community": 4,
+      "community_name": "NotificationManager.luau",
+      "norm_label": "notificationmanager.init()"
     },
     {
       "label": "AdminPanelView.luau",
@@ -1012,7 +1133,7 @@
       "_origin": "ast",
       "id": "src_client_ui_adminpanelview",
       "community": 9,
-      "community_name": "UiTheme.addCorner",
+      "community_name": "AdminPanelView.new",
       "norm_label": "adminpanelview.luau"
     },
     {
@@ -1023,7 +1144,7 @@
       "_origin": "ast",
       "id": "src_client_ui_adminpanelview_createtextbox",
       "community": 9,
-      "community_name": "UiTheme.addCorner",
+      "community_name": "AdminPanelView.new",
       "norm_label": "createtextbox()"
     },
     {
@@ -1034,7 +1155,7 @@
       "_origin": "ast",
       "id": "src_client_ui_adminpanelview_constraintext",
       "community": 9,
-      "community_name": "UiTheme.addCorner",
+      "community_name": "AdminPanelView.new",
       "norm_label": "constraintext()"
     },
     {
@@ -1045,7 +1166,7 @@
       "_origin": "ast",
       "id": "src_client_ui_adminpanelview_createsection",
       "community": 9,
-      "community_name": "UiTheme.addCorner",
+      "community_name": "AdminPanelView.new",
       "norm_label": "createsection()"
     },
     {
@@ -1056,7 +1177,7 @@
       "_origin": "ast",
       "id": "src_client_ui_adminpanelview_adminpanelview_new",
       "community": 9,
-      "community_name": "UiTheme.addCorner",
+      "community_name": "AdminPanelView.new",
       "norm_label": "adminpanelview.new()"
     },
     {
@@ -1067,7 +1188,7 @@
       "_origin": "ast",
       "id": "src_client_ui_announcementview",
       "community": 9,
-      "community_name": "UiTheme.addCorner",
+      "community_name": "AdminPanelView.new",
       "norm_label": "announcementview.luau"
     },
     {
@@ -1078,7 +1199,7 @@
       "_origin": "ast",
       "id": "src_client_ui_announcementview_gettonecolor",
       "community": 9,
-      "community_name": "UiTheme.addCorner",
+      "community_name": "AdminPanelView.new",
       "norm_label": "gettonecolor()"
     },
     {
@@ -1089,8 +1210,63 @@
       "_origin": "ast",
       "id": "src_client_ui_announcementview_announcementview_new",
       "community": 9,
-      "community_name": "UiTheme.addCorner",
+      "community_name": "AdminPanelView.new",
       "norm_label": "announcementview.new()"
+    },
+    {
+      "label": "BannerView.luau",
+      "file_type": "code",
+      "source_file": "src/client/ui/BannerView.luau",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "src_client_ui_bannerview",
+      "community": 9,
+      "community_name": "AdminPanelView.new",
+      "norm_label": "bannerview.luau"
+    },
+    {
+      "label": "getShownY()",
+      "file_type": "code",
+      "source_file": "src/client/ui/BannerView.luau",
+      "source_location": "L30",
+      "_origin": "ast",
+      "id": "src_client_ui_bannerview_getshowny",
+      "community": 9,
+      "community_name": "AdminPanelView.new",
+      "norm_label": "getshowny()"
+    },
+    {
+      "label": "getToneColor()",
+      "file_type": "code",
+      "source_file": "src/client/ui/BannerView.luau",
+      "source_location": "L40",
+      "_origin": "ast",
+      "id": "src_client_ui_bannerview_gettonecolor",
+      "community": 9,
+      "community_name": "AdminPanelView.new",
+      "norm_label": "gettonecolor()"
+    },
+    {
+      "label": "createBanner()",
+      "file_type": "code",
+      "source_file": "src/client/ui/BannerView.luau",
+      "source_location": "L49",
+      "_origin": "ast",
+      "id": "src_client_ui_bannerview_createbanner",
+      "community": 9,
+      "community_name": "AdminPanelView.new",
+      "norm_label": "createbanner()"
+    },
+    {
+      "label": "BannerView.new()",
+      "file_type": "code",
+      "source_file": "src/client/ui/BannerView.luau",
+      "source_location": "L104",
+      "_origin": "ast",
+      "id": "src_client_ui_bannerview_bannerview_new",
+      "community": 9,
+      "community_name": "AdminPanelView.new",
+      "norm_label": "bannerview.new()"
     },
     {
       "label": "CombatHudView.luau",
@@ -1100,7 +1276,7 @@
       "_origin": "ast",
       "id": "src_client_ui_combathudview",
       "community": 9,
-      "community_name": "UiTheme.addCorner",
+      "community_name": "AdminPanelView.new",
       "norm_label": "combathudview.luau"
     },
     {
@@ -1111,7 +1287,7 @@
       "_origin": "ast",
       "id": "src_client_ui_combathudview_createpanelroot",
       "community": 9,
-      "community_name": "UiTheme.addCorner",
+      "community_name": "AdminPanelView.new",
       "norm_label": "createpanelroot()"
     },
     {
@@ -1122,7 +1298,7 @@
       "_origin": "ast",
       "id": "src_client_ui_combathudview_createlabel",
       "community": 9,
-      "community_name": "UiTheme.addCorner",
+      "community_name": "AdminPanelView.new",
       "norm_label": "createlabel()"
     },
     {
@@ -1133,7 +1309,7 @@
       "_origin": "ast",
       "id": "src_client_ui_combathudview_combathudview_new",
       "community": 9,
-      "community_name": "UiTheme.addCorner",
+      "community_name": "AdminPanelView.new",
       "norm_label": "combathudview.new()"
     },
     {
@@ -1144,7 +1320,7 @@
       "_origin": "ast",
       "id": "src_client_ui_controlhintview",
       "community": 9,
-      "community_name": "UiTheme.addCorner",
+      "community_name": "AdminPanelView.new",
       "norm_label": "controlhintview.luau"
     },
     {
@@ -1155,7 +1331,7 @@
       "_origin": "ast",
       "id": "src_client_ui_controlhintview_controlhintview_new",
       "community": 9,
-      "community_name": "UiTheme.addCorner",
+      "community_name": "AdminPanelView.new",
       "norm_label": "controlhintview.new()"
     },
     {
@@ -1210,7 +1386,7 @@
       "_origin": "ast",
       "id": "src_client_ui_feedbackview",
       "community": 9,
-      "community_name": "UiTheme.addCorner",
+      "community_name": "AdminPanelView.new",
       "norm_label": "feedbackview.luau"
     },
     {
@@ -1221,7 +1397,7 @@
       "_origin": "ast",
       "id": "src_client_ui_feedbackview_gettonecolor",
       "community": 9,
-      "community_name": "UiTheme.addCorner",
+      "community_name": "AdminPanelView.new",
       "norm_label": "gettonecolor()"
     },
     {
@@ -1232,7 +1408,7 @@
       "_origin": "ast",
       "id": "src_client_ui_feedbackview_findcallout",
       "community": 9,
-      "community_name": "UiTheme.addCorner",
+      "community_name": "AdminPanelView.new",
       "norm_label": "findcallout()"
     },
     {
@@ -1243,7 +1419,7 @@
       "_origin": "ast",
       "id": "src_client_ui_feedbackview_feedbackview_new",
       "community": 9,
-      "community_name": "UiTheme.addCorner",
+      "community_name": "AdminPanelView.new",
       "norm_label": "feedbackview.new()"
     },
     {
@@ -1254,7 +1430,7 @@
       "_origin": "ast",
       "id": "src_client_ui_firebuttonview",
       "community": 9,
-      "community_name": "UiTheme.addCorner",
+      "community_name": "AdminPanelView.new",
       "norm_label": "firebuttonview.luau"
     },
     {
@@ -1265,7 +1441,7 @@
       "_origin": "ast",
       "id": "src_client_ui_firebuttonview_circle",
       "community": 9,
-      "community_name": "UiTheme.addCorner",
+      "community_name": "AdminPanelView.new",
       "norm_label": "circle()"
     },
     {
@@ -1276,7 +1452,7 @@
       "_origin": "ast",
       "id": "src_client_ui_firebuttonview_firebuttonview_new",
       "community": 9,
-      "community_name": "UiTheme.addCorner",
+      "community_name": "AdminPanelView.new",
       "norm_label": "firebuttonview.new()"
     },
     {
@@ -1287,18 +1463,18 @@
       "_origin": "ast",
       "id": "src_client_ui_hudview",
       "community": 9,
-      "community_name": "UiTheme.addCorner",
+      "community_name": "AdminPanelView.new",
       "norm_label": "hudview.luau"
     },
     {
       "label": "HudView.new()",
       "file_type": "code",
       "source_file": "src/client/ui/HudView.luau",
-      "source_location": "L35",
+      "source_location": "L32",
       "_origin": "ast",
       "id": "src_client_ui_hudview_hudview_new",
       "community": 9,
-      "community_name": "UiTheme.addCorner",
+      "community_name": "AdminPanelView.new",
       "norm_label": "hudview.new()"
     },
     {
@@ -1309,7 +1485,7 @@
       "_origin": "ast",
       "id": "src_client_ui_responsivescale",
       "community": 9,
-      "community_name": "UiTheme.addCorner",
+      "community_name": "AdminPanelView.new",
       "norm_label": "responsivescale.luau"
     },
     {
@@ -1320,7 +1496,7 @@
       "_origin": "ast",
       "id": "src_client_ui_responsivescale_responsivescale_attach",
       "community": 9,
-      "community_name": "UiTheme.addCorner",
+      "community_name": "AdminPanelView.new",
       "norm_label": "responsivescale.attach()"
     },
     {
@@ -1331,7 +1507,7 @@
       "_origin": "ast",
       "id": "src_client_ui_roundhudview",
       "community": 9,
-      "community_name": "UiTheme.addCorner",
+      "community_name": "AdminPanelView.new",
       "norm_label": "roundhudview.luau"
     },
     {
@@ -1342,7 +1518,7 @@
       "_origin": "ast",
       "id": "src_client_ui_roundhudview_createtextlabel",
       "community": 9,
-      "community_name": "UiTheme.addCorner",
+      "community_name": "AdminPanelView.new",
       "norm_label": "createtextlabel()"
     },
     {
@@ -1353,7 +1529,7 @@
       "_origin": "ast",
       "id": "src_client_ui_roundhudview_createanimationgroup",
       "community": 9,
-      "community_name": "UiTheme.addCorner",
+      "community_name": "AdminPanelView.new",
       "norm_label": "createanimationgroup()"
     },
     {
@@ -1364,7 +1540,7 @@
       "_origin": "ast",
       "id": "src_client_ui_roundhudview_roundhudview_new",
       "community": 9,
-      "community_name": "UiTheme.addCorner",
+      "community_name": "AdminPanelView.new",
       "norm_label": "roundhudview.new()"
     },
     {
@@ -1375,7 +1551,7 @@
       "_origin": "ast",
       "id": "src_client_ui_spectatorview",
       "community": 9,
-      "community_name": "UiTheme.addCorner",
+      "community_name": "AdminPanelView.new",
       "norm_label": "spectatorview.luau"
     },
     {
@@ -1386,8 +1562,41 @@
       "_origin": "ast",
       "id": "src_client_ui_spectatorview_spectatorview_new",
       "community": 9,
-      "community_name": "UiTheme.addCorner",
+      "community_name": "AdminPanelView.new",
       "norm_label": "spectatorview.new()"
+    },
+    {
+      "label": "SuperChargeView.luau",
+      "file_type": "code",
+      "source_file": "src/client/ui/SuperChargeView.luau",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "src_client_ui_superchargeview",
+      "community": 9,
+      "community_name": "AdminPanelView.new",
+      "norm_label": "superchargeview.luau"
+    },
+    {
+      "label": "createSuperPill()",
+      "file_type": "code",
+      "source_file": "src/client/ui/SuperChargeView.luau",
+      "source_location": "L20",
+      "_origin": "ast",
+      "id": "src_client_ui_superchargeview_createsuperpill",
+      "community": 9,
+      "community_name": "AdminPanelView.new",
+      "norm_label": "createsuperpill()"
+    },
+    {
+      "label": "SuperChargeView.new()",
+      "file_type": "code",
+      "source_file": "src/client/ui/SuperChargeView.luau",
+      "source_location": "L45",
+      "_origin": "ast",
+      "id": "src_client_ui_superchargeview_superchargeview_new",
+      "community": 9,
+      "community_name": "AdminPanelView.new",
+      "norm_label": "superchargeview.new()"
     },
     {
       "label": "UiKit.luau",
@@ -1397,7 +1606,7 @@
       "_origin": "ast",
       "id": "src_client_ui_uikit",
       "community": 9,
-      "community_name": "UiTheme.addCorner",
+      "community_name": "AdminPanelView.new",
       "norm_label": "uikit.luau"
     },
     {
@@ -1408,7 +1617,7 @@
       "_origin": "ast",
       "id": "src_client_ui_uikit_getvariantcolors",
       "community": 9,
-      "community_name": "UiTheme.addCorner",
+      "community_name": "AdminPanelView.new",
       "norm_label": "getvariantcolors()"
     },
     {
@@ -1419,7 +1628,7 @@
       "_origin": "ast",
       "id": "src_client_ui_uikit_uikit_playclick",
       "community": 9,
-      "community_name": "UiTheme.addCorner",
+      "community_name": "AdminPanelView.new",
       "norm_label": "uikit.playclick()"
     },
     {
@@ -1430,7 +1639,7 @@
       "_origin": "ast",
       "id": "src_client_ui_uikit_uikit_pop",
       "community": 9,
-      "community_name": "UiTheme.addCorner",
+      "community_name": "AdminPanelView.new",
       "norm_label": "uikit.pop()"
     },
     {
@@ -1441,7 +1650,7 @@
       "_origin": "ast",
       "id": "src_client_ui_uikit_uikit_createbutton",
       "community": 9,
-      "community_name": "UiTheme.addCorner",
+      "community_name": "AdminPanelView.new",
       "norm_label": "uikit.createbutton()"
     },
     {
@@ -1452,7 +1661,7 @@
       "_origin": "ast",
       "id": "src_client_ui_uikit_uikit_createwordmark",
       "community": 9,
-      "community_name": "UiTheme.addCorner",
+      "community_name": "AdminPanelView.new",
       "norm_label": "uikit.createwordmark()"
     },
     {
@@ -1463,7 +1672,7 @@
       "_origin": "ast",
       "id": "src_client_ui_uitheme",
       "community": 9,
-      "community_name": "UiTheme.addCorner",
+      "community_name": "AdminPanelView.new",
       "norm_label": "uitheme.luau"
     },
     {
@@ -1474,7 +1683,7 @@
       "_origin": "ast",
       "id": "src_client_ui_uitheme_uitheme_createscreengui",
       "community": 9,
-      "community_name": "UiTheme.addCorner",
+      "community_name": "AdminPanelView.new",
       "norm_label": "uitheme.createscreengui()"
     },
     {
@@ -1485,7 +1694,7 @@
       "_origin": "ast",
       "id": "src_client_ui_uitheme_uitheme_addcorner",
       "community": 9,
-      "community_name": "UiTheme.addCorner",
+      "community_name": "AdminPanelView.new",
       "norm_label": "uitheme.addcorner()"
     },
     {
@@ -1496,7 +1705,7 @@
       "_origin": "ast",
       "id": "src_client_ui_uitheme_uitheme_addstroke",
       "community": 9,
-      "community_name": "UiTheme.addCorner",
+      "community_name": "AdminPanelView.new",
       "norm_label": "uitheme.addstroke()"
     },
     {
@@ -1507,7 +1716,7 @@
       "_origin": "ast",
       "id": "src_client_ui_uitheme_uitheme_addpadding",
       "community": 9,
-      "community_name": "UiTheme.addCorner",
+      "community_name": "AdminPanelView.new",
       "norm_label": "uitheme.addpadding()"
     },
     {
@@ -1518,7 +1727,7 @@
       "_origin": "ast",
       "id": "src_client_ui_uitheme_uitheme_addtextconstraint",
       "community": 9,
-      "community_name": "UiTheme.addCorner",
+      "community_name": "AdminPanelView.new",
       "norm_label": "uitheme.addtextconstraint()"
     },
     {
@@ -1529,7 +1738,7 @@
       "_origin": "ast",
       "id": "src_client_ui_uitheme_uitheme_addgradient",
       "community": 9,
-      "community_name": "UiTheme.addCorner",
+      "community_name": "AdminPanelView.new",
       "norm_label": "uitheme.addgradient()"
     },
     {
@@ -1540,7 +1749,7 @@
       "_origin": "ast",
       "id": "src_client_ui_uitheme_uitheme_addtextoutline",
       "community": 9,
-      "community_name": "UiTheme.addCorner",
+      "community_name": "AdminPanelView.new",
       "norm_label": "uitheme.addtextoutline()"
     },
     {
@@ -1551,7 +1760,7 @@
       "_origin": "ast",
       "id": "src_client_ui_uitheme_uitheme_createshadow",
       "community": 9,
-      "community_name": "UiTheme.addCorner",
+      "community_name": "AdminPanelView.new",
       "norm_label": "uitheme.createshadow()"
     },
     {
@@ -1562,7 +1771,7 @@
       "_origin": "ast",
       "id": "src_client_ui_uitheme_uitheme_stylepanel",
       "community": 9,
-      "community_name": "UiTheme.addCorner",
+      "community_name": "AdminPanelView.new",
       "norm_label": "uitheme.stylepanel()"
     },
     {
@@ -1573,63 +1782,8 @@
       "_origin": "ast",
       "id": "src_client_ui_uitheme_uitheme_createlabel",
       "community": 9,
-      "community_name": "UiTheme.addCorner",
+      "community_name": "AdminPanelView.new",
       "norm_label": "uitheme.createlabel()"
-    },
-    {
-      "label": "VaultView.luau",
-      "file_type": "code",
-      "source_file": "src/client/ui/VaultView.luau",
-      "source_location": "L1",
-      "_origin": "ast",
-      "id": "src_client_ui_vaultview",
-      "community": 9,
-      "community_name": "UiTheme.addCorner",
-      "norm_label": "vaultview.luau"
-    },
-    {
-      "label": "getToneColor()",
-      "file_type": "code",
-      "source_file": "src/client/ui/VaultView.luau",
-      "source_location": "L28",
-      "_origin": "ast",
-      "id": "src_client_ui_vaultview_gettonecolor",
-      "community": 9,
-      "community_name": "UiTheme.addCorner",
-      "norm_label": "gettonecolor()"
-    },
-    {
-      "label": "createBanner()",
-      "file_type": "code",
-      "source_file": "src/client/ui/VaultView.luau",
-      "source_location": "L37",
-      "_origin": "ast",
-      "id": "src_client_ui_vaultview_createbanner",
-      "community": 9,
-      "community_name": "UiTheme.addCorner",
-      "norm_label": "createbanner()"
-    },
-    {
-      "label": "createSuperPill()",
-      "file_type": "code",
-      "source_file": "src/client/ui/VaultView.luau",
-      "source_location": "L92",
-      "_origin": "ast",
-      "id": "src_client_ui_vaultview_createsuperpill",
-      "community": 9,
-      "community_name": "UiTheme.addCorner",
-      "norm_label": "createsuperpill()"
-    },
-    {
-      "label": "VaultView.new()",
-      "file_type": "code",
-      "source_file": "src/client/ui/VaultView.luau",
-      "source_location": "L117",
-      "_origin": "ast",
-      "id": "src_client_ui_vaultview_vaultview_new",
-      "community": 9,
-      "community_name": "UiTheme.addCorner",
-      "norm_label": "vaultview.new()"
     },
     {
       "label": "AdminConfig.luau",
@@ -2045,8 +2199,8 @@
       "source_location": "L331",
       "_origin": "ast",
       "id": "src_server_services_arenaservice_arenaservice_getplayerspawncframes",
-      "community": 2,
-      "community_name": "ArenaService.luau",
+      "community": 0,
+      "community_name": "RoundService.luau",
       "norm_label": "arenaservice.getplayerspawncframes()"
     },
     {
@@ -2133,8 +2287,8 @@
       "source_location": "L459",
       "_origin": "ast",
       "id": "src_server_services_arenaservice_arenaservice_getintactblocks",
-      "community": 2,
-      "community_name": "ArenaService.luau",
+      "community": 0,
+      "community_name": "RoundService.luau",
       "norm_label": "arenaservice.getintactblocks()"
     },
     {
@@ -2144,8 +2298,8 @@
       "source_location": "L473",
       "_origin": "ast",
       "id": "src_server_services_arenaservice_arenaservice_getsaferespawncframe",
-      "community": 2,
-      "community_name": "ArenaService.luau",
+      "community": 0,
+      "community_name": "RoundService.luau",
       "norm_label": "arenaservice.getsaferespawncframe()"
     },
     {
@@ -2155,8 +2309,8 @@
       "source_location": "L523",
       "_origin": "ast",
       "id": "src_server_services_arenaservice_arenaservice_setcollapsewarning",
-      "community": 2,
-      "community_name": "ArenaService.luau",
+      "community": 0,
+      "community_name": "RoundService.luau",
       "norm_label": "arenaservice.setcollapsewarning()"
     },
     {
@@ -2694,8 +2848,8 @@
       "source_location": "L31",
       "_origin": "ast",
       "id": "src_server_services_finalchaosservice_runwaves",
-      "community": 2,
-      "community_name": "ArenaService.luau",
+      "community": 0,
+      "community_name": "RoundService.luau",
       "norm_label": "runwaves()"
     },
     {
@@ -4245,8 +4399,8 @@
       "source_location": "L35",
       "_origin": "ast",
       "id": "src_server_services_secretroombuilder_secretroombuilder_getframe",
-      "community": 30,
-      "community_name": "VaultService.luau",
+      "community": 25,
+      "community_name": "BuildingDecor.createPart",
       "norm_label": "secretroombuilder.getframe()"
     },
     {
@@ -4256,8 +4410,8 @@
       "source_location": "L40",
       "_origin": "ast",
       "id": "src_server_services_secretroombuilder_secretroombuilder_getpedestaltop",
-      "community": 30,
-      "community_name": "VaultService.luau",
+      "community": 25,
+      "community_name": "BuildingDecor.createPart",
       "norm_label": "secretroombuilder.getpedestaltop()"
     },
     {
@@ -4366,8 +4520,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_server_services_vaultprops",
-      "community": 30,
-      "community_name": "VaultService.luau",
+      "community": 25,
+      "community_name": "BuildingDecor.createPart",
       "norm_label": "vaultprops.luau"
     },
     {
@@ -4377,8 +4531,8 @@
       "source_location": "L43",
       "_origin": "ast",
       "id": "src_server_services_vaultprops_attachtopanel",
-      "community": 30,
-      "community_name": "VaultService.luau",
+      "community": 25,
+      "community_name": "BuildingDecor.createPart",
       "norm_label": "attachtopanel()"
     },
     {
@@ -4388,8 +4542,8 @@
       "source_location": "L52",
       "_origin": "ast",
       "id": "src_server_services_vaultprops_createpanel",
-      "community": 30,
-      "community_name": "VaultService.luau",
+      "community": 25,
+      "community_name": "BuildingDecor.createPart",
       "norm_label": "createpanel()"
     },
     {
@@ -4399,8 +4553,8 @@
       "source_location": "L88",
       "_origin": "ast",
       "id": "src_server_services_vaultprops_createprompt",
-      "community": 30,
-      "community_name": "VaultService.luau",
+      "community": 25,
+      "community_name": "BuildingDecor.createPart",
       "norm_label": "createprompt()"
     },
     {
@@ -4410,8 +4564,8 @@
       "source_location": "L103",
       "_origin": "ast",
       "id": "src_server_services_vaultprops_createglow",
-      "community": 30,
-      "community_name": "VaultService.luau",
+      "community": 25,
+      "community_name": "BuildingDecor.createPart",
       "norm_label": "createglow()"
     },
     {
@@ -4421,8 +4575,8 @@
       "source_location": "L133",
       "_origin": "ast",
       "id": "src_server_services_vaultprops_createalarm",
-      "community": 30,
-      "community_name": "VaultService.luau",
+      "community": 25,
+      "community_name": "BuildingDecor.createPart",
       "norm_label": "createalarm()"
     },
     {
@@ -4432,8 +4586,8 @@
       "source_location": "L150",
       "_origin": "ast",
       "id": "src_server_services_vaultprops_vaultprops_create",
-      "community": 30,
-      "community_name": "VaultService.luau",
+      "community": 25,
+      "community_name": "BuildingDecor.createPart",
       "norm_label": "vaultprops.create()"
     },
     {
@@ -4465,8 +4619,8 @@
       "source_location": "L196",
       "_origin": "ast",
       "id": "src_server_services_vaultprops_vaultprops_startalarm",
-      "community": 30,
-      "community_name": "VaultService.luau",
+      "community": 25,
+      "community_name": "BuildingDecor.createPart",
       "norm_label": "vaultprops.startalarm()"
     },
     {
@@ -4487,8 +4641,8 @@
       "source_location": "L229",
       "_origin": "ast",
       "id": "src_server_services_vaultprops_vaultprops_createprize",
-      "community": 30,
-      "community_name": "VaultService.luau",
+      "community": 25,
+      "community_name": "BuildingDecor.createPart",
       "norm_label": "vaultprops.createprize()"
     },
     {
@@ -5218,10 +5372,21 @@
       "norm_label": "regras do core (fase 1, entrega 1.1)"
     },
     {
-      "label": "O Cofre do Bar\u00e3o Puff",
+      "label": "Notifica\u00e7\u00f5es (Fase 1, entrega 1.2)",
       "file_type": "document",
       "source_file": "README.md",
       "source_location": "L235",
+      "_origin": "ast",
+      "id": "readme_notifica\u00e7\u00f5es_fase_1_entrega_1_2",
+      "community": 17,
+      "community_name": "BlocoPuff!",
+      "norm_label": "notificacoes (fase 1, entrega 1.2)"
+    },
+    {
+      "label": "O Cofre do Bar\u00e3o Puff",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": "L263",
       "_origin": "ast",
       "id": "readme_o_cofre_do_bar\u00e3o_puff",
       "community": 17,
@@ -5232,7 +5397,7 @@
       "label": "Identidade visual",
       "file_type": "document",
       "source_file": "README.md",
-      "source_location": "L249",
+      "source_location": "L277",
       "_origin": "ast",
       "id": "readme_identidade_visual",
       "community": 17,
@@ -5243,7 +5408,7 @@
       "label": "Artes da loja",
       "file_type": "document",
       "source_file": "README.md",
-      "source_location": "L255",
+      "source_location": "L283",
       "_origin": "ast",
       "id": "readme_artes_da_loja",
       "community": 17,
@@ -7104,7 +7269,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/client/controllers/AdminController.luau",
-      "source_location": "L171",
+      "source_location": "L182",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_client_controllers_admincontroller",
@@ -7128,7 +7293,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/client/controllers/AdminController.luau",
-      "source_location": "L174",
+      "source_location": "L185",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_client_controllers_admincontroller_refreshplayers",
@@ -7145,7 +7310,19 @@
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_client_controllers_admincontroller_admincontroller_start",
-      "target": "src_client_ui_adminbroadcastview_adminbroadcastview_new"
+      "target": "src_client_notifications_notificationmanager_notificationmanager_init"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "src/client/controllers/AdminController.luau",
+      "source_location": "L105",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_client_controllers_admincontroller_admincontroller_start",
+      "target": "src_client_notifications_notificationmanager_notificationmanager_notify"
     },
     {
       "relation": "contains",
@@ -7611,7 +7788,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/client/controllers/HudController.luau",
-      "source_location": "L99",
+      "source_location": "L101",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_client_controllers_hudcontroller",
@@ -7622,7 +7799,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/client/controllers/HudController.luau",
-      "source_location": "L85",
+      "source_location": "L87",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_client_controllers_hudcontroller",
@@ -7633,7 +7810,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/client/controllers/HudController.luau",
-      "source_location": "L92",
+      "source_location": "L94",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_client_controllers_hudcontroller",
@@ -7644,7 +7821,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/client/controllers/HudController.luau",
-      "source_location": "L77",
+      "source_location": "L79",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_client_controllers_hudcontroller",
@@ -7655,7 +7832,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/client/controllers/HudController.luau",
-      "source_location": "L61",
+      "source_location": "L63",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_client_controllers_hudcontroller",
@@ -7666,7 +7843,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/client/controllers/HudController.luau",
-      "source_location": "L47",
+      "source_location": "L49",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_client_controllers_hudcontroller",
@@ -7677,7 +7854,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/client/controllers/HudController.luau",
-      "source_location": "L69",
+      "source_location": "L71",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_client_controllers_hudcontroller",
@@ -7688,7 +7865,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/client/controllers/HudController.luau",
-      "source_location": "L134",
+      "source_location": "L150",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_client_controllers_hudcontroller",
@@ -7699,7 +7876,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/client/controllers/HudController.luau",
-      "source_location": "L122",
+      "source_location": "L138",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_client_controllers_hudcontroller",
@@ -7710,7 +7887,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/client/controllers/HudController.luau",
-      "source_location": "L107",
+      "source_location": "L112",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_client_controllers_hudcontroller",
@@ -7722,7 +7899,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/client/controllers/HudController.luau",
-      "source_location": "L128",
+      "source_location": "L144",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_client_controllers_hudcontroller_renderwaiting",
@@ -7732,9 +7909,21 @@
     {
       "relation": "calls",
       "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "src/client/controllers/HudController.luau",
+      "source_location": "L106",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_client_controllers_hudcontroller_clearannouncement",
+      "target": "src_client_notifications_notificationmanager_notificationmanager_clear"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/client/controllers/HudController.luau",
-      "source_location": "L139",
+      "source_location": "L155",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_client_controllers_hudcontroller_rendercountdown",
@@ -7746,12 +7935,24 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/client/controllers/HudController.luau",
-      "source_location": "L131",
+      "source_location": "L147",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_client_controllers_hudcontroller_renderwaiting",
       "target": "src_client_controllers_hudcontroller_clearannouncement",
       "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "src/client/controllers/HudController.luau",
+      "source_location": "L126",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_client_controllers_hudcontroller_showannouncement",
+      "target": "src_client_notifications_notificationmanager_notificationmanager_notify"
     },
     {
       "relation": "contains",
@@ -8903,7 +9104,18 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/client/controllers/VaultController.luau",
-      "source_location": "L49",
+      "source_location": "L32",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_client_controllers_vaultcontroller",
+      "target": "src_client_controllers_vaultcontroller_banner",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/client/controllers/VaultController.luau",
+      "source_location": "L68",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_client_controllers_vaultcontroller",
@@ -8914,7 +9126,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/client/controllers/VaultController.luau",
-      "source_location": "L42",
+      "source_location": "L61",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_client_controllers_vaultcontroller",
@@ -8925,7 +9137,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/client/controllers/VaultController.luau",
-      "source_location": "L27",
+      "source_location": "L46",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_client_controllers_vaultcontroller",
@@ -8935,9 +9147,21 @@
     {
       "relation": "calls",
       "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "src/client/controllers/VaultController.luau",
+      "source_location": "L33",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_client_controllers_vaultcontroller_banner",
+      "target": "src_client_notifications_notificationmanager_notificationmanager_notify"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/client/controllers/VaultController.luau",
-      "source_location": "L45",
+      "source_location": "L64",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_client_controllers_vaultcontroller_playalarm",
@@ -8947,12 +9171,230 @@
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
-      "source_file": "src/client/ui/AdminBroadcastView.luau",
-      "source_location": "L23",
+      "source_file": "src/client/notifications/NotificationManager.luau",
+      "source_location": "L127",
       "weight": 1.0,
       "_origin": "ast",
-      "source": "src_client_ui_adminbroadcastview",
-      "target": "src_client_ui_adminbroadcastview_adminbroadcastview_new",
+      "source": "src_client_notifications_notificationmanager",
+      "target": "src_client_notifications_notificationmanager_finishcurrent",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/client/notifications/NotificationManager.luau",
+      "source_location": "L97",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_client_notifications_notificationmanager",
+      "target": "src_client_notifications_notificationmanager_insertsorted",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/client/notifications/NotificationManager.luau",
+      "source_location": "L89",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_client_notifications_notificationmanager",
+      "target": "src_client_notifications_notificationmanager_maxwait",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/client/notifications/NotificationManager.luau",
+      "source_location": "L204",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_client_notifications_notificationmanager",
+      "target": "src_client_notifications_notificationmanager_notificationmanager_clear",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/client/notifications/NotificationManager.luau",
+      "source_location": "L241",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_client_notifications_notificationmanager",
+      "target": "src_client_notifications_notificationmanager_notificationmanager_init",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/client/notifications/NotificationManager.luau",
+      "source_location": "L162",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_client_notifications_notificationmanager",
+      "target": "src_client_notifications_notificationmanager_notificationmanager_notify",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/client/notifications/NotificationManager.luau",
+      "source_location": "L85",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_client_notifications_notificationmanager",
+      "target": "src_client_notifications_notificationmanager_rank",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/client/notifications/NotificationManager.luau",
+      "source_location": "L93",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_client_notifications_notificationmanager",
+      "target": "src_client_notifications_notificationmanager_samekey",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/client/notifications/NotificationManager.luau",
+      "source_location": "L115",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_client_notifications_notificationmanager",
+      "target": "src_client_notifications_notificationmanager_shownext",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/client/notifications/NotificationManager.luau",
+      "source_location": "L220",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_client_notifications_notificationmanager",
+      "target": "src_client_notifications_notificationmanager_toannouncementtone",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/client/notifications/NotificationManager.luau",
+      "source_location": "L231",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_client_notifications_notificationmanager",
+      "target": "src_client_notifications_notificationmanager_tobannertone",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/client/notifications/NotificationManager.luau",
+      "source_location": "L100",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_client_notifications_notificationmanager_insertsorted",
+      "target": "src_client_notifications_notificationmanager_rank",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/client/notifications/NotificationManager.luau",
+      "source_location": "L190",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_client_notifications_notificationmanager_notificationmanager_notify",
+      "target": "src_client_notifications_notificationmanager_rank",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/client/notifications/NotificationManager.luau",
+      "source_location": "L120",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_client_notifications_notificationmanager_shownext",
+      "target": "src_client_notifications_notificationmanager_maxwait",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/client/notifications/NotificationManager.luau",
+      "source_location": "L175",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_client_notifications_notificationmanager_notificationmanager_notify",
+      "target": "src_client_notifications_notificationmanager_samekey",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/client/notifications/NotificationManager.luau",
+      "source_location": "L195",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_client_notifications_notificationmanager_notificationmanager_notify",
+      "target": "src_client_notifications_notificationmanager_insertsorted",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/client/notifications/NotificationManager.luau",
+      "source_location": "L138",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_client_notifications_notificationmanager_finishcurrent",
+      "target": "src_client_notifications_notificationmanager_shownext",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/client/notifications/NotificationManager.luau",
+      "source_location": "L216",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_client_notifications_notificationmanager_notificationmanager_clear",
+      "target": "src_client_notifications_notificationmanager_finishcurrent",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/client/notifications/NotificationManager.luau",
+      "source_location": "L250",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_client_notifications_notificationmanager_notificationmanager_init",
+      "target": "src_client_notifications_notificationmanager_toannouncementtone",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/client/notifications/NotificationManager.luau",
+      "source_location": "L258",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_client_notifications_notificationmanager_notificationmanager_init",
+      "target": "src_client_notifications_notificationmanager_tobannertone",
       "confidence_score": 1.0
     },
     {
@@ -8960,72 +9402,24 @@
       "context": "call",
       "confidence": "INFERRED",
       "confidence_score": 0.8,
-      "source_file": "src/client/ui/AdminBroadcastView.luau",
-      "source_location": "L34",
+      "source_file": "src/client/notifications/NotificationManager.luau",
+      "source_location": "L247",
       "weight": 1.0,
       "_origin": "ast",
-      "source": "src_client_ui_adminbroadcastview_adminbroadcastview_new",
-      "target": "src_client_ui_responsivescale_responsivescale_attach"
+      "source": "src_client_notifications_notificationmanager_notificationmanager_init",
+      "target": "src_client_ui_announcementview_announcementview_new"
     },
     {
       "relation": "calls",
       "context": "call",
       "confidence": "INFERRED",
       "confidence_score": 0.8,
-      "source_file": "src/client/ui/AdminBroadcastView.luau",
-      "source_location": "L72",
+      "source_file": "src/client/notifications/NotificationManager.luau",
+      "source_location": "L255",
       "weight": 1.0,
       "_origin": "ast",
-      "source": "src_client_ui_adminbroadcastview_adminbroadcastview_new",
-      "target": "src_client_ui_uitheme_uitheme_addcorner"
-    },
-    {
-      "relation": "calls",
-      "context": "call",
-      "confidence": "INFERRED",
-      "confidence_score": 0.8,
-      "source_file": "src/client/ui/AdminBroadcastView.luau",
-      "source_location": "L100",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "src_client_ui_adminbroadcastview_adminbroadcastview_new",
-      "target": "src_client_ui_uitheme_uitheme_addtextconstraint"
-    },
-    {
-      "relation": "calls",
-      "context": "call",
-      "confidence": "INFERRED",
-      "confidence_score": 0.8,
-      "source_file": "src/client/ui/AdminBroadcastView.luau",
-      "source_location": "L24",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "src_client_ui_adminbroadcastview_adminbroadcastview_new",
-      "target": "src_client_ui_uitheme_uitheme_createscreengui"
-    },
-    {
-      "relation": "calls",
-      "context": "call",
-      "confidence": "INFERRED",
-      "confidence_score": 0.8,
-      "source_file": "src/client/ui/AdminBroadcastView.luau",
-      "source_location": "L51",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "src_client_ui_adminbroadcastview_adminbroadcastview_new",
-      "target": "src_client_ui_uitheme_uitheme_createshadow"
-    },
-    {
-      "relation": "calls",
-      "context": "call",
-      "confidence": "INFERRED",
-      "confidence_score": 0.8,
-      "source_file": "src/client/ui/AdminBroadcastView.luau",
-      "source_location": "L58",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "src_client_ui_adminbroadcastview_adminbroadcastview_new",
-      "target": "src_client_ui_uitheme_uitheme_stylepanel"
+      "source": "src_client_notifications_notificationmanager_notificationmanager_init",
+      "target": "src_client_ui_bannerview_bannerview_new"
     },
     {
       "relation": "contains",
@@ -9442,16 +9836,192 @@
       "target": "src_client_ui_uitheme_uitheme_stylepanel"
     },
     {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/client/ui/BannerView.luau",
+      "source_location": "L104",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_client_ui_bannerview",
+      "target": "src_client_ui_bannerview_bannerview_new",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/client/ui/BannerView.luau",
+      "source_location": "L49",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_client_ui_bannerview",
+      "target": "src_client_ui_bannerview_createbanner",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/client/ui/BannerView.luau",
+      "source_location": "L30",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_client_ui_bannerview",
+      "target": "src_client_ui_bannerview_getshowny",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/client/ui/BannerView.luau",
+      "source_location": "L40",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_client_ui_bannerview",
+      "target": "src_client_ui_bannerview_gettonecolor",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/client/ui/BannerView.luau",
+      "source_location": "L128",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_client_ui_bannerview_bannerview_new",
+      "target": "src_client_ui_bannerview_getshowny",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/client/ui/BannerView.luau",
+      "source_location": "L114",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_client_ui_bannerview_bannerview_new",
+      "target": "src_client_ui_bannerview_gettonecolor",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/client/ui/BannerView.luau",
+      "source_location": "L106",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_client_ui_bannerview_bannerview_new",
+      "target": "src_client_ui_bannerview_createbanner",
+      "confidence_score": 1.0
+    },
+    {
       "relation": "calls",
       "context": "call",
       "confidence": "INFERRED",
       "confidence_score": 0.8,
-      "source_file": "src/client/ui/HudView.luau",
-      "source_location": "L38",
+      "source_file": "src/client/ui/BannerView.luau",
+      "source_location": "L58",
       "weight": 1.0,
       "_origin": "ast",
-      "source": "src_client_ui_hudview_hudview_new",
-      "target": "src_client_ui_announcementview_announcementview_new"
+      "source": "src_client_ui_bannerview_createbanner",
+      "target": "src_client_ui_responsivescale_responsivescale_attach"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "src/client/ui/BannerView.luau",
+      "source_location": "L77",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_client_ui_bannerview_createbanner",
+      "target": "src_client_ui_uitheme_uitheme_addcorner"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "src/client/ui/BannerView.luau",
+      "source_location": "L78",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_client_ui_bannerview_createbanner",
+      "target": "src_client_ui_uitheme_uitheme_addstroke"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "src/client/ui/BannerView.luau",
+      "source_location": "L91",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_client_ui_bannerview_createbanner",
+      "target": "src_client_ui_uitheme_uitheme_addtextconstraint"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "src/client/ui/BannerView.luau",
+      "source_location": "L90",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_client_ui_bannerview_createbanner",
+      "target": "src_client_ui_uitheme_uitheme_addtextoutline"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "src/client/ui/BannerView.luau",
+      "source_location": "L80",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_client_ui_bannerview_createbanner",
+      "target": "src_client_ui_uitheme_uitheme_createlabel"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "src/client/ui/BannerView.luau",
+      "source_location": "L60",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_client_ui_bannerview_createbanner",
+      "target": "src_client_ui_uitheme_uitheme_createshadow"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "src/client/ui/BannerView.luau",
+      "source_location": "L66",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_client_ui_bannerview_createbanner",
+      "target": "src_client_ui_uitheme_uitheme_stylepanel"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "src/client/ui/BannerView.luau",
+      "source_location": "L105",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_client_ui_bannerview_bannerview_new",
+      "target": "src_client_ui_uitheme_uitheme_createscreengui"
     },
     {
       "relation": "contains",
@@ -9600,7 +10170,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.8,
       "source_file": "src/client/ui/HudView.luau",
-      "source_location": "L37",
+      "source_location": "L34",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_client_ui_hudview_hudview_new",
@@ -9985,7 +10555,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/client/ui/HudView.luau",
-      "source_location": "L35",
+      "source_location": "L32",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_client_ui_hudview",
@@ -9998,7 +10568,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.8,
       "source_file": "src/client/ui/HudView.luau",
-      "source_location": "L36",
+      "source_location": "L33",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_client_ui_hudview_hudview_new",
@@ -10044,23 +10614,11 @@
       "context": "call",
       "confidence": "INFERRED",
       "confidence_score": 0.8,
-      "source_file": "src/client/ui/VaultView.luau",
-      "source_location": "L46",
+      "source_file": "src/client/ui/SuperChargeView.luau",
+      "source_location": "L33",
       "weight": 1.0,
       "_origin": "ast",
-      "source": "src_client_ui_vaultview_createbanner",
-      "target": "src_client_ui_responsivescale_responsivescale_attach"
-    },
-    {
-      "relation": "calls",
-      "context": "call",
-      "confidence": "INFERRED",
-      "confidence_score": 0.8,
-      "source_file": "src/client/ui/VaultView.luau",
-      "source_location": "L105",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "src_client_ui_vaultview_createsuperpill",
+      "source": "src_client_ui_superchargeview_createsuperpill",
       "target": "src_client_ui_responsivescale_responsivescale_attach"
     },
     {
@@ -10314,6 +10872,112 @@
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
+      "source_file": "src/client/ui/SuperChargeView.luau",
+      "source_location": "L20",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_client_ui_superchargeview",
+      "target": "src_client_ui_superchargeview_createsuperpill",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/client/ui/SuperChargeView.luau",
+      "source_location": "L45",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_client_ui_superchargeview",
+      "target": "src_client_ui_superchargeview_superchargeview_new",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "src/client/ui/SuperChargeView.luau",
+      "source_location": "L30",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_client_ui_superchargeview_createsuperpill",
+      "target": "src_client_ui_uitheme_uitheme_addcorner"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "src/client/ui/SuperChargeView.luau",
+      "source_location": "L31",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_client_ui_superchargeview_createsuperpill",
+      "target": "src_client_ui_uitheme_uitheme_addgradient"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "src/client/ui/SuperChargeView.luau",
+      "source_location": "L32",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_client_ui_superchargeview_createsuperpill",
+      "target": "src_client_ui_uitheme_uitheme_addstroke"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "src/client/ui/SuperChargeView.luau",
+      "source_location": "L41",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_client_ui_superchargeview_createsuperpill",
+      "target": "src_client_ui_uitheme_uitheme_addtextoutline"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "src/client/ui/SuperChargeView.luau",
+      "source_location": "L39",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_client_ui_superchargeview_createsuperpill",
+      "target": "src_client_ui_uitheme_uitheme_createlabel"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/client/ui/SuperChargeView.luau",
+      "source_location": "L47",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_client_ui_superchargeview_superchargeview_new",
+      "target": "src_client_ui_superchargeview_createsuperpill",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "src/client/ui/SuperChargeView.luau",
+      "source_location": "L46",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_client_ui_superchargeview_superchargeview_new",
+      "target": "src_client_ui_uitheme_uitheme_createscreengui"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
       "source_file": "src/client/ui/UiKit.luau",
       "source_location": "L62",
       "weight": 1.0,
@@ -10551,18 +11215,6 @@
     {
       "relation": "calls",
       "context": "call",
-      "confidence": "INFERRED",
-      "confidence_score": 0.8,
-      "source_file": "src/client/ui/VaultView.luau",
-      "source_location": "L118",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "src_client_ui_vaultview_vaultview_new",
-      "target": "src_client_ui_uitheme_uitheme_createscreengui"
-    },
-    {
-      "relation": "calls",
-      "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/client/ui/UiTheme.luau",
       "source_location": "L174",
@@ -10587,30 +11239,6 @@
     {
       "relation": "calls",
       "context": "call",
-      "confidence": "INFERRED",
-      "confidence_score": 0.8,
-      "source_file": "src/client/ui/VaultView.luau",
-      "source_location": "L65",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "src_client_ui_vaultview_createbanner",
-      "target": "src_client_ui_uitheme_uitheme_addcorner"
-    },
-    {
-      "relation": "calls",
-      "context": "call",
-      "confidence": "INFERRED",
-      "confidence_score": 0.8,
-      "source_file": "src/client/ui/VaultView.luau",
-      "source_location": "L102",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "src_client_ui_vaultview_createsuperpill",
-      "target": "src_client_ui_uitheme_uitheme_addcorner"
-    },
-    {
-      "relation": "calls",
-      "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/client/ui/UiTheme.luau",
       "source_location": "L192",
@@ -10623,42 +11251,6 @@
     {
       "relation": "calls",
       "context": "call",
-      "confidence": "INFERRED",
-      "confidence_score": 0.8,
-      "source_file": "src/client/ui/VaultView.luau",
-      "source_location": "L66",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "src_client_ui_vaultview_createbanner",
-      "target": "src_client_ui_uitheme_uitheme_addstroke"
-    },
-    {
-      "relation": "calls",
-      "context": "call",
-      "confidence": "INFERRED",
-      "confidence_score": 0.8,
-      "source_file": "src/client/ui/VaultView.luau",
-      "source_location": "L104",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "src_client_ui_vaultview_createsuperpill",
-      "target": "src_client_ui_uitheme_uitheme_addstroke"
-    },
-    {
-      "relation": "calls",
-      "context": "call",
-      "confidence": "INFERRED",
-      "confidence_score": 0.8,
-      "source_file": "src/client/ui/VaultView.luau",
-      "source_location": "L79",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "src_client_ui_vaultview_createbanner",
-      "target": "src_client_ui_uitheme_uitheme_addtextconstraint"
-    },
-    {
-      "relation": "calls",
-      "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/client/ui/UiTheme.luau",
       "source_location": "L190",
@@ -10666,170 +11258,6 @@
       "_origin": "ast",
       "source": "src_client_ui_uitheme_uitheme_stylepanel",
       "target": "src_client_ui_uitheme_uitheme_addgradient",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "calls",
-      "context": "call",
-      "confidence": "INFERRED",
-      "confidence_score": 0.8,
-      "source_file": "src/client/ui/VaultView.luau",
-      "source_location": "L103",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "src_client_ui_vaultview_createsuperpill",
-      "target": "src_client_ui_uitheme_uitheme_addgradient"
-    },
-    {
-      "relation": "calls",
-      "context": "call",
-      "confidence": "INFERRED",
-      "confidence_score": 0.8,
-      "source_file": "src/client/ui/VaultView.luau",
-      "source_location": "L78",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "src_client_ui_vaultview_createbanner",
-      "target": "src_client_ui_uitheme_uitheme_addtextoutline"
-    },
-    {
-      "relation": "calls",
-      "context": "call",
-      "confidence": "INFERRED",
-      "confidence_score": 0.8,
-      "source_file": "src/client/ui/VaultView.luau",
-      "source_location": "L113",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "src_client_ui_vaultview_createsuperpill",
-      "target": "src_client_ui_uitheme_uitheme_addtextoutline"
-    },
-    {
-      "relation": "calls",
-      "context": "call",
-      "confidence": "INFERRED",
-      "confidence_score": 0.8,
-      "source_file": "src/client/ui/VaultView.luau",
-      "source_location": "L48",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "src_client_ui_vaultview_createbanner",
-      "target": "src_client_ui_uitheme_uitheme_createshadow"
-    },
-    {
-      "relation": "calls",
-      "context": "call",
-      "confidence": "INFERRED",
-      "confidence_score": 0.8,
-      "source_file": "src/client/ui/VaultView.luau",
-      "source_location": "L54",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "src_client_ui_vaultview_createbanner",
-      "target": "src_client_ui_uitheme_uitheme_stylepanel"
-    },
-    {
-      "relation": "calls",
-      "context": "call",
-      "confidence": "INFERRED",
-      "confidence_score": 0.8,
-      "source_file": "src/client/ui/VaultView.luau",
-      "source_location": "L68",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "src_client_ui_vaultview_createbanner",
-      "target": "src_client_ui_uitheme_uitheme_createlabel"
-    },
-    {
-      "relation": "calls",
-      "context": "call",
-      "confidence": "INFERRED",
-      "confidence_score": 0.8,
-      "source_file": "src/client/ui/VaultView.luau",
-      "source_location": "L111",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "src_client_ui_vaultview_createsuperpill",
-      "target": "src_client_ui_uitheme_uitheme_createlabel"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "src/client/ui/VaultView.luau",
-      "source_location": "L37",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "src_client_ui_vaultview",
-      "target": "src_client_ui_vaultview_createbanner",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "src/client/ui/VaultView.luau",
-      "source_location": "L92",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "src_client_ui_vaultview",
-      "target": "src_client_ui_vaultview_createsuperpill",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "src/client/ui/VaultView.luau",
-      "source_location": "L28",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "src_client_ui_vaultview",
-      "target": "src_client_ui_vaultview_gettonecolor",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "src/client/ui/VaultView.luau",
-      "source_location": "L117",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "src_client_ui_vaultview",
-      "target": "src_client_ui_vaultview_vaultview_new",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "calls",
-      "context": "call",
-      "confidence": "EXTRACTED",
-      "source_file": "src/client/ui/VaultView.luau",
-      "source_location": "L128",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "src_client_ui_vaultview_vaultview_new",
-      "target": "src_client_ui_vaultview_gettonecolor",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "calls",
-      "context": "call",
-      "confidence": "EXTRACTED",
-      "source_file": "src/client/ui/VaultView.luau",
-      "source_location": "L119",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "src_client_ui_vaultview_vaultview_new",
-      "target": "src_client_ui_vaultview_createbanner",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "calls",
-      "context": "call",
-      "confidence": "EXTRACTED",
-      "source_file": "src/client/ui/VaultView.luau",
-      "source_location": "L120",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "src_client_ui_vaultview_vaultview_new",
-      "target": "src_client_ui_vaultview_createsuperpill",
       "confidence_score": 1.0
     },
     {
@@ -18055,7 +18483,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "README.md",
-      "source_location": "L255",
+      "source_location": "L283",
       "weight": 1.0,
       "_origin": "ast",
       "source": "readme_estado_atual",
@@ -18066,7 +18494,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "README.md",
-      "source_location": "L249",
+      "source_location": "L277",
       "weight": 1.0,
       "_origin": "ast",
       "source": "readme_estado_atual",
@@ -18078,6 +18506,17 @@
       "confidence": "EXTRACTED",
       "source_file": "README.md",
       "source_location": "L235",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "readme_estado_atual",
+      "target": "readme_notifica\u00e7\u00f5es_fase_1_entrega_1_2",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "README.md",
+      "source_location": "L263",
       "weight": 1.0,
       "_origin": "ast",
       "source": "readme_estado_atual",
@@ -19868,5 +20307,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "06b94aecc20d6e164e5dec1b73779ee281d41067"
+  "built_at_commit": "5cd50be56ef22bad7ed3dcc207480e4dc53d3ab6"
 }

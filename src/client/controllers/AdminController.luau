@@ -7,7 +7,7 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local AdminConstants = require(ReplicatedStorage.Shared.modules.AdminConstants)
-local AdminBroadcastView = require(script.Parent.Parent.ui.AdminBroadcastView)
+local NotificationManager = require(script.Parent.Parent.notifications.NotificationManager)
 local AdminPanelView = require(script.Parent.Parent.ui.AdminPanelView)
 
 type AdminRequest = AdminConstants.AdminRequest
@@ -88,7 +88,7 @@ function AdminController.start()
 	local requestFunction = requestInstance :: RemoteFunction
 	local announcementEvent = announcementInstance :: RemoteEvent
 
-	local broadcastView = AdminBroadcastView.new(playerGuiInstance)
+	NotificationManager.init(playerGuiInstance)
 	table.insert(connections, announcementEvent.OnClientEvent:Connect(function(rawPayload: unknown)
 		if typeof(rawPayload) ~= "table" then
 			return
@@ -100,7 +100,18 @@ function AdminController.start()
 		if #payload.message > AdminConstants.MaximumAnnouncementLength or #payload.sender > 50 then
 			return
 		end
-		broadcastView.show(payload.sender, payload.message)
+		-- Aviso de administrador na faixa do topo, com prioridade alta: não
+		-- se sobrepõe aos avisos do jogo, apenas entra na fila deles.
+		NotificationManager.notify({
+			channel = "Banner",
+			category = "Admin",
+			priority = "High",
+			icon = "📢",
+			title = "AVISO",
+			subtitle = string.format("%s — %s", payload.message, payload.sender),
+			tone = "Info",
+			duration = 6,
+		})
 	end))
 
 	local statusOk, isAdminResult = pcall(function()

@@ -1,29 +1,41 @@
 --!strict
 
--- Telas do Cofre do Barão: faixa de aviso no topo (destravou, alguém
--- invadiu, Super pego, eliminado no cofre) e a pílula dourada "SUPER" com
--- os tiros restantes do Super Puffador. Só visual.
+-- Faixa de aviso no topo da tela (ícone, título e subtítulo). Só visual:
+-- quem decide o que aparece, em que ordem e por quanto tempo é o
+-- NotificationManager.
 
 local TweenService = game:GetService("TweenService")
+local Workspace = game:GetService("Workspace")
 
 local ResponsiveScale = require(script.Parent.ResponsiveScale)
 local UiTheme = require(script.Parent.UiTheme)
 
 export type BannerTone = "Gold" | "Danger" | "Info"
 
-export type VaultViewHandle = {
-	showBanner: (icon: string, title: string, subtitle: string, tone: BannerTone, duration: number?) -> (),
-	setSuperCharges: (charges: number) -> (),
+export type BannerViewHandle = {
+	show: (icon: string, title: string, subtitle: string, tone: BannerTone, duration: number?) -> (),
+	hide: () -> (),
 	destroy: () -> (),
 }
 
-local GUI_NAME = "BlocoPuffVault"
+local GUI_NAME = "BlocoPuffBanner"
 local BANNER_SIZE = Vector2.new(520, 84)
-local BANNER_DURATION = 4
 local HIDDEN_Y = -120
 local SHOWN_Y = 96
+-- Em telas estreitas o cronômetro da partida desce para y≈106; a faixa
+-- fica abaixo dele para não se sobrepor.
+local SHOWN_Y_COMPACT = 162
+local COMPACT_WIDTH = 700
 
-local VaultView = {}
+local function getShownY(): number
+	local camera = Workspace.CurrentCamera
+	if camera ~= nil and camera.ViewportSize.X < COMPACT_WIDTH then
+		return SHOWN_Y_COMPACT
+	end
+	return SHOWN_Y
+end
+
+local BannerView = {}
 
 local function getToneColor(tone: BannerTone): Color3
 	if tone == "Danger" then
@@ -89,40 +101,14 @@ local function createBanner(screenGui: ScreenGui)
 	return root, stroke, badge, icon, title, subtitle
 end
 
-local function createSuperPill(screenGui: ScreenGui)
-	local pill = Instance.new("Frame")
-	pill.Name = "SuperPill"
-	pill.AnchorPoint = Vector2.new(0.5, 1)
-	pill.Position = UDim2.new(0.5, 0, 1, -150)
-	pill.Size = UDim2.fromOffset(210, 46)
-	pill.BackgroundColor3 = UiTheme.Colors.White
-	pill.BorderSizePixel = 0
-	pill.Visible = false
-	pill.Parent = screenGui
-	UiTheme.addCorner(pill, 999)
-	UiTheme.addGradient(pill, UiTheme.Colors.Gold, UiTheme.Colors.GoldDeep)
-	UiTheme.addStroke(pill, UiTheme.Colors.Outline, 3)
-	ResponsiveScale.attach(pill, Vector2.new(1280, 720), 0.7, 1.05)
-
-	local scale = Instance.new("UIScale")
-	scale.Name = "Pulse"
-	scale.Parent = pill
-
-	local label = UiTheme.createLabel(pill, "Label", "", UiTheme.Fonts.Display, 22, UiTheme.Colors.White)
-	label.Size = UDim2.fromScale(1, 1)
-	UiTheme.addTextOutline(label, 2.5)
-	return pill, label, scale
-end
-
-function VaultView.new(playerGui: PlayerGui): VaultViewHandle
+function BannerView.new(playerGui: PlayerGui): BannerViewHandle
 	local screenGui = UiTheme.createScreenGui(GUI_NAME, playerGui, 31)
 	local banner, stroke, badge, icon, title, subtitle = createBanner(screenGui)
-	local pill, pillLabel, pillScale = createSuperPill(screenGui)
 	local generation = 0
 
-	local handle = {} :: VaultViewHandle
+	local handle = {} :: BannerViewHandle
 
-	handle.showBanner = function(iconText: string, titleText: string, subtitleText: string, tone: BannerTone, duration: number?)
+	handle.show = function(iconText: string, titleText: string, subtitleText: string, tone: BannerTone, duration: number?)
 		generation += 1
 		local current = generation
 		local color = getToneColor(tone)
@@ -139,41 +125,41 @@ function VaultView.new(playerGui: PlayerGui): VaultViewHandle
 		banner.Visible = true
 		banner.Position = UDim2.new(0.5, 0, 0, HIDDEN_Y)
 		TweenService:Create(banner, TweenInfo.new(0.45, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
-			Position = UDim2.new(0.5, 0, 0, SHOWN_Y),
+			Position = UDim2.new(0.5, 0, 0, getShownY()),
 		}):Play()
 
-		task.delay(duration or BANNER_DURATION, function()
-			if current ~= generation or screenGui.Parent == nil then
-				return
-			end
-			local hide = TweenService:Create(banner, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
-				Position = UDim2.new(0.5, 0, 0, HIDDEN_Y),
-			})
-			hide:Play()
-			hide.Completed:Connect(function()
+		if duration ~= nil and duration > 0 then
+			task.delay(duration, function()
 				if current == generation then
-					banner.Visible = false
+					handle.hide()
 				end
 			end)
+		end
+	end
+
+	handle.hide = function()
+		generation += 1
+		local current = generation
+		if not banner.Visible then
+			return
+		end
+		local hide = TweenService:Create(banner, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
+			Position = UDim2.new(0.5, 0, 0, HIDDEN_Y),
+		})
+		hide:Play()
+		hide.Completed:Connect(function()
+			if current == generation then
+				banner.Visible = false
+			end
 		end)
 	end
 
-	handle.setSuperCharges = function(charges: number)
-		if charges <= 0 then
-			pill.Visible = false
-			return
-		end
-		pillLabel.Text = string.format("⚡ SUPER × %d", charges)
-		pill.Visible = true
-		pillScale.Scale = 1.15
-		TweenService:Create(pillScale, TweenInfo.new(0.25, Enum.EasingStyle.Back), { Scale = 1 }):Play()
-	end
-
 	handle.destroy = function()
+		generation += 1
 		screenGui:Destroy()
 	end
 
 	return handle
 end
 
-return table.freeze(VaultView)
+return table.freeze(BannerView)

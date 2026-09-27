@@ -11,9 +11,11 @@ local EliminationTypes = require(ReplicatedStorage.Shared.types.EliminationTypes
 local RoundTypes = require(ReplicatedStorage.Shared.types.RoundTypes)
 local StateAttributeNames = require(ReplicatedStorage.Shared.types.StateAttributeNames)
 local HudView = require(script.Parent.Parent.ui.HudView)
+local NotificationManager = require(script.Parent.Parent.notifications.NotificationManager)
 
 type RoundState = RoundTypes.RoundState
 type HudViewHandle = HudView.HudViewHandle
+type Priority = NotificationManager.Priority
 
 local STATE_WAIT_TIMEOUT = 10
 
@@ -96,27 +98,41 @@ local function getQueueMessage(): string
 	return "Você participa da próxima rodada"
 end
 
-local function clearAnnouncement(currentView: HudViewHandle)
+local function clearAnnouncement(_currentView: HudViewHandle)
 	if lastAnnouncementKey == "" then
 		return
 	end
 	lastAnnouncementKey = ""
-	currentView.hideAnnouncement()
+	NotificationManager.clear("Center")
 end
 
+-- Envia um anúncio central uma única vez por `key` (o render roda a cada
+-- mudança de atributo). Fila, prioridade e sobreposição ficam com o
+-- NotificationManager.
 local function showAnnouncement(
-	currentView: HudViewHandle,
+	_currentView: HudViewHandle,
 	key: string,
 	title: string,
 	subtitle: string,
 	tone: "Info" | "Warning" | "Danger" | "Winner",
-	duration: number?
+	duration: number,
+	category: string,
+	priority: Priority
 )
 	if key == lastAnnouncementKey then
 		return
 	end
 	lastAnnouncementKey = key
-	currentView.showAnnouncement(title, subtitle, tone, duration)
+	NotificationManager.notify({
+		channel = "Center",
+		category = category,
+		priority = priority,
+		key = key,
+		title = title,
+		subtitle = subtitle,
+		tone = tone,
+		duration = duration,
+	})
 end
 
 local function renderWaiting(currentView: HudViewHandle)
@@ -177,7 +193,9 @@ local function renderActive(currentView: HudViewHandle)
 			"AGUARDE SUA VEZ",
 			getQueueMessage(),
 			"Warning",
-			3
+			3,
+			"Round",
+			"Low"
 		)
 	elseif cached.isEliminated then
 		local reason = cached.eliminationReason
@@ -191,7 +209,9 @@ local function renderActive(currentView: HudViewHandle)
 			title,
 			string.format("%s • acompanhe os jogadores restantes", getPersonalScoreSummary()),
 			"Danger",
-			2.6
+			2.6,
+			"Elimination",
+			"Critical"
 		)
 	elseif cached.finalChaos then
 		showAnnouncement(
@@ -200,7 +220,9 @@ local function renderActive(currentView: HudViewHandle)
 			"CAOS FINAL!",
 			"Sem Segunda Chance • blocos vermelhos vão cair",
 			"Danger",
-			3
+			3,
+			"Chaos",
+			"Critical"
 		)
 	elseif secondChanceUsed then
 		showAnnouncement(
@@ -209,7 +231,9 @@ local function renderActive(currentView: HudViewHandle)
 			"SEGUNDA CHANCE!",
 			"Você voltou para a arena • agora é sua última vida",
 			"Warning",
-			2.6
+			2.6,
+			"Lives",
+			"High"
 		)
 	else
 		showAnnouncement(
@@ -218,7 +242,9 @@ local function renderActive(currentView: HudViewHandle)
 			"VALENDO!",
 			"Empurre os rivais e derrube os blocos embaixo deles",
 			"Info",
-			1.5
+			1.5,
+			"Round",
+			"Normal"
 		)
 	end
 end
@@ -241,7 +267,9 @@ local function renderEnding(currentView: HudViewHandle)
 				then string.format("Último na arena • %s", scoreSummary)
 				else string.format("%s venceu • %s", cached.winnerName, scoreSummary),
 			"Winner",
-			4
+			4,
+			"Result",
+			"Critical"
 		)
 	else
 		showAnnouncement(
@@ -250,7 +278,9 @@ local function renderEnding(currentView: HudViewHandle)
 			"FIM DA RODADA",
 			scoreSummary,
 			"Info",
-			3
+			3,
+			"Result",
+			"High"
 		)
 	end
 end
@@ -304,6 +334,7 @@ function HudController.start()
 		return
 	end
 
+	NotificationManager.init(playerGuiInstance)
 	view = HudView.new(playerGuiInstance)
 
 	local function refreshFromContainer()

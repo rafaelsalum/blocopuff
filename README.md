@@ -232,6 +232,34 @@ Direção de produto em `docs/GAME_DESIGN.md`; escopo da fase em `docs/FASE_1_CO
 - **Segunda Chance:** a primeira queda para fora da arena devolve o jogador a um bloco inteiro do andar de baixo, com 2,5 s de imunidade a empurrões; a segunda queda elimina. A HUD mostra "2 VIDAS" / "ÚLTIMA VIDA".
 - **Caos Final:** nos últimos 30 s a Segunda Chance é desligada e, a cada 2 s, blocos aleatórios piscam em vermelho por 1,2 s e caem (3 no início, até 9 no fim). O cronômetro fica vermelho (`FinalChaosService`, `GameConfig.FinalChaos`).
 
+### Notificações (Fase 1, entrega 1.2)
+
+Todo alerta de tela passa pelo `NotificationManager` (`src/client/notifications/`). Existem dois canais, em regiões diferentes da tela, e cada um mostra um alerta por vez, então nada se sobrepõe:
+
+| Canal | Onde | O que mostra |
+| --- | --- | --- |
+| `Center` | anúncio grande no meio | rodada, eliminação, Segunda Chance, Caos Final, resultado |
+| `Banner` | faixa no topo (mais baixa em telas estreitas) | cofre, avisos de administrador |
+
+Regras de cada canal:
+
+- **Prioridade:** `Critical` > `High` > `Normal` > `Low`. Um alerta mais importante interrompe o atual; o interrompido volta para a fila se for `High`/`Critical` e ainda tiver mais de 1 s, senão é descartado.
+- **Fila:** até 4 alertas, por prioridade e ordem de chegada. Com a fila cheia, sai o menos importante.
+- **Validade:** quem espera demais é descartado (Low 2 s, Normal 3 s, High 6 s, Critical 8 s), para não mostrar notícia velha.
+- **Substituição:** a mesma `key` atualiza o alerta na tela ou substitui o que está na fila.
+- **Categoria:** `clear(canal, categoria)` limpa só um tipo de alerta.
+
+| Alerta | Canal | Prioridade |
+| --- | --- | --- |
+| Eliminado, Caos Final, vencedor | Center | Critical |
+| Segunda Chance, fim sem vencedor | Center | High |
+| "VALENDO!" | Center | Normal |
+| Aguarde sua vez | Center | Low |
+| Cofre invadido | Banner | Critical |
+| Aviso de administrador, cofre destrancou, Super pego | Banner | High |
+
+Os pop-ups de combate perto da mira ("+1", combo e marcos) seguem na `FeedbackView`, no canto direito, porque são reforços curtos que não competem com os alertas.
+
 ### O Cofre do Barão Puff
 
 > **Desligado na Fase 1** (`GameConfig.SecretRoom.Enabled = false`): as portas ficam fechadas e sem interação. O cofre será refeito na Fase 2, conforme `docs/FASE_2_SEGREDOS_COFRE_BARAO.md`.

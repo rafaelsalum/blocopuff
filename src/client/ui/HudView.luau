@@ -1,13 +1,12 @@
 --!strict
 
--- Fachada do HUD: mantém as camadas de rodada, combate e anúncios separadas
--- enquanto oferece ao controller uma única interface tipada.
+-- Fachada do HUD: mantém as camadas de rodada e combate separadas enquanto
+-- oferece ao controller uma única interface tipada. Os anúncios ficam com o
+-- NotificationManager.
 
-local AnnouncementView = require(script.Parent.AnnouncementView)
 local CombatHudView = require(script.Parent.CombatHudView)
 local RoundHudView = require(script.Parent.RoundHudView)
 
-type AnnouncementTone = AnnouncementView.AnnouncementTone
 type RoundHudMode = RoundHudView.RoundHudMode
 type LivesState = CombatHudView.LivesState
 
@@ -25,8 +24,6 @@ export type HudViewHandle = {
 	setPersonalScore: (count: number, visible: boolean) -> (),
 	setLives: (state: LivesState) -> (),
 	setTimerDanger: (danger: boolean) -> (),
-	showAnnouncement: (title: string, subtitle: string, tone: AnnouncementTone, duration: number?) -> (),
-	hideAnnouncement: () -> (),
 	destroy: () -> (),
 }
 
@@ -35,7 +32,6 @@ local HudView = {}
 function HudView.new(playerGui: PlayerGui): HudViewHandle
 	local roundHud = RoundHudView.new(playerGui)
 	local combatHud = CombatHudView.new(playerGui)
-	local announcements = AnnouncementView.new(playerGui)
 
 	local handle = {} :: HudViewHandle
 	handle.setRoundMode = roundHud.setMode
@@ -51,13 +47,10 @@ function HudView.new(playerGui: PlayerGui): HudViewHandle
 	handle.setPersonalScore = combatHud.setPersonalScore
 	handle.setLives = combatHud.setLives
 	handle.setTimerDanger = combatHud.setTimerDanger
-	handle.showAnnouncement = announcements.show
-	handle.hideAnnouncement = announcements.hide
 
 	handle.destroy = function()
 		roundHud.destroy()
 		combatHud.destroy()
-		announcements.destroy()
 	end
 
 	return handle
