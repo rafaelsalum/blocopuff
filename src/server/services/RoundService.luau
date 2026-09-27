@@ -17,6 +17,7 @@ local VaultService = require(script.Parent.VaultService)
 local KnockbackService = require(script.Parent.KnockbackService)
 local FinalChaosService = require(script.Parent.FinalChaosService)
 local RoundResultBuilder = require(script.Parent.RoundResultBuilder)
+local TelemetryService = require(script.Parent.TelemetryService)
 local PuffadorConstants = require(ReplicatedStorage.Shared.modules.PuffadorConstants)
 
 type RoundState = RoundTypes.RoundState
@@ -73,6 +74,8 @@ local respawnGraceUntil: { [Player]: number } = {}
 -- Posição final de quem foi eliminado (1 = vencedor): quantos seguiam vivos
 -- depois da eliminação + 1.
 local eliminationPositions: { [Player]: number } = {}
+-- Momento de cada eliminação: quedas no mesmo instante viram empate.
+local eliminationTimes: { [Player]: number } = {}
 local resultRemote: RemoteEvent? = nil
 
 local function countConnectedPlayers(): number
@@ -275,6 +278,9 @@ local function eliminateParticipant(player: Player, reason: EliminationReason)
 	end
 
 	if reason == EliminationTypes.FellFromArena then
+		local fallCharacter = player.Character
+		local fallRoot = if fallCharacter ~= nil then getHumanoidRootPart(fallCharacter) else nil
+		local fallPosition = if fallRoot ~= nil then fallRoot.Position else Vector3.zero
 		-- Logo após a Segunda Chance o servidor ainda pode receber a posição
 		-- antiga (abaixo da zona) antes do teleporte chegar ao cliente.
 		local grace = respawnGraceUntil[player]
@@ -283,8 +289,11 @@ local function eliminateParticipant(player: Player, reason: EliminationReason)
 		end
 		creditKnockout(player)
 		if trySecondChance(player) then
+			TelemetryService.fell(player, fallPosition, true)
+			TelemetryService.secondChanceUsed(player)
 			return
 		end
+		TelemetryService.fell(player, fallPosition, false)
 	end
 
 	participant.alive = false
@@ -295,6 +304,8 @@ local function eliminateParticipant(player: Player, reason: EliminationReason)
 		end
 	end
 	eliminationPositions[player] = stillAlive + 1
+	eliminationTimes[player] = os.clock()
+	TelemetryService.eliminated(player, reason, stillAlive + 1)
 	player:SetAttribute(ATTR_IS_ELIMINATED, true)
 	player:SetAttribute(ATTR_ELIMINATION_REASON, reason)
 	player:SetAttribute(ATTR_ELIMINATED_AT_ROUND_ID, currentRoundId)
@@ -343,6 +354,7 @@ end
 local function clearRoundParticipants()
 	table.clear(respawnGraceUntil)
 	table.clear(eliminationPositions)
+	table.clear(eliminationTimes)
 	table.clear(participants)
 	table.clear(participantOrder)
 end
@@ -371,6 +383,9 @@ local function onPlayerRemoving(player: Player)
 	if participant ~= nil then
 		if participant.alive then
 			print(string.format("[BlocoPuff] %s eliminated: %s", player.Name, EliminationTypes.PlayerLeft))
+		end
+		if currentState == RoundTypes.Active then
+			TelemetryService.leftMidRound(player)
 		end
 
 		participants[player] = nil
@@ -453,6 +468,7 @@ local function beginRound(timings: RoundTimings)
 	connectParticipantDeathHandlers(participantOrder)
 	PuffadorService.beginRound(participantOrder, currentRoundId)
 	KnockbackService.beginRound(currentRoundId)
+	TelemetryService.roundStarted(participantOrder)
 	ReplicatedState.setFinalChaos(false)
 	VaultService.beginRound(currentRoundId, timings.RoundDuration)
 
@@ -472,6 +488,14 @@ end
 local function startFinalChaos(duration: number)
 	FinalChaosService.begin(duration)
 	ReplicatedState.setFinalChaos(true)
+	local alivePlayers: { Player } = {}
+	for _, player in ipairs(participantOrder) do
+		local participant = participants[player]
+		if participant ~= nil and participant.alive then
+			table.insert(alivePlayers, player)
+		end
+	end
+	TelemetryService.finalChaosStarted(alivePlayers)
 	print(string.format("[BlocoPuff] Round %d entered Final Chaos (%ds)", currentRoundId, duration))
 end
 
@@ -483,7 +507,12 @@ local function runActive(timings: RoundTimings)
 		local aliveCount, soleActive = evaluateActiveParticipants()
 
 		if aliveCount == 0 then
-			winner = nil
+			-- Todos caíram antes do próximo tique: vence quem caiu por último,
+			-- se caiu sozinho; quedas no mesmo instante terminam em empate.
+			local lastPlayers = RoundResultBuilder.getLastEliminated(eliminationTimes)
+			winner = if #lastPlayers == 1
+				then { userId = lastPlayers[1].UserId, name = lastPlayers[1].Name }
+				else nil
 			break
 		elseif aliveCount == 1 then
 			winner = if soleActive ~= nil
@@ -521,6 +550,7 @@ local function publishResult()
 				player = player,
 				alive = participant.alive,
 				eliminatedPosition = eliminationPositions[player],
+				eliminatedAt = eliminationTimes[player],
 			})
 			if winner ~= nil and player.UserId == winner.userId then
 				winnerPlayer = player
@@ -544,6 +574,15 @@ local function runEnding(timings: RoundTimings)
 	ArenaService.endRound()
 	VaultService.endRound()
 	publishResult()
+	local outcomes: { [Player]: string } = {}
+	for _, player in ipairs(participantOrder) do
+		local participant = participants[player]
+		if participant ~= nil then
+			local won = winner ~= nil and player.UserId == winner.userId
+			outcomes[player] = if won then "Win" elseif winner == nil and participant.alive then "Draw" else "Loss"
+		end
+	end
+	TelemetryService.roundFinished(outcomes)
 	PuffadorService.endRound()
 	disconnectParticipantDeathHandlers()
 

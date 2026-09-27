@@ -12,6 +12,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local GameConfig = require(ReplicatedStorage.Shared.config.GameConfig)
 local StateAttributeNames = require(ReplicatedStorage.Shared.types.StateAttributeNames)
 local ProjectileService = require(script.Parent.ProjectileService)
+local TelemetryService = require(script.Parent.TelemetryService)
 
 type LastHit = {
 	attacker: Player,
@@ -58,6 +59,7 @@ local function onCharacterHit(shooter: Player, victim: Player, _position: Vector
 	-- Acerto confirmado para quem atirou (marcador na mira), mesmo se o
 	-- alvo estiver imune.
 	send(shooter, "PlayerHit", victim.UserId)
+	TelemetryService.playerHit(shooter)
 
 	local now = os.clock()
 	local immuneUntil = protectedUntil[victim]

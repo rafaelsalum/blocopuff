@@ -232,12 +232,32 @@ Direção de produto em `docs/GAME_DESIGN.md`; escopo da fase em `docs/FASE_1_CO
 - **Segunda Chance:** a primeira queda para fora da arena devolve o jogador a um bloco inteiro do andar de baixo, com 2,5 s de imunidade a empurrões; a segunda queda elimina. A HUD mostra "2 VIDAS" / "ÚLTIMA VIDA".
 - **Caos Final:** nos últimos 30 s a Segunda Chance é desligada e, a cada 2 s, blocos aleatórios piscam em vermelho por 1,2 s e caem (3 no início, até 9 no fim). O cronômetro fica vermelho (`FinalChaosService`, `GameConfig.FinalChaos`).
 
+### Telemetria (Fase 1, entrega 1.4)
+
+`TelemetryService` envia eventos customizados pelo `AnalyticsService` do Roblox; eles aparecem no Creator Dashboard, em Analytics › Custom Events. No Studio cada evento também é impresso no Output (`GameConfig.Telemetry`). Os contadores de combate são somados no servidor e enviados uma vez no fim da rodada. Todos os eventos são por jogador, e os campos customizados seguem a mesma ordem: **Field01 = dispositivo** (Mobile, Desktop, Gamepad, informado pelo `TelemetryController`), **Field02 = contexto**, **Field03 = detalhe**.
+
+| Evento | Valor | Field02 / Field03 |
+| --- | --- | --- |
+| `RoundStarted` | jogadores na rodada | — |
+| `Rematch` | 1 (jogou a rodada anterior e seguiu) | — |
+| `FloorDrop` | segundos de rodada | zona / `F2>F1` |
+| `Fell` | segundos de rodada | zona / `SecondChance` ou `Eliminated` |
+| `SecondChanceUsed` | segundos de rodada | — |
+| `Eliminated` | posição final | motivo / segundos |
+| `FinalChaosStarted` | jogadores vivos | — |
+| `LeftMidRound` | segundos de rodada | — |
+| `RoundFinished` | duração em segundos | `Win`, `Draw` ou `Loss` |
+| `RoundWon` | duração em segundos | — |
+| `RoundShots`, `RoundPlayerHits`, `RoundBlockHits`, `RoundBlocksDestroyed` | total na rodada | — |
+
+As zonas dividem a arena em `Center`, `NorthWest`, `NorthEast`, `SouthWest` e `SouthEast`.
+
 ### Pós-partida (Fase 1, entrega 1.3)
 
 Ao fim de cada rodada o servidor monta o resultado (`RoundResultBuilder`) e o envia a todos pelo RemoteEvent `RoundResult`. O cliente mostra o painel `ResultsView` (`ResultsController`):
 
 - **Título:** "VITÓRIA!" para quem venceu, "FIM DA RODADA" com o nome do vencedor, ou "EMPATE!" quando o tempo acaba com mais de um jogador vivo.
-- **Sua posição:** #1 é o vencedor; quem é eliminado fica com (jogadores ainda vivos + 1). Em empate, todos os sobreviventes ficam em #1.
+- **Sua posição:** #1 é o vencedor; quem é eliminado fica com (jogadores ainda vivos + 1). Em empate, todos os sobreviventes ficam em #1. Quedas no mesmo instante dividem a posição; se todos caem antes do fim, vence quem caiu por último (ou é empate, se caíram juntos).
 - **Seus números:** blocos destruídos e derrubadas.
 - **Destaques:** "MAIS BLOCOS" e "MAIS DERRUBADAS", quando alguém pontuou.
 - **Classificação:** as 5 primeiras posições, com sua linha destacada. O desempate usa derrubadas e depois blocos.

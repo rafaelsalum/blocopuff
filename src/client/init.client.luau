@@ -9,6 +9,7 @@ local MusicController = require(script.controllers.MusicController)
 local VaultController = require(script.controllers.VaultController)
 local KnockbackController = require(script.controllers.KnockbackController)
 local ResultsController = require(script.controllers.ResultsController)
+local TelemetryController = require(script.controllers.TelemetryController)
 
 print("[BlocoPuff] Client initialized")
 
@@ -73,4 +74,11 @@ local resultsOk, resultsErr = pcall(function()
 end)
 if not resultsOk then
 	warn(string.format("[BlocoPuff] Failed to start results controller: %s", tostring(resultsErr)))
+end
+
+local telemetryOk, telemetryErr = pcall(function()
+	TelemetryController.start()
+end)
+if not telemetryOk then
+	warn(string.format("[BlocoPuff] Failed to start telemetry controller: %s", tostring(telemetryErr)))
 end

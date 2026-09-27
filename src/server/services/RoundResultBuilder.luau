@@ -17,9 +17,61 @@ export type ParticipantSnapshot = {
 	player: Player,
 	alive: boolean,
 	eliminatedPosition: number?,
+	eliminatedAt: number?,
 }
 
+-- Eliminações com menos que isso de diferença contam como simultâneas.
+local SIMULTANEOUS_WINDOW = 0.05
+
 local RoundResultBuilder = {}
+
+-- Jogadores eliminados por último (mesmo instante, dentro da janela).
+function RoundResultBuilder.getLastEliminated(times: { [Player]: number }): { Player }
+	local latest = -math.huge
+	for _, clock in pairs(times) do
+		latest = math.max(latest, clock)
+	end
+	local last: { Player } = {}
+	for player, clock in pairs(times) do
+		if latest - clock <= SIMULTANEOUS_WINDOW then
+			table.insert(last, player)
+		end
+	end
+	return last
+end
+
+-- Quedas simultâneas dividem a melhor posição do grupo (empate). A posição 1
+-- fica para o vencedor; sem vencedor, um grupo empatado no topo divide o 1º.
+local function resolveTies(snapshots: { ParticipantSnapshot }): { [Player]: number }
+	local eliminated: { ParticipantSnapshot } = {}
+	for _, snapshot in ipairs(snapshots) do
+		if not snapshot.alive and snapshot.eliminatedAt ~= nil then
+			table.insert(eliminated, snapshot)
+		end
+	end
+	table.sort(eliminated, function(a, b)
+		return (a.eliminatedAt :: number) > (b.eliminatedAt :: number)
+	end)
+
+	local positions: { [Player]: number } = {}
+	local index = 1
+	while index <= #eliminated do
+		local groupEnd = index
+		local anchor = eliminated[index].eliminatedAt :: number
+		while groupEnd + 1 <= #eliminated and anchor - (eliminated[groupEnd + 1].eliminatedAt :: number) <= SIMULTANEOUS_WINDOW do
+			groupEnd += 1
+		end
+		local best = math.huge
+		for member = index, groupEnd do
+			best = math.min(best, eliminated[member].eliminatedPosition or #snapshots)
+		end
+		for member = index, groupEnd do
+			positions[eliminated[member].player] = best
+		end
+		index = groupEnd + 1
+	end
+	return positions
+end
 
 local function readCount(player: Player, attribute: string): number
 	local value = player:GetAttribute(attribute)
@@ -43,7 +95,9 @@ end
 
 function RoundResultBuilder.build(roundId: number, snapshots: { ParticipantSnapshot }, winner: Player?): RoundResult
 	local entries: { ResultEntry } = {}
+	local tiedPositions = resolveTies(snapshots)
 	local survivors = 0
+	local sharedFirst = 0
 	for _, snapshot in ipairs(snapshots) do
 		if snapshot.alive then
 			survivors += 1
@@ -52,7 +106,10 @@ function RoundResultBuilder.build(roundId: number, snapshots: { ParticipantSnaps
 
 	for _, snapshot in ipairs(snapshots) do
 		local player = snapshot.player
-		local position = if snapshot.alive then 1 else (snapshot.eliminatedPosition or #snapshots)
+		local position = if snapshot.alive then 1 else (tiedPositions[player] or snapshot.eliminatedPosition or #snapshots)
+		if not snapshot.alive and position == 1 and (winner == nil or winner ~= player) then
+			sharedFirst += 1
+		end
 		table.insert(entries, {
 			userId = player.UserId,
 			name = player.DisplayName,
@@ -94,7 +151,7 @@ function RoundResultBuilder.build(roundId: number, snapshots: { ParticipantSnaps
 		roundId = roundId,
 		winnerUserId = if winner ~= nil then winner.UserId else 0,
 		winnerName = if winner ~= nil then winner.DisplayName else "",
-		draw = winner == nil and survivors > 1,
+		draw = winner == nil and (survivors > 1 or sharedFirst > 1),
 		participantCount = #snapshots,
 		entries = entries,
 		highlights = highlights,

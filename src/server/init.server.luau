@@ -12,6 +12,7 @@ local EliminationService = require(script.services.EliminationService)
 local RoundService = require(script.services.RoundService)
 local VaultService = require(script.services.VaultService)
 local KnockbackService = require(script.services.KnockbackService)
+local TelemetryService = require(script.services.TelemetryService)
 local WorldVisualService = require(script.services.WorldVisualService)
 local BuildingService = require(script.services.BuildingService)
 local AdminService = require(script.services.AdminService)
@@ -67,6 +68,9 @@ print(string.format("[BlocoPuff] Arena created with %d blocks", #ArenaService.ge
 
 PuffadorService.start(world)
 print("[BlocoPuff] Puffador system started")
+
+TelemetryService.start(PuffadorService.getRemotesFolder())
+print("[BlocoPuff] Telemetry ready")
 
 KnockbackService.start(PuffadorService.sendFeedback)
 print("[BlocoPuff] Puffador knockback armed")

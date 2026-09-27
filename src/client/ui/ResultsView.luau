@@ -62,6 +62,9 @@ local function describe(result: RoundResult, mine: ResultEntry?, localUserId: nu
 				survivors += 1
 			end
 		end
+		if survivors == 0 then
+			return "EMPATE!", "Os últimos caíram ao mesmo tempo", UiTheme.Colors.Brand
+		end
 		return "EMPATE!", string.format("%d jogadores resistiram até o fim", survivors), UiTheme.Colors.Brand
 	elseif result.winnerUserId ~= 0 then
 		return "FIM DA RODADA", string.format("%s venceu a rodada", result.winnerName), UiTheme.Colors.Brand

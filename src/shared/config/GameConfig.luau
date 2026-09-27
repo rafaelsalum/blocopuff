@@ -120,6 +120,11 @@ export type FinalChaosConfig = {
 	WarningTime: number,
 }
 
+export type TelemetryConfig = {
+	Enabled: boolean,
+	PrintInStudio: boolean,
+}
+
 export type MusicConfig = {
 	SoundId: string,
 	LobbyVolume: number,
@@ -147,6 +152,7 @@ export type GameConfig = {
 	Knockback: KnockbackConfig,
 	SecondChance: SecondChanceConfig,
 	FinalChaos: FinalChaosConfig,
+	Telemetry: TelemetryConfig,
 	getRoundTimings: () -> RoundTimings,
 }
 
@@ -319,6 +325,13 @@ local FinalChaos: FinalChaosConfig = table.freeze({
 	WarningTime = 1.2,
 })
 
+-- Telemetria via AnalyticsService (eventos customizados no Creator
+-- Dashboard). PrintInStudio escreve cada evento no Output durante testes.
+local Telemetry: TelemetryConfig = table.freeze({
+	Enabled = true,
+	PrintInStudio = true,
+})
+
 local GameConfig = {} :: GameConfig
 
 GameConfig.GameName = "BlocoPuff"
@@ -344,6 +357,7 @@ GameConfig.SecretRoom = SecretRoom
 GameConfig.Knockback = Knockback
 GameConfig.SecondChance = SecondChance
 GameConfig.FinalChaos = FinalChaos
+GameConfig.Telemetry = Telemetry
 
 function GameConfig.getRoundTimings(): RoundTimings
 	if RunService:IsStudio() then
