@@ -320,6 +320,25 @@ Escopo em `docs/FASE_2_SEGREDOS_COFRE_BARAO.md`.
 - **Ajustes:** ficam em `GameConfig.Barao` e `GameConfig.Toca`. Os sons atuais são provisórios, embutidos no Roblox; troque `BarkSoundIds`, `FunnySoundIds` e `FootstepSoundId` por áudios da Creator Store (`rbxassetid://...`).
 - **Código:** `BaraoService` (comportamento), `BaraoModel`, `TocaService`, `CorridorBuilder` (nichos) e `BuildingLayout.getTocas` / `isInsideToca` / `getCorridorFloorY`. No cliente, `BaraoController` mostra os avisos.
 
+### Resultado avançado (Fase 3, entrega 3.3)
+
+- **Pódio:** os três primeiros, com foto (headshot), nome e degraus de ouro, prata e bronze. Em empate, o texto mostra a mesma posição.
+- **Sua linha:** posição, blocos e derrubadas.
+- **Destaques** (até 5; o seu fica em dourado):
+
+  | Destaque | Critério |
+  |----------|----------|
+  | Demolidor | Mais blocos, mínimo 5 |
+  | Mais derrubadas | Mais derrubadas |
+  | Dono do cofre | Pegou o Puffador do Cofre ou abriu o cofre |
+  | Escapou do Barão | Mais fugas |
+  | Descobridor | Mais passagens reveladas |
+  | Volta por Cima | Voltou da Segunda Chance e derrubou alguém ou venceu |
+
+  Nenhum destaque premia comportamento antijogo: não há prêmio por se esconder na Toca, ficar parado ou fugir da luta. Todos vêm de jogar de verdade.
+- **XP da rodada:** o total, a barra de nível (ou "NÍVEL 4 → 5!") e cada fonte do XP. Ele chega pelo perfil logo depois do resultado, marcado com o número da rodada, e só entra no painel dessa mesma rodada.
+- **Código:** `RoundResultBuilder` (destaques e contadores por jogador), `ResultTypes`, `ResultsView` e `ResultsController`.
+
 ### XP, Nível e Prestígio (Fase 3, entrega 3.2)
 
 - **XP por rodada** (`XpCalculator`, calculado no servidor ao fim de cada rodada):
@@ -348,7 +367,7 @@ Escopo em `docs/FASE_2_SEGREDOS_COFRE_BARAO.md`.
 - **Perfil v2:** o formato ganhou `levelReachedAt`. A migração v1 → v2 é automática ao carregar.
 - **Na tela:**
   - **Cartão no lobby:** fica no canto superior esquerdo, com nível, estrelas de prestígio e barra de XP; o botão PERFIL abre as estatísticas da carreira. Se o progresso não estiver sendo salvo, o cartão avisa.
-  - **Fim de cada rodada:** faixa "+N XP" com as maiores fontes.
+  - **Fim de cada rodada:** o XP ganho aparece no painel de pós-partida (entrega 3.3).
   - **Subida de nível:** faixa "NÍVEL N!" com som.
 - **Telemetria:**
   - `XpGained` (por fonte) e `XpRound` (total, com a faixa de nível e se venceu, para cruzar nível com vitória);

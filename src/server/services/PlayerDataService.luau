@@ -35,6 +35,7 @@ type XpLine = ProfileTypes.XpLine
 
 -- XP calculado pelo RoundService para a rodada (ver XpCalculator).
 export type RoundXp = {
+	roundId: number,
 	lines: { XpLine },
 	total: number,
 	won: boolean,
@@ -358,6 +359,7 @@ function PlayerDataService.applyRound(player: Player, roundKey: string, delta: R
 	end
 
 	publish(entry, {
+		roundId = roundXp.roundId,
 		total = gained,
 		lines = roundXp.lines,
 		levelBefore = profile.level,

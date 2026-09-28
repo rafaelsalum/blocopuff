@@ -12,12 +12,19 @@ local PuffadorConstants = require(ReplicatedStorage.Shared.modules.PuffadorConst
 local ResultTypes = require(ReplicatedStorage.Shared.types.ResultTypes)
 local RoundTypes = require(ReplicatedStorage.Shared.types.RoundTypes)
 local StateAttributeNames = require(ReplicatedStorage.Shared.types.StateAttributeNames)
+local ProfileTypes = require(ReplicatedStorage.Shared.types.ProfileTypes)
 local ResultsView = require(script.Parent.Parent.ui.ResultsView)
+local ProfileController = require(script.Parent.ProfileController)
 
 type RoundResult = ResultTypes.RoundResult
 type ResultEntry = ResultTypes.ResultEntry
 type Highlight = ResultTypes.Highlight
 type ResultsViewHandle = ResultsView.ResultsViewHandle
+type ProfileSnapshot = ProfileTypes.ProfileSnapshot
+
+-- O XP da rodada chega pelo perfil logo depois (ou logo antes) do
+-- resultado; vale se chegou até este tempo antes do painel abrir.
+local AWARD_FRESHNESS = 10
 
 local WAIT_TIMEOUT = 15
 local CLOSE_AT_COUNTDOWN = 3
@@ -65,6 +72,9 @@ local function parseResult(raw: unknown): RoundResult?
 			blocks = blocks,
 			knockouts = knockouts,
 			survived = item.survived == true,
+			vault = asNumber(item.vault) or 0,
+			baraoEscapes = asNumber(item.baraoEscapes) or 0,
+			secretsFound = asNumber(item.secretsFound) or 0,
 		})
 	end
 
@@ -72,8 +82,9 @@ local function parseResult(raw: unknown): RoundResult?
 	for _, item in ipairs(rawHighlights :: { any }) do
 		if typeof(item) == "table" then
 			local titleText, userId, name, value = asString(item.title), asNumber(item.userId), asString(item.name), asNumber(item.value)
+			local kind = asString(item.kind) or ""
 			if titleText ~= nil and userId ~= nil and name ~= nil and value ~= nil then
-				table.insert(highlights, { title = titleText, userId = userId, name = name, value = value })
+				table.insert(highlights, { kind = kind, title = titleText, userId = userId, name = name, value = value })
 			end
 		end
 	end
@@ -151,6 +162,22 @@ function ResultsController.start()
 		currentView.setFooter(footerText(container, player))
 	end
 
+	-- XP da rodada: aplica no painel aberto ou guarda para quando abrir.
+	local latestAward: { snapshot: ProfileSnapshot, at: number }? = nil
+	local shownRoundId = -1
+	ProfileController.Changed:Connect(function(snapshot: ProfileSnapshot)
+		local award = snapshot.award
+		if award == nil then
+			return
+		end
+		-- Só no painel da mesma rodada; senão guarda para o painel que abrir.
+		if currentView.isVisible() and award.roundId == shownRoundId then
+			currentView.setXp(award, snapshot.xp)
+		else
+			latestAward = { snapshot = snapshot, at = os.clock() }
+		end
+	end)
+
 	container:GetAttributeChangedSignal(StateAttributeNames.RoundState):Connect(refresh)
 	container:GetAttributeChangedSignal(StateAttributeNames.TimeRemaining):Connect(refresh)
 	player:GetAttributeChangedSignal(StateAttributeNames.PlayerRoundsUntilTurn):Connect(refresh)
@@ -169,6 +196,13 @@ function ResultsController.start()
 				return
 			end
 			currentView.show(result, player.UserId)
+			shownRoundId = result.roundId
+			local pending = latestAward
+			local pendingAward = if pending ~= nil then pending.snapshot.award else nil
+			if pending ~= nil and pendingAward ~= nil and pendingAward.roundId == result.roundId and os.clock() - pending.at <= AWARD_FRESHNESS then
+				currentView.setXp(pendingAward, pending.snapshot.xp)
+			end
+			latestAward = nil
 			refresh()
 		end)
 	end)

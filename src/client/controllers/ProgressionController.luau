@@ -1,8 +1,8 @@
 --!strict
 
 -- Mostra a progressão do jogador: o cartão de perfil no lobby (nível, XP e
--- estatísticas), o XP ganho em cada rodada e a comemoração de subida de
--- nível. Tudo vem do servidor pelo ProfileController.
+-- estatísticas) e a comemoração de subida de nível (o XP de cada rodada fica
+-- no painel de pós-partida). Tudo vem do servidor pelo ProfileController.
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -19,21 +19,6 @@ type XpAward = ProfileTypes.XpAward
 
 local WAIT_TIMEOUT = 15
 local LEVEL_UP_SOUND = "rbxasset://sounds/electronicpingshort.wav"
-local SUMMARY_LINES = 3
-
-local SOURCE_NAMES: { [string]: string } = {
-	Participation = "Partida",
-	Placement = "Colocação",
-	Win = "Vitória",
-	Knockouts = "Derrubadas",
-	Blocks = "Blocos",
-	Secrets = "Segredos",
-	VaultOpened = "Cofre aberto",
-	VaultConquered = "Cofre conquistado",
-	BaraoEscapes = "Fugas do Barão",
-	Comeback = "Volta por Cima",
-	BlocksBuilt = "Construções",
-}
 
 local ProgressionController = {}
 
@@ -55,48 +40,25 @@ local function playLevelUp()
 	end
 end
 
--- "Vitória +40 · Derrubadas +16 · Partida +20" com as maiores fontes.
-local function summarize(award: XpAward): string
-	local lines = table.clone(award.lines)
-	table.sort(lines, function(a, b)
-		return a.xp > b.xp
-	end)
-	local parts: { string } = {}
-	for index = 1, math.min(SUMMARY_LINES, #lines) do
-		local line = lines[index]
-		table.insert(parts, string.format("%s +%d", SOURCE_NAMES[line.source] or line.source, line.xp))
-	end
-	return if #parts > 0 then table.concat(parts, " · ") else "Dispare para ganhar XP na próxima"
-end
-
+-- O XP da rodada aparece no painel de pós-partida; aqui fica só a
+-- comemoração de subida de nível.
 local function announce(award: XpAward)
+	if award.levelAfter <= award.levelBefore then
+		return
+	end
+	playLevelUp()
 	NotificationManager.notify({
 		channel = "Banner",
 		category = "Progression",
-		priority = "Normal",
-		key = "xp-award",
-		icon = "✨",
-		title = string.format("+%d XP", award.total),
-		subtitle = summarize(award),
-		tone = "Gold",
-		duration = 3.5,
-		maxWait = 8,
+		priority = "High",
+		key = "level-up",
+		icon = "⭐",
+		title = string.format("NÍVEL %d!", award.levelAfter),
+		subtitle = "Você subiu de nível no BlocoPuff",
+		tone = "Winner",
+		duration = 4,
+		maxWait = 10,
 	})
-	if award.levelAfter > award.levelBefore then
-		playLevelUp()
-		NotificationManager.notify({
-			channel = "Banner",
-			category = "Progression",
-			priority = "High",
-			key = "level-up",
-			icon = "⭐",
-			title = string.format("NÍVEL %d!", award.levelAfter),
-			subtitle = "Você subiu de nível no BlocoPuff",
-			tone = "Winner",
-			duration = 4,
-			maxWait = 10,
-		})
-	end
 end
 
 function ProgressionController.start()

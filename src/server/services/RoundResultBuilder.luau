@@ -18,7 +18,17 @@ export type ParticipantSnapshot = {
 	alive: boolean,
 	eliminatedPosition: number?,
 	eliminatedAt: number?,
+	-- Contadores da rodada que não estão em atributos (RoundStatsService).
+	vaultsOpened: number,
+	vaultsConquered: number,
+	baraoEscapes: number,
+	secretsFound: number,
+	comebacks: number,
 }
+
+-- Mínimo para ganhar o destaque (evita "Demolidor" com 1 bloco).
+local DEMOLISHER_MIN_BLOCKS = 5
+local MAX_HIGHLIGHTS = 5
 
 -- Eliminações com menos que isso de diferença contam como simultâneas.
 local SIMULTANEOUS_WINDOW = 0.05
@@ -79,22 +89,23 @@ local function readCount(player: Player, attribute: string): number
 end
 
 -- Maior valor entre as entradas; nil se ninguém pontuou.
-local function pickHighlight(entries: { ResultEntry }, title: string, read: (ResultEntry) -> number): Highlight?
+local function pickHighlight(entries: { ResultEntry }, kind: string, title: string, minimum: number, read: (ResultEntry) -> number): Highlight?
 	local best: ResultEntry? = nil
 	for _, entry in ipairs(entries) do
 		local value = read(entry)
-		if value > 0 and (best == nil or value > read(best)) then
+		if value >= math.max(1, minimum) and (best == nil or value > read(best)) then
 			best = entry
 		end
 	end
 	if best == nil then
 		return nil
 	end
-	return { title = title, userId = best.userId, name = best.name, value = read(best) }
+	return { kind = kind, title = title, userId = best.userId, name = best.name, value = read(best) }
 end
 
 function RoundResultBuilder.build(roundId: number, snapshots: { ParticipantSnapshot }, winner: Player?): RoundResult
 	local entries: { ResultEntry } = {}
+	local comebacks: { [number]: number } = {}
 	local tiedPositions = resolveTies(snapshots)
 	local survivors = 0
 	local sharedFirst = 0
@@ -117,7 +128,11 @@ function RoundResultBuilder.build(roundId: number, snapshots: { ParticipantSnaps
 			blocks = readCount(player, StateAttributeNames.PlayerRoundBlocksDestroyed),
 			knockouts = readCount(player, StateAttributeNames.PlayerRoundKnockouts),
 			survived = snapshot.alive,
+			vault = if snapshot.vaultsConquered > 0 then 2 elseif snapshot.vaultsOpened > 0 then 1 else 0,
+			baraoEscapes = snapshot.baraoEscapes,
+			secretsFound = snapshot.secretsFound,
 		})
+		comebacks[player.UserId] = snapshot.comebacks
 	end
 
 	table.sort(entries, function(a, b)
@@ -134,17 +149,34 @@ function RoundResultBuilder.build(roundId: number, snapshots: { ParticipantSnaps
 	end)
 
 	local highlights: { Highlight } = {}
-	local mostBlocks = pickHighlight(entries, "MAIS BLOCOS", function(entry)
-		return entry.blocks
-	end)
-	if mostBlocks ~= nil then
-		table.insert(highlights, mostBlocks)
+	local function consider(highlight: Highlight?)
+		if highlight ~= nil and #highlights < MAX_HIGHLIGHTS then
+			table.insert(highlights, highlight)
+		end
 	end
-	local mostKnockouts = pickHighlight(entries, "MAIS DERRUBADAS", function(entry)
-		return entry.knockouts
-	end)
-	if mostKnockouts ~= nil then
-		table.insert(highlights, mostKnockouts)
+	-- table.pack guarda os nil (quem não tem destaque) sem cortar a lista.
+	local candidates = table.pack(
+		pickHighlight(entries, "Demolisher", "DEMOLIDOR", DEMOLISHER_MIN_BLOCKS, function(entry)
+			return entry.blocks
+		end),
+		pickHighlight(entries, "Knockouts", "MAIS DERRUBADAS", 1, function(entry)
+			return entry.knockouts
+		end),
+		pickHighlight(entries, "Vault", "DONO DO COFRE", 1, function(entry)
+			return entry.vault
+		end),
+		pickHighlight(entries, "BaraoEscapes", "ESCAPOU DO BARÃO", 1, function(entry)
+			return entry.baraoEscapes
+		end),
+		pickHighlight(entries, "Secrets", "DESCOBRIDOR", 1, function(entry)
+			return entry.secretsFound
+		end),
+		pickHighlight(entries, "Comeback", "VOLTA POR CIMA", 1, function(entry)
+			return comebacks[entry.userId] or 0
+		end)
+	)
+	for index = 1, candidates.n do
+		consider(candidates[index])
 	end
 
 	return {

@@ -619,7 +619,7 @@ local function commitProfiles(result: ResultTypes.RoundResult)
 				blocksBuilt = trusted.blocksBuilt,
 				shots = extra.shots,
 			})
-			PlayerDataService.applyRound(player, roundKey, delta, { lines = xpLines, total = xpTotal, won = won })
+			PlayerDataService.applyRound(player, roundKey, delta, { roundId = currentRoundId, lines = xpLines, total = xpTotal, won = won })
 		end
 	end
 end
@@ -631,11 +631,17 @@ local function publishResult()
 	for _, player in ipairs(participantOrder) do
 		local participant = participants[player]
 		if participant ~= nil and player.Parent ~= nil then
+			local extra = RoundStatsService.get(player)
 			table.insert(snapshots, {
 				player = player,
 				alive = participant.alive,
 				eliminatedPosition = eliminationPositions[player],
 				eliminatedAt = eliminationTimes[player],
+				vaultsOpened = extra.vaultsOpened,
+				vaultsConquered = extra.vaultsConquered,
+				baraoEscapes = extra.baraoEscapes,
+				secretsFound = extra.secretsFound,
+				comebacks = extra.comebacks,
 			})
 			if winner ~= nil and player.UserId == winner.userId then
 				winnerPlayer = player

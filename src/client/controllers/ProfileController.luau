@@ -50,6 +50,7 @@ local function parseAward(raw: unknown): XpAward?
 		end
 	end
 	return {
+		roundId = readNumber(data.roundId),
 		total = readNumber(data.total),
 		lines = lines,
 		levelBefore = math.max(1, readNumber(data.levelBefore)),

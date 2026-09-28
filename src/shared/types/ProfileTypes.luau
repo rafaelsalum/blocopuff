@@ -24,6 +24,8 @@ export type XpLine = {
 }
 
 export type XpAward = {
+	-- Rodada a que o XP pertence (o cliente só mostra no painel dessa rodada).
+	roundId: number,
 	total: number,
 	lines: { XpLine },
 	levelBefore: number,

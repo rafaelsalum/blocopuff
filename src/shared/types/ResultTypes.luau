@@ -1,8 +1,8 @@
 --!strict
 
 -- Resultado de uma rodada, montado pelo RoundService e enviado a todos os
--- clientes no início do encerramento. Só dados da rodada (sem progresso
--- persistente nesta fase).
+-- clientes no início do encerramento. Só dados da rodada; o XP ganho chega
+-- pelo perfil (ProfileSnapshot.award).
 
 export type ResultEntry = {
 	userId: number,
@@ -13,9 +13,17 @@ export type ResultEntry = {
 	blocks: number,
 	knockouts: number,
 	survived: boolean,
+	-- 0 = nada, 1 = abriu o cofre, 2 = conquistou o Puffador do Cofre.
+	vault: number,
+	baraoEscapes: number,
+	secretsFound: number,
 }
 
+-- Tipos de destaque: Demolisher, Knockouts, Vault, BaraoEscapes, Secrets,
+-- Comeback. Nenhum premia comportamento antijogo (esconder-se, fugir da
+-- partida): todos vêm de jogar de verdade.
 export type Highlight = {
+	kind: string,
 	title: string,
 	userId: number,
 	name: string,

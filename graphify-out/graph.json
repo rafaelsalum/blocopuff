@@ -296,8 +296,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_client_controllers_buildmodecontroller",
-      "community": 2,
-      "community_name": "ArenaService.luau",
+      "community": 64,
+      "community_name": "trySecondChance",
       "norm_label": "buildmodecontroller.luau"
     },
     {
@@ -307,8 +307,8 @@
       "source_location": "L51",
       "_origin": "ast",
       "id": "src_client_controllers_buildmodecontroller_isavailable",
-      "community": 2,
-      "community_name": "ArenaService.luau",
+      "community": 64,
+      "community_name": "trySecondChance",
       "norm_label": "isavailable()"
     },
     {
@@ -318,8 +318,8 @@
       "source_location": "L55",
       "_origin": "ast",
       "id": "src_client_controllers_buildmodecontroller_cellkey",
-      "community": 2,
-      "community_name": "ArenaService.luau",
+      "community": 64,
+      "community_name": "trySecondChance",
       "norm_label": "cellkey()"
     },
     {
@@ -711,7 +711,7 @@
       "label": "parse()",
       "file_type": "code",
       "source_file": "src/client/controllers/ProfileController.luau",
-      "source_location": "L60",
+      "source_location": "L61",
       "_origin": "ast",
       "id": "src_client_controllers_profilecontroller_parse",
       "community": 4,
@@ -722,7 +722,7 @@
       "label": "ProfileController.get()",
       "file_type": "code",
       "source_file": "src/client/controllers/ProfileController.luau",
-      "source_location": "L82",
+      "source_location": "L83",
       "_origin": "ast",
       "id": "src_client_controllers_profilecontroller_profilecontroller_get",
       "community": 4,
@@ -733,7 +733,7 @@
       "label": "ProfileController.start()",
       "file_type": "code",
       "source_file": "src/client/controllers/ProfileController.luau",
-      "source_location": "L89",
+      "source_location": "L90",
       "_origin": "ast",
       "id": "src_client_controllers_profilecontroller_profilecontroller_start",
       "community": 4,
@@ -755,7 +755,7 @@
       "label": "playLevelUp()",
       "file_type": "code",
       "source_file": "src/client/controllers/ProgressionController.luau",
-      "source_location": "L42",
+      "source_location": "L27",
       "_origin": "ast",
       "id": "src_client_controllers_progressioncontroller_playlevelup",
       "community": 4,
@@ -763,21 +763,10 @@
       "norm_label": "playlevelup()"
     },
     {
-      "label": "summarize()",
-      "file_type": "code",
-      "source_file": "src/client/controllers/ProgressionController.luau",
-      "source_location": "L59",
-      "_origin": "ast",
-      "id": "src_client_controllers_progressioncontroller_summarize",
-      "community": 4,
-      "community_name": "NotificationManager.luau",
-      "norm_label": "summarize()"
-    },
-    {
       "label": "announce()",
       "file_type": "code",
       "source_file": "src/client/controllers/ProgressionController.luau",
-      "source_location": "L72",
+      "source_location": "L45",
       "_origin": "ast",
       "id": "src_client_controllers_progressioncontroller_announce",
       "community": 4,
@@ -788,7 +777,7 @@
       "label": "ProgressionController.start()",
       "file_type": "code",
       "source_file": "src/client/controllers/ProgressionController.luau",
-      "source_location": "L102",
+      "source_location": "L64",
       "_origin": "ast",
       "id": "src_client_controllers_progressioncontroller_progressioncontroller_start",
       "community": 4,
@@ -1085,7 +1074,7 @@
       "label": "parseResult()",
       "file_type": "code",
       "source_file": "src/client/controllers/ResultsController.luau",
-      "source_location": "L40",
+      "source_location": "L47",
       "_origin": "ast",
       "id": "src_client_controllers_resultscontroller_parseresult",
       "community": 33,
@@ -2012,53 +2001,42 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_client_ui_resultsview",
-      "community": 21,
-      "community_name": "ResultsView.luau",
+      "community": 9,
+      "community_name": "UiTheme.addCorner",
       "norm_label": "resultsview.luau"
     },
     {
       "label": "label()",
       "file_type": "code",
       "source_file": "src/client/ui/ResultsView.luau",
-      "source_location": "L34",
+      "source_location": "L86",
       "_origin": "ast",
       "id": "src_client_ui_resultsview_label",
-      "community": 21,
-      "community_name": "ResultsView.luau",
+      "community": 9,
+      "community_name": "UiTheme.addCorner",
       "norm_label": "label()"
     },
     {
       "label": "findEntry()",
       "file_type": "code",
       "source_file": "src/client/ui/ResultsView.luau",
-      "source_location": "L42",
+      "source_location": "L94",
       "_origin": "ast",
       "id": "src_client_ui_resultsview_findentry",
-      "community": 21,
-      "community_name": "ResultsView.luau",
+      "community": 9,
+      "community_name": "UiTheme.addCorner",
       "norm_label": "findentry()"
     },
     {
       "label": "plural()",
       "file_type": "code",
       "source_file": "src/client/ui/ResultsView.luau",
-      "source_location": "L51",
+      "source_location": "L103",
       "_origin": "ast",
       "id": "src_client_ui_resultsview_plural",
-      "community": 21,
-      "community_name": "ResultsView.luau",
+      "community": 9,
+      "community_name": "UiTheme.addCorner",
       "norm_label": "plural()"
-    },
-    {
-      "label": "describe()",
-      "file_type": "code",
-      "source_file": "src/client/ui/ResultsView.luau",
-      "source_location": "L55",
-      "_origin": "ast",
-      "id": "src_client_ui_resultsview_describe",
-      "community": 21,
-      "community_name": "ResultsView.luau",
-      "norm_label": "describe()"
     },
     {
       "label": "RoundHudView.luau",
@@ -2518,7 +2496,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_server_data_xpcalculator",
-      "community": 64,
+      "community": 71,
       "community_name": "RoundStatsService.luau",
       "norm_label": "xpcalculator.luau"
     },
@@ -2529,7 +2507,7 @@
       "source_location": "L32",
       "_origin": "ast",
       "id": "src_server_data_xpcalculator_participantmultiplier",
-      "community": 64,
+      "community": 71,
       "community_name": "RoundStatsService.luau",
       "norm_label": "participantmultiplier()"
     },
@@ -2540,7 +2518,7 @@
       "source_location": "L39",
       "_origin": "ast",
       "id": "src_server_data_xpcalculator_xpcalculator_compute",
-      "community": 64,
+      "community": 71,
       "community_name": "RoundStatsService.luau",
       "norm_label": "xpcalculator.compute()"
     },
@@ -2936,8 +2914,8 @@
       "source_location": "L324",
       "_origin": "ast",
       "id": "src_server_services_arenaservice_arenaservice_getblocks",
-      "community": 58,
-      "community_name": "PhotoModeService.luau",
+      "community": 2,
+      "community_name": "ArenaService.luau",
       "norm_label": "arenaservice.getblocks()"
     },
     {
@@ -2947,8 +2925,8 @@
       "source_location": "L333",
       "_origin": "ast",
       "id": "src_server_services_arenaservice_arenaservice_getplayerspawncframes",
-      "community": 0,
-      "community_name": "RoundService.luau",
+      "community": 64,
+      "community_name": "trySecondChance",
       "norm_label": "arenaservice.getplayerspawncframes()"
     },
     {
@@ -3035,8 +3013,8 @@
       "source_location": "L461",
       "_origin": "ast",
       "id": "src_server_services_arenaservice_arenaservice_getintactblocks",
-      "community": 2,
-      "community_name": "ArenaService.luau",
+      "community": 21,
+      "community_name": "FinalChaosService.luau",
       "norm_label": "arenaservice.getintactblocks()"
     },
     {
@@ -3046,8 +3024,8 @@
       "source_location": "L475",
       "_origin": "ast",
       "id": "src_server_services_arenaservice_arenaservice_getsaferespawncframe",
-      "community": 2,
-      "community_name": "ArenaService.luau",
+      "community": 64,
+      "community_name": "trySecondChance",
       "norm_label": "arenaservice.getsaferespawncframe()"
     },
     {
@@ -3057,8 +3035,8 @@
       "source_location": "L525",
       "_origin": "ast",
       "id": "src_server_services_arenaservice_arenaservice_setcollapsewarning",
-      "community": 2,
-      "community_name": "ArenaService.luau",
+      "community": 21,
+      "community_name": "FinalChaosService.luau",
       "norm_label": "arenaservice.setcollapsewarning()"
     },
     {
@@ -3816,7 +3794,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_server_services_corridorbuilder",
-      "community": 70,
+      "community": 69,
       "community_name": "CorridorBuilder.luau",
       "norm_label": "corridorbuilder.luau"
     },
@@ -3827,7 +3805,7 @@
       "source_location": "L41",
       "_origin": "ast",
       "id": "src_server_services_corridorbuilder_solid",
-      "community": 70,
+      "community": 69,
       "community_name": "CorridorBuilder.luau",
       "norm_label": "solid()"
     },
@@ -3838,7 +3816,7 @@
       "source_location": "L45",
       "_origin": "ast",
       "id": "src_server_services_corridorbuilder_decor",
-      "community": 70,
+      "community": 69,
       "community_name": "CorridorBuilder.luau",
       "norm_label": "decor()"
     },
@@ -3849,7 +3827,7 @@
       "source_location": "L49",
       "_origin": "ast",
       "id": "src_server_services_corridorbuilder_addlamp",
-      "community": 70,
+      "community": 69,
       "community_name": "CorridorBuilder.luau",
       "norm_label": "addlamp()"
     },
@@ -3860,7 +3838,7 @@
       "source_location": "L63",
       "_origin": "ast",
       "id": "src_server_services_corridorbuilder_buildouterwall",
-      "community": 70,
+      "community": 69,
       "community_name": "CorridorBuilder.luau",
       "norm_label": "buildouterwall()"
     },
@@ -3871,7 +3849,7 @@
       "source_location": "L87",
       "_origin": "ast",
       "id": "src_server_services_corridorbuilder_buildtoca",
-      "community": 70,
+      "community": 69,
       "community_name": "CorridorBuilder.luau",
       "norm_label": "buildtoca()"
     },
@@ -3882,7 +3860,7 @@
       "source_location": "L114",
       "_origin": "ast",
       "id": "src_server_services_corridorbuilder_corridorbuilder_build",
-      "community": 70,
+      "community": 69,
       "community_name": "CorridorBuilder.luau",
       "norm_label": "corridorbuilder.build()"
     },
@@ -4058,7 +4036,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_server_services_finalchaosservice",
-      "community": 69,
+      "community": 21,
       "community_name": "FinalChaosService.luau",
       "norm_label": "finalchaosservice.luau"
     },
@@ -4069,7 +4047,7 @@
       "source_location": "L19",
       "_origin": "ast",
       "id": "src_server_services_finalchaosservice_pickrandom",
-      "community": 69,
+      "community": 21,
       "community_name": "FinalChaosService.luau",
       "norm_label": "pickrandom()"
     },
@@ -4080,8 +4058,8 @@
       "source_location": "L31",
       "_origin": "ast",
       "id": "src_server_services_finalchaosservice_runwaves",
-      "community": 2,
-      "community_name": "ArenaService.luau",
+      "community": 21,
+      "community_name": "FinalChaosService.luau",
       "norm_label": "runwaves()"
     },
     {
@@ -4091,7 +4069,7 @@
       "source_location": "L54",
       "_origin": "ast",
       "id": "src_server_services_finalchaosservice_finalchaosservice_getduration",
-      "community": 69,
+      "community": 21,
       "community_name": "FinalChaosService.luau",
       "norm_label": "finalchaosservice.getduration()"
     },
@@ -4102,7 +4080,7 @@
       "source_location": "L59",
       "_origin": "ast",
       "id": "src_server_services_finalchaosservice_finalchaosservice_begin",
-      "community": 69,
+      "community": 21,
       "community_name": "FinalChaosService.luau",
       "norm_label": "finalchaosservice.begin()"
     },
@@ -4113,7 +4091,7 @@
       "source_location": "L68",
       "_origin": "ast",
       "id": "src_server_services_finalchaosservice_finalchaosservice_stop",
-      "community": 69,
+      "community": 21,
       "community_name": "FinalChaosService.luau",
       "norm_label": "finalchaosservice.stop()"
     },
@@ -4124,7 +4102,7 @@
       "source_location": "L73",
       "_origin": "ast",
       "id": "src_server_services_finalchaosservice_finalchaosservice_isrunning",
-      "community": 69,
+      "community": 21,
       "community_name": "FinalChaosService.luau",
       "norm_label": "finalchaosservice.isrunning()"
     },
@@ -4135,8 +4113,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_server_services_knockbackservice",
-      "community": 67,
-      "community_name": "KnockbackService.luau",
+      "community": 59,
+      "community_name": "TocaService.luau",
       "norm_label": "knockbackservice.luau"
     },
     {
@@ -4146,8 +4124,8 @@
       "source_location": "L34",
       "_origin": "ast",
       "id": "src_server_services_knockbackservice_isactiveparticipant",
-      "community": 67,
-      "community_name": "KnockbackService.luau",
+      "community": 59,
+      "community_name": "TocaService.luau",
       "norm_label": "isactiveparticipant()"
     },
     {
@@ -4157,8 +4135,8 @@
       "source_location": "L42",
       "_origin": "ast",
       "id": "src_server_services_knockbackservice_computevelocity",
-      "community": 67,
-      "community_name": "KnockbackService.luau",
+      "community": 59,
+      "community_name": "TocaService.luau",
       "norm_label": "computevelocity()"
     },
     {
@@ -4168,8 +4146,8 @@
       "source_location": "L50",
       "_origin": "ast",
       "id": "src_server_services_knockbackservice_oncharacterhit",
-      "community": 67,
-      "community_name": "KnockbackService.luau",
+      "community": 59,
+      "community_name": "TocaService.luau",
       "norm_label": "oncharacterhit()"
     },
     {
@@ -4179,8 +4157,8 @@
       "source_location": "L75",
       "_origin": "ast",
       "id": "src_server_services_knockbackservice_knockbackservice_getrecentattacker",
-      "community": 67,
-      "community_name": "KnockbackService.luau",
+      "community": 59,
+      "community_name": "TocaService.luau",
       "norm_label": "knockbackservice.getrecentattacker()"
     },
     {
@@ -4190,7 +4168,7 @@
       "source_location": "L86",
       "_origin": "ast",
       "id": "src_server_services_knockbackservice_knockbackservice_protect",
-      "community": 72,
+      "community": 64,
       "community_name": "trySecondChance",
       "norm_label": "knockbackservice.protect()"
     },
@@ -4201,8 +4179,8 @@
       "source_location": "L91",
       "_origin": "ast",
       "id": "src_server_services_knockbackservice_knockbackservice_forget",
-      "community": 67,
-      "community_name": "KnockbackService.luau",
+      "community": 59,
+      "community_name": "TocaService.luau",
       "norm_label": "knockbackservice.forget()"
     },
     {
@@ -4212,8 +4190,8 @@
       "source_location": "L96",
       "_origin": "ast",
       "id": "src_server_services_knockbackservice_knockbackservice_beginround",
-      "community": 0,
-      "community_name": "RoundService.luau",
+      "community": 59,
+      "community_name": "TocaService.luau",
       "norm_label": "knockbackservice.beginround()"
     },
     {
@@ -4223,8 +4201,8 @@
       "source_location": "L103",
       "_origin": "ast",
       "id": "src_server_services_knockbackservice_knockbackservice_endround",
-      "community": 67,
-      "community_name": "KnockbackService.luau",
+      "community": 59,
+      "community_name": "TocaService.luau",
       "norm_label": "knockbackservice.endround()"
     },
     {
@@ -4234,8 +4212,8 @@
       "source_location": "L109",
       "_origin": "ast",
       "id": "src_server_services_knockbackservice_knockbackservice_start",
-      "community": 67,
-      "community_name": "KnockbackService.luau",
+      "community": 59,
+      "community_name": "TocaService.luau",
       "norm_label": "knockbackservice.start()"
     },
     {
@@ -4245,8 +4223,8 @@
       "source_location": "L114",
       "_origin": "ast",
       "id": "src_server_services_knockbackservice_knockbackservice_stop",
-      "community": 67,
-      "community_name": "KnockbackService.luau",
+      "community": 59,
+      "community_name": "TocaService.luau",
       "norm_label": "knockbackservice.stop()"
     },
     {
@@ -4685,8 +4663,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_server_services_projectileservice",
-      "community": 2,
-      "community_name": "ArenaService.luau",
+      "community": 67,
+      "community_name": "ProjectileService.luau",
       "norm_label": "projectileservice.luau"
     },
     {
@@ -4696,8 +4674,8 @@
       "source_location": "L67",
       "_origin": "ast",
       "id": "src_server_services_projectileservice_isowned",
-      "community": 2,
-      "community_name": "ArenaService.luau",
+      "community": 67,
+      "community_name": "ProjectileService.luau",
       "norm_label": "isowned()"
     },
     {
@@ -4707,8 +4685,8 @@
       "source_location": "L71",
       "_origin": "ast",
       "id": "src_server_services_projectileservice_removeprojectileat",
-      "community": 2,
-      "community_name": "ArenaService.luau",
+      "community": 67,
+      "community_name": "ProjectileService.luau",
       "norm_label": "removeprojectileat()"
     },
     {
@@ -4718,8 +4696,8 @@
       "source_location": "L83",
       "_origin": "ast",
       "id": "src_server_services_projectileservice_createimpacteffect",
-      "community": 2,
-      "community_name": "ArenaService.luau",
+      "community": 67,
+      "community_name": "ProjectileService.luau",
       "norm_label": "createimpacteffect()"
     },
     {
@@ -4729,8 +4707,8 @@
       "source_location": "L142",
       "_origin": "ast",
       "id": "src_server_services_projectileservice_notifyhit",
-      "community": 2,
-      "community_name": "ArenaService.luau",
+      "community": 67,
+      "community_name": "ProjectileService.luau",
       "norm_label": "notifyhit()"
     },
     {
@@ -4740,8 +4718,8 @@
       "source_location": "L161",
       "_origin": "ast",
       "id": "src_server_services_projectileservice_updateprojectiles",
-      "community": 2,
-      "community_name": "ArenaService.luau",
+      "community": 67,
+      "community_name": "ProjectileService.luau",
       "norm_label": "updateprojectiles()"
     },
     {
@@ -4751,8 +4729,8 @@
       "source_location": "L233",
       "_origin": "ast",
       "id": "src_server_services_projectileservice_projectileservice_start",
-      "community": 2,
-      "community_name": "ArenaService.luau",
+      "community": 67,
+      "community_name": "ProjectileService.luau",
       "norm_label": "projectileservice.start()"
     },
     {
@@ -4762,8 +4740,8 @@
       "source_location": "L260",
       "_origin": "ast",
       "id": "src_server_services_projectileservice_projectileservice_spawn",
-      "community": 2,
-      "community_name": "ArenaService.luau",
+      "community": 67,
+      "community_name": "ProjectileService.luau",
       "norm_label": "projectileservice.spawn()"
     },
     {
@@ -4773,8 +4751,8 @@
       "source_location": "L365",
       "_origin": "ast",
       "id": "src_server_services_projectileservice_projectileservice_setcharacterhithandler",
-      "community": 67,
-      "community_name": "KnockbackService.luau",
+      "community": 59,
+      "community_name": "TocaService.luau",
       "norm_label": "projectileservice.setcharacterhithandler()"
     },
     {
@@ -4795,8 +4773,8 @@
       "source_location": "L373",
       "_origin": "ast",
       "id": "src_server_services_projectileservice_projectileservice_clearall",
-      "community": 2,
-      "community_name": "ArenaService.luau",
+      "community": 67,
+      "community_name": "ProjectileService.luau",
       "norm_label": "projectileservice.clearall()"
     },
     {
@@ -4806,8 +4784,8 @@
       "source_location": "L379",
       "_origin": "ast",
       "id": "src_server_services_projectileservice_projectileservice_clearforplayer",
-      "community": 2,
-      "community_name": "ArenaService.luau",
+      "community": 67,
+      "community_name": "ProjectileService.luau",
       "norm_label": "projectileservice.clearforplayer()"
     },
     {
@@ -4817,8 +4795,8 @@
       "source_location": "L388",
       "_origin": "ast",
       "id": "src_server_services_projectileservice_projectileservice_stop",
-      "community": 2,
-      "community_name": "ArenaService.luau",
+      "community": 67,
+      "community_name": "ProjectileService.luau",
       "norm_label": "projectileservice.stop()"
     },
     {
@@ -5379,62 +5357,51 @@
       "_origin": "ast",
       "id": "src_server_services_roundresultbuilder",
       "community": 71,
-      "community_name": "RoundResultBuilder.luau",
+      "community_name": "RoundStatsService.luau",
       "norm_label": "roundresultbuilder.luau"
-    },
-    {
-      "label": "RoundResultBuilder.getLastEliminated()",
-      "file_type": "code",
-      "source_file": "src/server/services/RoundResultBuilder.luau",
-      "source_location": "L29",
-      "_origin": "ast",
-      "id": "src_server_services_roundresultbuilder_roundresultbuilder_getlasteliminated",
-      "community": 69,
-      "community_name": "FinalChaosService.luau",
-      "norm_label": "roundresultbuilder.getlasteliminated()"
     },
     {
       "label": "resolveTies()",
       "file_type": "code",
       "source_file": "src/server/services/RoundResultBuilder.luau",
-      "source_location": "L45",
+      "source_location": "L55",
       "_origin": "ast",
       "id": "src_server_services_roundresultbuilder_resolveties",
       "community": 71,
-      "community_name": "RoundResultBuilder.luau",
+      "community_name": "RoundStatsService.luau",
       "norm_label": "resolveties()"
     },
     {
       "label": "readCount()",
       "file_type": "code",
       "source_file": "src/server/services/RoundResultBuilder.luau",
-      "source_location": "L76",
+      "source_location": "L86",
       "_origin": "ast",
       "id": "src_server_services_roundresultbuilder_readcount",
       "community": 71,
-      "community_name": "RoundResultBuilder.luau",
+      "community_name": "RoundStatsService.luau",
       "norm_label": "readcount()"
     },
     {
       "label": "pickHighlight()",
       "file_type": "code",
       "source_file": "src/server/services/RoundResultBuilder.luau",
-      "source_location": "L82",
+      "source_location": "L92",
       "_origin": "ast",
       "id": "src_server_services_roundresultbuilder_pickhighlight",
       "community": 71,
-      "community_name": "RoundResultBuilder.luau",
+      "community_name": "RoundStatsService.luau",
       "norm_label": "pickhighlight()"
     },
     {
       "label": "RoundResultBuilder.build()",
       "file_type": "code",
       "source_file": "src/server/services/RoundResultBuilder.luau",
-      "source_location": "L96",
+      "source_location": "L106",
       "_origin": "ast",
       "id": "src_server_services_roundresultbuilder_roundresultbuilder_build",
       "community": 71,
-      "community_name": "RoundResultBuilder.luau",
+      "community_name": "RoundStatsService.luau",
       "norm_label": "roundresultbuilder.build()"
     },
     {
@@ -5477,7 +5444,7 @@
       "source_location": "L114",
       "_origin": "ast",
       "id": "src_server_services_roundservice_gethumanoidrootpart",
-      "community": 72,
+      "community": 64,
       "community_name": "trySecondChance",
       "norm_label": "gethumanoidrootpart()"
     },
@@ -5488,7 +5455,7 @@
       "source_location": "L123",
       "_origin": "ast",
       "id": "src_server_services_roundservice_movecharacterto",
-      "community": 72,
+      "community": 64,
       "community_name": "trySecondChance",
       "norm_label": "movecharacterto()"
     },
@@ -5543,8 +5510,8 @@
       "source_location": "L194",
       "_origin": "ast",
       "id": "src_server_services_roundservice_teleportparticipantstoarena",
-      "community": 0,
-      "community_name": "RoundService.luau",
+      "community": 64,
+      "community_name": "trySecondChance",
       "norm_label": "teleportparticipantstoarena()"
     },
     {
@@ -5587,7 +5554,7 @@
       "source_location": "L249",
       "_origin": "ast",
       "id": "src_server_services_roundservice_recordcomeback",
-      "community": 64,
+      "community": 71,
       "community_name": "RoundStatsService.luau",
       "norm_label": "recordcomeback()"
     },
@@ -5598,8 +5565,8 @@
       "source_location": "L257",
       "_origin": "ast",
       "id": "src_server_services_roundservice_creditknockout",
-      "community": 67,
-      "community_name": "KnockbackService.luau",
+      "community": 59,
+      "community_name": "TocaService.luau",
       "norm_label": "creditknockout()"
     },
     {
@@ -5609,7 +5576,7 @@
       "source_location": "L274",
       "_origin": "ast",
       "id": "src_server_services_roundservice_trysecondchance",
-      "community": 72,
+      "community": 64,
       "community_name": "trySecondChance",
       "norm_label": "trysecondchance()"
     },
@@ -5620,7 +5587,7 @@
       "source_location": "L305",
       "_origin": "ast",
       "id": "src_server_services_roundservice_eliminateparticipant",
-      "community": 72,
+      "community": 64,
       "community_name": "trySecondChance",
       "norm_label": "eliminateparticipant()"
     },
@@ -5631,8 +5598,8 @@
       "source_location": "L356",
       "_origin": "ast",
       "id": "src_server_services_roundservice_onparticipantdied",
-      "community": 72,
-      "community_name": "trySecondChance",
+      "community": 0,
+      "community_name": "RoundService.luau",
       "norm_label": "onparticipantdied()"
     },
     {
@@ -5642,8 +5609,8 @@
       "source_location": "L360",
       "_origin": "ast",
       "id": "src_server_services_roundservice_connectparticipantdeathhandlers",
-      "community": 72,
-      "community_name": "trySecondChance",
+      "community": 0,
+      "community_name": "RoundService.luau",
       "norm_label": "connectparticipantdeathhandlers()"
     },
     {
@@ -5675,7 +5642,7 @@
       "source_location": "L394",
       "_origin": "ast",
       "id": "src_server_services_roundservice_evaluateactiveparticipants",
-      "community": 69,
+      "community": 21,
       "community_name": "FinalChaosService.luau",
       "norm_label": "evaluateactiveparticipants()"
     },
@@ -5730,7 +5697,7 @@
       "source_location": "L531",
       "_origin": "ast",
       "id": "src_server_services_roundservice_startfinalchaos",
-      "community": 69,
+      "community": 21,
       "community_name": "FinalChaosService.luau",
       "norm_label": "startfinalchaos()"
     },
@@ -5741,7 +5708,7 @@
       "source_location": "L545",
       "_origin": "ast",
       "id": "src_server_services_roundservice_runactive",
-      "community": 69,
+      "community": 21,
       "community_name": "FinalChaosService.luau",
       "norm_label": "runactive()"
     },
@@ -5752,8 +5719,8 @@
       "source_location": "L584",
       "_origin": "ast",
       "id": "src_server_services_roundservice_commitprofiles",
-      "community": 64,
-      "community_name": "RoundStatsService.luau",
+      "community": 56,
+      "community_name": "ProfileSchema.luau",
       "norm_label": "commitprofiles()"
     },
     {
@@ -5764,7 +5731,7 @@
       "_origin": "ast",
       "id": "src_server_services_roundservice_publishresult",
       "community": 71,
-      "community_name": "RoundResultBuilder.luau",
+      "community_name": "RoundStatsService.luau",
       "norm_label": "publishresult()"
     },
     {
@@ -5774,7 +5741,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_server_services_roundstatsservice",
-      "community": 64,
+      "community": 71,
       "community_name": "RoundStatsService.luau",
       "norm_label": "roundstatsservice.luau"
     },
@@ -5785,7 +5752,7 @@
       "source_location": "L23",
       "_origin": "ast",
       "id": "src_server_services_roundstatsservice_empty",
-      "community": 64,
+      "community": 71,
       "community_name": "RoundStatsService.luau",
       "norm_label": "empty()"
     },
@@ -5796,7 +5763,7 @@
       "source_location": "L27",
       "_origin": "ast",
       "id": "src_server_services_roundstatsservice_add",
-      "community": 64,
+      "community": 71,
       "community_name": "RoundStatsService.luau",
       "norm_label": "add()"
     },
@@ -5807,7 +5774,7 @@
       "source_location": "L40",
       "_origin": "ast",
       "id": "src_server_services_roundstatsservice_roundstatsservice_vaultopened",
-      "community": 64,
+      "community": 71,
       "community_name": "RoundStatsService.luau",
       "norm_label": "roundstatsservice.vaultopened()"
     },
@@ -5818,7 +5785,7 @@
       "source_location": "L44",
       "_origin": "ast",
       "id": "src_server_services_roundstatsservice_roundstatsservice_vaultconquered",
-      "community": 64,
+      "community": 71,
       "community_name": "RoundStatsService.luau",
       "norm_label": "roundstatsservice.vaultconquered()"
     },
@@ -5829,7 +5796,7 @@
       "source_location": "L48",
       "_origin": "ast",
       "id": "src_server_services_roundstatsservice_roundstatsservice_baraoescape",
-      "community": 64,
+      "community": 71,
       "community_name": "RoundStatsService.luau",
       "norm_label": "roundstatsservice.baraoescape()"
     },
@@ -5840,7 +5807,7 @@
       "source_location": "L52",
       "_origin": "ast",
       "id": "src_server_services_roundstatsservice_roundstatsservice_secretfound",
-      "community": 64,
+      "community": 71,
       "community_name": "RoundStatsService.luau",
       "norm_label": "roundstatsservice.secretfound()"
     },
@@ -5851,7 +5818,7 @@
       "source_location": "L56",
       "_origin": "ast",
       "id": "src_server_services_roundstatsservice_roundstatsservice_blockbuilt",
-      "community": 64,
+      "community": 71,
       "community_name": "RoundStatsService.luau",
       "norm_label": "roundstatsservice.blockbuilt()"
     },
@@ -5862,7 +5829,7 @@
       "source_location": "L61",
       "_origin": "ast",
       "id": "src_server_services_roundstatsservice_roundstatsservice_shot",
-      "community": 64,
+      "community": 71,
       "community_name": "RoundStatsService.luau",
       "norm_label": "roundstatsservice.shot()"
     },
@@ -5873,7 +5840,7 @@
       "source_location": "L65",
       "_origin": "ast",
       "id": "src_server_services_roundstatsservice_roundstatsservice_comeback",
-      "community": 64,
+      "community": 71,
       "community_name": "RoundStatsService.luau",
       "norm_label": "roundstatsservice.comeback()"
     },
@@ -5884,7 +5851,7 @@
       "source_location": "L70",
       "_origin": "ast",
       "id": "src_server_services_roundstatsservice_roundstatsservice_get",
-      "community": 64,
+      "community": 71,
       "community_name": "RoundStatsService.luau",
       "norm_label": "roundstatsservice.get()"
     },
@@ -5907,7 +5874,7 @@
       "_origin": "ast",
       "id": "src_server_services_roundstatsservice_roundstatsservice_endround",
       "community": 71,
-      "community_name": "RoundResultBuilder.luau",
+      "community_name": "RoundStatsService.luau",
       "norm_label": "roundstatsservice.endround()"
     },
     {
@@ -6115,8 +6082,8 @@
       "source_location": "L35",
       "_origin": "ast",
       "id": "src_server_services_secretroombuilder_secretroombuilder_getframe",
-      "community": 30,
-      "community_name": "VaultService.luau",
+      "community": 25,
+      "community_name": "BuildingDecor.createPart",
       "norm_label": "secretroombuilder.getframe()"
     },
     {
@@ -6126,8 +6093,8 @@
       "source_location": "L40",
       "_origin": "ast",
       "id": "src_server_services_secretroombuilder_secretroombuilder_getpedestaltop",
-      "community": 30,
-      "community_name": "VaultService.luau",
+      "community": 25,
+      "community_name": "BuildingDecor.createPart",
       "norm_label": "secretroombuilder.getpedestaltop()"
     },
     {
@@ -6588,8 +6555,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_server_services_vaultprops",
-      "community": 30,
-      "community_name": "VaultService.luau",
+      "community": 25,
+      "community_name": "BuildingDecor.createPart",
       "norm_label": "vaultprops.luau"
     },
     {
@@ -6599,8 +6566,8 @@
       "source_location": "L43",
       "_origin": "ast",
       "id": "src_server_services_vaultprops_attachtopanel",
-      "community": 30,
-      "community_name": "VaultService.luau",
+      "community": 25,
+      "community_name": "BuildingDecor.createPart",
       "norm_label": "attachtopanel()"
     },
     {
@@ -6610,8 +6577,8 @@
       "source_location": "L52",
       "_origin": "ast",
       "id": "src_server_services_vaultprops_createpanel",
-      "community": 30,
-      "community_name": "VaultService.luau",
+      "community": 25,
+      "community_name": "BuildingDecor.createPart",
       "norm_label": "createpanel()"
     },
     {
@@ -6621,8 +6588,8 @@
       "source_location": "L88",
       "_origin": "ast",
       "id": "src_server_services_vaultprops_createprompt",
-      "community": 30,
-      "community_name": "VaultService.luau",
+      "community": 25,
+      "community_name": "BuildingDecor.createPart",
       "norm_label": "createprompt()"
     },
     {
@@ -6632,8 +6599,8 @@
       "source_location": "L103",
       "_origin": "ast",
       "id": "src_server_services_vaultprops_createglow",
-      "community": 30,
-      "community_name": "VaultService.luau",
+      "community": 25,
+      "community_name": "BuildingDecor.createPart",
       "norm_label": "createglow()"
     },
     {
@@ -6643,8 +6610,8 @@
       "source_location": "L133",
       "_origin": "ast",
       "id": "src_server_services_vaultprops_createalarm",
-      "community": 30,
-      "community_name": "VaultService.luau",
+      "community": 25,
+      "community_name": "BuildingDecor.createPart",
       "norm_label": "createalarm()"
     },
     {
@@ -6654,8 +6621,8 @@
       "source_location": "L150",
       "_origin": "ast",
       "id": "src_server_services_vaultprops_vaultprops_create",
-      "community": 30,
-      "community_name": "VaultService.luau",
+      "community": 25,
+      "community_name": "BuildingDecor.createPart",
       "norm_label": "vaultprops.create()"
     },
     {
@@ -6687,8 +6654,8 @@
       "source_location": "L196",
       "_origin": "ast",
       "id": "src_server_services_vaultprops_vaultprops_startalarm",
-      "community": 30,
-      "community_name": "VaultService.luau",
+      "community": 25,
+      "community_name": "BuildingDecor.createPart",
       "norm_label": "vaultprops.startalarm()"
     },
     {
@@ -6709,8 +6676,8 @@
       "source_location": "L229",
       "_origin": "ast",
       "id": "src_server_services_vaultprops_vaultprops_createprize",
-      "community": 30,
-      "community_name": "VaultService.luau",
+      "community": 25,
+      "community_name": "BuildingDecor.createPart",
       "norm_label": "vaultprops.createprize()"
     },
     {
@@ -7682,10 +7649,21 @@
       "norm_label": "barao e tocas seguras (fase 2, entrega 2.2)"
     },
     {
-      "label": "XP, N\u00edvel e Prest\u00edgio (Fase 3, entrega 3.2)",
+      "label": "Resultado avan\u00e7ado (Fase 3, entrega 3.3)",
       "file_type": "document",
       "source_file": "README.md",
       "source_location": "L323",
+      "_origin": "ast",
+      "id": "readme_resultado_avan\u00e7ado_fase_3_entrega_3_3",
+      "community": 17,
+      "community_name": "Estado atual",
+      "norm_label": "resultado avancado (fase 3, entrega 3.3)"
+    },
+    {
+      "label": "XP, N\u00edvel e Prest\u00edgio (Fase 3, entrega 3.2)",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": "L342",
       "_origin": "ast",
       "id": "readme_xp_n\u00edvel_e_prest\u00edgio_fase_3_entrega_3_2",
       "community": 17,
@@ -7696,7 +7674,7 @@
       "label": "Perfil persistente (Fase 3, entrega 3.1)",
       "file_type": "document",
       "source_file": "README.md",
-      "source_location": "L360",
+      "source_location": "L379",
       "_origin": "ast",
       "id": "readme_perfil_persistente_fase_3_entrega_3_1",
       "community": 17,
@@ -7707,7 +7685,7 @@
       "label": "Alertas, Momentos Puff e telemetria dos segredos (Fase 2, entrega 2.4)",
       "file_type": "document",
       "source_file": "README.md",
-      "source_location": "L386",
+      "source_location": "L405",
       "_origin": "ast",
       "id": "readme_alertas_momentos_puff_e_telemetria_dos_segredos_fase_2_entrega_2_4",
       "community": 17,
@@ -7718,7 +7696,7 @@
       "label": "O Cofre e o Puffador do Cofre (Fase 2, entrega 2.3)",
       "file_type": "document",
       "source_file": "README.md",
-      "source_location": "L413",
+      "source_location": "L432",
       "_origin": "ast",
       "id": "readme_o_cofre_e_o_puffador_do_cofre_fase_2_entrega_2_3",
       "community": 17,
@@ -7729,7 +7707,7 @@
       "label": "Identidade visual",
       "file_type": "document",
       "source_file": "README.md",
-      "source_location": "L430",
+      "source_location": "L449",
       "_origin": "ast",
       "id": "readme_identidade_visual",
       "community": 17,
@@ -7740,7 +7718,7 @@
       "label": "Artes da loja",
       "file_type": "document",
       "source_file": "README.md",
-      "source_location": "L436",
+      "source_location": "L455",
       "_origin": "ast",
       "id": "readme_artes_da_loja",
       "community": 17,
@@ -10656,7 +10634,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/client/controllers/ProfileController.luau",
-      "source_location": "L60",
+      "source_location": "L61",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_client_controllers_profilecontroller",
@@ -10678,7 +10656,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/client/controllers/ProfileController.luau",
-      "source_location": "L82",
+      "source_location": "L83",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_client_controllers_profilecontroller",
@@ -10689,7 +10667,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/client/controllers/ProfileController.luau",
-      "source_location": "L89",
+      "source_location": "L90",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_client_controllers_profilecontroller",
@@ -10724,7 +10702,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/client/controllers/ProfileController.luau",
-      "source_location": "L106",
+      "source_location": "L107",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_client_controllers_profilecontroller_profilecontroller_start",
@@ -10737,7 +10715,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.8,
       "source_file": "src/client/controllers/ProgressionController.luau",
-      "source_location": "L142",
+      "source_location": "L104",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_client_controllers_progressioncontroller_progressioncontroller_start",
@@ -10747,7 +10725,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/client/controllers/ProgressionController.luau",
-      "source_location": "L72",
+      "source_location": "L45",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_client_controllers_progressioncontroller",
@@ -10758,7 +10736,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/client/controllers/ProgressionController.luau",
-      "source_location": "L42",
+      "source_location": "L27",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_client_controllers_progressioncontroller",
@@ -10769,7 +10747,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/client/controllers/ProgressionController.luau",
-      "source_location": "L102",
+      "source_location": "L64",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_client_controllers_progressioncontroller",
@@ -10777,38 +10755,15 @@
       "confidence_score": 1.0
     },
     {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "src/client/controllers/ProgressionController.luau",
-      "source_location": "L59",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "src_client_controllers_progressioncontroller",
-      "target": "src_client_controllers_progressioncontroller_summarize",
-      "confidence_score": 1.0
-    },
-    {
       "relation": "calls",
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/client/controllers/ProgressionController.luau",
-      "source_location": "L86",
+      "source_location": "L49",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_client_controllers_progressioncontroller_announce",
       "target": "src_client_controllers_progressioncontroller_playlevelup",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "calls",
-      "context": "call",
-      "confidence": "EXTRACTED",
-      "source_file": "src/client/controllers/ProgressionController.luau",
-      "source_location": "L80",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "src_client_controllers_progressioncontroller_announce",
-      "target": "src_client_controllers_progressioncontroller_summarize",
       "confidence_score": 1.0
     },
     {
@@ -10817,7 +10772,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.8,
       "source_file": "src/client/controllers/ProgressionController.luau",
-      "source_location": "L73",
+      "source_location": "L50",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_client_controllers_progressioncontroller_announce",
@@ -10829,7 +10784,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.8,
       "source_file": "src/client/controllers/ProgressionController.luau",
-      "source_location": "L116",
+      "source_location": "L78",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_client_controllers_progressioncontroller_progressioncontroller_start",
@@ -10841,7 +10796,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.8,
       "source_file": "src/client/controllers/ProgressionController.luau",
-      "source_location": "L117",
+      "source_location": "L79",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_client_controllers_progressioncontroller_progressioncontroller_start",
@@ -11488,7 +11443,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/client/controllers/ResultsController.luau",
-      "source_location": "L40",
+      "source_location": "L47",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_client_controllers_resultscontroller",
@@ -13834,18 +13789,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/client/ui/ResultsView.luau",
-      "source_location": "L55",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "src_client_ui_resultsview",
-      "target": "src_client_ui_resultsview_describe",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "src/client/ui/ResultsView.luau",
-      "source_location": "L42",
+      "source_location": "L94",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_client_ui_resultsview",
@@ -13856,7 +13800,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/client/ui/ResultsView.luau",
-      "source_location": "L34",
+      "source_location": "L86",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_client_ui_resultsview",
@@ -13867,7 +13811,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/client/ui/ResultsView.luau",
-      "source_location": "L51",
+      "source_location": "L103",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_client_ui_resultsview",
@@ -13880,23 +13824,11 @@
       "confidence": "INFERRED",
       "confidence_score": 0.8,
       "source_file": "src/client/ui/ResultsView.luau",
-      "source_location": "L35",
+      "source_location": "L87",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_client_ui_resultsview_label",
       "target": "src_client_ui_uitheme_uitheme_createlabel"
-    },
-    {
-      "relation": "calls",
-      "context": "call",
-      "confidence": "EXTRACTED",
-      "source_file": "src/client/ui/ResultsView.luau",
-      "source_location": "L186",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "src_client_ui_resultsview_describe",
-      "target": "src_client_ui_resultsview_plural",
-      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -20651,7 +20583,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/server/services/RoundResultBuilder.luau",
-      "source_location": "L82",
+      "source_location": "L92",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_server_services_roundresultbuilder",
@@ -20662,7 +20594,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/server/services/RoundResultBuilder.luau",
-      "source_location": "L76",
+      "source_location": "L86",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_server_services_roundresultbuilder",
@@ -20673,7 +20605,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/server/services/RoundResultBuilder.luau",
-      "source_location": "L45",
+      "source_location": "L55",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_server_services_roundresultbuilder",
@@ -20684,7 +20616,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/server/services/RoundResultBuilder.luau",
-      "source_location": "L96",
+      "source_location": "L106",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_server_services_roundresultbuilder",
@@ -20692,34 +20624,11 @@
       "confidence_score": 1.0
     },
     {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "src/server/services/RoundResultBuilder.luau",
-      "source_location": "L29",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "src_server_services_roundresultbuilder",
-      "target": "src_server_services_roundresultbuilder_roundresultbuilder_getlasteliminated",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "calls",
-      "context": "call",
-      "confidence": "INFERRED",
-      "confidence_score": 0.8,
-      "source_file": "src/server/services/RoundService.luau",
-      "source_location": "L555",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "src_server_services_roundservice_runactive",
-      "target": "src_server_services_roundresultbuilder_roundresultbuilder_getlasteliminated"
-    },
-    {
       "relation": "calls",
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/server/services/RoundResultBuilder.luau",
-      "source_location": "L98",
+      "source_location": "L109",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_server_services_roundresultbuilder_roundresultbuilder_build",
@@ -20731,7 +20640,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/server/services/RoundResultBuilder.luau",
-      "source_location": "L117",
+      "source_location": "L128",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_server_services_roundresultbuilder_roundresultbuilder_build",
@@ -20743,7 +20652,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/server/services/RoundResultBuilder.luau",
-      "source_location": "L137",
+      "source_location": "L159",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_server_services_roundresultbuilder_roundresultbuilder_build",
@@ -20756,7 +20665,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.8,
       "source_file": "src/server/services/RoundService.luau",
-      "source_location": "L645",
+      "source_location": "L651",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_server_services_roundservice_publishresult",
@@ -21507,11 +21416,23 @@
       "confidence": "INFERRED",
       "confidence_score": 0.8,
       "source_file": "src/server/services/RoundService.luau",
-      "source_location": "L650",
+      "source_location": "L656",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_server_services_roundservice_publishresult",
       "target": "src_server_services_roundstatsservice_roundstatsservice_endround"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "src/server/services/RoundService.luau",
+      "source_location": "L634",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_server_services_roundservice_publishresult",
+      "target": "src_server_services_roundstatsservice_roundstatsservice_get"
     },
     {
       "relation": "contains",
@@ -24723,7 +24644,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "README.md",
-      "source_location": "L386",
+      "source_location": "L405",
       "weight": 1.0,
       "_origin": "ast",
       "source": "readme_estado_atual",
@@ -24734,7 +24655,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "README.md",
-      "source_location": "L436",
+      "source_location": "L455",
       "weight": 1.0,
       "_origin": "ast",
       "source": "readme_estado_atual",
@@ -24778,7 +24699,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "README.md",
-      "source_location": "L430",
+      "source_location": "L449",
       "weight": 1.0,
       "_origin": "ast",
       "source": "readme_estado_atual",
@@ -24800,7 +24721,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "README.md",
-      "source_location": "L413",
+      "source_location": "L432",
       "weight": 1.0,
       "_origin": "ast",
       "source": "readme_estado_atual",
@@ -24822,7 +24743,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "README.md",
-      "source_location": "L360",
+      "source_location": "L379",
       "weight": 1.0,
       "_origin": "ast",
       "source": "readme_estado_atual",
@@ -24866,6 +24787,17 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "README.md",
+      "source_location": "L323",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "readme_estado_atual",
+      "target": "readme_resultado_avan\u00e7ado_fase_3_entrega_3_3",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "README.md",
       "source_location": "L243",
       "weight": 1.0,
       "_origin": "ast",
@@ -24877,7 +24809,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "README.md",
-      "source_location": "L323",
+      "source_location": "L342",
       "weight": 1.0,
       "_origin": "ast",
       "source": "readme_estado_atual",
@@ -26635,5 +26567,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "ce393e042bceea5a0874027ff6919de9321bb544"
+  "built_at_commit": "bb01c322b9e6f3151a78814e87433383edc6eb3b"
 }
