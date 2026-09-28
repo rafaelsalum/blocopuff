@@ -1,13 +1,15 @@
 --!strict
 
 -- Feedbacks customizados de jogo, no estilo dos jogos de tiro mais polidos:
--- "+1" que sobe perto da mira a cada bloco derrubado, contador de combo e
--- chamadas de sequência ("TRIPLO!", "EM CHAMAS!"), além de notificações
--- curtas (toasts) empilhadas. Puramente visual: só reage a confirmações que
--- o servidor já enviou.
+-- um "+1" pequeno que escorrega para a direita da mira a cada bloco
+-- derrubado (sem cobrir o alvo), e, no lado direito da tela, a faixa de
+-- sequência (combo "x5" e chamadas como "TRIPLO!", "EM CHAMAS!") acima das
+-- notificações curtas (toasts). O centro da tela fica livre para jogar.
+-- Puramente visual: só reage a confirmações que o servidor já enviou.
 
 local TweenService = game:GetService("TweenService")
 
+local ResponsiveScale = require(script.Parent.ResponsiveScale)
 local UiKit = require(script.Parent.UiKit)
 local UiTheme = require(script.Parent.UiTheme)
 
@@ -28,8 +30,13 @@ type Callout = {
 
 local GUI_NAME = "BlocoPuffFeedback"
 local COMBO_WINDOW = 1.6
-local POPUP_RISE = 46
-local POPUP_DURATION = 0.7
+-- "+1": nasce à direita da mira e escorrega para fora dela.
+local POPUP_START = Vector2.new(30, 4)
+local POPUP_DRIFT = Vector2.new(26, -10)
+local POPUP_DURATION = 0.55
+-- Faixa de sequência no lado direito, entre o HUD superior e os toasts.
+local STREAK_Y = 96
+local CALLOUT_HOLD = 1.2
 local TOAST_DURATION = 3
 local MAX_TOASTS = 4
 local CALLOUTS: { Callout } = {
@@ -79,28 +86,42 @@ function FeedbackView.new(playerGui: PlayerGui): FeedbackViewHandle
 	center.BackgroundTransparency = 1
 	center.Parent = centerGui
 
-	local comboLabel = UiTheme.createLabel(center, "Combo", "", UiTheme.Fonts.Display, 30, UiTheme.Colors.White)
-	comboLabel.AnchorPoint = Vector2.new(0, 0.5)
-	comboLabel.Position = UDim2.fromOffset(40, -2)
-	comboLabel.Size = UDim2.fromOffset(120, 36)
-	comboLabel.TextXAlignment = Enum.TextXAlignment.Left
+	-- Toasts e a faixa de sequência ficam na área segura, abaixo do HUD
+	-- superior direito, longe da mira.
+	local toastGui = UiTheme.createScreenGui(`{GUI_NAME}Toasts`, playerGui, 40)
+
+	local streak = Instance.new("Frame")
+	streak.Name = "Streak"
+	streak.AnchorPoint = Vector2.new(1, 0)
+	streak.Position = UDim2.new(1, -18, 0, STREAK_Y)
+	streak.Size = UDim2.fromOffset(300, 44)
+	streak.BackgroundTransparency = 1
+	streak.Parent = toastGui
+	ResponsiveScale.attach(streak, Vector2.new(1280, 720), 0.7, 1.05)
+
+	local comboLabel = UiTheme.createLabel(streak, "Combo", "", UiTheme.Fonts.Display, 30, UiTheme.Colors.White)
+	comboLabel.AnchorPoint = Vector2.new(1, 0.5)
+	comboLabel.Position = UDim2.new(1, 0, 0.5, 0)
+	comboLabel.Size = UDim2.fromOffset(80, 40)
+	comboLabel.TextXAlignment = Enum.TextXAlignment.Right
 	comboLabel.TextTransparency = 1
 	local comboGradient = UiTheme.addGradient(comboLabel, UiTheme.Colors.White, UiTheme.Colors.Gold)
 	local comboOutline = UiTheme.addTextOutline(comboLabel, 3)
 	comboOutline.Transparency = 1
 
-	local calloutLabel = UiTheme.createLabel(center, "Callout", "", UiTheme.Fonts.Display, 44, UiTheme.Colors.White)
-	calloutLabel.AnchorPoint = Vector2.new(0.5, 0.5)
-	calloutLabel.Position = UDim2.fromOffset(0, -120)
-	calloutLabel.Size = UDim2.fromOffset(420, 56)
-	calloutLabel.Rotation = -4
+	local calloutLabel = UiTheme.createLabel(streak, "Callout", "", UiTheme.Fonts.Display, 30, UiTheme.Colors.White)
+	calloutLabel.AnchorPoint = Vector2.new(1, 0.5)
+	calloutLabel.Position = UDim2.new(1, -86, 0.5, 0)
+	calloutLabel.Size = UDim2.fromOffset(214, 40)
+	calloutLabel.TextXAlignment = Enum.TextXAlignment.Right
+	calloutLabel.TextScaled = true
+	calloutLabel.TextWrapped = false
+	UiTheme.addTextConstraint(calloutLabel, 18, 30)
 	calloutLabel.TextTransparency = 1
 	local calloutGradient = UiTheme.addGradient(calloutLabel, UiTheme.Colors.White, UiTheme.Colors.Gold)
-	local calloutOutline = UiTheme.addTextOutline(calloutLabel, 4)
+	local calloutOutline = UiTheme.addTextOutline(calloutLabel, 3.5)
 	calloutOutline.Transparency = 1
 
-	-- Toasts ficam na área segura, abaixo do HUD superior direito.
-	local toastGui = UiTheme.createScreenGui(`{GUI_NAME}Toasts`, playerGui, 40)
 	local toastStack = Instance.new("Frame")
 	toastStack.Name = "ToastStack"
 	toastStack.AnchorPoint = Vector2.new(1, 0)
@@ -133,18 +154,19 @@ function FeedbackView.new(playerGui: PlayerGui): FeedbackViewHandle
 	end
 
 	local function spawnPopup()
-		local popup = UiTheme.createLabel(center, "HitPopup", "+1", UiTheme.Fonts.Display, 26, UiTheme.Colors.White)
-		popup.AnchorPoint = Vector2.new(0.5, 0.5)
-		local jitter = math.random(-14, 14)
-		popup.Position = UDim2.fromOffset(jitter, -26)
-		popup.Size = UDim2.fromOffset(60, 30)
+		local popup = UiTheme.createLabel(center, "HitPopup", "+1", UiTheme.Fonts.Display, 20, UiTheme.Colors.White)
+		popup.AnchorPoint = Vector2.new(0, 0.5)
+		local jitter = math.random(-6, 6)
+		popup.Position = UDim2.fromOffset(POPUP_START.X, POPUP_START.Y + jitter)
+		popup.Size = UDim2.fromOffset(44, 24)
+		popup.TextXAlignment = Enum.TextXAlignment.Left
 		UiTheme.addGradient(popup, UiTheme.Colors.White, UiTheme.Colors.Gold)
 		local outline = UiTheme.addTextOutline(popup, 2.5)
 		UiKit.pop(popup, 0.45)
 
 		local info = TweenInfo.new(POPUP_DURATION, Enum.EasingStyle.Quint, Enum.EasingDirection.Out)
 		TweenService:Create(popup, info, {
-			Position = UDim2.fromOffset(jitter, -26 - POPUP_RISE),
+			Position = UDim2.fromOffset(POPUP_START.X + POPUP_DRIFT.X, POPUP_START.Y + jitter + POPUP_DRIFT.Y),
 			TextTransparency = 1,
 		}):Play()
 		TweenService:Create(outline, info, { Transparency = 1 }):Play()
@@ -158,9 +180,9 @@ function FeedbackView.new(playerGui: PlayerGui): FeedbackViewHandle
 		calloutGradient.Color = ColorSequence.new(UiTheme.Colors.White, callout.color)
 		calloutLabel.TextTransparency = 0
 		calloutOutline.Transparency = 0
-		UiKit.pop(calloutLabel, 0.6)
+		UiKit.pop(calloutLabel, 0.4)
 		UiKit.playClick(1.6)
-		task.delay(0.9, function()
+		task.delay(CALLOUT_HOLD, function()
 			if calloutLabel.Text ~= callout.text then
 				return
 			end

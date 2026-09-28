@@ -1,6 +1,7 @@
 --!strict
 
 local TweenService = game:GetService("TweenService")
+local Workspace = game:GetService("Workspace")
 
 local ResponsiveScale = require(script.Parent.ResponsiveScale)
 local UiTheme = require(script.Parent.UiTheme)
@@ -14,8 +15,21 @@ export type AnnouncementViewHandle = {
 }
 
 local GUI_NAME = "BlocoPuffAnnouncements"
+-- Topo do cartão: logo abaixo da faixa de avisos (BannerView mostra em
+-- y 96, ou 162 em telas estreitas), deixando o centro (mira) livre.
+local TOP_Y = 196
+local TOP_Y_COMPACT = 256
+local COMPACT_WIDTH = 700
 
 local AnnouncementView = {}
+
+local function getTopY(): number
+	local camera = Workspace.CurrentCamera
+	if camera ~= nil and camera.ViewportSize.X < COMPACT_WIDTH then
+		return TOP_Y_COMPACT
+	end
+	return TOP_Y
+end
 
 local function getToneColor(tone: AnnouncementTone): Color3
 	if tone == "Warning" then
@@ -34,8 +48,9 @@ function AnnouncementView.new(playerGui: PlayerGui): AnnouncementViewHandle
 
 	local responsiveRoot = Instance.new("Frame")
 	responsiveRoot.Name = "ResponsiveRoot"
-	responsiveRoot.AnchorPoint = Vector2.new(0.5, 0.5)
-	responsiveRoot.Position = UDim2.fromScale(0.5, 0.43)
+	-- No topo, abaixo da faixa de avisos (BannerView), longe da mira.
+	responsiveRoot.AnchorPoint = Vector2.new(0.5, 0)
+	responsiveRoot.Position = UDim2.new(0.5, 0, 0, getTopY())
 	responsiveRoot.Size = UDim2.fromOffset(460, 92)
 	responsiveRoot.BackgroundTransparency = 1
 	responsiveRoot.Visible = false
@@ -153,6 +168,7 @@ function AnnouncementView.new(playerGui: PlayerGui): AnnouncementViewHandle
 		if strokeGradient ~= nil then
 			strokeGradient.Color = ColorSequence.new(toneColor, toneColor:Lerp(UiTheme.Colors.Gold, 0.55))
 		end
+		responsiveRoot.Position = UDim2.new(0.5, 0, 0, getTopY())
 		responsiveRoot.Visible = true
 		animationScale.Scale = 0.78
 		setTransparency(0.08)
