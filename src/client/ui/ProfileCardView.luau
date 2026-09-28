@@ -2,8 +2,9 @@
 
 -- Cartão de perfil no canto superior esquerdo do lobby: nível (e prestígio),
 -- barra de XP, um botão que abre as estatísticas da carreira e, ao lado, os
--- botões 🏆 do ranking global e ✨ do Puffdex. Some durante a partida (o HUD
--- de combate usa esse canto). Só visual.
+-- botões 🏆 do ranking global, ✨ do Puffdex e 🎰 da Puff Machine (com o
+-- saldo de tickets). Some durante a partida (o HUD de combate usa esse
+-- canto). Só visual.
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TweenService = game:GetService("TweenService")
@@ -51,14 +52,14 @@ local function formatNumber(value: number): string
 end
 
 -- `onRanking`: abre o painel RANKING (botão 🏆 ao lado do cartão).
--- `onPuffdex`: abre o PUFFDEX (botão ✨).
-function ProfileCardView.new(playerGui: PlayerGui, onRanking: () -> (), onPuffdex: () -> ()): ProfileCardViewHandle
+-- `onPuffdex`: abre o PUFFDEX (botão ✨). `onMachine`: abre a PUFF MACHINE (🎰).
+function ProfileCardView.new(playerGui: PlayerGui, onRanking: () -> (), onPuffdex: () -> (), onMachine: () -> ()): ProfileCardViewHandle
 	local screenGui = UiTheme.createScreenGui(GUI_NAME, playerGui, 12)
 
 	local root = Instance.new("Frame")
 	root.Name = "Root"
 	root.Position = UDim2.fromOffset(18, 16)
-	root.Size = UDim2.fromOffset(CARD_SIZE.X + (SIDE_BUTTON_WIDTH + SIDE_BUTTON_GAP) * 2, CARD_SIZE.Y + STATS_SIZE.Y + 8)
+	root.Size = UDim2.fromOffset(CARD_SIZE.X + (SIDE_BUTTON_WIDTH + SIDE_BUTTON_GAP) * 3, CARD_SIZE.Y + STATS_SIZE.Y + 8)
 	root.BackgroundTransparency = 1
 	root.Visible = false
 	root.Parent = screenGui
@@ -158,6 +159,31 @@ function ProfileCardView.new(playerGui: PlayerGui, onRanking: () -> (), onPuffde
 		onPuffdex()
 	end)
 
+	local machineButton = UiKit.createButton(root, {
+		name = "MachineButton",
+		text = "🎰",
+		variant = "Gold",
+		size = UDim2.fromOffset(SIDE_BUTTON_WIDTH, CARD_SIZE.Y),
+		position = UDim2.fromOffset(CARD_SIZE.X + SIDE_BUTTON_GAP * 3 + SIDE_BUTTON_WIDTH * 2, 0),
+		textSize = 24,
+		zIndex = 4,
+	})
+	machineButton.button.Activated:Connect(function()
+		UiKit.playClick()
+		onMachine()
+	end)
+	-- Saldo de tickets num selo embaixo do botão.
+	local ticketBadge = UiTheme.createLabel(machineButton.root, "Tickets", "🎟 0", UiTheme.Fonts.Display, 11, UiTheme.Colors.White)
+	ticketBadge.AnchorPoint = Vector2.new(0.5, 0.5)
+	ticketBadge.Position = UDim2.new(0.5, 0, 1, -2)
+	ticketBadge.Size = UDim2.fromOffset(SIDE_BUTTON_WIDTH + 6, 18)
+	ticketBadge.BackgroundTransparency = 0
+	ticketBadge.BackgroundColor3 = UiTheme.Colors.Outline
+	ticketBadge.TextScaled = true
+	ticketBadge.ZIndex = 8
+	UiTheme.addTextConstraint(ticketBadge, 8, 11)
+	UiTheme.addCorner(ticketBadge, 999)
+
 	-- Painel das estatísticas (abre abaixo do cartão).
 	local stats = Instance.new("Frame")
 	stats.Name = "Stats"
@@ -227,6 +253,7 @@ function ProfileCardView.new(playerGui: PlayerGui, onRanking: () -> (), onPuffde
 		for key, value in pairs(valueLabels) do
 			value.Text = formatNumber(statsTable[key] or 0)
 		end
+		ticketBadge.Text = string.format("🎟 %s", formatNumber(snapshot.tickets))
 		notice.Visible = not snapshot.saved
 		notice.Text = "Progresso desta sessão não está sendo salvo"
 	end

@@ -279,6 +279,10 @@ function ResultsView.new(playerGui: PlayerGui, onClose: () -> ()): ResultsViewHa
 	UiTheme.addCorner(xpFrame, 14)
 	local xpTotal = label(xpFrame, "Total", "", UiTheme.Fonts.Display, 24, UiTheme.Colors.Gold, UDim2.fromOffset(12, 6), UDim2.new(0.4, -12, 0, 28))
 	xpTotal.TextXAlignment = Enum.TextXAlignment.Left
+	-- Cabe "+XP" e os tickets da rodada na mesma linha.
+	xpTotal.TextScaled = true
+	xpTotal.TextWrapped = false
+	UiTheme.addTextConstraint(xpTotal, 14, 24)
 	UiTheme.addTextOutline(xpTotal, 2)
 	local xpLevel = label(xpFrame, "Level", "", UiTheme.Fonts.Display, 16, UiTheme.Colors.White, UDim2.new(0.4, 0, 0, 10), UDim2.new(0.6, -12, 0, 22))
 	xpLevel.TextXAlignment = Enum.TextXAlignment.Right
@@ -403,7 +407,9 @@ function ResultsView.new(playerGui: PlayerGui, onClose: () -> ()): ResultsViewHa
 	handle.setXp = function(award: XpAward, totalXp: number)
 		local progress = LevelCurve.progress(totalXp)
 		xpFrame.Visible = true
-		xpTotal.Text = string.format("+%d XP", award.total)
+		xpTotal.Text = if award.tickets > 0
+			then string.format("+%d XP  +%d 🎟", award.total, award.tickets)
+			else string.format("+%d XP", award.total)
 		xpLevel.Text = if award.levelAfter > award.levelBefore
 			then string.format("NÍVEL %d → %d!", award.levelBefore, award.levelAfter)
 			elseif progress.isMax then "NÍVEL MÁXIMO"

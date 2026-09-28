@@ -119,6 +119,26 @@ function PuffInventory.grantUnlocks(inventory: Inventory, stats: { [string]: num
 	return result or inventory, granted
 end
 
+-- Acrescenta um Puff (Puff Machine). Se já tiver, soma em `count` (o uid
+-- do item continua o mesmo). Devolve o novo inventário e se era repetido.
+function PuffInventory.addPuff(inventory: Inventory, id: string, origin: PuffOrigin, now: number): (Inventory, boolean)
+	local updated = table.clone(inventory)
+	local existing = inventory[id]
+	if existing ~= nil then
+		local record = table.clone(existing)
+		record.count = math.min(MAX_COUNT, existing.count + 1)
+		updated[id] = record
+		return updated, true
+	end
+	updated[id] = {
+		obtainedAt = now,
+		count = 1,
+		origin = origin,
+		uid = HttpService:GenerateGUID(false),
+	}
+	return updated, false
+end
+
 -- Cópia para o cliente: só Puffs do catálogo, sem o uid.
 function PuffInventory.toOwnedList(inventory: Inventory): { OwnedPuff }
 	local list: { OwnedPuff } = {}

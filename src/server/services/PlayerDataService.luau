@@ -12,6 +12,9 @@
 --   * Dados de uma versão mais nova do formato (atualização em andamento)
 --     são carregados só para leitura, para não apagar campos novos.
 --   * Quem sai no meio da rodada não recebe a rodada.
+--   * Tickets (4.2): ganhos só no fim da rodada, calculados aqui; gastos só
+--     na Puff Machine, numa única atualização do perfil (sem pausa entre
+--     conferir o saldo e gastar), salva na hora.
 --   * Puffdex: os Puffs merecidos (nível e façanhas) são concedidos pelo
 --     servidor ao carregar e depois de cada rodada. O inventário é indexado
 --     pelo id do Puff: nada duplica ao reconectar.
@@ -30,6 +33,8 @@ local ProfileConfig = require(script.Parent.Parent.config.ProfileConfig)
 local ProfileSchema = require(script.Parent.Parent.data.ProfileSchema)
 local DataStoreErrors = require(script.Parent.Parent.data.DataStoreErrors)
 local PuffInventory = require(script.Parent.Parent.data.PuffInventory)
+local RewardRules = require(script.Parent.Parent.data.RewardRules)
+local RewardConfig = require(ReplicatedStorage.Shared.config.RewardConfig)
 local ProgressionConfig = require(ReplicatedStorage.Shared.config.ProgressionConfig)
 local LevelCurve = require(ReplicatedStorage.Shared.modules.LevelCurve)
 local TelemetryService = require(script.Parent.TelemetryService)
@@ -74,6 +79,19 @@ type PendingRound = {
 
 export type ProfileListener = (player: Player, snapshot: ProfileSnapshot) -> ()
 
+-- Resultado de um giro da Puff Machine.
+export type MachineResult = {
+	puffId: string,
+	duplicate: boolean,
+	refund: number,
+	tickets: number,
+	pity: number,
+}
+
+-- Motivos de falha do giro (o PuffMachineService ainda usa "Cooldown" e
+-- "Competing", decididos antes de chegar aqui).
+export type MachineFailure = "NotLoaded" | "NotSaved" | "NoTickets" | "Empty"
+
 local SESSION_ID = if game.JobId ~= "" then game.JobId else `studio-{HttpService:GenerateGUID(false)}`
 local BIND_TO_CLOSE_TIMEOUT = 25
 local REQUEST_COOLDOWN = 3
@@ -115,6 +133,8 @@ local function snapshotOf(entry: Entry, award: XpAward?, newPuffs: { string }?):
 		saved = entry.canSave,
 		puffs = PuffInventory.toOwnedList(profile.puffs),
 		equippedPuff = profile.equippedPuff,
+		tickets = profile.tickets,
+		machinePity = profile.machinePity,
 		award = award,
 		newPuffs = if newPuffs ~= nil and #newPuffs > 0 then newPuffs else nil,
 	}
@@ -398,7 +418,10 @@ function PlayerDataService.applyRound(player: Player, roundKey: string, delta: R
 	local newXp = math.min(LevelCurve.maxXp(), profile.xp + gained)
 	local newLevel = LevelCurve.levelForXp(newXp)
 	local timestamp = now()
+	local tickets, ticketLines = RewardRules.ticketsForRound(clean, gained, newLevel - profile.level)
 	local updated = table.clone(profile)
+	updated.tickets = math.min(RewardConfig.MaxTickets, profile.tickets + tickets)
+	updated.ticketsEarned = profile.ticketsEarned + tickets
 	updated.stats = ProfileSchema.addStats(profile.stats, clean)
 	updated.appliedRounds = ProfileSchema.withAppliedRound(profile.appliedRounds, roundKey, ProfileConfig.AppliedRoundsKept)
 	updated.xp = newXp
@@ -417,6 +440,9 @@ function PlayerDataService.applyRound(player: Player, roundKey: string, delta: R
 	if newLevel > profile.level then
 		TelemetryService.event(player, "LevelUp", timestamp - profile.levelReachedAt, `Level{newLevel}`, `From{profile.level}`)
 	end
+	for _, line in ipairs(ticketLines) do
+		TelemetryService.lobbyEvent(player, "TicketsEarned", line.tickets, line.source)
+	end
 
 	local newPuffs = grantPuffs(entry)
 	publish(entry, {
@@ -425,6 +451,7 @@ function PlayerDataService.applyRound(player: Player, roundKey: string, delta: R
 		lines = roundXp.lines,
 		levelBefore = profile.level,
 		levelAfter = newLevel,
+		tickets = tickets,
 	}, newPuffs)
 	-- Grava logo: o fim da rodada é o momento mais importante de não perder.
 	task.spawn(save, entry, false)
@@ -499,6 +526,59 @@ function PlayerDataService.equipPuff(player: Player, puffId: string): boolean
 	TelemetryService.lobbyEvent(player, "PuffEquipped", 1, puffId, if definition ~= nil then definition.rarity else nil)
 	publish(entry)
 	return true
+end
+
+-- Um giro da Puff Machine: confere o saldo, gasta, sorteia e guarda o Puff
+-- numa única atualização (nada aqui pausa, então dois pedidos seguidos
+-- nunca gastam o mesmo saldo). Só com perfil salvo: um Puff que sumisse na
+-- próxima sessão pareceria roubo. Salva logo em seguida.
+function PlayerDataService.machinePull(player: Player, rng: Random): (MachineResult?, MachineFailure?)
+	local entry = entries[player]
+	if entry == nil then
+		return nil, "NotLoaded"
+	end
+	if not entry.canSave then
+		return nil, "NotSaved"
+	end
+	local profile = entry.profile
+	if profile.tickets < RewardConfig.MachineCost then
+		return nil, "NoTickets"
+	end
+	local picked, nextPity = RewardRules.rollMachine(rng, profile.machinePity)
+	if picked == nil then
+		return nil, "Empty"
+	end
+	local timestamp = now()
+	local puffs, duplicate = PuffInventory.addPuff(profile.puffs, picked.id, "Machine", timestamp)
+	local refund = if duplicate then RewardConfig.DuplicateRefund else 0
+	local updated = table.clone(profile)
+	updated.puffs = puffs
+	updated.tickets = math.min(RewardConfig.MaxTickets, profile.tickets - RewardConfig.MachineCost + refund)
+	updated.ticketsSpent = profile.ticketsSpent + RewardConfig.MachineCost - refund
+	updated.machinePulls = profile.machinePulls + 1
+	updated.machinePity = nextPity
+	entry.profile = updated
+	entry.dirty = true
+
+	TelemetryService.lobbyEvent(player, "TicketsSpent", RewardConfig.MachineCost, "PuffMachine")
+	TelemetryService.lobbyEvent(player, "PuffMachinePull", updated.machinePulls, picked.id, `{picked.rarity}:{if duplicate then "Duplicate" else "New"}`)
+	if duplicate then
+		TelemetryService.lobbyEvent(player, "TicketsEarned", refund, "DuplicateRefund")
+	else
+		TelemetryService.lobbyEvent(player, "PuffUnlocked", PuffInventory.countOwned(puffs), picked.id, `{picked.rarity}:Machine`)
+		TelemetryService.lobbyEvent(player, "PuffCollection", PuffInventory.countOwned(puffs), `Of{#PuffCatalog.all()}`)
+	end
+
+	-- Sem `newPuffs`: a própria máquina faz a revelação.
+	publish(entry)
+	task.spawn(save, entry, false)
+	return {
+		puffId = picked.id,
+		duplicate = duplicate,
+		refund = refund,
+		tickets = updated.tickets,
+		pity = nextPity,
+	}, nil
 end
 
 -- Chave única da rodada para `applyRound`.

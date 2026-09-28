@@ -1,8 +1,10 @@
 --!strict
 
--- Primeira coleção do Puffdex (Fase 4.1). Conjunto enxuto: 14 Puffs em
--- quatro raridades, todos conquistados jogando (nível ou façanhas), com um
--- Lendário do Barão. Nada aqui dá vantagem: só muda as cores do disparo.
+-- Primeira coleção do Puffdex. Conjunto enxuto em quatro raridades:
+--   * 14 conquistados jogando (nível ou façanhas), com um Lendário do
+--     Barão (Fase 4.1);
+--   * 8 exclusivos da Puff Machine (Fase 4.2).
+-- Nada aqui dá vantagem: só muda as cores do disparo.
 --
 -- Para acrescentar um Puff: nova entrada em ENTRIES com um `id` NOVO (ids
 -- ficam salvos nos perfis: nunca renomeie nem reaproveite um id).
@@ -182,6 +184,87 @@ local ENTRIES: { PuffDefinition } = {
 		style = style(rgb(255, 240, 150), rgb(255, 80, 60), rgb(255, 160, 80), rgb(255, 200, 90)),
 		tradable = false,
 	},
+	-- Exclusivos da Puff Machine (4.2): só saem girando a máquina.
+	{
+		id = "chiclete",
+		name = "Puff Chiclete",
+		rarity = "Common",
+		origin = "Machine",
+		unlock = { kind = "Machine" },
+		hint = "Sai na Puff Machine",
+		style = style(rgb(255, 160, 200), rgb(255, 110, 170), rgb(255, 150, 200), rgb(255, 200, 225)),
+		tradable = false,
+	},
+	{
+		id = "limao",
+		name = "Puff Limão",
+		rarity = "Common",
+		origin = "Machine",
+		unlock = { kind = "Machine" },
+		hint = "Sai na Puff Machine",
+		style = style(rgb(230, 255, 130), rgb(140, 220, 60), rgb(210, 255, 110), rgb(240, 255, 170)),
+		tradable = false,
+	},
+	{
+		id = "nuvem",
+		name = "Puff Nuvem",
+		rarity = "Common",
+		origin = "Machine",
+		unlock = { kind = "Machine" },
+		hint = "Sai na Puff Machine",
+		style = style(rgb(245, 248, 255), rgb(170, 190, 230), rgb(220, 230, 255), rgb(235, 240, 255)),
+		tradable = false,
+	},
+	{
+		id = "oceano",
+		name = "Puff Oceano",
+		rarity = "Rare",
+		origin = "Machine",
+		unlock = { kind = "Machine" },
+		hint = "Sai na Puff Machine",
+		style = style(rgb(120, 240, 255), rgb(30, 110, 220), rgb(90, 200, 255), rgb(160, 245, 255)),
+		tradable = false,
+	},
+	{
+		id = "arcoiris",
+		name = "Puff Arco-Íris",
+		rarity = "Rare",
+		origin = "Machine",
+		unlock = { kind = "Machine" },
+		hint = "Sai na Puff Machine",
+		style = style(rgb(255, 120, 120), rgb(120, 140, 255), rgb(255, 220, 120), rgb(140, 255, 170)),
+		tradable = false,
+	},
+	{
+		id = "neon",
+		name = "Puff Neon",
+		rarity = "Epic",
+		origin = "Machine",
+		unlock = { kind = "Machine" },
+		hint = "Sai na Puff Machine",
+		style = style(rgb(80, 255, 230), rgb(255, 60, 220), rgb(120, 255, 240), rgb(255, 120, 240)),
+		tradable = false,
+	},
+	{
+		id = "aurora",
+		name = "Puff Aurora",
+		rarity = "Epic",
+		origin = "Machine",
+		unlock = { kind = "Machine" },
+		hint = "Sai na Puff Machine",
+		style = style(rgb(140, 255, 190), rgb(150, 90, 255), rgb(150, 255, 210), rgb(200, 170, 255)),
+		tradable = false,
+	},
+	{
+		id = "cometa",
+		name = "Puff Cometa",
+		rarity = "Legendary",
+		origin = "Machine",
+		unlock = { kind = "Machine" },
+		hint = "Sai na Puff Machine",
+		style = style(rgb(255, 255, 235), rgb(255, 150, 60), rgb(255, 230, 160), rgb(255, 250, 210)),
+		tradable = false,
+	},
 }
 
 local byId: { [string]: PuffDefinition } = {}
@@ -206,6 +289,17 @@ PuffCatalog.MaxIdLength = 32
 -- Todos, na ordem do Puffdex.
 function PuffCatalog.all(): { PuffDefinition }
 	return ENTRIES
+end
+
+-- Os que saem na Puff Machine, de uma raridade.
+function PuffCatalog.machinePool(rarity: PuffRarity): { PuffDefinition }
+	local pool: { PuffDefinition } = {}
+	for _, entry in ipairs(ENTRIES) do
+		if entry.unlock.kind == "Machine" and entry.rarity == rarity then
+			table.insert(pool, entry)
+		end
+	end
+	return pool
 end
 
 function PuffCatalog.get(id: unknown): PuffDefinition?

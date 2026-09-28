@@ -58,6 +58,7 @@ local function parseAward(raw: unknown): XpAward?
 		lines = lines,
 		levelBefore = math.max(1, readNumber(data.levelBefore)),
 		levelAfter = math.max(1, readNumber(data.levelAfter)),
+		tickets = readNumber(data.tickets),
 	}
 end
 
@@ -126,6 +127,8 @@ local function parse(raw: unknown): ProfileSnapshot?
 		saved = data.saved == true,
 		puffs = parsePuffs(data.puffs),
 		equippedPuff = if PuffCatalog.get(data.equippedPuff) ~= nil then data.equippedPuff else PuffCatalog.DefaultId,
+		tickets = readNumber(data.tickets),
+		machinePity = readNumber(data.machinePity),
 		award = parseAward(data.award),
 		newPuffs = parseNewPuffs(data.newPuffs),
 	}

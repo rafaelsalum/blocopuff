@@ -24,6 +24,7 @@ local PlayerDataService = require(script.services.PlayerDataService)
 local LeaderboardService = require(script.services.LeaderboardService)
 local HallOfFameService = require(script.services.HallOfFameService)
 local PuffdexService = require(script.services.PuffdexService)
+local PuffMachineService = require(script.services.PuffMachineService)
 local WorldVisualService = require(script.services.WorldVisualService)
 local BuildingService = require(script.services.BuildingService)
 local AdminService = require(script.services.AdminService)
@@ -138,7 +139,8 @@ print("[BlocoPuff] Player profiles ready")
 
 -- Puffdex: equipar Puffs (os desbloqueios vêm do perfil).
 PuffdexService.start(PuffadorService.getRemotesFolder())
-print("[BlocoPuff] Puffdex ready")
+PuffMachineService.start(PuffadorService.getRemotesFolder())
+print("[BlocoPuff] Puffdex and Puff Machine ready")
 
 -- Ranking global (lê os perfis salvos) e os painéis do Hall da Fama no lobby.
 LeaderboardService.start(PuffadorService.getRemotesFolder())

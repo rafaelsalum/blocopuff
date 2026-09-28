@@ -69,6 +69,22 @@ function PuffdexController.open()
 	end
 end
 
+-- Marca Puffs como novos no painel (Puff Machine: a revelação já foi a
+-- comemoração, então sem aviso extra).
+function PuffdexController.markNew(ids: { string })
+	local current = view
+	if current ~= nil then
+		current.markNew(ids)
+	end
+end
+
+function PuffdexController.show()
+	local current = view
+	if current ~= nil and not current.isOpen() then
+		current.open()
+	end
+end
+
 function PuffdexController.start()
 	if started then
 		return

@@ -320,11 +320,33 @@ Escopo em `docs/FASE_2_SEGREDOS_COFRE_BARAO.md`.
 - **Ajustes:** ficam em `GameConfig.Barao` e `GameConfig.Toca`. Os sons atuais são provisórios, embutidos no Roblox; troque `BarkSoundIds`, `FunnySoundIds` e `FootstepSoundId` por áudios da Creator Store (`rbxassetid://...`).
 - **Código:** `BaraoService` (comportamento), `BaraoModel`, `TocaService`, `CorridorBuilder` (nichos) e `BuildingLayout.getTocas` / `isInsideToca` / `getCorridorFloorY`. No cliente, `BaraoController` mostra os avisos.
 
+### Tickets e Puff Machine (Fase 4, entrega 4.2)
+
+- **Tickets** (moeda não competitiva, só para a Puff Machine): saem só jogando, calculados pelo servidor no fim da rodada (`RewardRules.ticketsForRound`).
+  - 1 por partida jogada de verdade (quem ganhou XP), +1 no Top 3 e +1 na vitória.
+  - +2 por nível ganho.
+  - Teto de 12 por rodada. O pós-partida mostra "+XP +N 🎟".
+- **Puff Machine:** botão 🎰 no cartão de perfil (lobby), com o saldo de tickets num selo.
+  - Cada giro custa 5 🎟 e dá um dos 8 Puffs exclusivos da máquina: Chiclete, Limão e Nuvem (Comuns), Oceano e Arco-Íris (Raros), Neon e Aurora (Épicos) e Cometa (Lendário).
+  - Os Puffs de façanha continuam só por façanha.
+- **Transparente e sem estrutura predatória:**
+  - chances fixas mostradas na própria máquina (Comum 60%, Raro 28%, Épico 10%, Lendário 2%), com quantos de cada raridade o jogador já tem;
+  - Épico ou melhor garantido a cada 10 giros sem um, com o contador visível;
+  - Puff repetido devolve 2 🎟 (e soma na quantidade do item);
+  - não existe compra de tickets nem de giros.
+- **Integridade:** o sorteio usa o `Random` do servidor.
+  - Conferir o saldo, gastar e guardar o Puff acontecem numa única atualização do perfil (`PlayerDataService.machinePull`), sem pausa entre elas, então não há gasto duplo. O perfil é salvo logo depois.
+  - Só gira com o perfil sendo salvo, só no lobby e com intervalo mínimo entre giros (`RewardConfig`).
+- **Revelação:** a cápsula gira pelas cores dos Puffs até a resposta chegar (mínimo de 1,8 s) e revela o Puff com a raridade e "NOVO!" ou "repetido, +2 🎟". O botão VER NO PUFFDEX leva direto ao Puff.
+- **Perfil v4:** passa a guardar `tickets`, `ticketsEarned`, `ticketsSpent`, `machinePulls` e `machinePity`. A migração v3 → v4 é automática.
+- **Telemetria:** `TicketsEarned` (por fonte, inclusive a devolução de repetidos), `TicketsSpent`, `PuffMachineOpened`, `PuffMachinePull` (Puff, raridade, novo ou repetido) e `PuffUnlocked` com origem `Machine`.
+- **Código:** `RewardConfig`, `data/RewardRules`, `PuffMachineService` e `PlayerDataService.machinePull`. No cliente, `PuffMachineController` e `PuffMachineView`.
+
 ### Puffdex e primeira coleção (Fase 4, entrega 4.1)
 
 Escopo em `docs/FASE_4_PUFFDEX_RECOMPENSAS_SOCIAL.md`.
 
-- **Coleção inicial** (`shared/config/PuffCatalog`): 14 Puffs em quatro raridades, todos conquistados jogando.
+- **Coleção inicial** (`shared/config/PuffCatalog`): 14 Puffs em quatro raridades, todos conquistados jogando (mais os 8 da Puff Machine, na 4.2).
   - **Comuns:** Branco (inicial), Algodão Doce (nível 3), Menta (5 partidas), Pêssego (150 blocos).
   - **Raros:** Gelo (nível 10), Elétrico (15 derrubadas), Tijolinho (10 blocos reconstruídos), Sussurro (3 passagens secretas).
   - **Épicos:** Brasil (20 Top 3), Galáxia (nível 25), Cofre (3 cofres conquistados).

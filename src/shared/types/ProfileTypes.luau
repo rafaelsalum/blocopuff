@@ -36,6 +36,8 @@ export type XpAward = {
 	lines: { XpLine },
 	levelBefore: number,
 	levelAfter: number,
+	-- Tickets ganhos na rodada (4.2).
+	tickets: number,
 }
 
 -- Cópia enviada ao cliente. `saved` = falso quando o progresso desta sessão
@@ -50,6 +52,9 @@ export type ProfileSnapshot = {
 	-- Puffdex: Puffs que o jogador tem (só os do catálogo) e o equipado.
 	puffs: { OwnedPuff },
 	equippedPuff: string,
+	-- Tickets da Puff Machine e giros seguidos sem Épico ou melhor.
+	tickets: number,
+	machinePity: number,
 	-- Presente só na atualização logo depois de uma rodada.
 	award: XpAward?,
 	-- Puffs recém-desbloqueados nesta atualização (para comemorar).

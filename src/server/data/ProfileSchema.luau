@@ -14,6 +14,7 @@ local GameConfig = require(ReplicatedStorage.Shared.config.GameConfig)
 local LevelCurve = require(ReplicatedStorage.Shared.modules.LevelCurve)
 local ProfileTypes = require(ReplicatedStorage.Shared.types.ProfileTypes)
 local PuffCatalog = require(ReplicatedStorage.Shared.config.PuffCatalog)
+local RewardConfig = require(ReplicatedStorage.Shared.config.RewardConfig)
 local PuffInventory = require(script.Parent.PuffInventory)
 
 type ProfileStats = ProfileTypes.ProfileStats
@@ -35,6 +36,13 @@ export type Profile = {
 	-- Puffdex (4.1): Puffs do jogador e o equipado.
 	puffs: Inventory,
 	equippedPuff: string,
+	-- Tickets e Puff Machine (4.2): saldo, totais e giros seguidos sem
+	-- Épico ou melhor (garantia).
+	tickets: number,
+	ticketsEarned: number,
+	ticketsSpent: number,
+	machinePulls: number,
+	machinePity: number,
 	appliedRounds: { string },
 	createdAt: number,
 	updatedAt: number,
@@ -45,7 +53,8 @@ export type Profile = {
 export type RoundDelta = ProfileStats
 
 -- v1: estatísticas (3.1). v2: levelReachedAt (3.2). v3: Puffdex (4.1).
-local CURRENT_VERSION = 3
+-- v4: tickets e Puff Machine (4.2).
+local CURRENT_VERSION = 4
 local MAX_STAT = 1e9
 local MAX_ROUND_KEY_LENGTH = 80
 
@@ -78,6 +87,11 @@ function ProfileSchema.default(now: number): Profile
 		levelReachedAt = now,
 		puffs = {},
 		equippedPuff = PuffCatalog.DefaultId,
+		tickets = 0,
+		ticketsEarned = 0,
+		ticketsSpent = 0,
+		machinePulls = 0,
+		machinePity = 0,
 		appliedRounds = {},
 		createdAt = now,
 		updatedAt = now,
@@ -101,6 +115,17 @@ local MIGRATIONS: { [number]: (data: { [string]: any }) -> { [string]: any } } =
 		migrated.puffs = {}
 		migrated.equippedPuff = PuffCatalog.DefaultId
 		migrated.version = 3
+		return migrated
+	end,
+	-- v3 → v4: carteira de tickets zerada.
+	[3] = function(data)
+		local migrated = table.clone(data)
+		migrated.tickets = 0
+		migrated.ticketsEarned = 0
+		migrated.ticketsSpent = 0
+		migrated.machinePulls = 0
+		migrated.machinePity = 0
+		migrated.version = 4
 		return migrated
 	end,
 }
@@ -189,6 +214,11 @@ function ProfileSchema.fromStored(raw: unknown, now: number): (Profile, boolean)
 		levelReachedAt = cleanNumber(data.levelReachedAt, now),
 		puffs = puffs,
 		equippedPuff = PuffInventory.validEquipped(puffs, data.equippedPuff),
+		tickets = math.min(cleanNumber(data.tickets, 0), RewardConfig.MaxTickets),
+		ticketsEarned = cleanNumber(data.ticketsEarned, 0),
+		ticketsSpent = cleanNumber(data.ticketsSpent, 0),
+		machinePulls = cleanNumber(data.machinePulls, 0),
+		machinePity = math.min(cleanNumber(data.machinePity, 0), RewardConfig.PityThreshold),
 		appliedRounds = readAppliedRounds(data.appliedRounds),
 		createdAt = cleanNumber(data.createdAt, now),
 		updatedAt = cleanNumber(data.updatedAt, now),
@@ -269,6 +299,11 @@ function ProfileSchema.toStored(profile: Profile): { [string]: any }
 		levelReachedAt = profile.levelReachedAt,
 		puffs = PuffInventory.toStored(profile.puffs),
 		equippedPuff = profile.equippedPuff,
+		tickets = profile.tickets,
+		ticketsEarned = profile.ticketsEarned,
+		ticketsSpent = profile.ticketsSpent,
+		machinePulls = profile.machinePulls,
+		machinePity = profile.machinePity,
 		appliedRounds = table.clone(profile.appliedRounds),
 		createdAt = profile.createdAt,
 		updatedAt = profile.updatedAt,
