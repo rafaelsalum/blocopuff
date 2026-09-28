@@ -12,6 +12,9 @@
 --   * Dados de uma versão mais nova do formato (atualização em andamento)
 --     são carregados só para leitura, para não apagar campos novos.
 --   * Quem sai no meio da rodada não recebe a rodada.
+--   * Puffdex: os Puffs merecidos (nível e façanhas) são concedidos pelo
+--     servidor ao carregar e depois de cada rodada. O inventário é indexado
+--     pelo id do Puff: nada duplica ao reconectar.
 
 local DataStoreService = game:GetService("DataStoreService")
 local HttpService = game:GetService("HttpService")
@@ -20,10 +23,13 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 
 local PuffadorConstants = require(ReplicatedStorage.Shared.modules.PuffadorConstants)
+local PuffCatalog = require(ReplicatedStorage.Shared.config.PuffCatalog)
 local ProfileTypes = require(ReplicatedStorage.Shared.types.ProfileTypes)
+local StateAttributeNames = require(ReplicatedStorage.Shared.types.StateAttributeNames)
 local ProfileConfig = require(script.Parent.Parent.config.ProfileConfig)
 local ProfileSchema = require(script.Parent.Parent.data.ProfileSchema)
 local DataStoreErrors = require(script.Parent.Parent.data.DataStoreErrors)
+local PuffInventory = require(script.Parent.Parent.data.PuffInventory)
 local ProgressionConfig = require(ReplicatedStorage.Shared.config.ProgressionConfig)
 local LevelCurve = require(ReplicatedStorage.Shared.modules.LevelCurve)
 local TelemetryService = require(script.Parent.TelemetryService)
@@ -99,7 +105,7 @@ local function keyFor(player: Player): string
 	return `{ProfileConfig.KeyPrefix}{player.UserId}`
 end
 
-local function snapshotOf(entry: Entry, award: XpAward?): ProfileSnapshot
+local function snapshotOf(entry: Entry, award: XpAward?, newPuffs: { string }?): ProfileSnapshot
 	local profile = entry.profile
 	return {
 		stats = table.clone(profile.stats),
@@ -107,12 +113,20 @@ local function snapshotOf(entry: Entry, award: XpAward?): ProfileSnapshot
 		level = profile.level,
 		prestige = profile.prestige,
 		saved = entry.canSave,
+		puffs = PuffInventory.toOwnedList(profile.puffs),
+		equippedPuff = profile.equippedPuff,
 		award = award,
+		newPuffs = if newPuffs ~= nil and #newPuffs > 0 then newPuffs else nil,
 	}
 end
 
-local function publish(entry: Entry, award: XpAward?)
-	local snapshot = snapshotOf(entry, award)
+local function publish(entry: Entry, award: XpAward?, newPuffs: { string }?)
+	-- O Puff equipado vai num atributo do jogador: todos os clientes (e o
+	-- PuffadorService, ao disparar) leem dali.
+	if entry.player.Parent ~= nil and entry.player:GetAttribute(StateAttributeNames.PlayerEquippedPuff) ~= entry.profile.equippedPuff then
+		entry.player:SetAttribute(StateAttributeNames.PlayerEquippedPuff, entry.profile.equippedPuff)
+	end
+	local snapshot = snapshotOf(entry, award, newPuffs)
 	local remote = snapshotRemote
 	if remote ~= nil and entry.player.Parent ~= nil then
 		remote:FireClient(entry.player, snapshot)
@@ -148,6 +162,36 @@ local function withRetries<T>(label: string, callback: () -> T): (boolean, T?)
 	end
 	warn(string.format("[BlocoPuff] Profile %s failed: %s", label, tostring(lastError)))
 	return false, nil
+end
+
+-- Concede os Puffs que o perfil já merece e ainda não tem (nível e
+-- façanhas). Devolve os ids novos para comemorar, mas só quando o perfil é
+-- salvo: numa sessão sem salvar o Puff vale só agora e voltaria como
+-- "novo" na próxima (o jogador veria o mesmo aviso de novo).
+local function grantPuffs(entry: Entry): { string }
+	local profile = entry.profile
+	local timestamp = now()
+	local inventory, granted = PuffInventory.grantUnlocks(profile.puffs, profile.stats :: any, profile.level, timestamp)
+	if #granted == 0 then
+		return granted
+	end
+	local updated = table.clone(profile)
+	updated.puffs = inventory
+	entry.profile = updated
+	entry.dirty = true
+	local owned = PuffInventory.countOwned(inventory)
+	local total = #PuffCatalog.all()
+	for _, id in ipairs(granted) do
+		local definition = PuffCatalog.get(id)
+		if definition ~= nil and entry.canSave then
+			TelemetryService.lobbyEvent(entry.player, "PuffUnlocked", owned, id, `{definition.rarity}:{definition.origin}`)
+		end
+	end
+	if not entry.canSave then
+		return {}
+	end
+	TelemetryService.lobbyEvent(entry.player, "PuffCollection", owned, `Of{total}`)
+	return granted
 end
 
 type LoadOutcome = "Loaded" | "Locked" | "Future" | "Error"
@@ -208,8 +252,7 @@ local function save(entry: Entry, release: boolean)
 	local lostLock = false
 	local ok = withRetries(`save {entry.key}`, function()
 		dataStore:UpdateAsync(entry.key, function(stored: any)
-			local current = ProfileSchema.fromStored(stored, timestamp)
-			local session = current.session
+			local session = ProfileSchema.storedSession(stored)
 			if session ~= nil and session.jobId ~= entry.lockId then
 				lostLock = true
 				return nil
@@ -296,7 +339,12 @@ local function load(player: Player)
 		leveledUpLastRound = false,
 	}
 	entries[player] = entry
-	publish(entry)
+	-- Puffs já merecidos (inclusive por perfis antigos, sem Puffdex).
+	local newPuffs = grantPuffs(entry)
+	publish(entry, nil, newPuffs)
+	if #newPuffs > 0 then
+		task.spawn(save, entry, false)
+	end
 
 	local pending = pendingRounds[player]
 	pendingRounds[player] = nil
@@ -370,13 +418,14 @@ function PlayerDataService.applyRound(player: Player, roundKey: string, delta: R
 		TelemetryService.event(player, "LevelUp", timestamp - profile.levelReachedAt, `Level{newLevel}`, `From{profile.level}`)
 	end
 
+	local newPuffs = grantPuffs(entry)
 	publish(entry, {
 		roundId = roundXp.roundId,
 		total = gained,
 		lines = roundXp.lines,
 		levelBefore = profile.level,
 		levelAfter = newLevel,
-	})
+	}, newPuffs)
 	-- Grava logo: o fim da rodada é o momento mais importante de não perder.
 	task.spawn(save, entry, false)
 	return true
@@ -430,6 +479,25 @@ function PlayerDataService.prestige(player: Player): boolean
 	TelemetryService.event(player, "Prestige", updated.prestige)
 	publish(entry)
 	task.spawn(save, entry, false)
+	return true
+end
+
+-- Equipa um Puff que o jogador tem (só visual). Falso se não tiver.
+function PlayerDataService.equipPuff(player: Player, puffId: string): boolean
+	local entry = entries[player]
+	if entry == nil or not PuffInventory.owns(entry.profile.puffs, puffId) then
+		return false
+	end
+	if entry.profile.equippedPuff == puffId then
+		return true
+	end
+	local updated = table.clone(entry.profile)
+	updated.equippedPuff = puffId
+	entry.profile = updated
+	entry.dirty = true
+	local definition = PuffCatalog.get(puffId)
+	TelemetryService.lobbyEvent(player, "PuffEquipped", 1, puffId, if definition ~= nil then definition.rarity else nil)
+	publish(entry)
 	return true
 end
 

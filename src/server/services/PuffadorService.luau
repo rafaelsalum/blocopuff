@@ -11,6 +11,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Workspace = game:GetService("Workspace")
 
 local GameConfig = require(ReplicatedStorage.Shared.config.GameConfig)
+local PuffCatalog = require(ReplicatedStorage.Shared.config.PuffCatalog)
 local StateAttributeNames = require(ReplicatedStorage.Shared.types.StateAttributeNames)
 local PuffadorConstants = require(ReplicatedStorage.Shared.modules.PuffadorConstants)
 local ProjectileService = require(script.Parent.ProjectileService)
@@ -374,7 +375,7 @@ local function onRequestPuff(player: Player, rawAimTarget: unknown, rawAimOrigin
 		sendFeedback(player, "Hit")
 		TelemetryService.blocksDestroyed(player, 1, not hitSomeBlock)
 		hitSomeBlock = true
-	end, power, PuffadorModel.getProjectileColor(variant))
+	end, power, PuffadorModel.getProjectileColor(variant), PuffCatalog.styleFor(player:GetAttribute(StateAttributeNames.PlayerEquippedPuff)))
 	if isSuper then
 		consumeSuperCharge(player)
 	end

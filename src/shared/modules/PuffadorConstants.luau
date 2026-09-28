@@ -28,6 +28,7 @@ export type PuffadorConstantsModule = {
 	PuffMomentRemoteName: string,
 	ProfileSnapshotRemoteName: string,
 	LeaderboardRemoteName: string,
+	PuffdexRemoteName: string,
 
 	OwnerUserIdAttribute: string,
 	RoundIdAttribute: string,
@@ -60,6 +61,7 @@ local PuffadorConstants: PuffadorConstantsModule = {
 	PuffMomentRemoteName = "PuffMoment",
 	ProfileSnapshotRemoteName = "ProfileSnapshot",
 	LeaderboardRemoteName = "Leaderboards",
+	PuffdexRemoteName = "Puffdex",
 
 	OwnerUserIdAttribute = "OwnerUserId",
 	RoundIdAttribute = StateAttributeNames.RoundId,

@@ -30,6 +30,9 @@ export type StateAttributeNames = {
 	PlayerRoundBlocksDestroyed: string,
 	PlayerHasSecondChance: string,
 	PlayerRoundKnockouts: string,
+	-- Puff equipado (id do PuffCatalog), escrito pelo servidor a partir do
+	-- perfil: todos os clientes veem o mesmo.
+	PlayerEquippedPuff: string,
 }
 
 local StateAttributeNames: StateAttributeNames = {
@@ -59,6 +62,7 @@ local StateAttributeNames: StateAttributeNames = {
 	PlayerRoundBlocksDestroyed = "RoundBlocksDestroyed",
 	PlayerHasSecondChance = "HasSecondChance",
 	PlayerRoundKnockouts = "RoundKnockouts",
+	PlayerEquippedPuff = "EquippedPuff",
 }
 
 return table.freeze(StateAttributeNames)

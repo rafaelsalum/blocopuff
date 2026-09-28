@@ -170,9 +170,9 @@ function TelemetryService.event(player: Player, eventName: string, value: number
 	log(player, eventName, if value ~= nil then value else elapsed(), context, detail)
 end
 
--- Evento fora da rodada (lobby: ranking, Hall da Fama).
-function TelemetryService.lobbyEvent(player: Player, eventName: string, value: number?, context: string?)
-	log(player, eventName, value, context)
+-- Evento fora da rodada (lobby: ranking, Hall da Fama, Puffdex).
+function TelemetryService.lobbyEvent(player: Player, eventName: string, value: number?, context: string?, detail: string?)
+	log(player, eventName, value, context, detail)
 end
 
 function TelemetryService.roundElapsed(): number

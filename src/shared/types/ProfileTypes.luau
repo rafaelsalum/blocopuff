@@ -3,6 +3,12 @@
 -- Perfil persistente do jogador (Fase 3). O servidor calcula e salva tudo;
 -- o cliente só recebe uma cópia para mostrar.
 
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local PuffTypes = require(ReplicatedStorage.Shared.types.PuffTypes)
+
+type OwnedPuff = PuffTypes.OwnedPuff
+
 export type ProfileStats = {
 	matches: number,
 	wins: number,
@@ -41,8 +47,13 @@ export type ProfileSnapshot = {
 	level: number,
 	prestige: number,
 	saved: boolean,
+	-- Puffdex: Puffs que o jogador tem (só os do catálogo) e o equipado.
+	puffs: { OwnedPuff },
+	equippedPuff: string,
 	-- Presente só na atualização logo depois de uma rodada.
 	award: XpAward?,
+	-- Puffs recém-desbloqueados nesta atualização (para comemorar).
+	newPuffs: { string }?,
 }
 
 -- Nomes das estatísticas, na ordem usada por schema, validação e interface.

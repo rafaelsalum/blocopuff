@@ -16,10 +16,13 @@ local TweenService = game:GetService("TweenService")
 local Workspace = game:GetService("Workspace")
 
 local GameConfig = require(ReplicatedStorage.Shared.config.GameConfig)
+local PuffCatalog = require(ReplicatedStorage.Shared.config.PuffCatalog)
+local PuffTypes = require(ReplicatedStorage.Shared.types.PuffTypes)
 local PuffadorConstants = require(ReplicatedStorage.Shared.modules.PuffadorConstants)
 local ArenaService = require(script.Parent.ArenaService)
 
 type BlockDestructionContext = ArenaService.BlockDestructionContext
+type PuffStyle = PuffTypes.PuffStyle
 
 -- Chamado quando um projétil acerta o personagem de outro jogador. Quem
 -- decide o efeito (empurrão, regra do cofre) são os serviços registrados.
@@ -53,6 +56,8 @@ type ProjectileRecord = {
 	onBlockHit: (() -> ())?,
 	-- Blocos quebrados por acerto: 1 no Puffador comum, 2 no Super.
 	power: number,
+	-- Cores do Puff equipado (só visual).
+	style: PuffStyle,
 }
 
 local ProjectileService = {}
@@ -80,7 +85,7 @@ local function removeProjectileAt(index: number)
 	end
 end
 
-local function createImpactEffect(position: Vector3, normal: Vector3)
+local function createImpactEffect(position: Vector3, normal: Vector3, sparkColor: Color3)
 	if projectileContainer == nil then
 		return
 	end
@@ -126,7 +131,7 @@ local function createImpactEffect(position: Vector3, normal: Vector3)
 		fragment.CanQuery = false
 		fragment.CastShadow = false
 		fragment.Material = Enum.Material.Neon
-		fragment.Color = PuffadorConstants.PuffadorAccentColor
+		fragment.Color = sparkColor
 		fragment.Parent = projectileContainer
 
 		TweenService:Create(fragment, TweenInfo.new(0.22, Enum.EasingStyle.Quad), {
@@ -204,7 +209,7 @@ local function updateProjectiles(deltaTime: number)
 				else
 					notifyHit(record, hitInstance, raycastResult.Position)
 				end
-				createImpactEffect(raycastResult.Position, raycastResult.Normal)
+				createImpactEffect(raycastResult.Position, raycastResult.Normal, record.style.spark)
 				return false
 			end
 
@@ -256,7 +261,9 @@ function ProjectileService.start(worldRoot: Model)
 end
 
 -- `origin` é o cano (visual); `aimOrigin` é a origem validada do raio da
--- mira, por onde o acerto é decidido.
+-- mira, por onde o acerto é decidido. `style` (Puff equipado) muda só o
+-- rastro, o brilho e as faíscas: tamanho, velocidade, alcance e acerto são
+-- iguais para todos, e o miolo do projétil continua bem visível.
 function ProjectileService.spawn(
 	player: Player,
 	origin: Vector3,
@@ -265,7 +272,8 @@ function ProjectileService.spawn(
 	roundId: number,
 	onBlockHit: (() -> ())?,
 	power: number?,
-	color: Color3?
+	color: Color3?,
+	style: PuffStyle?
 )
 	if projectileContainer == nil then
 		return
@@ -273,6 +281,7 @@ function ProjectileService.spawn(
 
 	local config = GameConfig.Puffador
 	local diameter = config.ProjectileRadius * 2
+	local puffStyle = style or PuffCatalog.styleFor(PuffCatalog.DefaultId)
 
 	local part = Instance.new("Part")
 	part.Name = PuffadorConstants.ProjectileName
@@ -312,8 +321,8 @@ function ProjectileService.spawn(
 	trail.Attachment0 = trailFront
 	trail.Attachment1 = trailBack
 	trail.Color = ColorSequence.new({
-		ColorSequenceKeypoint.new(0, PuffadorConstants.PuffadorAccentColor),
-		ColorSequenceKeypoint.new(1, PuffadorConstants.PuffadorPrimaryColor),
+		ColorSequenceKeypoint.new(0, puffStyle.trailStart),
+		ColorSequenceKeypoint.new(1, puffStyle.trailEnd),
 	})
 	trail.Transparency = NumberSequence.new({
 		NumberSequenceKeypoint.new(0, 0.05),
@@ -326,7 +335,7 @@ function ProjectileService.spawn(
 
 	local glow = Instance.new("PointLight")
 	glow.Name = "Glow"
-	glow.Color = PuffadorConstants.PuffadorAccentColor
+	glow.Color = puffStyle.glow
 	glow.Brightness = 1.2
 	glow.Range = 7
 	glow.Parent = part
@@ -356,6 +365,7 @@ function ProjectileService.spawn(
 		distanceTraveled = 0,
 		onBlockHit = onBlockHit,
 		power = math.clamp(math.floor(power or 1), 1, 4),
+		style = puffStyle,
 	}
 
 	table.insert(activeProjectiles, record)

@@ -1,9 +1,9 @@
 --!strict
 
 -- Cartão de perfil no canto superior esquerdo do lobby: nível (e prestígio),
--- barra de XP, um botão que abre as estatísticas da carreira e, ao lado, o
--- botão 🏆 do ranking global. Some durante
--- a partida (o HUD de combate usa esse canto). Só visual.
+-- barra de XP, um botão que abre as estatísticas da carreira e, ao lado, os
+-- botões 🏆 do ranking global e ✨ do Puffdex. Some durante a partida (o HUD
+-- de combate usa esse canto). Só visual.
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TweenService = game:GetService("TweenService")
@@ -26,6 +26,8 @@ export type ProfileCardViewHandle = {
 local GUI_NAME = "BlocoPuffProfileCard"
 local CARD_SIZE = Vector2.new(236, 66)
 local STATS_SIZE = Vector2.new(236, 212)
+local SIDE_BUTTON_WIDTH = 50
+local SIDE_BUTTON_GAP = 8
 
 -- Estatísticas mostradas no painel, na ordem.
 local STAT_ROWS: { { key: string, label: string } } = {
@@ -49,13 +51,14 @@ local function formatNumber(value: number): string
 end
 
 -- `onRanking`: abre o painel RANKING (botão 🏆 ao lado do cartão).
-function ProfileCardView.new(playerGui: PlayerGui, onRanking: () -> ()): ProfileCardViewHandle
+-- `onPuffdex`: abre o PUFFDEX (botão ✨).
+function ProfileCardView.new(playerGui: PlayerGui, onRanking: () -> (), onPuffdex: () -> ()): ProfileCardViewHandle
 	local screenGui = UiTheme.createScreenGui(GUI_NAME, playerGui, 12)
 
 	local root = Instance.new("Frame")
 	root.Name = "Root"
 	root.Position = UDim2.fromOffset(18, 16)
-	root.Size = UDim2.fromOffset(CARD_SIZE.X + 58, CARD_SIZE.Y + STATS_SIZE.Y + 8)
+	root.Size = UDim2.fromOffset(CARD_SIZE.X + (SIDE_BUTTON_WIDTH + SIDE_BUTTON_GAP) * 2, CARD_SIZE.Y + STATS_SIZE.Y + 8)
 	root.BackgroundTransparency = 1
 	root.Visible = false
 	root.Parent = screenGui
@@ -131,14 +134,28 @@ function ProfileCardView.new(playerGui: PlayerGui, onRanking: () -> ()): Profile
 		name = "RankingButton",
 		text = "🏆",
 		variant = "Gold",
-		size = UDim2.fromOffset(50, CARD_SIZE.Y),
-		position = UDim2.fromOffset(CARD_SIZE.X + 8, 0),
+		size = UDim2.fromOffset(SIDE_BUTTON_WIDTH, CARD_SIZE.Y),
+		position = UDim2.fromOffset(CARD_SIZE.X + SIDE_BUTTON_GAP, 0),
 		textSize = 24,
 		zIndex = 4,
 	})
 	rankingButton.button.Activated:Connect(function()
 		UiKit.playClick()
 		onRanking()
+	end)
+
+	local puffdexButton = UiKit.createButton(root, {
+		name = "PuffdexButton",
+		text = "✨",
+		variant = "Primary",
+		size = UDim2.fromOffset(SIDE_BUTTON_WIDTH, CARD_SIZE.Y),
+		position = UDim2.fromOffset(CARD_SIZE.X + SIDE_BUTTON_GAP * 2 + SIDE_BUTTON_WIDTH, 0),
+		textSize = 24,
+		zIndex = 4,
+	})
+	puffdexButton.button.Activated:Connect(function()
+		UiKit.playClick()
+		onPuffdex()
 	end)
 
 	-- Painel das estatísticas (abre abaixo do cartão).

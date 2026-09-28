@@ -320,6 +320,34 @@ Escopo em `docs/FASE_2_SEGREDOS_COFRE_BARAO.md`.
 - **Ajustes:** ficam em `GameConfig.Barao` e `GameConfig.Toca`. Os sons atuais são provisórios, embutidos no Roblox; troque `BarkSoundIds`, `FunnySoundIds` e `FootstepSoundId` por áudios da Creator Store (`rbxassetid://...`).
 - **Código:** `BaraoService` (comportamento), `BaraoModel`, `TocaService`, `CorridorBuilder` (nichos) e `BuildingLayout.getTocas` / `isInsideToca` / `getCorridorFloorY`. No cliente, `BaraoController` mostra os avisos.
 
+### Puffdex e primeira coleção (Fase 4, entrega 4.1)
+
+Escopo em `docs/FASE_4_PUFFDEX_RECOMPENSAS_SOCIAL.md`.
+
+- **Coleção inicial** (`shared/config/PuffCatalog`): 14 Puffs em quatro raridades, todos conquistados jogando.
+  - **Comuns:** Branco (inicial), Algodão Doce (nível 3), Menta (5 partidas), Pêssego (150 blocos).
+  - **Raros:** Gelo (nível 10), Elétrico (15 derrubadas), Tijolinho (10 blocos reconstruídos), Sussurro (3 passagens secretas).
+  - **Épicos:** Brasil (20 Top 3), Galáxia (nível 25), Cofre (3 cofres conquistados).
+  - **Lendários:** Barão (25 fugas do Barão), Dourado (25 vitórias), Fênix (10 Voltas por Cima).
+  - Ids ficam salvos nos perfis: nunca renomeie nem reaproveite um id.
+- **Só visual:** o Puff equipado muda o rastro, o brilho e as faíscas do impacto do disparo.
+  - Tamanho, velocidade, alcance, cadência, empurrão e acerto são iguais para todos.
+  - O miolo do projétil continua branco, para não atrapalhar a visibilidade.
+- **Desbloqueio no servidor:** o `PlayerDataService` concede os Puffs merecidos ao carregar o perfil e depois de cada rodada.
+  - Perfis antigos recebem na hora o que já tinham conquistado.
+  - O inventário é indexado pelo id do Puff, então nada duplica ao reconectar e cada recompensa é dada uma vez só.
+- **Perfil v3:** o perfil passa a guardar `puffs` (data, quantidade, origem e um `uid` por item) e `equippedPuff`. A migração v2 → v3 é automática.
+- **Equipar:** o painel pede ao servidor pelo remote `Puffdex` (`PuffdexService`), que confere se o jogador tem o Puff.
+  - O Puff equipado fica no atributo `EquippedPuff` do jogador, que todos os clientes enxergam.
+  - É dali que o `PuffadorService` tira as cores de cada disparo.
+- **Interface:** o botão ✨ ao lado do 🏆 no cartão de perfil (lobby) abre o **PUFFDEX**.
+  - Grade com a coleção: os Puffs bloqueados aparecem como "?" com a raridade.
+  - O detalhe mostra a prévia das cores, a origem, a data, a dica curta de como conseguir e o progresso (por exemplo, "7 / 15").
+  - Puffs novos ganham o aviso "NOVO PUFF!" e a etiqueta NOVO.
+- **Trading:** preparado, mas desligado (`PuffCatalog.TradingEnabled = false`, campo `tradable` e `uid` por item). Não existe nenhum caminho de troca.
+- **Telemetria:** `PuffUnlocked` (id, raridade e origem), `PuffCollection` (progresso), `PuffEquipped` e `PuffdexOpened`.
+- **Código:** `PuffCatalog`, `PuffTypes`, `data/PuffInventory`, `ProfileSchema`, `PlayerDataService` e `PuffdexService`. No cliente, `PuffdexController` e `PuffdexView`.
+
 ### Ranking global e Hall da Fama (Fase 3, entrega 3.4)
 
 - **Categorias** (poucas de propósito): vitórias, derrubadas, blocos destruídos e cofres conquistados. Cada uma tem um OrderedDataStore (`BlocoPuffLB_v1_<categoria>`, chave = UserId).

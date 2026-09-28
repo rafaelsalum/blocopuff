@@ -8,13 +8,16 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 
+local PuffCatalog = require(ReplicatedStorage.Shared.config.PuffCatalog)
 local PuffadorConstants = require(ReplicatedStorage.Shared.modules.PuffadorConstants)
 local ProfileTypes = require(ReplicatedStorage.Shared.types.ProfileTypes)
+local PuffTypes = require(ReplicatedStorage.Shared.types.PuffTypes)
 
 type ProfileSnapshot = ProfileTypes.ProfileSnapshot
 type ProfileStats = ProfileTypes.ProfileStats
 type XpAward = ProfileTypes.XpAward
 type XpLine = ProfileTypes.XpLine
+type OwnedPuff = PuffTypes.OwnedPuff
 
 local WAIT_TIMEOUT = 15
 
@@ -58,6 +61,51 @@ local function parseAward(raw: unknown): XpAward?
 	}
 end
 
+-- Só Puffs do catálogo, sem repetidos.
+local function parsePuffs(raw: unknown): { OwnedPuff }
+	local list: { OwnedPuff } = {}
+	if typeof(raw) ~= "table" then
+		return list
+	end
+	local seen: { [string]: boolean } = {}
+	for index, item in ipairs(raw :: { any }) do
+		if index > #PuffCatalog.all() then
+			break
+		end
+		if typeof(item) == "table" then
+			local definition = PuffCatalog.get(item.id)
+			if definition ~= nil and not seen[definition.id] then
+				seen[definition.id] = true
+				local origin = if table.find(PuffTypes.Origins, item.origin) ~= nil then item.origin else definition.origin
+				table.insert(list, {
+					id = definition.id,
+					obtainedAt = readNumber(item.obtainedAt),
+					count = math.max(1, readNumber(item.count)),
+					origin = origin,
+				})
+			end
+		end
+	end
+	return list
+end
+
+local function parseNewPuffs(raw: unknown): { string }?
+	if typeof(raw) ~= "table" then
+		return nil
+	end
+	local ids: { string } = {}
+	for index, id in ipairs(raw :: { any }) do
+		if index > #PuffCatalog.all() then
+			break
+		end
+		local definition = PuffCatalog.get(id)
+		if definition ~= nil then
+			table.insert(ids, definition.id)
+		end
+	end
+	return if #ids > 0 then ids else nil
+end
+
 local function parse(raw: unknown): ProfileSnapshot?
 	if typeof(raw) ~= "table" then
 		return nil
@@ -76,7 +124,10 @@ local function parse(raw: unknown): ProfileSnapshot?
 		level = math.max(1, readNumber(data.level)),
 		prestige = readNumber(data.prestige),
 		saved = data.saved == true,
+		puffs = parsePuffs(data.puffs),
+		equippedPuff = if PuffCatalog.get(data.equippedPuff) ~= nil then data.equippedPuff else PuffCatalog.DefaultId,
 		award = parseAward(data.award),
+		newPuffs = parseNewPuffs(data.newPuffs),
 	}
 end
 

@@ -13,8 +13,11 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local GameConfig = require(ReplicatedStorage.Shared.config.GameConfig)
 local LevelCurve = require(ReplicatedStorage.Shared.modules.LevelCurve)
 local ProfileTypes = require(ReplicatedStorage.Shared.types.ProfileTypes)
+local PuffCatalog = require(ReplicatedStorage.Shared.config.PuffCatalog)
+local PuffInventory = require(script.Parent.PuffInventory)
 
 type ProfileStats = ProfileTypes.ProfileStats
+type Inventory = PuffInventory.Inventory
 
 export type Session = {
 	jobId: string,
@@ -29,6 +32,9 @@ export type Profile = {
 	prestige: number,
 	-- os.time() em que chegou ao nível atual (telemetria de tempo por nível).
 	levelReachedAt: number,
+	-- Puffdex (4.1): Puffs do jogador e o equipado.
+	puffs: Inventory,
+	equippedPuff: string,
 	appliedRounds: { string },
 	createdAt: number,
 	updatedAt: number,
@@ -38,8 +44,8 @@ export type Profile = {
 -- Soma de uma rodada para um jogador (mesmas chaves das estatísticas).
 export type RoundDelta = ProfileStats
 
--- v1: estatísticas (3.1). v2: levelReachedAt (3.2).
-local CURRENT_VERSION = 2
+-- v1: estatísticas (3.1). v2: levelReachedAt (3.2). v3: Puffdex (4.1).
+local CURRENT_VERSION = 3
 local MAX_STAT = 1e9
 local MAX_ROUND_KEY_LENGTH = 80
 
@@ -70,6 +76,8 @@ function ProfileSchema.default(now: number): Profile
 		level = 1,
 		prestige = 0,
 		levelReachedAt = now,
+		puffs = {},
+		equippedPuff = PuffCatalog.DefaultId,
 		appliedRounds = {},
 		createdAt = now,
 		updatedAt = now,
@@ -84,6 +92,15 @@ local MIGRATIONS: { [number]: (data: { [string]: any }) -> { [string]: any } } =
 		local migrated = table.clone(data)
 		migrated.levelReachedAt = data.updatedAt or data.createdAt
 		migrated.version = 2
+		return migrated
+	end,
+	-- v2 → v3: inventário de Puffs vazio; os Puffs já merecidos (nível e
+	-- façanhas) são concedidos pelo PlayerDataService ao carregar.
+	[2] = function(data)
+		local migrated = table.clone(data)
+		migrated.puffs = {}
+		migrated.equippedPuff = PuffCatalog.DefaultId
+		migrated.version = 3
 		return migrated
 	end,
 }
@@ -124,6 +141,15 @@ local function readAppliedRounds(raw: unknown): { string }
 	return rounds
 end
 
+-- Só a trava de sessão do que está salvo (checagem leve dentro do
+-- UpdateAsync ao salvar, sem reconstruir o perfil inteiro).
+function ProfileSchema.storedSession(raw: unknown): Session?
+	if typeof(raw) ~= "table" then
+		return nil
+	end
+	return readSession((raw :: { [string]: unknown }).session)
+end
+
 -- Converte o que veio do DataStore num perfil válido da versão atual.
 -- Segundo retorno: verdadeiro se os dados são de uma versão MAIS NOVA que
 -- este servidor conhece (atualização em andamento). Nesse caso o perfil não
@@ -137,6 +163,8 @@ function ProfileSchema.fromStored(raw: unknown, now: number): (Profile, boolean)
 	if version > CURRENT_VERSION then
 		local profile = ProfileSchema.default(now)
 		profile.stats = readStats(data.stats)
+		profile.puffs = PuffInventory.fromStored(data.puffs, now)
+		profile.equippedPuff = PuffInventory.validEquipped(profile.puffs, data.equippedPuff)
 		profile.session = readSession(data.session)
 		return profile, true
 	end
@@ -151,6 +179,7 @@ function ProfileSchema.fromStored(raw: unknown, now: number): (Profile, boolean)
 
 	-- O nível sai sempre do XP (determinístico); o salvo é só informativo.
 	local xp = math.min(cleanNumber(data.xp, 0), LevelCurve.maxXp())
+	local puffs = PuffInventory.fromStored(data.puffs, now)
 	return {
 		version = CURRENT_VERSION,
 		stats = readStats(data.stats),
@@ -158,6 +187,8 @@ function ProfileSchema.fromStored(raw: unknown, now: number): (Profile, boolean)
 		level = LevelCurve.levelForXp(xp),
 		prestige = cleanNumber(data.prestige, 0),
 		levelReachedAt = cleanNumber(data.levelReachedAt, now),
+		puffs = puffs,
+		equippedPuff = PuffInventory.validEquipped(puffs, data.equippedPuff),
 		appliedRounds = readAppliedRounds(data.appliedRounds),
 		createdAt = cleanNumber(data.createdAt, now),
 		updatedAt = cleanNumber(data.updatedAt, now),
@@ -236,6 +267,8 @@ function ProfileSchema.toStored(profile: Profile): { [string]: any }
 		level = profile.level,
 		prestige = profile.prestige,
 		levelReachedAt = profile.levelReachedAt,
+		puffs = PuffInventory.toStored(profile.puffs),
+		equippedPuff = profile.equippedPuff,
 		appliedRounds = table.clone(profile.appliedRounds),
 		createdAt = profile.createdAt,
 		updatedAt = profile.updatedAt,
