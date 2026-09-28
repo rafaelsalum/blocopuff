@@ -106,6 +106,14 @@ function ChallengesController.open()
 	end
 end
 
+-- Abre (sem alternar): usado pelas estações do lobby.
+function ChallengesController.show()
+	local current = view
+	if current ~= nil and not current.isOpen() then
+		current.open()
+	end
+end
+
 function ChallengesController.start()
 	if started then
 		return

@@ -35,6 +35,8 @@ local acceptingRequests = false
 local currentRoundId = 0
 
 local grantedTools: { [Player]: Tool } = {}
+-- Jogadores na área de treino do lobby (Puffador de treino, 4.5).
+local trainees: { [Player]: boolean } = {}
 local lastFireClock: { [Player]: number } = {}
 -- Tiros restantes do Puffador do Cofre de cada jogador; ao zerar, volta ao
 -- comum (e as construções que sobraram se perdem).
@@ -220,7 +222,30 @@ local function revokeAllTracked()
 	end
 end
 
+-- Área de treino do lobby (4.5): dá ou tira um Puffador de treino. Quem
+-- está com o Puffador da partida não vira treinando.
+function PuffadorService.setTraining(player: Player, enabled: boolean)
+	if enabled then
+		if trainees[player] or grantedTools[player] ~= nil then
+			return
+		end
+		trainees[player] = true
+		grantToolToPlayer(player, "Standard")
+	elseif trainees[player] then
+		trainees[player] = nil
+		PuffadorService.revokeFrom(player)
+	end
+end
+
+function PuffadorService.isTraining(player: Player): boolean
+	return trainees[player] == true
+end
+
 function PuffadorService.beginRound(players: { Player }, roundId: number)
+	-- Quem foi escalado deixa de treinar e recebe o Puffador da partida.
+	for _, player in ipairs(players) do
+		trainees[player] = nil
+	end
 	ProjectileService.clearAll()
 	currentRoundId = roundId
 	acceptingRequests = true
@@ -230,6 +255,8 @@ end
 function PuffadorService.endRound()
 	acceptingRequests = false
 	revokeAllTracked()
+	-- A área de treino devolve o Puffador de treino a quem continuar nela.
+	table.clear(trainees)
 	table.clear(superCharges)
 	table.clear(buildCharges)
 	ProjectileService.clearAll()
@@ -299,7 +326,9 @@ local function onRequestPuff(player: Player, rawAimTarget: unknown, rawAimOrigin
 		return
 	end
 
-	if not acceptingRequests then
+	-- Área de treino (4.5): vale fora da partida, sem regras de rodada.
+	local isTrainee = trainees[player] == true
+	if not isTrainee and not acceptingRequests then
 		return
 	end
 
@@ -310,14 +339,16 @@ local function onRequestPuff(player: Player, rawAimTarget: unknown, rawAimOrigin
 		return
 	end
 
-	if player:GetAttribute(StateAttributeNames.PlayerIsParticipant) ~= true then
-		return
-	end
-	if player:GetAttribute(StateAttributeNames.PlayerParticipatingRoundId) ~= currentRoundId then
-		return
-	end
-	if player:GetAttribute(StateAttributeNames.PlayerIsEliminated) ~= false then
-		return
+	if not isTrainee then
+		if player:GetAttribute(StateAttributeNames.PlayerIsParticipant) ~= true then
+			return
+		end
+		if player:GetAttribute(StateAttributeNames.PlayerParticipatingRoundId) ~= currentRoundId then
+			return
+		end
+		if player:GetAttribute(StateAttributeNames.PlayerIsEliminated) ~= false then
+			return
+		end
 	end
 
 	local character = player.Character
@@ -364,6 +395,12 @@ local function onRequestPuff(player: Player, rawAimTarget: unknown, rawAimOrigin
 	lastFireClock[player] = now
 
 	local direction = aimDelta.Unit
+	local puffStyle = PuffCatalog.styleFor(player:GetAttribute(StateAttributeNames.PlayerEquippedPuff))
+	if isTrainee then
+		-- Só alvos de treino: nada de bloco, empurrão, estatística ou telemetria de tiro.
+		ProjectileService.spawn(player, origin, aimOrigin, direction, 0, nil, 1, PuffadorModel.getProjectileColor("Standard"), puffStyle, true)
+		return
+	end
 	local isSuper = superCharges[player] ~= nil
 	local variant: Variant = if isSuper then "Super" else "Standard"
 	local power = if isSuper then GameConfig.SecretRoom.SuperPower else 1
@@ -375,7 +412,7 @@ local function onRequestPuff(player: Player, rawAimTarget: unknown, rawAimOrigin
 		sendFeedback(player, "Hit")
 		TelemetryService.blocksDestroyed(player, 1, not hitSomeBlock)
 		hitSomeBlock = true
-	end, power, PuffadorModel.getProjectileColor(variant), PuffCatalog.styleFor(player:GetAttribute(StateAttributeNames.PlayerEquippedPuff)))
+	end, power, PuffadorModel.getProjectileColor(variant), puffStyle)
 	if isSuper then
 		consumeSuperCharge(player)
 	end

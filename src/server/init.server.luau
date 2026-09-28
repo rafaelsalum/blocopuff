@@ -28,6 +28,8 @@ local PuffMachineService = require(script.services.PuffMachineService)
 local SecretAchievementService = require(script.services.SecretAchievementService)
 local PartyService = require(script.services.PartyService)
 local ReactionService = require(script.services.ReactionService)
+local LobbyStationsService = require(script.services.LobbyStationsService)
+local TrainingService = require(script.services.TrainingService)
 local WorldVisualService = require(script.services.WorldVisualService)
 local BuildingService = require(script.services.BuildingService)
 local AdminService = require(script.services.AdminService)
@@ -163,6 +165,19 @@ end
 LeaderboardService.start(PuffadorService.getRemotesFolder())
 HallOfFameService.start(world, LeaderboardService.addListener)
 print("[BlocoPuff] Leaderboards and Hall of Fame ready")
+
+-- Lobby expandido: estações (Puff Machine, vitrine, desafios, loja em
+-- breve, Barão amigável) e a área de treino. Opcional: uma falha aqui não
+-- impede o servidor de subir.
+local stationsOk, stationsFailure = pcall(function()
+	LobbyStationsService.start(world)
+	TrainingService.start(world)
+end)
+if stationsOk then
+	print("[BlocoPuff] Lobby stations and training range ready")
+else
+	warn(string.format("[BlocoPuff] Lobby stations unavailable: %s", tostring(stationsFailure)))
+end
 
 -- Party (entra junto nas partidas) e reações de quem está assistindo.
 PartyService.start(PuffadorService.getRemotesFolder())

@@ -454,6 +454,12 @@ local function load(player: Player)
 	}
 	entries[player] = entry
 	-- Puffs já merecidos (inclusive por perfis antigos, sem Puffdex).
+	-- Retenção (D1/D7/D28): dias desde a criação do perfil a cada sessão.
+	if canSave then
+		local days = math.max(0, math.floor((now() - entry.profile.createdAt) / 86400))
+		local bucket = if days >= 28 then "D28+" elseif days >= 7 then "D7+" elseif days >= 1 then "D1+" else "D0"
+		TelemetryService.lobbyEvent(player, "SessionStart", days, bucket)
+	end
 	local newPuffs = grantPuffs(entry)
 	-- Retorno diário e desafios de hoje.
 	local dailyReward = refreshDay(entry)

@@ -58,6 +58,9 @@ type ProjectileRecord = {
 	power: number,
 	-- Cores do Puff equipado (só visual).
 	style: PuffStyle,
+	-- Disparo da área de treino do lobby (4.5): não quebra bloco nem
+	-- acerta personagem; só avisa os handlers de superfície (alvos).
+	training: boolean,
 }
 
 local ProjectileService = {}
@@ -192,6 +195,13 @@ local function updateProjectiles(deltaTime: number)
 					projectileId = record.projectileId,
 				}
 				local hitInstance = raycastResult.Instance
+				if record.training then
+					for _, handler in pairs(surfaceHitHandlers) do
+						task.spawn(handler, record.ownerPlayer, hitInstance, raycastResult.Position)
+					end
+					createImpactEffect(raycastResult.Position, raycastResult.Normal, record.style.spark)
+					return false
+				end
 				local destroyedBlock = ArenaService.tryDestroyBlock(hitInstance, context)
 				if destroyedBlock then
 					if record.onBlockHit ~= nil then
@@ -273,7 +283,8 @@ function ProjectileService.spawn(
 	onBlockHit: (() -> ())?,
 	power: number?,
 	color: Color3?,
-	style: PuffStyle?
+	style: PuffStyle?,
+	training: boolean?
 )
 	if projectileContainer == nil then
 		return
@@ -366,12 +377,15 @@ function ProjectileService.spawn(
 		onBlockHit = onBlockHit,
 		power = math.clamp(math.floor(power or 1), 1, 4),
 		style = puffStyle,
+		training = training == true,
 	}
 
 	table.insert(activeProjectiles, record)
 end
 
 -- Registra (ou remove, com nil) um handler de acerto em personagem por chave.
+-- Os handlers de superfície recebem acertos de TODOS os disparos (partida e
+-- treino): cada um deve conferir se a peça é dele (atributo/tag) antes de agir.
 function ProjectileService.setCharacterHitHandler(key: string, handler: CharacterHitHandler?)
 	characterHitHandlers[key] = handler
 end

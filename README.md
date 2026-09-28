@@ -320,6 +320,28 @@ Escopo em `docs/FASE_2_SEGREDOS_COFRE_BARAO.md`.
 - **Ajustes:** ficam em `GameConfig.Barao` e `GameConfig.Toca`. Os sons atuais são provisórios, embutidos no Roblox; troque `BarkSoundIds`, `FunnySoundIds` e `FootstepSoundId` por áudios da Creator Store (`rbxassetid://...`).
 - **Código:** `BaraoService` (comportamento), `BaraoModel`, `TocaService`, `CorridorBuilder` (nichos) e `BuildingLayout.getTocas` / `isInsideToca` / `getCorridorFloorY`. No cliente, `BaraoController` mostra os avisos.
 
+### Lobby expandido (Fase 4, entrega 4.5)
+
+A galeria (20 × 90 studs) ganhou estações físicas. Cada uma tem um ProximityPrompt que abre a tela correspondente, e o centro e os sofás continuam livres.
+
+- **Ponta norte:**
+  - **Puff Machine** física: gabinete com cúpula de cápsulas; o prompt "Girar" abre a máquina;
+  - **Barão amigável** dormindo numa caminha ("Zzz"). O prompt "Fazer carinho" faz ele pular de alegria (💜), sem nenhuma hostilidade;
+  - o Puff Perdido (conquista secreta da 4.3) continua escondido atrás do caixote no canto.
+- **Lado do vidro:**
+  - **vitrine de Puffs** (exibição de cosméticos): um Puff de cada raridade em pedestais, com nome e raridade; o prompt abre o Puffdex;
+  - **quadro de desafios**, que abre os desafios do dia;
+  - **loja "em breve"**, só a banca fechada. O prompt avisa que nada é vendido por enquanto (preparação para a Fase 5).
+- **Ponta sul, área de treino** (`TrainingService`): quem passa da faixa verde e não está competindo recebe um Puffador de treino e pratica a mira em quatro alvos (três fixos e um que desliza).
+  - Acertar dá o mesmo retorno visual de sempre (+1 e combo).
+  - Os disparos de treino só acertam alvos: não quebram bloco, não empurram ninguém e não contam estatística nem XP (`training` no `ProjectileService`, `setTraining` no `PuffadorService`).
+  - Quem é escalado para a partida troca na hora pelo Puffador da partida. Ao sair da área o de treino some, e no fim da partida quem continua na área recebe o de treino de novo.
+- **Ninguém nasce em cima das estações:** o `LobbyService` recebe as áreas reservadas e tira essas posições da lista de lugares da galeria.
+- **Celular:** poucas peças, nenhuma luz extra, placas com distância máxima e só um alvo animado pelo servidor.
+- Os atalhos do cartão de perfil continuam funcionando: as estações são um caminho a mais, físico.
+- **Telemetria:** `BaraoPet`, `TrainingSession` (acertos e duração) e `SessionStart` (dias desde a criação do perfil, com a faixa D0, D1+, D7+ ou D28+, para medir D1/D7/D28).
+- **Código:** `LobbyStationsService` e `TrainingService`. No cliente, `LobbyStationsController`.
+
 ### Party e espectador social (Fase 4, entrega 4.4)
 
 - **Party** (`PartyService`, `shared/config/SocialConfig`): grupo de até 4 jogadores do mesmo servidor, um terço da sala de 12, então sobra vaga para quem joga sozinho.

@@ -70,6 +70,14 @@ function PuffMachineController.open()
 	end
 end
 
+-- Abre (sem alternar): usado pelas estações do lobby.
+function PuffMachineController.show()
+	local current = view
+	if current ~= nil and not current.isOpen() then
+		current.open()
+	end
+end
+
 function PuffMachineController.start()
 	if started then
 		return

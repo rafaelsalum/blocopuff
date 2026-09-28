@@ -15,6 +15,12 @@ local StateAttributeNames = require(ReplicatedStorage.Shared.types.StateAttribut
 type ArenaConfig = GameConfig.ArenaConfig
 type BuildingConfig = GameConfig.BuildingConfig
 
+-- Retângulo no chão (só X e Z contam).
+export type ReservedArea = {
+	center: Vector3,
+	size: Vector3,
+}
+
 local LOBBY_NAME = "Lobby"
 local GENERATED_BY_ATTRIBUTE = "GeneratedBy"
 local SERVICE_NAME = "LobbyService"
@@ -40,6 +46,8 @@ local playerRemovingConnection: RBXScriptConnection? = nil
 local characterConnections: { [Player]: RBXScriptConnection } = {}
 local recoveryGeneration = 0
 local slotRandom = Random.new()
+-- Áreas do lobby ocupadas por estações (4.5): ninguém é colocado nelas.
+local reservedAreas: { ReservedArea } = {}
 
 local function isOwned(instance: Instance): boolean
 	return instance:GetAttribute(GENERATED_BY_ATTRIBUTE) == SERVICE_NAME
@@ -114,11 +122,33 @@ local function moveCharacterTo(player: Player, cframe: CFrame)
 	end
 end
 
+local function isReserved(position: Vector3): boolean
+	for _, area in ipairs(reservedAreas) do
+		local offset = position - area.center
+		if math.abs(offset.X) <= area.size.X / 2 and math.abs(offset.Z) <= area.size.Z / 2 then
+			return true
+		end
+	end
+	return false
+end
+
 local function getGallerySlots(): { CFrame }
 	if currentArena == nil or currentBuilding == nil then
 		return {}
 	end
-	return BuildingLayout.getGallerySpawnCFrames(currentArena, currentBuilding, TELEPORT_SLOT_COUNT)
+	local all = BuildingLayout.getGallerySpawnCFrames(currentArena, currentBuilding, TELEPORT_SLOT_COUNT)
+	local slots: { CFrame } = {}
+	for _, slot in ipairs(all) do
+		if not isReserved(slot.Position) then
+			table.insert(slots, slot)
+		end
+	end
+	-- Nunca deixa ninguém sem lugar: se as reservas cobrirem tudo (ou
+	-- sobrar pouco para o servidor cheio), ignora as reservas.
+	if #slots < GameConfig.MaximumPlayers then
+		return all
+	end
+	return slots
 end
 
 local function isActiveCompetitor(player: Player): boolean
@@ -324,6 +354,11 @@ end
 -- ainda está na arena volta para a galeria.
 function LobbyService.returnToLobby(players: { Player })
 	placeInLobby(players)
+end
+
+-- Estações do lobby (LobbyStationsService) avisam onde não colocar gente.
+function LobbyService.setReservedAreas(areas: { ReservedArea })
+	reservedAreas = table.clone(areas)
 end
 
 function LobbyService.getModel(): Model?
