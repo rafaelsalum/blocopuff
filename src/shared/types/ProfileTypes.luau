@@ -17,6 +17,19 @@ export type ProfileStats = {
 	comebacks: number,
 }
 
+-- XP de uma rodada, por fonte (para o pós-partida e o aviso de nível).
+export type XpLine = {
+	source: string,
+	xp: number,
+}
+
+export type XpAward = {
+	total: number,
+	lines: { XpLine },
+	levelBefore: number,
+	levelAfter: number,
+}
+
 -- Cópia enviada ao cliente. `saved` = falso quando o progresso desta sessão
 -- não está sendo salvo (DataStore indisponível ou perfil preso em outro
 -- servidor).
@@ -26,6 +39,8 @@ export type ProfileSnapshot = {
 	level: number,
 	prestige: number,
 	saved: boolean,
+	-- Presente só na atualização logo depois de uma rodada.
+	award: XpAward?,
 }
 
 -- Nomes das estatísticas, na ordem usada por schema, validação e interface.

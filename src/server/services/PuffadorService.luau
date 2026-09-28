@@ -16,6 +16,7 @@ local PuffadorConstants = require(ReplicatedStorage.Shared.modules.PuffadorConst
 local ProjectileService = require(script.Parent.ProjectileService)
 local PuffadorModel = require(script.Parent.PuffadorModel)
 local TelemetryService = require(script.Parent.TelemetryService)
+local RoundStatsService = require(script.Parent.RoundStatsService)
 
 type Variant = PuffadorModel.Variant
 
@@ -366,6 +367,7 @@ local function onRequestPuff(player: Player, rawAimTarget: unknown, rawAimOrigin
 	local variant: Variant = if isSuper then "Super" else "Standard"
 	local power = if isSuper then GameConfig.SecretRoom.SuperPower else 1
 	TelemetryService.shot(player, isSuper)
+	RoundStatsService.shot(player)
 	local hitSomeBlock = false
 	ProjectileService.spawn(player, origin, aimOrigin, direction, currentRoundId, function()
 		incrementRoundBlocksDestroyed(player)

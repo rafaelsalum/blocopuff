@@ -12,6 +12,7 @@ export type RoundCounters = {
 	secretsFound: number,
 	blocksBuilt: number,
 	comebacks: number,
+	shots: number,
 }
 
 local RoundStatsService = {}
@@ -20,7 +21,7 @@ local active = false
 local counters: { [Player]: RoundCounters } = {}
 
 local function empty(): RoundCounters
-	return { vaultsOpened = 0, vaultsConquered = 0, baraoEscapes = 0, secretsFound = 0, blocksBuilt = 0, comebacks = 0 }
+	return { vaultsOpened = 0, vaultsConquered = 0, baraoEscapes = 0, secretsFound = 0, blocksBuilt = 0, comebacks = 0, shots = 0 }
 end
 
 local function add(player: Player, key: string)
@@ -54,6 +55,11 @@ end
 
 function RoundStatsService.blockBuilt(player: Player)
 	add(player, "blocksBuilt")
+end
+
+-- Puffs disparados (só para saber se o jogador participou de verdade).
+function RoundStatsService.shot(player: Player)
+	add(player, "shots")
 end
 
 function RoundStatsService.comeback(player: Player)

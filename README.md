@@ -320,6 +320,43 @@ Escopo em `docs/FASE_2_SEGREDOS_COFRE_BARAO.md`.
 - **Ajustes:** ficam em `GameConfig.Barao` e `GameConfig.Toca`. Os sons atuais são provisórios, embutidos no Roblox; troque `BarkSoundIds`, `FunnySoundIds` e `FootstepSoundId` por áudios da Creator Store (`rbxassetid://...`).
 - **Código:** `BaraoService` (comportamento), `BaraoModel`, `TocaService`, `CorridorBuilder` (nichos) e `BuildingLayout.getTocas` / `isInsideToca` / `getCorridorFloorY`. No cliente, `BaraoController` mostra os avisos.
 
+### XP, Nível e Prestígio (Fase 3, entrega 3.2)
+
+- **XP por rodada** (`XpCalculator`, calculado no servidor ao fim de cada rodada):
+
+  | Fonte | XP |
+  |-------|----|
+  | Concluir a partida (quem disparou pelo menos um Puff) | 20 |
+  | Colocação (do último ao primeiro) | 0 a 30 |
+  | Vitória | 40 |
+  | Derrubadas | 8 cada, até 5 |
+  | Blocos destruídos | 1 a cada 2, até 20 |
+  | Passagem descoberta | 10 cada |
+  | Cofre aberto / conquistado | 10 / 15 |
+  | Fuga do Barão | 8 cada, até 2 |
+  | Volta por Cima | 15 |
+  | Construções | 2 cada |
+
+- **Contra farming:**
+  - multiplicador pelo tamanho da partida: 0,6 com 2 participantes, 0,8 com 3 e 1,0 com 4 ou mais;
+  - quem não disparou nada não ganha XP de participação, colocação nem vitória;
+  - o XP é calculado com os mesmos números já limitados que vão para o perfil;
+  - cada fonte tem limite, e há um teto de 400 XP por rodada;
+  - o XP entra junto com a rodada, pela mesma chave única, então também não duplica ao reconectar.
+- **Nível:** para ir do nível N ao N+1 são necessários 100 + 25 × (N − 1) XP, até o nível 50 (34.300 XP no total). O nível é sempre recalculado a partir do XP (`LevelCurve`, compartilhado entre servidor e cliente), então é determinístico. Nível não muda nada na força do jogador.
+- **Prestígio:** preparado, mas desligado (`ProgressionConfig.PrestigeEnabled = false`). Quando liberado, no nível 50 o jogador soma uma estrela de prestígio (até 10) e recomeça do nível 1; é só status, sem força. Chamada: `PlayerDataService.prestige(player)`.
+- **Perfil v2:** o formato ganhou `levelReachedAt`. A migração v1 → v2 é automática ao carregar.
+- **Na tela:**
+  - **Cartão no lobby:** fica no canto superior esquerdo, com nível, estrelas de prestígio e barra de XP; o botão PERFIL abre as estatísticas da carreira. Se o progresso não estiver sendo salvo, o cartão avisa.
+  - **Fim de cada rodada:** faixa "+N XP" com as maiores fontes.
+  - **Subida de nível:** faixa "NÍVEL N!" com som.
+- **Telemetria:**
+  - `XpGained` (por fonte) e `XpRound` (total, com a faixa de nível e se venceu, para cruzar nível com vitória);
+  - `LevelUp` (tempo no nível anterior) e `RoundAfterLevelUp` (replay depois de subir de nível);
+  - `Prestige`.
+- **Ajustes:** `shared/config/ProgressionConfig`.
+- **Código:** `LevelCurve`, `XpCalculator` e `PlayerDataService`. No cliente, `ProgressionController` e `ProfileCardView`.
+
 ### Perfil persistente (Fase 3, entrega 3.1)
 
 Escopo em `docs/FASE_3_PROGRESSAO_COMPETICAO.md`.

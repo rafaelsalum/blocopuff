@@ -13,6 +13,8 @@ local ProfileTypes = require(ReplicatedStorage.Shared.types.ProfileTypes)
 
 type ProfileSnapshot = ProfileTypes.ProfileSnapshot
 type ProfileStats = ProfileTypes.ProfileStats
+type XpAward = ProfileTypes.XpAward
+type XpLine = ProfileTypes.XpLine
 
 local WAIT_TIMEOUT = 15
 
@@ -27,6 +29,32 @@ local function readNumber(value: unknown): number
 		return math.floor(value)
 	end
 	return 0
+end
+
+local MAX_AWARD_LINES = 16
+
+local function parseAward(raw: unknown): XpAward?
+	if typeof(raw) ~= "table" then
+		return nil
+	end
+	local data = raw :: { [string]: any }
+	local lines: { XpLine } = {}
+	if typeof(data.lines) == "table" then
+		for index, line in ipairs(data.lines :: { any }) do
+			if index > MAX_AWARD_LINES then
+				break
+			end
+			if typeof(line) == "table" and typeof(line.source) == "string" and #line.source <= 30 then
+				table.insert(lines, { source = line.source, xp = readNumber(line.xp) })
+			end
+		end
+	end
+	return {
+		total = readNumber(data.total),
+		lines = lines,
+		levelBefore = math.max(1, readNumber(data.levelBefore)),
+		levelAfter = math.max(1, readNumber(data.levelAfter)),
+	}
 end
 
 local function parse(raw: unknown): ProfileSnapshot?
@@ -47,6 +75,7 @@ local function parse(raw: unknown): ProfileSnapshot?
 		level = math.max(1, readNumber(data.level)),
 		prestige = readNumber(data.prestige),
 		saved = data.saved == true,
+		award = parseAward(data.award),
 	}
 end
 

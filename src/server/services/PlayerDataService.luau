@@ -23,11 +23,22 @@ local PuffadorConstants = require(ReplicatedStorage.Shared.modules.PuffadorConst
 local ProfileTypes = require(ReplicatedStorage.Shared.types.ProfileTypes)
 local ProfileConfig = require(script.Parent.Parent.config.ProfileConfig)
 local ProfileSchema = require(script.Parent.Parent.data.ProfileSchema)
+local ProgressionConfig = require(ReplicatedStorage.Shared.config.ProgressionConfig)
+local LevelCurve = require(ReplicatedStorage.Shared.modules.LevelCurve)
 local TelemetryService = require(script.Parent.TelemetryService)
 
 type Profile = ProfileSchema.Profile
 type RoundDelta = ProfileSchema.RoundDelta
 type ProfileSnapshot = ProfileTypes.ProfileSnapshot
+type XpAward = ProfileTypes.XpAward
+type XpLine = ProfileTypes.XpLine
+
+-- XP calculado pelo RoundService para a rodada (ver XpCalculator).
+export type RoundXp = {
+	lines: { XpLine },
+	total: number,
+	won: boolean,
+}
 
 type Entry = {
 	player: Player,
@@ -43,11 +54,14 @@ type Entry = {
 	saving: boolean,
 	released: boolean,
 	lastSavedAt: number,
+	-- Subiu de nível na última rodada (telemetria de replay após level-up).
+	leveledUpLastRound: boolean,
 }
 
 type PendingRound = {
 	roundKey: string,
 	delta: RoundDelta,
+	xp: RoundXp,
 }
 
 export type ProfileListener = (player: Player, snapshot: ProfileSnapshot) -> ()
@@ -59,6 +73,8 @@ local MAX_ROUND_KEY_LENGTH = 80
 -- Sem mudanças, o salvamento automático só renova a trava depois deste tempo.
 local LOCK_REFRESH_INTERVAL = 300
 local AUTOSAVE_STAGGER = 0.5
+-- Teto de XP por rodada (defesa extra além dos limites do XpCalculator).
+local MAX_ROUND_XP = 400
 
 local PlayerDataService = {}
 
@@ -81,7 +97,7 @@ local function keyFor(player: Player): string
 	return `{ProfileConfig.KeyPrefix}{player.UserId}`
 end
 
-local function snapshotOf(entry: Entry): ProfileSnapshot
+local function snapshotOf(entry: Entry, award: XpAward?): ProfileSnapshot
 	local profile = entry.profile
 	return {
 		stats = table.clone(profile.stats),
@@ -89,11 +105,12 @@ local function snapshotOf(entry: Entry): ProfileSnapshot
 		level = profile.level,
 		prestige = profile.prestige,
 		saved = entry.canSave,
+		award = award,
 	}
 end
 
-local function publish(entry: Entry)
-	local snapshot = snapshotOf(entry)
+local function publish(entry: Entry, award: XpAward?)
+	local snapshot = snapshotOf(entry, award)
 	local remote = snapshotRemote
 	if remote ~= nil and entry.player.Parent ~= nil then
 		remote:FireClient(entry.player, snapshot)
@@ -242,6 +259,7 @@ local function load(player: Player)
 				saving = false,
 				released = false,
 				lastSavedAt = os.clock(),
+				leveledUpLastRound = false,
 			}, true)
 		end
 		pendingRounds[player] = nil
@@ -262,6 +280,7 @@ local function load(player: Player)
 		saving = false,
 		released = false,
 		lastSavedAt = os.clock(),
+		leveledUpLastRound = false,
 	}
 	entries[player] = entry
 	publish(entry)
@@ -270,7 +289,7 @@ local function load(player: Player)
 	pendingRounds[player] = nil
 	if pending ~= nil then
 		for _, round in ipairs(pending) do
-			PlayerDataService.applyRound(player, round.roundKey, round.delta)
+			PlayerDataService.applyRound(player, round.roundKey, round.delta, round.xp)
 		end
 	end
 end
@@ -289,13 +308,13 @@ end
 
 -- Soma a rodada ao perfil de um jogador presente. `roundKey` identifica a
 -- rodada de forma única (servidor + rodada): repetir a chave não soma de novo.
-function PlayerDataService.applyRound(player: Player, roundKey: string, delta: RoundDelta): boolean
+function PlayerDataService.applyRound(player: Player, roundKey: string, delta: RoundDelta, roundXp: RoundXp): boolean
 	local entry = entries[player]
 	if entry == nil then
 		if loading[player] then
 			-- Perfil ainda carregando: guarda a rodada para somar ao carregar.
 			local queue = pendingRounds[player] or {}
-			table.insert(queue, { roundKey = roundKey, delta = delta })
+			table.insert(queue, { roundKey = roundKey, delta = delta, xp = roundXp })
 			pendingRounds[player] = queue
 			return true
 		end
@@ -313,11 +332,37 @@ function PlayerDataService.applyRound(player: Player, roundKey: string, delta: R
 		warn(string.format("[BlocoPuff] Profile anomaly for %s in %s: %s", player.Name, roundKey, detail))
 		TelemetryService.event(player, "ProfileAnomaly", #anomalies, string.sub(detail, 1, 50))
 	end
-	entry.profile = table.clone(profile)
-	entry.profile.stats = ProfileSchema.addStats(profile.stats, clean)
-	entry.profile.appliedRounds = ProfileSchema.withAppliedRound(profile.appliedRounds, roundKey, ProfileConfig.AppliedRoundsKept)
+	-- XP: limitado ao teto do prestígio atual; o nível sai do XP.
+	local gained = math.clamp(math.floor(roundXp.total), 0, MAX_ROUND_XP)
+	local newXp = math.min(LevelCurve.maxXp(), profile.xp + gained)
+	local newLevel = LevelCurve.levelForXp(newXp)
+	local timestamp = now()
+	local updated = table.clone(profile)
+	updated.stats = ProfileSchema.addStats(profile.stats, clean)
+	updated.appliedRounds = ProfileSchema.withAppliedRound(profile.appliedRounds, roundKey, ProfileConfig.AppliedRoundsKept)
+	updated.xp = newXp
+	updated.level = newLevel
+	if newLevel > profile.level then
+		updated.levelReachedAt = timestamp
+	end
+	entry.profile = updated
+	entry.leveledUpLastRound = newLevel > profile.level
 	entry.dirty = true
-	publish(entry)
+
+	for _, line in ipairs(roundXp.lines) do
+		TelemetryService.event(player, "XpGained", line.xp, line.source)
+	end
+	TelemetryService.event(player, "XpRound", gained, `Level{profile.level}`, if roundXp.won then "Win" else "NoWin")
+	if newLevel > profile.level then
+		TelemetryService.event(player, "LevelUp", timestamp - profile.levelReachedAt, `Level{newLevel}`, `From{profile.level}`)
+	end
+
+	publish(entry, {
+		total = gained,
+		lines = roundXp.lines,
+		levelBefore = profile.level,
+		levelAfter = newLevel,
+	})
 	-- Grava logo: o fim da rodada é o momento mais importante de não perder.
 	task.spawn(save, entry, false)
 	return true
@@ -335,6 +380,43 @@ end
 -- Avisado quando o perfil de alguém carrega ou muda.
 function PlayerDataService.addListener(listener: ProfileListener)
 	table.insert(listeners, listener)
+end
+
+-- Chamado no início de cada rodada: registra quem voltou a jogar logo
+-- depois de subir de nível.
+function PlayerDataService.roundStarted(players: { Player })
+	for _, player in ipairs(players) do
+		local entry = entries[player]
+		if entry ~= nil and entry.leveledUpLastRound then
+			entry.leveledUpLastRound = false
+			TelemetryService.event(player, "RoundAfterLevelUp", entry.profile.level)
+		end
+	end
+end
+
+-- Prestígio (preparado; só funciona com ProgressionConfig.PrestigeEnabled):
+-- no nível máximo, soma 1 de prestígio e recomeça do nível 1. Não dá força.
+function PlayerDataService.prestige(player: Player): boolean
+	local entry = entries[player]
+	if not ProgressionConfig.PrestigeEnabled or entry == nil then
+		return false
+	end
+	local profile = entry.profile
+	if profile.level < ProgressionConfig.MaxLevel or profile.prestige >= ProgressionConfig.MaxPrestige then
+		return false
+	end
+	local updated = table.clone(profile)
+	updated.prestige = profile.prestige + 1
+	updated.xp = 0
+	updated.level = 1
+	updated.levelReachedAt = now()
+	entry.profile = updated
+	entry.dirty = true
+	print(string.format("[BlocoPuff] %s reached prestige %d", player.Name, updated.prestige))
+	TelemetryService.event(player, "Prestige", updated.prestige)
+	publish(entry)
+	task.spawn(save, entry, false)
+	return true
 end
 
 -- Chave única da rodada para `applyRound`.

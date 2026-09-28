@@ -11,6 +11,7 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local GameConfig = require(ReplicatedStorage.Shared.config.GameConfig)
+local LevelCurve = require(ReplicatedStorage.Shared.modules.LevelCurve)
 local ProfileTypes = require(ReplicatedStorage.Shared.types.ProfileTypes)
 
 type ProfileStats = ProfileTypes.ProfileStats
@@ -26,6 +27,8 @@ export type Profile = {
 	xp: number,
 	level: number,
 	prestige: number,
+	-- os.time() em que chegou ao nível atual (telemetria de tempo por nível).
+	levelReachedAt: number,
 	appliedRounds: { string },
 	createdAt: number,
 	updatedAt: number,
@@ -35,7 +38,8 @@ export type Profile = {
 -- Soma de uma rodada para um jogador (mesmas chaves das estatísticas).
 export type RoundDelta = ProfileStats
 
-local CURRENT_VERSION = 1
+-- v1: estatísticas (3.1). v2: levelReachedAt (3.2).
+local CURRENT_VERSION = 2
 local MAX_STAT = 1e9
 local MAX_ROUND_KEY_LENGTH = 80
 
@@ -65,6 +69,7 @@ function ProfileSchema.default(now: number): Profile
 		xp = 0,
 		level = 1,
 		prestige = 0,
+		levelReachedAt = now,
 		appliedRounds = {},
 		createdAt = now,
 		updatedAt = now,
@@ -73,7 +78,15 @@ function ProfileSchema.default(now: number): Profile
 end
 
 -- Passos de migração: MIGRATIONS[n] recebe dados na versão n e devolve na n+1.
-local MIGRATIONS: { [number]: (data: { [string]: any }) -> { [string]: any } } = {}
+local MIGRATIONS: { [number]: (data: { [string]: any }) -> { [string]: any } } = {
+	-- v1 → v2: data em que chegou ao nível atual (sem histórico: usa a última gravação).
+	[1] = function(data)
+		local migrated = table.clone(data)
+		migrated.levelReachedAt = data.updatedAt or data.createdAt
+		migrated.version = 2
+		return migrated
+	end,
+}
 
 local function readStats(raw: unknown): ProfileStats
 	local stats = ProfileSchema.emptyStats() :: any
@@ -136,12 +149,15 @@ function ProfileSchema.fromStored(raw: unknown, now: number): (Profile, boolean)
 		version += 1
 	end
 
+	-- O nível sai sempre do XP (determinístico); o salvo é só informativo.
+	local xp = math.min(cleanNumber(data.xp, 0), LevelCurve.maxXp())
 	return {
 		version = CURRENT_VERSION,
 		stats = readStats(data.stats),
-		xp = cleanNumber(data.xp, 0),
-		level = math.max(1, cleanNumber(data.level, 1)),
+		xp = xp,
+		level = LevelCurve.levelForXp(xp),
 		prestige = cleanNumber(data.prestige, 0),
+		levelReachedAt = cleanNumber(data.levelReachedAt, now),
 		appliedRounds = readAppliedRounds(data.appliedRounds),
 		createdAt = cleanNumber(data.createdAt, now),
 		updatedAt = cleanNumber(data.updatedAt, now),
@@ -219,6 +235,7 @@ function ProfileSchema.toStored(profile: Profile): { [string]: any }
 		xp = profile.xp,
 		level = profile.level,
 		prestige = profile.prestige,
+		levelReachedAt = profile.levelReachedAt,
 		appliedRounds = table.clone(profile.appliedRounds),
 		createdAt = profile.createdAt,
 		updatedAt = profile.updatedAt,

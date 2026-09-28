@@ -26,6 +26,8 @@ local PuffMomentService = require(script.Parent.PuffMomentService)
 local CorridorTelemetryService = require(script.Parent.CorridorTelemetryService)
 local RoundStatsService = require(script.Parent.RoundStatsService)
 local PlayerDataService = require(script.Parent.PlayerDataService)
+local XpCalculator = require(script.Parent.Parent.data.XpCalculator)
+local ProfileSchema = require(script.Parent.Parent.data.ProfileSchema)
 local ResultTypes = require(ReplicatedStorage.Shared.types.ResultTypes)
 
 local awakeningRandom = Random.new()
@@ -504,6 +506,7 @@ local function beginRound(timings: RoundTimings)
 	TocaService.beginRound(currentRoundId)
 	PuffMomentService.beginRound()
 	RoundStatsService.beginRound()
+	PlayerDataService.roundStarted(participantOrder)
 	CorridorTelemetryService.beginRound(currentRoundId)
 	-- O Barão acorda e o cofre destranca no mesmo instante sorteado.
 	local awakening = timings.RoundDuration * awakeningRandom:NextNumber(GameConfig.Barao.WakeMinFraction, GameConfig.Barao.WakeMaxFraction)
@@ -586,7 +589,7 @@ local function commitProfiles(result: ResultTypes.RoundResult)
 			local extra = RoundStatsService.get(player)
 			local won = not result.draw and result.winnerUserId == entry.userId
 			local podium = won or (entry.position <= 3 and result.participantCount >= TOP3_MIN_PARTICIPANTS)
-			PlayerDataService.applyRound(player, roundKey, {
+			local delta = {
 				matches = 1,
 				wins = if won then 1 else 0,
 				top3 = if podium then 1 else 0,
@@ -598,7 +601,25 @@ local function commitProfiles(result: ResultTypes.RoundResult)
 				secretsFound = extra.secretsFound,
 				blocksBuilt = extra.blocksBuilt,
 				comebacks = extra.comebacks,
+			}
+			-- O XP usa os mesmos números já limitados que vão para o perfil
+			-- (o applyRound limita de novo e registra as anomalias).
+			local trusted = ProfileSchema.clampDelta(delta)
+			local xpLines, xpTotal = XpCalculator.compute({
+				position = entry.position,
+				participantCount = result.participantCount,
+				won = won,
+				knockouts = trusted.knockouts,
+				blocksDestroyed = trusted.blocksDestroyed,
+				secretsFound = trusted.secretsFound,
+				vaultsOpened = trusted.vaultsOpened,
+				vaultsConquered = trusted.vaultsConquered,
+				baraoEscapes = trusted.baraoEscapes,
+				comebacks = trusted.comebacks,
+				blocksBuilt = trusted.blocksBuilt,
+				shots = extra.shots,
 			})
+			PlayerDataService.applyRound(player, roundKey, delta, { lines = xpLines, total = xpTotal, won = won })
 		end
 	end
 end
