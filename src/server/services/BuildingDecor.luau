@@ -42,9 +42,13 @@ export type StoryOptions = {
 
 -- `frame`: vão com moldura visível (cofre). Sem moldura, o vão fica escondido
 -- atrás de um painel falso até ser revelado (corredores secretos).
+-- `width`/`height` mudam o tamanho do vão (padrão: a porta do cofre); as
+-- portas e arcos do Casarão são maiores.
 export type DoorGap = {
 	offset: number,
 	frame: boolean,
+	width: number?,
+	height: number?,
 }
 
 local WAINSCOT_HEIGHT = 4.5
@@ -145,9 +149,17 @@ local function panel(
 	)
 end
 
--- Mesmo painel, recortado em volta dos vãos de porta (`gapOffsets`, cada um
--- com a largura da porta): um pedaço entre cada vão e, se o painel passar do
--- topo dos vãos (`gapTop`), um pedaço por cima de cada um.
+local function gapWidth(gap: DoorGap): number
+	return gap.width or DOOR_SIZE.X
+end
+
+local function gapHeight(gap: DoorGap): number
+	return gap.height or DOOR_SIZE.Y
+end
+
+-- Mesmo painel, recortado em volta dos vãos de porta (cada um com a sua
+-- largura): um pedaço entre cada vão e, se o painel passar do topo de um
+-- vão (`gapBottom` + altura do vão), um pedaço por cima dele.
 local function panelAroundGaps(
 	parent: Instance,
 	segment: WallSegment,
@@ -157,25 +169,28 @@ local function panelAroundGaps(
 	thickness: number,
 	color: Color3,
 	material: Enum.Material,
-	gapOffsets: { number },
-	gapTop: number
+	gaps: { DoorGap },
+	gapBottom: number
 )
 	local length = segment.length
-	local halfGap = DOOR_SIZE.X / 2
-	local sorted = table.clone(gapOffsets)
-	table.sort(sorted)
+	local sorted = table.clone(gaps)
+	table.sort(sorted, function(a, b)
+		return a.offset < b.offset
+	end)
 
 	local cursor = -length / 2
-	for _, offset in ipairs(sorted) do
-		local left = offset - halfGap
+	for _, gap in ipairs(sorted) do
+		local halfGap = gapWidth(gap) / 2
+		local left = gap.offset - halfGap
 		if left - cursor > 0.05 then
 			panel(parent, segment, name, (cursor + left) / 2, left - cursor, y0, height, thickness, color, material)
 		end
+		local gapTop = gapBottom + gapHeight(gap)
 		if y0 + height > gapTop then
 			local bottom = math.max(y0, gapTop)
-			panel(parent, segment, `{name}Lintel`, offset, DOOR_SIZE.X, bottom, (y0 + height) - bottom, thickness, color, material)
+			panel(parent, segment, `{name}Lintel`, gap.offset, gapWidth(gap), bottom, (y0 + height) - bottom, thickness, color, material)
 		end
-		cursor = offset + halfGap
+		cursor = gap.offset + halfGap
 	end
 	local rightEdge = length / 2
 	if rightEdge - cursor > 0.05 then
@@ -326,15 +341,18 @@ local function createDoor(parent: Instance, segment: WallSegment, offset: number
 end
 
 -- Moldura de um vão real de porta (sem folha: a porta funcional é do VaultService).
-local function createDoorwayFrame(parent: Instance, segment: WallSegment, offset: number, floorY: number, style: BuildingConfig)
+local function createDoorwayFrame(parent: Instance, segment: WallSegment, gap: DoorGap, floorY: number, style: BuildingConfig)
 	local jambWidth = 0.5
 	local depth = 0.5
+	local width = gapWidth(gap)
+	local height = gapHeight(gap)
+	local offset = gap.offset
 	for _, side in ipairs({ -1, 1 }) do
 		BuildingDecor.createPart(
 			parent,
 			`{segment.name}DoorwayJamb`,
-			Vector3.new(jambWidth, DOOR_SIZE.Y + 0.6, depth),
-			BuildingDecor.wallCFrame(segment, offset + (side * ((DOOR_SIZE.X + jambWidth) / 2)), floorY + ((DOOR_SIZE.Y + 0.6) / 2), depth / 2),
+			Vector3.new(jambWidth, height + 0.6, depth),
+			BuildingDecor.wallCFrame(segment, offset + (side * ((width + jambWidth) / 2)), floorY + ((height + 0.6) / 2), depth / 2),
 			style.TrimColor,
 			{ material = Enum.Material.Wood }
 		)
@@ -342,8 +360,8 @@ local function createDoorwayFrame(parent: Instance, segment: WallSegment, offset
 	BuildingDecor.createPart(
 		parent,
 		`{segment.name}DoorwayLintel`,
-		Vector3.new(DOOR_SIZE.X + (jambWidth * 2), 0.6, depth),
-		BuildingDecor.wallCFrame(segment, offset, floorY + DOOR_SIZE.Y + 0.3, depth / 2),
+		Vector3.new(width + (jambWidth * 2), 0.6, depth),
+		BuildingDecor.wallCFrame(segment, offset, floorY + height + 0.3, depth / 2),
 		style.TrimColor,
 		{ material = Enum.Material.Wood }
 	)
@@ -351,7 +369,7 @@ local function createDoorwayFrame(parent: Instance, segment: WallSegment, offset
 		parent,
 		`{segment.name}DoorwayCrest`,
 		Vector3.new(1.2, 0.8, 0.2),
-		BuildingDecor.wallCFrame(segment, offset, floorY + DOOR_SIZE.Y + 1.1, 0.5),
+		BuildingDecor.wallCFrame(segment, offset, floorY + height + 1.1, 0.5),
 		style.BrassColor,
 		{ material = Enum.Material.Metal }
 	)
@@ -389,16 +407,11 @@ function BuildingDecor.decorateStory(
 	local length = segment.length
 
 	local gaps = options.gaps or {}
-	local gapOffsets: { number } = {}
-	for _, gap in ipairs(gaps) do
-		table.insert(gapOffsets, gap.offset)
-	end
-	local gapTop = bottom + DOOR_SIZE.Y
-	panelAroundGaps(parent, segment, "Wallpaper", bottom, height, 0.1, options.wallpaperColor, Enum.Material.Plaster, gapOffsets, gapTop)
-	panelAroundGaps(parent, segment, "Wainscot", bottom, math.min(WAINSCOT_HEIGHT, height), 0.3, style.WainscotColor, Enum.Material.WoodPlanks, gapOffsets, gapTop)
-	panelAroundGaps(parent, segment, "Baseboard", bottom, math.min(0.8, height), 0.45, style.BaseboardColor, Enum.Material.Wood, gapOffsets, gapTop)
+	panelAroundGaps(parent, segment, "Wallpaper", bottom, height, 0.1, options.wallpaperColor, Enum.Material.Plaster, gaps, bottom)
+	panelAroundGaps(parent, segment, "Wainscot", bottom, math.min(WAINSCOT_HEIGHT, height), 0.3, style.WainscotColor, Enum.Material.WoodPlanks, gaps, bottom)
+	panelAroundGaps(parent, segment, "Baseboard", bottom, math.min(0.8, height), 0.45, style.BaseboardColor, Enum.Material.Wood, gaps, bottom)
 	if height > WAINSCOT_HEIGHT + 0.5 then
-		panelAroundGaps(parent, segment, "ChairRail", bottom + WAINSCOT_HEIGHT - 0.2, 0.4, 0.5, style.TrimColor, Enum.Material.Wood, gapOffsets, gapTop)
+		panelAroundGaps(parent, segment, "ChairRail", bottom + WAINSCOT_HEIGHT - 0.2, 0.4, 0.5, style.TrimColor, Enum.Material.Wood, gaps, bottom)
 	end
 	if height > MIN_HEIGHT_FOR_ART then
 		panel(parent, segment, "Crown", 0, length, top - 0.7, 0.7, 0.6, style.TrimColor, Enum.Material.Wood)
@@ -406,13 +419,14 @@ function BuildingDecor.decorateStory(
 
 	for _, gap in ipairs(gaps) do
 		if gap.frame then
-			createDoorwayFrame(parent, segment, gap.offset, bottom, style)
+			createDoorwayFrame(parent, segment, gap, bottom, style)
 		end
 	end
 	-- Nenhum detalhe (porta, arandela, quadro) em cima de um vão real.
 	local function overlapsGap(offset: number): boolean
-		for _, gapOffset in ipairs(gapOffsets) do
-			if math.abs(offset - gapOffset) < GAP_CLEARANCE then
+		for _, gap in ipairs(gaps) do
+			local clearance = GAP_CLEARANCE + (gapWidth(gap) - DOOR_SIZE.X) / 2
+			if math.abs(offset - gap.offset) < clearance then
 				return true
 			end
 		end
@@ -449,7 +463,8 @@ function BuildingDecor.decorateStory(
 	end
 end
 
-function BuildingDecor.createChandelier(parent: Instance, name: string, anchor: Vector3, drop: number, radius: number, style: BuildingConfig, range: number, brightness: number)
+-- `shadows` (padrão: sim) pode ser desligado onde há muitos lustres (Casarão).
+function BuildingDecor.createChandelier(parent: Instance, name: string, anchor: Vector3, drop: number, radius: number, style: BuildingConfig, range: number, brightness: number, shadows: boolean?)
 	local center = anchor - Vector3.new(0, drop, 0)
 	BuildingDecor.createPart(
 		parent,
@@ -467,7 +482,7 @@ function BuildingDecor.createChandelier(parent: Instance, name: string, anchor: 
 		style.BrassColor,
 		{ material = Enum.Material.Metal, shape = Enum.PartType.Cylinder }
 	)
-	addPointLight(body, style.LampColor, range, brightness, true)
+	addPointLight(body, style.LampColor, range, brightness, shadows ~= false)
 
 	local bulbCount = 6
 	for index = 1, bulbCount do

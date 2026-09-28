@@ -78,14 +78,15 @@ function RoundHudView.new(playerGui: PlayerGui): RoundHudViewHandle
 	local waitingRoot, waitingGroup, waitingScale, waitingResponsive = createAnimationGroup(
 		screenGui,
 		"WaitingGroup",
-		UDim2.new(0.5, 0, 0, 124),
-		UDim2.fromOffset(360, 76)
+		-- Compacto e colado no topo: o lobby (Casarão) fica visível.
+		UDim2.new(0.5, 0, 0, 98),
+		UDim2.fromOffset(320, 68)
 	)
 	waitingRoot.Visible = false
 
 	-- Logotipo do jogo acima do cartão de espera: é a primeira coisa que o
 	-- jogador vê no lobby e fixa a identidade visual.
-	local wordmark = UiKit.createWordmark(waitingGroup, 60, 3)
+	local wordmark = UiKit.createWordmark(waitingGroup, 46, 3)
 	wordmark.AnchorPoint = Vector2.new(0.5, 1)
 	wordmark.Position = UDim2.new(0.5, 0, 0, -4)
 

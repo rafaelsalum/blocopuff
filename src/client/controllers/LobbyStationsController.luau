@@ -1,7 +1,7 @@
 --!strict
 
 -- Estações do lobby (Fase 4.5): o ProximityPrompt de cada estação física
--- abre a tela correspondente (Puff Machine, Puffdex, Desafios). A loja só
+-- abre a tela correspondente (Puff Machine, Puffdex, Desafios, Party). A loja só
 -- avisa que chega em breve. O carinho no Barão é tratado no servidor.
 
 local Players = game:GetService("Players")
@@ -9,6 +9,7 @@ local ProximityPromptService = game:GetService("ProximityPromptService")
 
 local NotificationManager = require(script.Parent.Parent.notifications.NotificationManager)
 local ChallengesController = require(script.Parent.ChallengesController)
+local PartyController = require(script.Parent.PartyController)
 local PuffdexController = require(script.Parent.PuffdexController)
 local PuffMachineController = require(script.Parent.PuffMachineController)
 
@@ -26,6 +27,8 @@ local function openStation(station: unknown)
 		PuffdexController.show()
 	elseif station == "Challenges" then
 		ChallengesController.show()
+	elseif station == "Party" then
+		PartyController.show()
 	elseif station == "Shop" then
 		NotificationManager.notify({
 			channel = "Banner",

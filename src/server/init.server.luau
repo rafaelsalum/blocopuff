@@ -32,6 +32,7 @@ local LobbyStationsService = require(script.services.LobbyStationsService)
 local TrainingService = require(script.services.TrainingService)
 local WorldVisualService = require(script.services.WorldVisualService)
 local BuildingService = require(script.services.BuildingService)
+local MansionService = require(script.services.MansionService)
 local AdminService = require(script.services.AdminService)
 local PhotoModeService = require(script.services.PhotoModeService)
 
@@ -76,6 +77,11 @@ print("[BlocoPuff] Building created")
 
 LobbyService.create(world, GameConfig.Arena, GameConfig.Building)
 print("[BlocoPuff] Lobby created")
+
+-- O Casarão é o lobby (o nascimento fica nele): precisa do prédio (portas
+-- na parede leste) e do LobbyService (reserva as áreas dos móveis).
+MansionService.create(world, GameConfig.Building)
+print("[BlocoPuff] Mansion lobby built")
 
 AdminService.start()
 print("[BlocoPuff] Secure admin panel initialized")
@@ -166,8 +172,8 @@ LeaderboardService.start(PuffadorService.getRemotesFolder())
 HallOfFameService.start(world, LeaderboardService.addListener)
 print("[BlocoPuff] Leaderboards and Hall of Fame ready")
 
--- Lobby expandido: estações (Puff Machine, vitrine, desafios, loja em
--- breve, Barão amigável) e a área de treino. Opcional: uma falha aqui não
+-- Estações nas salas do Casarão (Puff Machine, vitrine, desafios, Party,
+-- loja em breve, Barão amigável) e a área de treino. Opcional: uma falha aqui não
 -- impede o servidor de subir.
 local stationsOk, stationsFailure = pcall(function()
 	LobbyStationsService.start(world)

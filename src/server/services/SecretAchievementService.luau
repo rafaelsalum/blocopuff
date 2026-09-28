@@ -16,7 +16,8 @@ local TweenService = game:GetService("TweenService")
 
 local GameConfig = require(ReplicatedStorage.Shared.config.GameConfig)
 local SecretCatalog = require(ReplicatedStorage.Shared.config.SecretCatalog)
-local BuildingLayout = require(ReplicatedStorage.Shared.modules.BuildingLayout)
+local MansionConfig = require(ReplicatedStorage.Shared.config.MansionConfig)
+local MansionLayout = require(ReplicatedStorage.Shared.modules.MansionLayout)
 local PlayerDataService = require(script.Parent.PlayerDataService)
 local TelemetryService = require(script.Parent.TelemetryService)
 local ProfileSchema = require(script.Parent.Parent.data.ProfileSchema)
@@ -115,8 +116,8 @@ function SecretAchievementService.beginRound()
 	table.clear(revealedFloors)
 end
 
--- O Puff escondido: pequeno, com brilho fraco, atrás de um caixote no canto
--- nordeste da galeria.
+-- O Puff escondido: pequeno, com brilho fraco, atrás de um caixote num
+-- canto do Casarão.
 local function createLobbyPuff(worldRoot: Model)
 	local existing = worldRoot:FindFirstChild(FOLDER_NAME)
 	if existing ~= nil then
@@ -130,10 +131,11 @@ local function createLobbyPuff(worldRoot: Model)
 	folder:SetAttribute(GENERATED_BY_ATTRIBUTE, SERVICE_NAME)
 	folder.Parent = worldRoot
 
-	local gallery = BuildingLayout.getGallery(GameConfig.Arena, GameConfig.Building)
-	local x = gallery.innerX + GameConfig.Building.GalleryDepth - CORNER_INSET
-	local z = gallery.center.Z - (gallery.size.Z / 2) + CORNER_INSET
-	local floorY = gallery.floorY
+	-- Canto nordeste do Jardim do Barão.
+	local garden = MansionLayout.room("Garden")
+	local x = garden.maxX - CORNER_INSET
+	local z = garden.minZ + (MansionConfig.PartitionThickness / 2) + CORNER_INSET
+	local floorY = MansionLayout.get().floorY
 
 	local crate = Instance.new("Part")
 	crate.Name = "Crate"

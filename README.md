@@ -320,6 +320,26 @@ Escopo em `docs/FASE_2_SEGREDOS_COFRE_BARAO.md`.
 - **Ajustes:** ficam em `GameConfig.Barao` e `GameConfig.Toca`. Os sons atuais são provisórios, embutidos no Roblox; troque `BarkSoundIds`, `FunnySoundIds` e `FootstepSoundId` por áudios da Creator Store (`rbxassetid://...`).
 - **Código:** `BaraoService` (comportamento), `BaraoModel`, `TocaService`, `CorridorBuilder` (nichos) e `BuildingLayout.getTocas` / `isInsideToca` / `getCorridorFloorY`. No cliente, `BaraoController` mostra os avisos.
 
+### O Casarão e alertas fora do centro (Fase 4, ajuste pós-4.5)
+
+O lobby virou um **Casarão** de 110 × 130 studs (a galeria tinha 20 × 90), anexo a leste do prédio da arena, com pé-direito de 24 studs. Três portas largas na parede leste da galeria levam ao Salão Principal; a galeria continua sendo o mirante da arena, com o Hall da Fama acima das portas.
+
+- **Salão Principal** (60 × 60): todos nascem e esperam aqui, em volta da estátua dourada "CASARÃO PUFF". Tem sofás e plantas, e os arcos levam às outras salas, cada um com uma placa dizendo para onde vai.
+- **Salão da Coleção** (norte): vitrine com **todos os 22 Puffs** do catálogo em duas fileiras, o púlpito do **Puffdex** e a **Puff Machine**.
+- **Jardim do Barão** (leste): gramado com o **Barão amigável** na caminha, a **loja "em breve"** e o Puff Perdido (conquista secreta) escondido num canto.
+- **Ponto de Encontro** (ala sul, oeste): o **quadro de desafios** e o **canto da Party** (sofás e uma placa com prompt que abre a Party).
+- **Treino** (ala sul, leste): faixa verde, seis alvos fixos e dois que deslizam.
+- **Ninguém nasce em cima de móveis:** estátua, sofás e plantas do Salão reservam as suas áreas no `LobbyService` (`addReservedAreas`).
+- **Celular:** seis lustres sem sombra (nenhuma arandela), placas com distância máxima e nada animado além dos alvos de treino.
+- **Alertas fora do centro:**
+  - os anúncios (`AnnouncementView`) e a faixa de avisos (`BannerView`) viraram cartões compactos na **borda esquerda**, que entram deslizando (anúncio a 42% da altura, aviso a 56%);
+  - o convite de Party desceu para 72%;
+  - o cartão de espera do lobby ficou menor e mais colado ao topo;
+  - o centro (mira) e o topo (cronômetro) ficam livres.
+- **Código:**
+  - `MansionConfig` e `MansionLayout` (geometria única do Casarão), `MansionService` (construção) e `WallBuilder` (paredes com vãos, também usado pelo `BuildingService`);
+  - `BuildingDecor` aceita vãos de largura e altura próprias e lustres sem sombra.
+
 ### Lobby expandido (Fase 4, entrega 4.5)
 
 A galeria (20 × 90 studs) ganhou estações físicas. Cada uma tem um ProximityPrompt que abre a tela correspondente, e o centro e os sofás continuam livres.

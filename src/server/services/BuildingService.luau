@@ -3,7 +3,8 @@
 -- Constrói o prédio fechado onde a partida acontece, com interior no estilo
 -- mansão: porão de tijolos no poço, um andar decorado para cada piso da
 -- arena, teto com vigas e lustres e uma galeria envidraçada que funciona
--- como lobby. A geometria vem de BuildingLayout; a decoração, de
+-- como mirante da arena, com portas para o Casarão (o lobby principal, ver
+-- MansionService). A geometria vem de BuildingLayout; a decoração, de
 -- BuildingDecor. Só usa instâncias e materiais nativos.
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -12,7 +13,10 @@ local Workspace = game:GetService("Workspace")
 local GameConfig = require(ReplicatedStorage.Shared.config.GameConfig)
 local BuildingLayout = require(ReplicatedStorage.Shared.modules.BuildingLayout)
 local BuildingDecor = require(script.Parent.BuildingDecor)
+local MansionConfig = require(ReplicatedStorage.Shared.config.MansionConfig)
+local MansionLayout = require(ReplicatedStorage.Shared.modules.MansionLayout)
 local SecretRoomBuilder = require(script.Parent.SecretRoomBuilder)
+local WallBuilder = require(script.Parent.WallBuilder)
 local CorridorBuilder = require(script.Parent.CorridorBuilder)
 
 type ArenaConfig = GameConfig.ArenaConfig
@@ -97,52 +101,45 @@ local function createSolid(parent: Instance, name: string, size: Vector3, positi
 	return part
 end
 
-type Box = { min: Vector3, max: Vector3 }
+type Box = WallBuilder.Box
 
-local function createBox(parent: Instance, name: string, box: Box, color: Color3, material: Enum.Material)
-	local size = box.max - box.min
-	if size.X <= 0.01 or size.Y <= 0.01 or size.Z <= 0.01 then
-		return
-	end
-	createSolid(parent, name, size, (box.min + box.max) / 2, color, material)
-end
+local createWallWithHoles = WallBuilder.createWallWithHoles
 
--- Parede sólida com vãos atravessando toda a espessura. Os vãos devem
--- estar contidos na parede e não se sobrepor ao longo dela. Vira colunas
--- inteiras entre os vãos e, em cada vão, uma peça abaixo e outra acima.
-local function createWallWithHoles(parent: Instance, name: string, wall: Box, holes: { Box }, color: Color3, material: Enum.Material)
-	local runsAlongX = (wall.max.X - wall.min.X) > (wall.max.Z - wall.min.Z)
-	local function withAlong(v: Vector3, value: number): Vector3
-		return if runsAlongX then Vector3.new(value, v.Y, v.Z) else Vector3.new(v.X, v.Y, value)
-	end
-	local function along(v: Vector3): number
-		return if runsAlongX then v.X else v.Z
-	end
-
-	local sorted = table.clone(holes)
-	table.sort(sorted, function(a, b)
-		return along(a.min) < along(b.min)
-	end)
-
-	local cursor = along(wall.min)
-	for index, hole in ipairs(sorted) do
-		createBox(parent, `{name}Span{index}`, { min = withAlong(wall.min, cursor), max = withAlong(wall.max, along(hole.min)) }, color, material)
-		local columnMin = withAlong(wall.min, along(hole.min))
-		local columnMax = withAlong(wall.max, along(hole.max))
-		createBox(parent, `{name}Below{index}`, { min = columnMin, max = Vector3.new(columnMax.X, hole.min.Y, columnMax.Z) }, color, material)
-		createBox(parent, `{name}Above{index}`, { min = Vector3.new(columnMin.X, hole.max.Y, columnMin.Z), max = columnMax }, color, material)
-		cursor = along(hole.max)
-	end
-	createBox(parent, `{name}Span{#sorted + 1}`, { min = withAlong(wall.min, cursor), max = wall.max }, color, material)
-end
-
--- Vão de porta atravessando a parede inteira, centrado em `point` (face
--- interna, no nível do piso).
+-- Vão de porta secreta (cofre, corredores) atravessando a parede inteira,
+-- centrado em `point` (face interna, no nível do piso).
 local function doorHole(point: Vector3, inward: Vector3, along: Vector3, thickness: number): Box
-	local size = BuildingLayout.SecretDoorSize
-	local cornerA = point + (along * (size.X / 2)) - (inward * (thickness + 0.5))
-	local cornerB = point - (along * (size.X / 2)) + (inward * 0.5) + Vector3.new(0, size.Y, 0)
-	return { min = cornerA:Min(cornerB), max = cornerA:Max(cornerB) }
+	return WallBuilder.hole(point, inward, along, thickness, BuildingLayout.SecretDoorSize)
+end
+
+-- Portas largas da galeria para o Casarão (lobby principal), na parede leste.
+local function getPassageHoles(building: BuildingConfig): { Box }
+	local mansion = MansionLayout.get()
+	local holes: { Box } = {}
+	for _, z in ipairs(mansion.passages) do
+		local point = Vector3.new(mansion.galleryWallX - building.WallThickness, mansion.floorY, z)
+		table.insert(holes, WallBuilder.hole(point, Vector3.new(-1, 0, 0), Vector3.new(0, 0, 1), building.WallThickness, MansionConfig.PassageSize))
+	end
+	return holes
+end
+
+-- Mesmas portas vistas da galeria (parede GalleryEast: ao longo = −Z).
+local function getPassageGaps(): { DoorGap }
+	local mansion = MansionLayout.get()
+	local centerZ = mansion.center.Z
+	local gaps: { DoorGap } = {}
+	for _, z in ipairs(mansion.passages) do
+		table.insert(gaps, { offset = centerZ - z, frame = true, width = MansionConfig.PassageSize.X, height = MansionConfig.PassageSize.Y })
+	end
+	return gaps
+end
+
+local function nearPassage(z: number, clearance: number): boolean
+	for _, passageZ in ipairs(MansionLayout.get().passages) do
+		if math.abs(z - passageZ) < clearance then
+			return true
+		end
+	end
+	return false
 end
 
 -- Vãos de cada parede: a porta do cofre (oeste) e as duas entradas de cada
@@ -275,14 +272,9 @@ local function createShell(parent: Instance, arena: ArenaConfig, building: Build
 	local westCenter = Vector3.new(center.X - bounds.halfWidth - (thickness / 2), midY, center.Z)
 	local westHalf = Vector3.new(thickness / 2, 0, innerDepth / 2) + halfHeight
 	createWallWithHoles(parent, "WallWest", { min = westCenter - westHalf, max = westCenter + westHalf }, holes.West or {}, wallColor, Enum.Material.Plaster)
-	createSolid(
-		parent,
-		"WallEast",
-		Vector3.new(thickness, height, innerDepth),
-		Vector3.new(gallery.innerX + building.GalleryDepth + (thickness / 2), midY, center.Z),
-		wallColor,
-		Enum.Material.Plaster
-	)
+	local eastCenter = Vector3.new(gallery.innerX + building.GalleryDepth + (thickness / 2), midY, center.Z)
+	local eastHalf = Vector3.new(thickness / 2, 0, innerDepth / 2) + halfHeight
+	createWallWithHoles(parent, "WallEast", { min = eastCenter - eastHalf, max = eastCenter + eastHalf }, getPassageHoles(building), wallColor, Enum.Material.Plaster)
 	for _, side in ipairs({ -1, 1 }) do
 		local wallName = if side < 0 then "North" else "South"
 		local wallCenter = Vector3.new(outerCenterX, midY, center.Z + (side * (bounds.halfDepth + (thickness / 2))))
@@ -390,8 +382,10 @@ local function decorateGallery(parent: Instance, arena: ArenaConfig, building: B
 			wallpaperColor = building.GalleryWallpaperColor,
 			lamps = true,
 			art = true,
-			windows = segment.name == "GalleryEast",
+			-- A parede leste tem as portas reais para o Casarão.
+			windows = false,
 			door = segment.name ~= "GalleryEast",
+			gaps = if segment.name == "GalleryEast" then getPassageGaps() else nil,
 			lampRange = GALLERY_LAMP_RANGE,
 			lampBrightness = GALLERY_LAMP_BRIGHTNESS,
 		}, rng)
@@ -455,7 +449,8 @@ local function decorateGallery(parent: Instance, arena: ArenaConfig, building: B
 			building
 		)
 		local between = z + ((innerDepth / sofaCount) / 2)
-		if index < sofaCount then
+		-- Mesinhas e plantas não ficam na frente das portas do Casarão.
+		if index < sofaCount and not nearPassage(between, MansionConfig.PassageSize.X / 2 + 1.5) then
 			if index % 2 == 1 then
 				BuildingDecor.createSideTable(parent, string.format("SideTable%02d", index), Vector3.new(eastX - 1.8, gallery.floorY, between), building)
 			else

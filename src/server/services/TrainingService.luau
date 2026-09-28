@@ -1,8 +1,8 @@
 --!strict
 
--- Área de treino do lobby (Fase 4.5), na ponta sul da galeria: quem entra
--- no tapete de treino (e não está competindo) recebe um Puffador de treino
--- e pratica a mira em alvos (três fixos e um que desliza). Os disparos de
+-- Área de treino do lobby, na sala de Treino do Casarão (ala sul): quem
+-- passa da faixa verde (e não está competindo) recebe um Puffador de treino
+-- e pratica a mira em alvos (fixos e dois que deslizam). Os disparos de
 -- treino só acertam os alvos: não quebram bloco, não empurram ninguém e não
 -- contam estatística (ver ProjectileService/PuffadorService). Sair do
 -- tapete, entrar na partida ou sair do jogo tira o Puffador de treino.
@@ -12,20 +12,21 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
 
-local GameConfig = require(ReplicatedStorage.Shared.config.GameConfig)
-local BuildingLayout = require(ReplicatedStorage.Shared.modules.BuildingLayout)
+local MansionLayout = require(ReplicatedStorage.Shared.modules.MansionLayout)
 local StateAttributeNames = require(ReplicatedStorage.Shared.types.StateAttributeNames)
 local ProjectileService = require(script.Parent.ProjectileService)
 local PuffadorService = require(script.Parent.PuffadorService)
 local TelemetryService = require(script.Parent.TelemetryService)
-local LobbyStationsService = require(script.Parent.LobbyStationsService)
 
 local FOLDER_NAME = "TrainingRange"
 local GENERATED_BY_ATTRIBUTE = "GeneratedBy"
 local SERVICE_NAME = "TrainingService"
 local TARGET_ATTRIBUTE = "TrainingTarget"
 local HANDLER_KEY = "Training"
+-- Profundidade da área (a partir da parede sul) e folga das paredes laterais.
 local ZONE_LENGTH = 20
+local ZONE_SIDE_INSET = 1.5
+local FIXED_TARGETS = 6
 local CHECK_INTERVAL = 0.25
 local TARGET_COLOR = Color3.fromRGB(255, 93, 115)
 local TARGET_HIT_COLOR = Color3.fromRGB(255, 209, 102)
@@ -157,23 +158,23 @@ function TrainingService.start(worldRoot: Model)
 	folder:SetAttribute(GENERATED_BY_ATTRIBUTE, SERVICE_NAME)
 	folder.Parent = worldRoot
 
-	local gallery = BuildingLayout.getGallery(GameConfig.Arena, GameConfig.Building)
-	local floorY = gallery.floorY
-	local zMax = gallery.center.Z + gallery.size.Z / 2
-	local xMin = gallery.innerX + 1.5
-	local xMax = gallery.innerX + GameConfig.Building.GalleryDepth - 0.5
+	local room = MansionLayout.room("Training")
+	local floorY = MansionLayout.get().floorY
+	local zMax = room.maxZ
+	local xMin = room.minX + ZONE_SIDE_INSET
+	local xMax = room.maxX - ZONE_SIDE_INSET
 	local zoneStart = zMax - ZONE_LENGTH
 	zoneMin = Vector3.new(xMin, floorY - 2, zoneStart)
-	zoneMax = Vector3.new(xMax, floorY + 12, zMax)
+	zoneMax = Vector3.new(xMax, floorY + 14, zMax)
 
-	-- Tapete listrado que marca a área.
-	local matCenter = Vector3.new((xMin + xMax) / 2 - 1.5, floorY + 0.06, zoneStart + 2)
-	local mat = part(folder, "TrainingMat", Vector3.new(xMax - xMin - 3, 0.12, 3), CFrame.new(matCenter), Color3.fromRGB(79, 214, 160), Enum.Material.Fabric)
+	-- Faixa que marca a área.
+	local matCenter = Vector3.new((xMin + xMax) / 2, floorY + 0.06, zoneStart + 1.5)
+	local mat = part(folder, "TrainingMat", Vector3.new(xMax - xMin, 0.12, 3), CFrame.new(matCenter), Color3.fromRGB(79, 214, 160), Enum.Material.Fabric)
 	mat.CanCollide = false
 	local signGui = Instance.new("BillboardGui")
 	signGui.Size = UDim2.new(9, 0, 2.2, 0)
 	signGui.StudsOffset = Vector3.new(0, 5, 0)
-	signGui.MaxDistance = 45
+	signGui.MaxDistance = 60
 	signGui.LightInfluence = 0
 	signGui.Parent = mat
 	local title = Instance.new("TextLabel")
@@ -196,25 +197,28 @@ function TrainingService.start(worldRoot: Model)
 	subtitle.TextStrokeTransparency = 0.3
 	subtitle.Parent = signGui
 
-	-- Alvos perto da parede sul.
+	-- Alvos perto da parede sul, em alturas variadas.
 	local targetZ = zMax - 1.4
-	local left = gallery.innerX + 5
-	local right = gallery.innerX + GameConfig.Building.GalleryDepth - 6
-	local middle = (left + right) / 2
-	createTarget(folder, "TargetLeft", Vector3.new(left, floorY + 3, targetZ))
-	createTarget(folder, "TargetMiddle", Vector3.new(middle, floorY + 5.5, targetZ))
-	createTarget(folder, "TargetRight", Vector3.new(right, floorY + 3.5, targetZ))
-	local mover = createTarget(folder, "TargetMoving", Vector3.new(left, floorY + 8.5, targetZ))
-	local moverCenter = folder:FindFirstChild("TargetMovingCenter")
-	local slide = TweenInfo.new(3, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true)
-	TweenService:Create(mover, slide, { CFrame = mover.CFrame + Vector3.new(right - left, 0, 0) }):Play()
-	if moverCenter ~= nil and moverCenter:IsA("BasePart") then
-		TweenService:Create(moverCenter, slide, { CFrame = moverCenter.CFrame + Vector3.new(right - left, 0, 0) }):Play()
+	local left = xMin + 4
+	local right = xMax - 4
+	local heights = { 3, 5.5, 3.5, 7, 4, 6 }
+	for index = 1, FIXED_TARGETS do
+		local x = left + ((index - 1) / (FIXED_TARGETS - 1)) * (right - left)
+		createTarget(folder, `Target{index}`, Vector3.new(x, floorY + heights[((index - 1) % #heights) + 1], targetZ))
 	end
-
-	LobbyStationsService.reserve({
-		{ center = Vector3.new((xMin + xMax) / 2, floorY, zoneStart + ZONE_LENGTH / 2), size = Vector3.new(xMax - xMin, 0, ZONE_LENGTH + 2) },
-	})
+	-- Dois alvos que deslizam, em sentidos opostos.
+	for index, height in ipairs({ 9.5, 12 }) do
+		local name = `TargetMoving{index}`
+		local startX = if index == 1 then left else right
+		local mover = createTarget(folder, name, Vector3.new(startX, floorY + height, targetZ))
+		local moverCenter = folder:FindFirstChild(`{name}Center`)
+		local delta = Vector3.new(if index == 1 then right - left else left - right, 0, 0)
+		local slide = TweenInfo.new(3 + index, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true)
+		TweenService:Create(mover, slide, { CFrame = mover.CFrame + delta }):Play()
+		if moverCenter ~= nil and moverCenter:IsA("BasePart") then
+			TweenService:Create(moverCenter, slide, { CFrame = moverCenter.CFrame + delta }):Play()
+		end
+	end
 
 	ProjectileService.setSurfaceHitHandler(HANDLER_KEY, onSurfaceHit)
 	RunService.Heartbeat:Connect(function(deltaTime: number)

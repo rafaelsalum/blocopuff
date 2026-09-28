@@ -1,7 +1,10 @@
 --!strict
 
+-- Cartão de anúncios na borda esquerda da tela, acima da faixa de avisos
+-- (BannerView): entra deslizando pela esquerda e deixa o centro (mira) e o
+-- topo (cronômetro) livres.
+
 local TweenService = game:GetService("TweenService")
-local Workspace = game:GetService("Workspace")
 
 local ResponsiveScale = require(script.Parent.ResponsiveScale)
 local UiTheme = require(script.Parent.UiTheme)
@@ -15,21 +18,16 @@ export type AnnouncementViewHandle = {
 }
 
 local GUI_NAME = "BlocoPuffAnnouncements"
--- Topo do cartão: logo abaixo da faixa de avisos (BannerView mostra em
--- y 96, ou 162 em telas estreitas), deixando o centro (mira) livre.
-local TOP_Y = 196
-local TOP_Y_COMPACT = 256
-local COMPACT_WIDTH = 700
+local CARD_SIZE = Vector2.new(330, 80)
+local EDGE_X = 18
+-- Altura (fração da tela) do centro do cartão: abaixo do cartão de perfil
+-- ou do HUD de combate (canto superior esquerdo).
+local CENTER_Y = 0.42
+local SHOWN_POSITION = UDim2.new(0, EDGE_X, CENTER_Y, 0)
+-- Escondido fora da tela, à esquerda (largura máxima já escalada).
+local HIDDEN_POSITION = UDim2.new(0, -(CARD_SIZE.X * 1.1) - 30, CENTER_Y, 0)
 
 local AnnouncementView = {}
-
-local function getTopY(): number
-	local camera = Workspace.CurrentCamera
-	if camera ~= nil and camera.ViewportSize.X < COMPACT_WIDTH then
-		return TOP_Y_COMPACT
-	end
-	return TOP_Y
-end
 
 local function getToneColor(tone: AnnouncementTone): Color3
 	if tone == "Warning" then
@@ -48,10 +46,9 @@ function AnnouncementView.new(playerGui: PlayerGui): AnnouncementViewHandle
 
 	local responsiveRoot = Instance.new("Frame")
 	responsiveRoot.Name = "ResponsiveRoot"
-	-- No topo, abaixo da faixa de avisos (BannerView), longe da mira.
-	responsiveRoot.AnchorPoint = Vector2.new(0.5, 0)
-	responsiveRoot.Position = UDim2.new(0.5, 0, 0, getTopY())
-	responsiveRoot.Size = UDim2.fromOffset(460, 92)
+	responsiveRoot.AnchorPoint = Vector2.new(0, 0.5)
+	responsiveRoot.Position = HIDDEN_POSITION
+	responsiveRoot.Size = UDim2.fromOffset(CARD_SIZE.X, CARD_SIZE.Y)
 	responsiveRoot.BackgroundTransparency = 1
 	responsiveRoot.Visible = false
 	responsiveRoot.Parent = screenGui
@@ -63,26 +60,23 @@ function AnnouncementView.new(playerGui: PlayerGui): AnnouncementViewHandle
 	animationGroup.BackgroundTransparency = 1
 	animationGroup.Parent = responsiveRoot
 
-	local animationScale = Instance.new("UIScale")
-	animationScale.Name = "AnimationScale"
-	animationScale.Parent = animationGroup
-
-	UiTheme.createShadow(animationGroup, UDim2.fromScale(0.5, 0.5), UDim2.fromScale(1, 1), 22)
+	UiTheme.createShadow(animationGroup, UDim2.fromScale(0.5, 0.5), UDim2.fromScale(1, 1), 16)
 
 	local card = Instance.new("Frame")
 	card.Name = "AnnouncementCard"
 	card.Size = UDim2.fromScale(1, 1)
 	card.ZIndex = 1
 	card.Parent = animationGroup
-	local cardStroke = UiTheme.stylePanel(card, { accent = UiTheme.Colors.Blue, radius = 18 })
-	cardStroke.Thickness = 3
+	local cardStroke = UiTheme.stylePanel(card, { accent = UiTheme.Colors.Blue, radius = 14 })
+	cardStroke.Thickness = 2.5
 	local strokeGradient = cardStroke:FindFirstChildOfClass("UIGradient") :: UIGradient?
 
 	local accent = Instance.new("Frame")
 	accent.Name = "Accent"
-	accent.AnchorPoint = Vector2.new(0.5, 0)
-	accent.Position = UDim2.new(0.5, 0, 0, 0)
-	accent.Size = UDim2.new(0.46, 0, 0, 5)
+	-- Barra vertical colorida na lateral esquerda do cartão.
+	accent.AnchorPoint = Vector2.new(0, 0.5)
+	accent.Position = UDim2.new(0, 8, 0.5, 0)
+	accent.Size = UDim2.new(0, 5, 0.62, 0)
 	accent.BackgroundColor3 = UiTheme.Colors.Blue
 	accent.BorderSizePixel = 0
 	accent.ZIndex = 2
@@ -91,8 +85,9 @@ function AnnouncementView.new(playerGui: PlayerGui): AnnouncementViewHandle
 
 	local titleLabel = Instance.new("TextLabel")
 	titleLabel.Name = "TitleLabel"
-	titleLabel.Position = UDim2.new(0, 18, 0, 14)
-	titleLabel.Size = UDim2.new(1, -36, 0, 34)
+	titleLabel.Position = UDim2.new(0, 22, 0, 10)
+	titleLabel.Size = UDim2.new(1, -34, 0, 32)
+	titleLabel.TextXAlignment = Enum.TextXAlignment.Left
 	titleLabel.BackgroundTransparency = 1
 	titleLabel.Font = UiTheme.Fonts.Display
 	titleLabel.Text = ""
@@ -101,14 +96,15 @@ function AnnouncementView.new(playerGui: PlayerGui): AnnouncementViewHandle
 	titleLabel.TextWrapped = true
 	titleLabel.ZIndex = 2
 	titleLabel.Parent = card
-	UiTheme.addTextConstraint(titleLabel, 18, 32)
+	UiTheme.addTextConstraint(titleLabel, 16, 26)
 	local titleGradient = UiTheme.addGradient(titleLabel, UiTheme.Colors.White, UiTheme.Colors.Blue)
 	local titleOutline = UiTheme.addTextOutline(titleLabel, 3)
 
 	local subtitleLabel = Instance.new("TextLabel")
 	subtitleLabel.Name = "SubtitleLabel"
-	subtitleLabel.Position = UDim2.new(0, 20, 0, 51)
-	subtitleLabel.Size = UDim2.new(1, -40, 0, 25)
+	subtitleLabel.Position = UDim2.new(0, 22, 0, 45)
+	subtitleLabel.Size = UDim2.new(1, -34, 0, 24)
+	subtitleLabel.TextXAlignment = Enum.TextXAlignment.Left
 	subtitleLabel.BackgroundTransparency = 1
 	subtitleLabel.Font = UiTheme.Fonts.BodyBold
 	subtitleLabel.Text = ""
@@ -117,7 +113,7 @@ function AnnouncementView.new(playerGui: PlayerGui): AnnouncementViewHandle
 	subtitleLabel.TextWrapped = true
 	subtitleLabel.ZIndex = 2
 	subtitleLabel.Parent = card
-	UiTheme.addTextConstraint(subtitleLabel, 11, 15)
+	UiTheme.addTextConstraint(subtitleLabel, 10, 14)
 
 	local generation = 0
 	local visible = false
@@ -131,6 +127,22 @@ function AnnouncementView.new(playerGui: PlayerGui): AnnouncementViewHandle
 		cardStroke.Transparency = value
 	end
 
+	-- Animações em andamento: mostrar e esconder cancelam as anteriores, para
+	-- uma saída atrasada não apagar o cartão que acabou de entrar.
+	local activeTweens: { Tween } = {}
+	local function play(instance: Instance, info: TweenInfo, goal: { [string]: any }): Tween
+		local tween = TweenService:Create(instance, info, goal)
+		table.insert(activeTweens, tween)
+		tween:Play()
+		return tween
+	end
+	local function cancelTweens()
+		for _, tween in ipairs(activeTweens) do
+			tween:Cancel()
+		end
+		table.clear(activeTweens)
+	end
+
 	local handle = {} :: AnnouncementViewHandle
 
 	handle.hide = function()
@@ -141,13 +153,14 @@ function AnnouncementView.new(playerGui: PlayerGui): AnnouncementViewHandle
 		generation += 1
 		local hideGeneration = generation
 
-		TweenService:Create(animationScale, TweenInfo.new(0.16, Enum.EasingStyle.Quad), { Scale = 0.9 }):Play()
-		local fadeTween = TweenService:Create(card, TweenInfo.new(0.16), { BackgroundTransparency = 1 })
-		TweenService:Create(titleLabel, TweenInfo.new(0.13), { TextTransparency = 1 }):Play()
-		TweenService:Create(titleOutline, TweenInfo.new(0.13), { Transparency = 1 }):Play()
-		TweenService:Create(subtitleLabel, TweenInfo.new(0.13), { TextTransparency = 1 }):Play()
-		TweenService:Create(accent, TweenInfo.new(0.13), { BackgroundTransparency = 1 }):Play()
-		fadeTween:Play()
+		cancelTweens()
+		play(responsiveRoot, TweenInfo.new(0.22, Enum.EasingStyle.Quad, Enum.EasingDirection.In), { Position = HIDDEN_POSITION })
+		local fadeTween = play(card, TweenInfo.new(0.2), { BackgroundTransparency = 1 })
+		play(titleLabel, TweenInfo.new(0.13), { TextTransparency = 1 })
+		play(titleOutline, TweenInfo.new(0.13), { Transparency = 1 })
+		play(subtitleLabel, TweenInfo.new(0.13), { TextTransparency = 1 })
+		play(accent, TweenInfo.new(0.13), { BackgroundTransparency = 1 })
+		play(cardStroke, TweenInfo.new(0.13), { Transparency = 1 })
 		fadeTween.Completed:Connect(function()
 			if generation == hideGeneration and not visible then
 				responsiveRoot.Visible = false
@@ -168,14 +181,16 @@ function AnnouncementView.new(playerGui: PlayerGui): AnnouncementViewHandle
 		if strokeGradient ~= nil then
 			strokeGradient.Color = ColorSequence.new(toneColor, toneColor:Lerp(UiTheme.Colors.Gold, 0.55))
 		end
-		responsiveRoot.Position = UDim2.new(0.5, 0, 0, getTopY())
+		cancelTweens()
+		if not responsiveRoot.Visible then
+			responsiveRoot.Position = HIDDEN_POSITION
+		end
 		responsiveRoot.Visible = true
-		animationScale.Scale = 0.78
 		setTransparency(0.08)
 
-		TweenService:Create(animationScale, TweenInfo.new(0.25, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
-			Scale = 1,
-		}):Play()
+		play(responsiveRoot, TweenInfo.new(0.32, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+			Position = SHOWN_POSITION,
+		})
 
 		if duration ~= nil and duration > 0 then
 			task.delay(duration, function()
@@ -188,6 +203,7 @@ function AnnouncementView.new(playerGui: PlayerGui): AnnouncementViewHandle
 
 	handle.destroy = function()
 		generation += 1
+		cancelTweens()
 		responsiveHandle.destroy()
 		screenGui:Destroy()
 	end

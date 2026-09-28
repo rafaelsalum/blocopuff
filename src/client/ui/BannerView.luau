@@ -1,11 +1,11 @@
 --!strict
 
--- Faixa de aviso no topo da tela (ícone, título e subtítulo). Só visual:
--- quem decide o que aparece, em que ordem e por quanto tempo é o
--- NotificationManager.
+-- Cartão de aviso na borda esquerda da tela (ícone, título e subtítulo),
+-- abaixo do cartão de anúncios (AnnouncementView): o centro e o topo (mira
+-- e cronômetro) ficam livres. Só visual: quem decide o que aparece, em que
+-- ordem e por quanto tempo é o NotificationManager.
 
 local TweenService = game:GetService("TweenService")
-local Workspace = game:GetService("Workspace")
 
 local ResponsiveScale = require(script.Parent.ResponsiveScale)
 local UiTheme = require(script.Parent.UiTheme)
@@ -19,21 +19,14 @@ export type BannerViewHandle = {
 }
 
 local GUI_NAME = "BlocoPuffBanner"
-local BANNER_SIZE = Vector2.new(520, 84)
-local HIDDEN_Y = -120
-local SHOWN_Y = 96
--- Em telas estreitas o cronômetro da partida desce para y≈106; a faixa
--- fica abaixo dele para não se sobrepor.
-local SHOWN_Y_COMPACT = 162
-local COMPACT_WIDTH = 700
-
-local function getShownY(): number
-	local camera = Workspace.CurrentCamera
-	if camera ~= nil and camera.ViewportSize.X < COMPACT_WIDTH then
-		return SHOWN_Y_COMPACT
-	end
-	return SHOWN_Y
-end
+local BANNER_SIZE = Vector2.new(340, 62)
+local EDGE_X = 18
+-- Altura (fração da tela) do centro do cartão: abaixo do cartão de perfil
+-- ou do HUD de combate e acima do convite de Party.
+local CENTER_Y = 0.56
+local SHOWN_POSITION = UDim2.new(0, EDGE_X, CENTER_Y, 0)
+-- Escondido fora da tela, à esquerda (largura máxima já escalada).
+local HIDDEN_POSITION = UDim2.new(0, -(BANNER_SIZE.X * 1.1) - 30, CENTER_Y, 0)
 
 local BannerView = {}
 
@@ -49,54 +42,54 @@ end
 local function createBanner(screenGui: ScreenGui)
 	local root = Instance.new("Frame")
 	root.Name = "Banner"
-	root.AnchorPoint = Vector2.new(0.5, 0)
-	root.Position = UDim2.new(0.5, 0, 0, HIDDEN_Y)
+	root.AnchorPoint = Vector2.new(0, 0.5)
+	root.Position = HIDDEN_POSITION
 	root.Size = UDim2.fromOffset(BANNER_SIZE.X, BANNER_SIZE.Y)
 	root.BackgroundTransparency = 1
 	root.Visible = false
 	root.Parent = screenGui
-	ResponsiveScale.attach(root, Vector2.new(1280, 720), 0.62, 1.05)
+	ResponsiveScale.attach(root, Vector2.new(1280, 720), 0.66, 1.05)
 
-	UiTheme.createShadow(root, UDim2.fromScale(0.5, 0.5), UDim2.fromScale(1, 1), 18)
+	UiTheme.createShadow(root, UDim2.fromScale(0.5, 0.5), UDim2.fromScale(1, 1), 14)
 	local card = Instance.new("Frame")
 	card.Name = "Card"
 	card.Size = UDim2.fromScale(1, 1)
 	card.ZIndex = 1
 	card.Parent = root
-	local stroke = UiTheme.stylePanel(card, { accent = UiTheme.Colors.Gold, radius = 18 })
+	local stroke = UiTheme.stylePanel(card, { accent = UiTheme.Colors.Gold, radius = 14 })
 
 	local badge = Instance.new("Frame")
 	badge.Name = "Badge"
 	badge.AnchorPoint = Vector2.new(0, 0.5)
-	badge.Position = UDim2.new(0, 14, 0.5, 0)
-	badge.Size = UDim2.fromOffset(58, 58)
+	badge.Position = UDim2.new(0, 10, 0.5, 0)
+	badge.Size = UDim2.fromOffset(42, 42)
 	badge.BackgroundColor3 = UiTheme.Colors.Gold
 	badge.BorderSizePixel = 0
 	badge.ZIndex = 2
 	badge.Parent = card
 	UiTheme.addCorner(badge, 999)
-	UiTheme.addStroke(badge, UiTheme.Colors.Outline, 3)
+	UiTheme.addStroke(badge, UiTheme.Colors.Outline, 2.5)
 
-	local icon = UiTheme.createLabel(badge, "Icon", "", UiTheme.Fonts.Display, 30, UiTheme.Colors.White)
+	local icon = UiTheme.createLabel(badge, "Icon", "", UiTheme.Fonts.Display, 22, UiTheme.Colors.White)
 	icon.Size = UDim2.fromScale(1, 1)
 	icon.ZIndex = 3
 
-	local title = UiTheme.createLabel(card, "Title", "", UiTheme.Fonts.Display, 26, UiTheme.Colors.Gold)
-	title.Position = UDim2.fromOffset(86, 10)
-	title.Size = UDim2.new(1, -100, 0, 34)
+	local title = UiTheme.createLabel(card, "Title", "", UiTheme.Fonts.Display, 20, UiTheme.Colors.Gold)
+	title.Position = UDim2.fromOffset(62, 7)
+	title.Size = UDim2.new(1, -72, 0, 26)
 	title.TextXAlignment = Enum.TextXAlignment.Left
 	title.TextScaled = true
 	title.ZIndex = 2
-	UiTheme.addTextOutline(title, 2.5)
-	UiTheme.addTextConstraint(title, 14, 26)
+	UiTheme.addTextOutline(title, 2)
+	UiTheme.addTextConstraint(title, 13, 20)
 
-	local subtitle = UiTheme.createLabel(card, "Subtitle", "", UiTheme.Fonts.BodyBold, 16, UiTheme.Colors.White)
-	subtitle.Position = UDim2.fromOffset(86, 46)
-	subtitle.Size = UDim2.new(1, -100, 0, 28)
+	local subtitle = UiTheme.createLabel(card, "Subtitle", "", UiTheme.Fonts.BodyBold, 13, UiTheme.Colors.White)
+	subtitle.Position = UDim2.fromOffset(62, 34)
+	subtitle.Size = UDim2.new(1, -72, 0, 20)
 	subtitle.TextXAlignment = Enum.TextXAlignment.Left
 	subtitle.TextScaled = true
 	subtitle.ZIndex = 2
-	UiTheme.addTextConstraint(subtitle, 11, 16)
+	UiTheme.addTextConstraint(subtitle, 10, 13)
 
 	return root, stroke, badge, icon, title, subtitle
 end
@@ -105,6 +98,18 @@ function BannerView.new(playerGui: PlayerGui): BannerViewHandle
 	local screenGui = UiTheme.createScreenGui(GUI_NAME, playerGui, 31)
 	local banner, stroke, badge, icon, title, subtitle = createBanner(screenGui)
 	local generation = 0
+	-- Só uma animação de posição por vez: entrar cancela a saída e vice-versa.
+	local activeTween: Tween? = nil
+	local function slideTo(info: TweenInfo, position: UDim2): Tween
+		local previous = activeTween
+		if previous ~= nil then
+			previous:Cancel()
+		end
+		local tween = TweenService:Create(banner, info, { Position = position })
+		activeTween = tween
+		tween:Play()
+		return tween
+	end
 
 	local handle = {} :: BannerViewHandle
 
@@ -122,11 +127,11 @@ function BannerView.new(playerGui: PlayerGui): BannerViewHandle
 			strokeGradient.Color = ColorSequence.new(color, color:Lerp(UiTheme.Colors.White, 0.3))
 		end
 
+		if not banner.Visible then
+			banner.Position = HIDDEN_POSITION
+		end
 		banner.Visible = true
-		banner.Position = UDim2.new(0.5, 0, 0, HIDDEN_Y)
-		TweenService:Create(banner, TweenInfo.new(0.45, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
-			Position = UDim2.new(0.5, 0, 0, getShownY()),
-		}):Play()
+		slideTo(TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.Out), SHOWN_POSITION)
 
 		if duration ~= nil and duration > 0 then
 			task.delay(duration, function()
@@ -143,10 +148,7 @@ function BannerView.new(playerGui: PlayerGui): BannerViewHandle
 		if not banner.Visible then
 			return
 		end
-		local hide = TweenService:Create(banner, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
-			Position = UDim2.new(0.5, 0, 0, HIDDEN_Y),
-		})
-		hide:Play()
+		local hide = slideTo(TweenInfo.new(0.28, Enum.EasingStyle.Quad, Enum.EasingDirection.In), HIDDEN_POSITION)
 		hide.Completed:Connect(function()
 			if current == generation then
 				banner.Visible = false

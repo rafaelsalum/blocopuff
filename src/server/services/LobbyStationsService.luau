@@ -1,11 +1,14 @@
 --!strict
 
--- Lobby expandido (Fase 4.5): estações físicas na galeria, cada uma com um
--- ProximityPrompt que abre a tela correspondente no cliente (o atributo
--- "LobbyStation" diz qual). Ao norte, a Puff Machine e o Barão amigável
--- dormindo na caminha (dá para fazer carinho); do lado do vidro, a vitrine
--- de Puffs (abre o Puffdex), o quadro de desafios e a loja "em breve" (só
--- preparação: nada é vendido). O centro e os sofás ficam livres.
+-- Estações do lobby, espalhadas pelas salas do Casarão (MansionLayout). Cada
+-- uma tem um ProximityPrompt que abre a tela correspondente no cliente (o
+-- atributo "LobbyStation" diz qual):
+--   Salão da Coleção → vitrine com todos os Puffs, púlpito do Puffdex e a
+--                      Puff Machine;
+--   Jardim do Barão  → o Barão amigável dormindo na caminha (dá para fazer
+--                      carinho) e a loja "em breve" (nada é vendido);
+--   Ponto de Encontro → quadro de desafios e o canto da Party.
+-- O treino (ala sul) é do TrainingService.
 --
 -- Pensado para celular: poucas peças, nenhuma luz extra, placas com
 -- distância máxima e nada animado continuamente pelo servidor.
@@ -14,14 +17,13 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TweenService = game:GetService("TweenService")
 
-local GameConfig = require(ReplicatedStorage.Shared.config.GameConfig)
+local MansionConfig = require(ReplicatedStorage.Shared.config.MansionConfig)
 local PuffCatalog = require(ReplicatedStorage.Shared.config.PuffCatalog)
-local BuildingLayout = require(ReplicatedStorage.Shared.modules.BuildingLayout)
+local MansionLayout = require(ReplicatedStorage.Shared.modules.MansionLayout)
 local BaraoModel = require(script.Parent.BaraoModel)
-local LobbyService = require(script.Parent.LobbyService)
 local TelemetryService = require(script.Parent.TelemetryService)
 
-type ReservedArea = LobbyService.ReservedArea
+type PuffDefinition = PuffCatalog.PuffDefinition
 
 local FOLDER_NAME = "LobbyStations"
 local GENERATED_BY_ATTRIBUTE = "GeneratedBy"
@@ -30,8 +32,9 @@ local STATION_ATTRIBUTE = "LobbyStation"
 local SIGN_DISTANCE = 45
 local PROMPT_DISTANCE = 9
 local PET_COOLDOWN = 2
--- Um Puff de cada raridade na vitrine.
-local SHOWCASE_IDS = { "menta", "gelo", "galaxia", "barao" }
+-- Vitrine: Puffs por fileira e distância entre pedestais.
+local SHOWCASE_PER_ROW = 11
+local SHOWCASE_SPACING = 9.4
 
 local LobbyStationsService = {}
 
@@ -99,8 +102,9 @@ local function prompt(parent: BasePart, station: string, action: string, object:
 	return proximity
 end
 
--- Puff Machine: gabinete com cúpula de cápsulas, virado para o salão (+X).
-local function buildMachine(parent: Instance, base: Vector3)
+-- Puff Machine: gabinete com cúpula de cápsulas; `facing` (±1) diz para
+-- que lado de X fica a abertura.
+local function buildMachine(parent: Instance, base: Vector3, facing: number)
 	local model = Instance.new("Model")
 	model.Name = "PuffMachine"
 	model.Parent = parent
@@ -117,7 +121,7 @@ local function buildMachine(parent: Instance, base: Vector3)
 		local capsule = part(model, `Capsule{index}`, Vector3.new(0.8, 0.8, 0.8), CFrame.new(base + Vector3.new(math.cos(angle) * 0.6, 5.4, math.sin(angle) * 0.6)), color, Enum.Material.Neon, Enum.PartType.Ball)
 		capsule.CanCollide = false
 	end
-	local slot = part(model, "Slot", Vector3.new(0.2, 0.8, 1.6), CFrame.new(base + Vector3.new(1.55, 1.6, 0)), Color3.fromRGB(26, 21, 48))
+	local slot = part(model, "Slot", Vector3.new(0.2, 0.8, 1.6), CFrame.new(base + Vector3.new(facing * 1.55, 1.6, 0)), Color3.fromRGB(26, 21, 48))
 	slot.CanCollide = false
 	sign(cabinet, "🎰 PUFF MACHINE", "Tickets viram Puffs", 6.2)
 	prompt(cabinet, "PuffMachine", "Girar", "Puff Machine")
@@ -131,8 +135,8 @@ local function buildFriendlyBarao(parent: Instance, base: Vector3)
 	bed.CFrame = CFrame.new(base + Vector3.new(0, 0.3, 0)) * CFrame.Angles(0, 0, math.rad(90))
 	local barao = BaraoModel.build()
 	barao.Name = "BaraoLobby"
-	-- De frente para o salão (+Z); o modelo olha para −Z.
-	local restCFrame = CFrame.new(base + Vector3.new(0, 0.6, 0)) * CFrame.Angles(0, math.pi, 0)
+	-- De frente para o arco do Salão Principal (−X); o modelo olha para −Z.
+	local restCFrame = CFrame.new(base + Vector3.new(0, 0.6, 0)) * CFrame.Angles(0, math.pi / 2, 0)
 	barao:PivotTo(restCFrame)
 	barao.Parent = parent
 	local body = barao:FindFirstChild("Body")
@@ -190,52 +194,61 @@ local function buildFriendlyBarao(parent: Instance, base: Vector3)
 	end)
 end
 
--- Vitrine: um Puff de cada raridade em pedestais (abre o Puffdex).
-local function buildShowcase(parent: Instance, base: Vector3, spacing: number)
+local function buildPedestal(parent: Instance, index: number, definition: PuffDefinition, position: Vector3)
+	local rarity = PuffCatalog.rarity(definition.rarity)
+	part(parent, `Pedestal{index}`, Vector3.new(1.8, 2.6, 1.8), CFrame.new(position + Vector3.new(0, 1.3, 0)), Color3.fromRGB(42, 34, 71), Enum.Material.Marble)
+	part(parent, `Band{index}`, Vector3.new(1.9, 0.3, 1.9), CFrame.new(position + Vector3.new(0, 2.5, 0)), rarity.color, Enum.Material.Neon)
+	local orb = part(parent, `Orb{index}`, Vector3.new(1.2, 1.2, 1.2), CFrame.new(position + Vector3.new(0, 3.4, 0)), definition.style.trailStart, Enum.Material.Neon, Enum.PartType.Ball)
+	orb.CanCollide = false
+	local ring = part(parent, `Ring{index}`, Vector3.new(0.2, 1.8, 1.8), CFrame.new(position + Vector3.new(0, 3.4, 0)) * CFrame.Angles(0, 0, math.rad(90)), definition.style.trailEnd, Enum.Material.Neon, Enum.PartType.Cylinder)
+	ring.Transparency = 0.5
+	ring.CanCollide = false
+	local label = Instance.new("BillboardGui")
+	label.Size = UDim2.new(4, 0, 1, 0)
+	label.StudsOffset = Vector3.new(0, 1.4, 0)
+	label.MaxDistance = 25
+	label.LightInfluence = 0
+	label.Parent = orb
+	local text = Instance.new("TextLabel")
+	text.Size = UDim2.fromScale(1, 1)
+	text.BackgroundTransparency = 1
+	text.Font = Enum.Font.GothamBold
+	text.Text = `{definition.name} · {rarity.label}`
+	text.TextColor3 = rarity.color
+	text.TextScaled = true
+	text.TextStrokeTransparency = 0.3
+	text.Parent = label
+end
+
+-- Vitrine com todos os Puffs do catálogo, em fileiras ao longo do Salão da
+-- Coleção (`rowZ` de cada fileira, começando em `startX`).
+local function buildShowcase(parent: Instance, floorY: number, startX: number, rowZ: { number })
 	local model = Instance.new("Model")
 	model.Name = "PuffShowcase"
 	model.Parent = parent
-	local middle: BasePart? = nil
-	for index, id in ipairs(SHOWCASE_IDS) do
-		local definition = PuffCatalog.get(id)
-		if definition ~= nil then
-			local position = base + Vector3.new(0, 0, (index - (#SHOWCASE_IDS + 1) / 2) * spacing)
-			local rarity = PuffCatalog.rarity(definition.rarity)
-			local pedestal = part(model, `Pedestal{index}`, Vector3.new(1.8, 2.6, 1.8), CFrame.new(position + Vector3.new(0, 1.3, 0)), Color3.fromRGB(42, 34, 71), Enum.Material.Marble)
-			part(model, `Band{index}`, Vector3.new(1.9, 0.3, 1.9), CFrame.new(position + Vector3.new(0, 2.5, 0)), rarity.color, Enum.Material.Neon)
-			local orb = part(model, `Orb{index}`, Vector3.new(1.2, 1.2, 1.2), CFrame.new(position + Vector3.new(0, 3.4, 0)), definition.style.trailStart, Enum.Material.Neon, Enum.PartType.Ball)
-			orb.CanCollide = false
-			local ring = part(model, `Ring{index}`, Vector3.new(0.2, 1.8, 1.8), CFrame.new(position + Vector3.new(0, 3.4, 0)) * CFrame.Angles(0, 0, math.rad(90)), definition.style.trailEnd, Enum.Material.Neon, Enum.PartType.Cylinder)
-			ring.Transparency = 0.5
-			ring.CanCollide = false
-			local label = Instance.new("BillboardGui")
-			label.Size = UDim2.new(4, 0, 1, 0)
-			label.StudsOffset = Vector3.new(0, 1.4, 0)
-			label.MaxDistance = 25
-			label.LightInfluence = 0
-			label.Parent = orb
-			local text = Instance.new("TextLabel")
-			text.Size = UDim2.fromScale(1, 1)
-			text.BackgroundTransparency = 1
-			text.Font = Enum.Font.GothamBold
-			text.Text = `{definition.name} · {rarity.label}`
-			text.TextColor3 = rarity.color
-			text.TextScaled = true
-			text.TextStrokeTransparency = 0.3
-			text.Parent = label
-			if index == 2 then
-				middle = pedestal
-			end
+	for index, definition in ipairs(PuffCatalog.all()) do
+		local row = math.floor((index - 1) / SHOWCASE_PER_ROW) + 1
+		local z = rowZ[row]
+		if z == nil then
+			break
 		end
-	end
-	local anchor = middle
-	if anchor ~= nil then
-		sign(anchor, "✨ PUFFDEX", "Colecione Puffs jogando", 5.4)
-		prompt(anchor, "Puffdex", "Abrir", "Puffdex")
+		local column = (index - 1) % SHOWCASE_PER_ROW
+		-- Fileiras alternadas ficam defasadas, para não esconder uma a outra.
+		local x = startX + (column * SHOWCASE_SPACING) + (if row % 2 == 0 then SHOWCASE_SPACING / 2 else 0)
+		buildPedestal(model, index, definition, Vector3.new(x, floorY, z))
 	end
 end
 
--- Quadro de desafios, de frente para o salão.
+-- Púlpito com o livro do Puffdex, virado para os arcos (+Z).
+local function buildPuffdexLectern(parent: Instance, base: Vector3)
+	local stand = part(parent, "PuffdexLectern", Vector3.new(2.4, 3, 1.6), CFrame.new(base + Vector3.new(0, 1.5, 0)), Color3.fromRGB(86, 56, 38), Enum.Material.Wood)
+	local book = part(parent, "PuffdexBook", Vector3.new(2.6, 0.3, 1.9), CFrame.new(base + Vector3.new(0, 3.2, 0.1)) * CFrame.Angles(math.rad(20), 0, 0), Color3.fromRGB(104, 76, 204), Enum.Material.Fabric)
+	book.CanCollide = false
+	sign(stand, "✨ PUFFDEX", "Colecione Puffs jogando", 5)
+	prompt(stand, "Puffdex", "Abrir", "Puffdex")
+end
+
+-- Quadro de desafios, de frente para o salão (+X).
 local function buildChallengeBoard(parent: Instance, base: Vector3)
 	local board = part(parent, "ChallengeBoard", Vector3.new(0.4, 3.2, 4.4), CFrame.new(base + Vector3.new(0, 3.4, 0)), Color3.fromRGB(150, 105, 70), Enum.Material.WoodPlanks)
 	part(parent, "ChallengeBoardPostA", Vector3.new(0.4, 2, 0.4), CFrame.new(base + Vector3.new(0, 1, -1.8)), Color3.fromRGB(86, 56, 38), Enum.Material.Wood)
@@ -249,16 +262,26 @@ local function buildChallengeBoard(parent: Instance, base: Vector3)
 end
 
 -- Loja: só a banca, fechada ("em breve"). Preparação para a Fase 5.
-local function buildShop(parent: Instance, base: Vector3)
+-- `facing` (±1) diz para que lado de X fica o balcão.
+local function buildShop(parent: Instance, base: Vector3, facing: number)
 	local counter = part(parent, "ShopCounter", Vector3.new(2.4, 2.6, 5.6), CFrame.new(base + Vector3.new(0, 1.3, 0)), Color3.fromRGB(150, 108, 66), Enum.Material.Wood)
 	local stripes = { Color3.fromRGB(255, 122, 186), Color3.fromRGB(255, 248, 238) }
 	for index = 1, 4 do
-		part(parent, `Awning{index}`, Vector3.new(3, 0.3, 1.4), CFrame.new(base + Vector3.new(0.3, 5.6, -2.1 + (index - 1) * 1.4)), stripes[(index % 2) + 1], Enum.Material.Fabric)
+		part(parent, `Awning{index}`, Vector3.new(3, 0.3, 1.4), CFrame.new(base + Vector3.new(facing * 0.3, 5.6, -2.1 + (index - 1) * 1.4)), stripes[(index % 2) + 1], Enum.Material.Fabric)
 	end
-	part(parent, "ShopPostA", Vector3.new(0.3, 3, 0.3), CFrame.new(base + Vector3.new(-0.9, 4.1, -2.6)), Color3.fromRGB(86, 56, 38), Enum.Material.Wood)
-	part(parent, "ShopPostB", Vector3.new(0.3, 3, 0.3), CFrame.new(base + Vector3.new(-0.9, 4.1, 2.6)), Color3.fromRGB(86, 56, 38), Enum.Material.Wood)
+	part(parent, "ShopPostA", Vector3.new(0.3, 3, 0.3), CFrame.new(base + Vector3.new(-facing * 0.9, 4.1, -2.6)), Color3.fromRGB(86, 56, 38), Enum.Material.Wood)
+	part(parent, "ShopPostB", Vector3.new(0.3, 3, 0.3), CFrame.new(base + Vector3.new(-facing * 0.9, 4.1, 2.6)), Color3.fromRGB(86, 56, 38), Enum.Material.Wood)
 	sign(counter, "🛍 LOJA", "Em breve", 5.8)
 	prompt(counter, "Shop", "Espiar", "Loja")
+end
+
+-- Canto da Party: placa em pé entre os sofás do Ponto de Encontro.
+local function buildPartyPost(parent: Instance, base: Vector3)
+	local post = part(parent, "PartyPost", Vector3.new(0.5, 3.6, 0.5), CFrame.new(base + Vector3.new(0, 1.8, 0)), Color3.fromRGB(86, 56, 38), Enum.Material.Wood)
+	local board = part(parent, "PartyBoard", Vector3.new(3.6, 1.8, 0.3), CFrame.new(base + Vector3.new(0, 4.2, 0)), Color3.fromRGB(64, 92, 140), Enum.Material.WoodPlanks)
+	board.CanCollide = false
+	sign(post, "👥 PARTY", "Chame amigos para jogar juntos", 6.2)
+	prompt(post, "Party", "Abrir", "Party")
 end
 
 function LobbyStationsService.start(worldRoot: Model)
@@ -278,47 +301,27 @@ function LobbyStationsService.start(worldRoot: Model)
 	folder:SetAttribute(GENERATED_BY_ATTRIBUTE, SERVICE_NAME)
 	folder.Parent = worldRoot
 
-	local gallery = BuildingLayout.getGallery(GameConfig.Arena, GameConfig.Building)
-	local floorY = gallery.floorY
-	local zMin = gallery.center.Z - gallery.size.Z / 2
-	local westX = gallery.innerX + 3.4
+	local mansion = MansionLayout.get()
+	local floorY = mansion.floorY
+	local half = MansionConfig.PartitionThickness / 2
+	local collection = MansionLayout.room("Collection")
+	local garden = MansionLayout.room("Garden")
+	local meeting = MansionLayout.roomCenter("Meeting")
 	local function at(x: number, z: number): Vector3
 		return Vector3.new(x, floorY, z)
 	end
 
-	local machineAt = at(gallery.innerX + 3.8, zMin + 6)
-	local baraoAt = at(gallery.center.X, zMin + 6.5)
-	local showcaseAt = at(westX, zMin + 22)
-	local boardAt = at(westX, zMin + 37)
-	local shopAt = at(gallery.innerX + 3.6, zMin + 55)
-	buildMachine(folder, machineAt)
-	buildFriendlyBarao(folder, baraoAt)
-	buildShowcase(folder, showcaseAt, 3.5)
-	buildChallengeBoard(folder, boardAt)
-	buildShop(folder, shopAt)
-
-	local reserved: { ReservedArea } = {
-		{ center = machineAt, size = Vector3.new(7, 0, 7) },
-		{ center = baraoAt, size = Vector3.new(8, 0, 8) },
-		{ center = showcaseAt, size = Vector3.new(6, 0, 17) },
-		{ center = boardAt, size = Vector3.new(6, 0, 7) },
-		{ center = shopAt, size = Vector3.new(7, 0, 9) },
-	}
-	LobbyStationsService.reserve(reserved)
+	buildShowcase(folder, floorY, collection.minX + 8, { collection.minZ + 5, collection.minZ + 15 })
+	buildPuffdexLectern(folder, at((collection.minX + collection.maxX) / 2, collection.maxZ - half - 6))
+	buildMachine(folder, at(collection.maxX - 4.5, collection.maxZ - half - 9), -1)
+	buildFriendlyBarao(folder, MansionLayout.roomCenter("Garden"))
+	buildShop(folder, at(garden.maxX - 3.5, (garden.minZ + garden.maxZ) / 2 + 12), -1)
+	buildChallengeBoard(folder, at(MansionLayout.room("Meeting").minX + 1.5, meeting.Z - 5))
+	buildPartyPost(folder, meeting + Vector3.new(0, 0, 13))
 
 	Players.PlayerRemoving:Connect(function(player: Player)
 		lastPet[player] = nil
 	end)
-end
-
--- Soma áreas às já reservadas (a área de treino também reserva a dela).
--- É aditivo: chame só uma vez por estação, na inicialização.
-local allReserved: { ReservedArea } = {}
-function LobbyStationsService.reserve(areas: { ReservedArea })
-	for _, area in ipairs(areas) do
-		table.insert(allReserved, area)
-	end
-	LobbyService.setReservedAreas(allReserved)
 end
 
 return table.freeze(LobbyStationsService)

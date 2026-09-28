@@ -120,6 +120,14 @@ function PartyController.open()
 	end
 end
 
+-- Abre sem alternar (estação do lobby).
+function PartyController.show()
+	local current = view
+	if current ~= nil and not current.isOpen() then
+		current.open()
+	end
+end
+
 function PartyController.start()
 	if started then
 		return

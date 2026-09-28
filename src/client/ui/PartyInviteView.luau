@@ -31,7 +31,8 @@ function PartyInviteView.new(
 	local root = Instance.new("Frame")
 	root.Name = "Root"
 	root.AnchorPoint = Vector2.new(0, 0.5)
-	root.Position = UDim2.new(0, 18, 0.62, 0)
+	-- Abaixo dos cartões de aviso (AnnouncementView e BannerView), à esquerda.
+	root.Position = UDim2.new(0, 18, 0.72, 0)
 	root.Size = UDim2.fromOffset(300, 104)
 	root.BackgroundTransparency = 1
 	root.Parent = screenGui

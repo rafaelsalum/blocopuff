@@ -1,15 +1,17 @@
 --!strict
 
--- O lobby é a galeria envidraçada dentro do próprio prédio: todos nascem e
--- aguardam ali, vendo a arena. Ao iniciar a partida, só os participantes
--- descem para o piso de cima; eliminados renascem na galeria e, ao final,
--- os participantes restantes voltam para ela.
+-- O lobby é o Casarão (MansionService), ligado à galeria envidraçada do
+-- prédio: todos nascem e aguardam no Salão Principal, livres para andar
+-- pelas salas ou ir à galeria assistir à arena. Ao iniciar a partida, só os
+-- participantes descem para o piso de cima; eliminados renascem no Salão e,
+-- ao final, os participantes restantes voltam para ele.
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local GameConfig = require(ReplicatedStorage.Shared.config.GameConfig)
 local BuildingLayout = require(ReplicatedStorage.Shared.modules.BuildingLayout)
+local MansionLayout = require(ReplicatedStorage.Shared.modules.MansionLayout)
 local StateAttributeNames = require(ReplicatedStorage.Shared.types.StateAttributeNames)
 
 type ArenaConfig = GameConfig.ArenaConfig
@@ -25,9 +27,8 @@ local LOBBY_NAME = "Lobby"
 local GENERATED_BY_ATTRIBUTE = "GeneratedBy"
 local SERVICE_NAME = "LobbyService"
 local SPAWN_SIZE = Vector3.new(6, 1, 6)
--- Posições candidatas no lobby. Mais posições que jogadores permitem sempre
--- escolher um lugar livre, longe de quem já está na galeria.
-local TELEPORT_SLOT_COUNT = 45
+-- Nascimento a oeste da estátua do Salão, perto das portas da galeria.
+local SPAWN_OFFSET = Vector3.new(-15, 0, 0)
 local SLOT_SPREAD_TOLERANCE = 0.85
 local ROOT_WAIT_TIMEOUT = 5
 local RECOVERY_INTERVAL = 0.2
@@ -40,13 +41,13 @@ local currentWorldRoot: Model? = nil
 local currentArena: ArenaConfig? = nil
 local currentBuilding: BuildingConfig? = nil
 local lobbyModel: Model? = nil
-local gallerySpawn: SpawnLocation? = nil
+local lobbySpawn: SpawnLocation? = nil
 local playerAddedConnection: RBXScriptConnection? = nil
 local playerRemovingConnection: RBXScriptConnection? = nil
 local characterConnections: { [Player]: RBXScriptConnection } = {}
 local recoveryGeneration = 0
 local slotRandom = Random.new()
--- Áreas do lobby ocupadas por estações (4.5): ninguém é colocado nelas.
+-- Áreas do lobby ocupadas por móveis e estações: ninguém é colocado nelas.
 local reservedAreas: { ReservedArea } = {}
 
 local function isOwned(instance: Instance): boolean
@@ -82,7 +83,7 @@ local function createSpawn(parent: Instance, name: string, surfacePosition: Vect
 end
 
 local function getActiveSpawn(): SpawnLocation?
-	local spawn = gallerySpawn
+	local spawn = lobbySpawn
 	if spawn ~= nil and spawn.Parent ~= nil then
 		return spawn
 	end
@@ -132,11 +133,13 @@ local function isReserved(position: Vector3): boolean
 	return false
 end
 
-local function getGallerySlots(): { CFrame }
+-- Posições candidatas no Salão Principal (bem mais que jogadores, para
+-- sempre haver um lugar livre longe de quem já está lá).
+local function getLobbySlots(): { CFrame }
 	if currentArena == nil or currentBuilding == nil then
 		return {}
 	end
-	local all = BuildingLayout.getGallerySpawnCFrames(currentArena, currentBuilding, TELEPORT_SLOT_COUNT)
+	local all = MansionLayout.spawnCFrames()
 	local slots: { CFrame } = {}
 	for _, slot in ipairs(all) do
 		if not isReserved(slot.Position) then
@@ -155,7 +158,8 @@ local function isActiveCompetitor(player: Player): boolean
 	return player:GetAttribute(ATTR_IS_PARTICIPANT) == true and player:GetAttribute(ATTR_IS_ELIMINATED) == false
 end
 
--- Posições dos outros jogadores vivos que estão na galeria agora.
+-- Posições dos outros jogadores vivos que estão fora da arena agora (na
+-- galeria ou no Casarão, que ficam a leste do vidro e acima do piso de cima).
 local function getOccupiedPositions(except: { [Player]: boolean }): { Vector3 }
 	local arena = currentArena
 	local building = currentBuilding
@@ -183,7 +187,7 @@ end
 -- Escolhe a posição do lobby mais distante de todos os ocupados (sorteando
 -- entre as quase tão boas), garantindo que ninguém nasça em cima de outro.
 local function pickFreeSlot(occupied: { Vector3 }): CFrame?
-	local slots = getGallerySlots()
+	local slots = getLobbySlots()
 	if #slots == 0 then
 		return nil
 	end
@@ -299,7 +303,7 @@ function LobbyService.destroy()
 	end
 
 	for _, player in ipairs(Players:GetPlayers()) do
-		if player.RespawnLocation ~= nil and player.RespawnLocation == gallerySpawn then
+		if player.RespawnLocation ~= nil and player.RespawnLocation == lobbySpawn then
 			player.RespawnLocation = nil
 		end
 	end
@@ -311,7 +315,9 @@ function LobbyService.destroy()
 	end
 
 	lobbyModel = nil
-	gallerySpawn = nil
+	lobbySpawn = nil
+	-- Quem reserva (MansionService) roda de novo depois do próximo create.
+	table.clear(reservedAreas)
 	currentWorldRoot = nil
 	currentArena = nil
 	currentBuilding = nil
@@ -329,10 +335,9 @@ function LobbyService.create(worldRoot: Model, arena: ArenaConfig, building: Bui
 	model:SetAttribute(GENERATED_BY_ATTRIBUTE, SERVICE_NAME)
 	model.Parent = worldRoot
 
-	local gallery = BuildingLayout.getGallery(arena, building)
-	local spawn = createSpawn(model, "GallerySpawn", gallery.center)
+	local spawn = createSpawn(model, "LobbySpawn", MansionLayout.roomCenter("GrandHall") + SPAWN_OFFSET)
 	spawn.Enabled = true
-	gallerySpawn = spawn
+	lobbySpawn = spawn
 
 	lobbyModel = model
 	for _, player in ipairs(Players:GetPlayers()) do
@@ -351,14 +356,17 @@ function LobbyService.create(worldRoot: Model, arena: ArenaConfig, building: Bui
 end
 
 -- Chamado quando a partida termina, antes de restaurar os pisos: quem
--- ainda está na arena volta para a galeria.
+-- ainda está na arena volta para o Salão Principal.
 function LobbyService.returnToLobby(players: { Player })
 	placeInLobby(players)
 end
 
--- Estações do lobby (LobbyStationsService) avisam onde não colocar gente.
-function LobbyService.setReservedAreas(areas: { ReservedArea })
-	reservedAreas = table.clone(areas)
+-- Móveis (MansionService) e estações (LobbyStationsService, TrainingService)
+-- avisam onde não colocar gente. É aditivo: cada um chama uma vez, ao iniciar.
+function LobbyService.addReservedAreas(areas: { ReservedArea })
+	for _, area in ipairs(areas) do
+		table.insert(reservedAreas, area)
+	end
 end
 
 function LobbyService.getModel(): Model?
