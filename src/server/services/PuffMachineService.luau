@@ -15,11 +15,29 @@
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
+local PuffCatalog = require(ReplicatedStorage.Shared.config.PuffCatalog)
+local PuffTypes = require(ReplicatedStorage.Shared.types.PuffTypes)
 local RewardConfig = require(ReplicatedStorage.Shared.config.RewardConfig)
 local PuffadorConstants = require(ReplicatedStorage.Shared.modules.PuffadorConstants)
 local StateAttributeNames = require(ReplicatedStorage.Shared.types.StateAttributeNames)
 local PlayerDataService = require(script.Parent.PlayerDataService)
 local TelemetryService = require(script.Parent.TelemetryService)
+local ProfileSchema = require(script.Parent.Parent.data.ProfileSchema)
+local PuffInventory = require(script.Parent.Parent.data.PuffInventory)
+local RewardRules = require(script.Parent.Parent.data.RewardRules)
+
+type Profile = ProfileSchema.Profile
+
+-- Resultado de um giro (enviado ao cliente).
+export type MachineResult = {
+	puffId: string,
+	duplicate: boolean,
+	refund: number,
+	tickets: number,
+	pity: number,
+}
+
+type MachineFailure = "NotLoaded" | "NotSaved" | "NoTickets" | "Empty"
 
 local OPENED_COOLDOWN = 5
 local MAX_REQUEST_ID = 1e9
@@ -34,6 +52,61 @@ local lastOpened: { [Player]: number } = {}
 local function isCompeting(player: Player): boolean
 	return player:GetAttribute(StateAttributeNames.PlayerIsParticipant) == true
 		and player:GetAttribute(StateAttributeNames.PlayerIsEliminated) ~= true
+end
+
+-- Um giro: confere o saldo, gasta, sorteia e guarda o Puff numa única
+-- atualização do perfil (sem pausa entre conferir e gravar: dois pedidos
+-- seguidos nunca gastam o mesmo saldo). Só com perfil salvo: um Puff que
+-- sumisse na próxima sessão pareceria roubo. Grava logo em seguida.
+local function pull(player: Player): (MachineResult?, MachineFailure)
+	local result: MachineResult? = nil
+	local failure: MachineFailure = "NotLoaded"
+	local picked: PuffTypes.PuffDefinition? = nil
+	local pulls = 0
+	local owned = 0
+	PlayerDataService.update(player, function(profile: Profile, canSave: boolean): (Profile?, PlayerDataService.Events?)
+		if not canSave then
+			failure = "NotSaved"
+			return nil, nil
+		end
+		if profile.tickets < RewardConfig.MachineCost then
+			failure = "NoTickets"
+			return nil, nil
+		end
+		local definition, nextPity = RewardRules.rollMachine(rng, profile.machinePity)
+		if definition == nil then
+			failure = "Empty"
+			return nil, nil
+		end
+		local puffs, duplicate = PuffInventory.addPuff(profile.puffs, definition.id, "Machine", os.time())
+		local refund = if duplicate then RewardConfig.DuplicateRefund else 0
+		local updated = table.clone(profile)
+		updated.puffs = puffs
+		updated.tickets = math.min(RewardConfig.MaxTickets, profile.tickets - RewardConfig.MachineCost + refund)
+		updated.ticketsSpent = profile.ticketsSpent + RewardConfig.MachineCost - refund
+		updated.machinePulls = profile.machinePulls + 1
+		updated.machinePity = nextPity
+		picked = definition
+		pulls = updated.machinePulls
+		owned = PuffInventory.countOwned(puffs)
+		result = { puffId = definition.id, duplicate = duplicate, refund = refund, tickets = updated.tickets, pity = nextPity }
+		-- Sem `newPuffs`: a própria máquina faz a revelação.
+		return updated, nil
+	end, true)
+
+	local definition = picked
+	if result == nil or definition == nil then
+		return nil, failure
+	end
+	TelemetryService.lobbyEvent(player, "TicketsSpent", RewardConfig.MachineCost, "PuffMachine")
+	TelemetryService.lobbyEvent(player, "PuffMachinePull", pulls, definition.id, `{definition.rarity}:{if result.duplicate then "Duplicate" else "New"}`)
+	if result.duplicate then
+		TelemetryService.lobbyEvent(player, "TicketsEarned", result.refund, "DuplicateRefund")
+	else
+		TelemetryService.lobbyEvent(player, "PuffUnlocked", owned, definition.id, `{definition.rarity}:Machine`)
+		TelemetryService.lobbyEvent(player, "PuffCollection", owned, `Of{#PuffCatalog.all()}`)
+	end
+	return result, failure
 end
 
 local function readRequestId(value: unknown): number
@@ -59,11 +132,11 @@ local function onRequest(remote: RemoteEvent, player: Player, action: unknown, r
 			remote:FireClient(player, "Failed", "Competing", requestId)
 			return
 		end
-		local result, failure = PlayerDataService.machinePull(player, rng)
+		local result, failure = pull(player)
 		if result ~= nil then
 			remote:FireClient(player, "Result", result, requestId)
 		else
-			remote:FireClient(player, "Failed", failure or "Empty", requestId)
+			remote:FireClient(player, "Failed", failure, requestId)
 		end
 	elseif action == "Opened" then
 		local clock = os.clock()

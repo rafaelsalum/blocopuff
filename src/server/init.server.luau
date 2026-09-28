@@ -25,6 +25,7 @@ local LeaderboardService = require(script.services.LeaderboardService)
 local HallOfFameService = require(script.services.HallOfFameService)
 local PuffdexService = require(script.services.PuffdexService)
 local PuffMachineService = require(script.services.PuffMachineService)
+local SecretAchievementService = require(script.services.SecretAchievementService)
 local WorldVisualService = require(script.services.WorldVisualService)
 local BuildingService = require(script.services.BuildingService)
 local AdminService = require(script.services.AdminService)
@@ -116,6 +117,7 @@ PuffMomentService.start(PuffadorService.getRemotesFolder())
 CorridorTelemetryService.start()
 BaraoService.setEventListener(function(kind, player, detail)
 	CorridorTelemetryService.baraoEvent(kind, player, detail)
+	SecretAchievementService.baraoEvent(kind, player, detail)
 	if kind == "Escape" then
 		PuffMomentService.record(player, "BaraoEscape", detail)
 		RoundStatsService.baraoEscape(player)
@@ -124,12 +126,16 @@ end)
 TocaService.setEventListener(CorridorTelemetryService.tocaEvent)
 SecretPassageService.setRevealListener(function(floor, player)
 	CorridorTelemetryService.passageRevealed(player, floor)
+	SecretAchievementService.passageRevealed(player, floor)
 	PuffMomentService.record(player, "SecretDiscovery", `Floor{floor}`)
 	RoundStatsService.secretFound(player)
 end)
 VaultService.setPrizeListener(function(player)
 	PuffMomentService.record(player, "VaultConquered")
 	RoundStatsService.vaultConquered(player)
+end)
+CorridorTelemetryService.setEntryListener(function(player, floor)
+	SecretAchievementService.corridorEntered(player, SecretPassageService.isRevealed(floor))
 end)
 print("[BlocoPuff] Puff moments and secrets telemetry ready")
 
@@ -141,6 +147,15 @@ print("[BlocoPuff] Player profiles ready")
 PuffdexService.start(PuffadorService.getRemotesFolder())
 PuffMachineService.start(PuffadorService.getRemotesFolder())
 print("[BlocoPuff] Puffdex and Puff Machine ready")
+
+-- Conquistas secretas (e o Puff escondido no lobby).
+-- Opcional: uma falha aqui não pode impedir o resto do servidor de subir.
+local secretsOk, secretsFailure = pcall(SecretAchievementService.start, world)
+if secretsOk then
+	print("[BlocoPuff] Secret achievements ready")
+else
+	warn(string.format("[BlocoPuff] Secret achievements unavailable: %s", tostring(secretsFailure)))
+end
 
 -- Ranking global (lê os perfis salvos) e os painéis do Hall da Fama no lobby.
 LeaderboardService.start(PuffadorService.getRemotesFolder())

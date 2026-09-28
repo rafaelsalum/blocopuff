@@ -9,6 +9,8 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 
 local PuffCatalog = require(ReplicatedStorage.Shared.config.PuffCatalog)
+local DailyConfig = require(ReplicatedStorage.Shared.config.DailyConfig)
+local SecretCatalog = require(ReplicatedStorage.Shared.config.SecretCatalog)
 local PuffadorConstants = require(ReplicatedStorage.Shared.modules.PuffadorConstants)
 local ProfileTypes = require(ReplicatedStorage.Shared.types.ProfileTypes)
 local PuffTypes = require(ReplicatedStorage.Shared.types.PuffTypes)
@@ -18,6 +20,10 @@ type ProfileStats = ProfileTypes.ProfileStats
 type XpAward = ProfileTypes.XpAward
 type XpLine = ProfileTypes.XpLine
 type OwnedPuff = PuffTypes.OwnedPuff
+type ChallengeState = ProfileTypes.ChallengeState
+type DailyState = ProfileTypes.DailyState
+type DailyReward = ProfileTypes.DailyReward
+type SecretState = ProfileTypes.SecretState
 
 local WAIT_TIMEOUT = 15
 
@@ -107,6 +113,84 @@ local function parseNewPuffs(raw: unknown): { string }?
 	return if #ids > 0 then ids else nil
 end
 
+local function isChallengeId(id: unknown): boolean
+	for _, definition in ipairs(DailyConfig.Challenges) do
+		if definition.id == id then
+			return true
+		end
+	end
+	return false
+end
+
+local function parseChallenges(raw: unknown): { ChallengeState }
+	local list: { ChallengeState } = {}
+	if typeof(raw) ~= "table" then
+		return list
+	end
+	for index, item in ipairs(raw :: { any }) do
+		if index > #DailyConfig.Tiers then
+			break
+		end
+		if typeof(item) == "table" and isChallengeId(item.id) then
+			table.insert(list, { id = item.id, progress = readNumber(item.progress), done = item.done == true })
+		end
+	end
+	return list
+end
+
+local function parseDaily(raw: unknown): DailyState
+	if typeof(raw) ~= "table" then
+		return { lastDay = 0, streak = 0, best = 0 }
+	end
+	local data = raw :: { [string]: any }
+	return { lastDay = readNumber(data.lastDay), streak = readNumber(data.streak), best = readNumber(data.best) }
+end
+
+local function parseDailyReward(raw: unknown): DailyReward?
+	if typeof(raw) ~= "table" then
+		return nil
+	end
+	local data = raw :: { [string]: any }
+	local streak = readNumber(data.streak)
+	if streak <= 0 then
+		return nil
+	end
+	return { streak = streak, tickets = readNumber(data.tickets) }
+end
+
+local function parseSecrets(raw: unknown): { SecretState }
+	local list: { SecretState } = {}
+	if typeof(raw) ~= "table" then
+		return list
+	end
+	for index, item in ipairs(raw :: { any }) do
+		if index > #SecretCatalog.all() then
+			break
+		end
+		if typeof(item) == "table" and SecretCatalog.get(item.id) ~= nil then
+			table.insert(list, { id = item.id, obtainedAt = readNumber(item.obtainedAt) })
+		end
+	end
+	return list
+end
+
+-- Lista de ids válidos (desafios ou segredos) para os eventos.
+local function parseIds(raw: unknown, isValid: (id: unknown) -> boolean, limit: number): { string }?
+	if typeof(raw) ~= "table" then
+		return nil
+	end
+	local ids: { string } = {}
+	for index, id in ipairs(raw :: { any }) do
+		if index > limit then
+			break
+		end
+		if typeof(id) == "string" and isValid(id) then
+			table.insert(ids, id)
+		end
+	end
+	return if #ids > 0 then ids else nil
+end
+
 local function parse(raw: unknown): ProfileSnapshot?
 	if typeof(raw) ~= "table" then
 		return nil
@@ -129,6 +213,15 @@ local function parse(raw: unknown): ProfileSnapshot?
 		equippedPuff = if PuffCatalog.get(data.equippedPuff) ~= nil then data.equippedPuff else PuffCatalog.DefaultId,
 		tickets = readNumber(data.tickets),
 		machinePity = readNumber(data.machinePity),
+		daily = parseDaily(data.daily),
+		challenges = parseChallenges(data.challenges),
+		nextResetAt = readNumber(data.nextResetAt),
+		secrets = parseSecrets(data.secrets),
+		dailyReward = parseDailyReward(data.dailyReward),
+		completedChallenges = parseIds(data.completedChallenges, isChallengeId, #DailyConfig.Tiers),
+		newSecrets = parseIds(data.newSecrets, function(id)
+			return SecretCatalog.get(id) ~= nil
+		end, #SecretCatalog.all()),
 		award = parseAward(data.award),
 		newPuffs = parseNewPuffs(data.newPuffs),
 	}

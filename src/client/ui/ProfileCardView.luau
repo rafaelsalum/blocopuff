@@ -2,8 +2,8 @@
 
 -- Cartão de perfil no canto superior esquerdo do lobby: nível (e prestígio),
 -- barra de XP, um botão que abre as estatísticas da carreira e, ao lado, os
--- botões 🏆 do ranking global, ✨ do Puffdex e 🎰 da Puff Machine (com o
--- saldo de tickets). Some durante a partida (o HUD de combate usa esse
+-- botões 🏆 do ranking global, ✨ do Puffdex, 🎰 da Puff Machine (com o
+-- saldo de tickets) e 📋 dos desafios. Some durante a partida (o HUD de combate usa esse
 -- canto). Só visual.
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -53,13 +53,20 @@ end
 
 -- `onRanking`: abre o painel RANKING (botão 🏆 ao lado do cartão).
 -- `onPuffdex`: abre o PUFFDEX (botão ✨). `onMachine`: abre a PUFF MACHINE (🎰).
-function ProfileCardView.new(playerGui: PlayerGui, onRanking: () -> (), onPuffdex: () -> (), onMachine: () -> ()): ProfileCardViewHandle
+-- `onChallenges`: abre os DESAFIOS (📋).
+function ProfileCardView.new(
+	playerGui: PlayerGui,
+	onRanking: () -> (),
+	onPuffdex: () -> (),
+	onMachine: () -> (),
+	onChallenges: () -> ()
+): ProfileCardViewHandle
 	local screenGui = UiTheme.createScreenGui(GUI_NAME, playerGui, 12)
 
 	local root = Instance.new("Frame")
 	root.Name = "Root"
 	root.Position = UDim2.fromOffset(18, 16)
-	root.Size = UDim2.fromOffset(CARD_SIZE.X + (SIDE_BUTTON_WIDTH + SIDE_BUTTON_GAP) * 3, CARD_SIZE.Y + STATS_SIZE.Y + 8)
+	root.Size = UDim2.fromOffset(CARD_SIZE.X + (SIDE_BUTTON_WIDTH + SIDE_BUTTON_GAP) * 4, CARD_SIZE.Y + STATS_SIZE.Y + 8)
 	root.BackgroundTransparency = 1
 	root.Visible = false
 	root.Parent = screenGui
@@ -172,6 +179,32 @@ function ProfileCardView.new(playerGui: PlayerGui, onRanking: () -> (), onPuffde
 		UiKit.playClick()
 		onMachine()
 	end)
+	local challengesButton = UiKit.createButton(root, {
+		name = "ChallengesButton",
+		text = "📋",
+		variant = "Success",
+		size = UDim2.fromOffset(SIDE_BUTTON_WIDTH, CARD_SIZE.Y),
+		position = UDim2.fromOffset(CARD_SIZE.X + SIDE_BUTTON_GAP * 4 + SIDE_BUTTON_WIDTH * 3, 0),
+		textSize = 24,
+		zIndex = 4,
+	})
+	challengesButton.button.Activated:Connect(function()
+		UiKit.playClick()
+		onChallenges()
+	end)
+	-- Aviso de desafio pendente (bolinha) quando ainda há desafio do dia a fazer.
+	local pendingDot = Instance.new("Frame")
+	pendingDot.Name = "Pending"
+	pendingDot.AnchorPoint = Vector2.new(0.5, 0.5)
+	pendingDot.Position = UDim2.new(1, -4, 0, 4)
+	pendingDot.Size = UDim2.fromOffset(12, 12)
+	pendingDot.BackgroundColor3 = UiTheme.Colors.Danger
+	pendingDot.ZIndex = 8
+	pendingDot.Visible = false
+	pendingDot.Parent = challengesButton.root
+	UiTheme.addCorner(pendingDot, 999)
+	UiTheme.addStroke(pendingDot, UiTheme.Colors.Outline, 1.5)
+
 	-- Saldo de tickets num selo embaixo do botão.
 	local ticketBadge = UiTheme.createLabel(machineButton.root, "Tickets", "🎟 0", UiTheme.Fonts.Display, 11, UiTheme.Colors.White)
 	ticketBadge.AnchorPoint = Vector2.new(0.5, 0.5)
@@ -254,6 +287,13 @@ function ProfileCardView.new(playerGui: PlayerGui, onRanking: () -> (), onPuffde
 			value.Text = formatNumber(statsTable[key] or 0)
 		end
 		ticketBadge.Text = string.format("🎟 %s", formatNumber(snapshot.tickets))
+		local pending = false
+		for _, state in ipairs(snapshot.challenges) do
+			if not state.done then
+				pending = true
+			end
+		end
+		pendingDot.Visible = pending
 		notice.Visible = not snapshot.saved
 		notice.Text = "Progresso desta sessão não está sendo salvo"
 	end

@@ -320,6 +320,32 @@ Escopo em `docs/FASE_2_SEGREDOS_COFRE_BARAO.md`.
 - **Ajustes:** ficam em `GameConfig.Barao` e `GameConfig.Toca`. Os sons atuais são provisórios, embutidos no Roblox; troque `BarkSoundIds`, `FunnySoundIds` e `FootstepSoundId` por áudios da Creator Store (`rbxassetid://...`).
 - **Código:** `BaraoService` (comportamento), `BaraoModel`, `TocaService`, `CorridorBuilder` (nichos) e `BuildingLayout.getTocas` / `isInsideToca` / `getCorridorFloorY`. No cliente, `BaraoController` mostra os avisos.
 
+### Desafios, retorno diário e conquistas secretas (Fase 4, entrega 4.3)
+
+- **Desafios diários** (`shared/config/DailyConfig`): 3 por dia, um de cada nível (fácil, médio e difícil), sorteados de forma fixa por jogador e dia (o mesmo em qualquer servidor).
+  - Todos são de gameplay: partidas, blocos, derrubadas, Top 3, Barão, passagem secreta, vitória, cofre, reconstrução e Volta por Cima. Nenhum é do tipo "fique online".
+  - O progresso sai da soma da rodada calculada pelo servidor, e só conta rodada jogada de verdade (com XP).
+  - Concluir dá tickets na hora (2 a 4), sem botão de resgatar.
+  - O dia vira à meia-noite de Brasília (`DayOffsetHours = -3`). Se virar com o jogador online, os desafios trocam no fim da próxima rodada.
+- **Retorno diário:** recompensa automática no primeiro login do dia, em ciclo de 7 dias (2, 2, 3, 3, 4, 4 e 8 🎟).
+  - Sequência amigável: perder um dia não zera nada (`GraceDays = 1`). O recorde fica guardado.
+- **Conquistas secretas** (`shared/config/SecretCatalog`): ficam como "???" com uma pista curta até alguém conseguir. Cada uma vale 5 🎟, uma vez só, e todas são detectadas no servidor (`SecretAchievementService`):
+  - **Passagem Oculta:** atravessar uma passagem de um andar ainda não revelado;
+  - **Pula-Barão:** pular o Barão 3 vezes na mesma partida;
+  - **Mestre dos Quadros:** revelar as passagens dos dois andares na mesma partida;
+  - **Por um Fio:** vencer com até 15% da arena de pé;
+  - **Puff Perdido:** achar o Puff dourado escondido atrás de um caixote num canto da galeria.
+- **Interface:** botão 📋 no cartão de perfil (com uma bolinha quando há desafio a fazer) abre o painel **DESAFIOS**.
+  - Mostra os desafios de hoje com barra de progresso e o tempo até os próximos.
+  - Mostra o ciclo de 7 dias com a sequência e as conquistas secretas.
+  - Avisos comemoram o retorno diário, o desafio concluído e a conquista secreta.
+- **Uma vez só:** no perfil, a recompensa do dia fica marcada pelo último dia recebido, os desafios guardam `done` e as conquistas ficam pelo id. Reconectar não repete nada. Numa sessão que não salva, nada é comemorado (voltaria como novo).
+- **Perfil v5:** passa a guardar `daily`, `challenges`, `challengesCompleted` e `secrets`. A migração v4 → v5 é automática.
+- **Arquitetura:** o `PlayerDataService` ganhou `update(player, updater, saveNow)`, uma atualização atômica genérica do perfil (o `updater` não pode pausar).
+  - O equipar do Puffdex, o giro da Puff Machine e as conquistas secretas passaram a viver nos seus próprios serviços, usando essa função.
+- **Telemetria:** `ChallengeAssigned`, `ChallengeCompleted`, `ChallengesOpened`, `DailyReturn` (sequência e recorde), `SecretAchievement` e `TicketsEarned` com as fontes `Daily`, `Challenge` e `Secret`.
+- **Código:** `DailyConfig`, `SecretCatalog`, `data/DailyRules`, `SecretAchievementService` e `PlayerDataService`. No cliente, `ChallengesController` e `ChallengesView`.
+
 ### Tickets e Puff Machine (Fase 4, entrega 4.2)
 
 - **Tickets** (moeda não competitiva, só para a Puff Machine): saem só jogando, calculados pelo servidor no fim da rodada (`RewardRules.ticketsForRound`).

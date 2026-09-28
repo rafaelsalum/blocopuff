@@ -19,6 +19,7 @@ local ProgressionController = require(script.controllers.ProgressionController)
 local LeaderboardController = require(script.controllers.LeaderboardController)
 local PuffdexController = require(script.controllers.PuffdexController)
 local PuffMachineController = require(script.controllers.PuffMachineController)
+local ChallengesController = require(script.controllers.ChallengesController)
 
 print("[BlocoPuff] Client initialized")
 
@@ -146,6 +147,13 @@ local machineOk, machineErr = pcall(function()
 end)
 if not machineOk then
 	warn(string.format("[BlocoPuff] Failed to start Puff Machine controller: %s", tostring(machineErr)))
+end
+
+local challengesOk, challengesErr = pcall(function()
+	ChallengesController.start()
+end)
+if not challengesOk then
+	warn(string.format("[BlocoPuff] Failed to start challenges controller: %s", tostring(challengesErr)))
 end
 
 local progressionOk, progressionErr = pcall(function()

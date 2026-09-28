@@ -36,6 +36,8 @@ local corridors: { Corridor } = {}
 local visits: { [Player]: Visit } = {}
 local lastBaraoMeeting: { [Player]: number } = {}
 local anyRevealThisRound = false
+-- Avisado quando um participante entra num corredor (conquistas secretas).
+local entryListener: ((player: Player, floor: number) -> ())? = nil
 local heartbeat: RBXScriptConnection? = nil
 local accumulator = 0
 
@@ -86,6 +88,10 @@ local function sample()
 				local floor = floorOf(corridor, root.Position.Y)
 				visits[player] = { corridor = corridor.name, enteredAt = os.clock(), entryFloor = floor }
 				TelemetryService.event(player, "CorridorEntered", nil, `Floor{floor}`, corridor.name)
+				local listener = entryListener
+				if listener ~= nil then
+					task.spawn(listener, player, floor)
+				end
 			elseif corridor == nil and visit ~= nil then
 				local lastCorridor: Corridor? = nil
 				for _, candidate in ipairs(corridors) do
@@ -97,6 +103,10 @@ local function sample()
 			end
 		end
 	end
+end
+
+function CorridorTelemetryService.setEntryListener(listener: ((player: Player, floor: number) -> ())?)
+	entryListener = listener
 end
 
 function CorridorTelemetryService.baraoEvent(kind: string, player: Player, detail: string?)

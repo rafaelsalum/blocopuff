@@ -16,9 +16,13 @@ local ProfileTypes = require(ReplicatedStorage.Shared.types.ProfileTypes)
 local PuffCatalog = require(ReplicatedStorage.Shared.config.PuffCatalog)
 local RewardConfig = require(ReplicatedStorage.Shared.config.RewardConfig)
 local PuffInventory = require(script.Parent.PuffInventory)
+local DailyRules = require(script.Parent.DailyRules)
+local SecretCatalog = require(ReplicatedStorage.Shared.config.SecretCatalog)
 
 type ProfileStats = ProfileTypes.ProfileStats
 type Inventory = PuffInventory.Inventory
+type Challenges = DailyRules.Challenges
+type DailyState = ProfileTypes.DailyState
 
 export type Session = {
 	jobId: string,
@@ -43,6 +47,11 @@ export type Profile = {
 	ticketsSpent: number,
 	machinePulls: number,
 	machinePity: number,
+	-- Retorno diário, desafios do dia e conquistas secretas (4.3).
+	daily: DailyState,
+	challenges: Challenges,
+	challengesCompleted: number,
+	secrets: { [string]: number },
 	appliedRounds: { string },
 	createdAt: number,
 	updatedAt: number,
@@ -53,8 +62,9 @@ export type Profile = {
 export type RoundDelta = ProfileStats
 
 -- v1: estatísticas (3.1). v2: levelReachedAt (3.2). v3: Puffdex (4.1).
--- v4: tickets e Puff Machine (4.2).
-local CURRENT_VERSION = 4
+-- v4: tickets e Puff Machine (4.2). v5: desafios, retorno diário e
+-- conquistas secretas (4.3).
+local CURRENT_VERSION = 5
 local MAX_STAT = 1e9
 local MAX_ROUND_KEY_LENGTH = 80
 
@@ -92,6 +102,10 @@ function ProfileSchema.default(now: number): Profile
 		ticketsSpent = 0,
 		machinePulls = 0,
 		machinePity = 0,
+		daily = DailyRules.emptyDaily(),
+		challenges = { day = 0, list = {} },
+		challengesCompleted = 0,
+		secrets = {},
 		appliedRounds = {},
 		createdAt = now,
 		updatedAt = now,
@@ -128,7 +142,31 @@ local MIGRATIONS: { [number]: (data: { [string]: any }) -> { [string]: any } } =
 		migrated.version = 4
 		return migrated
 	end,
+	-- v4 → v5: sem desafios nem sequência ainda (começam no próximo login).
+	[4] = function(data)
+		local migrated = table.clone(data)
+		migrated.daily = nil
+		migrated.challenges = nil
+		migrated.challengesCompleted = 0
+		migrated.secrets = {}
+		migrated.version = 5
+		return migrated
+	end,
 }
+
+local function readSecrets(raw: unknown, now: number): { [string]: number }
+	local secrets: { [string]: number } = {}
+	if typeof(raw) ~= "table" then
+		return secrets
+	end
+	for id, value in pairs(raw :: { [unknown]: unknown }) do
+		-- Ids desconhecidos são mantidos (conquista de uma versão futura).
+		if typeof(id) == "string" and #id <= SecretCatalog.MaxIdLength then
+			secrets[id] = if typeof(value) == "number" and value == value then math.max(0, math.floor(value)) else now
+		end
+	end
+	return secrets
+end
 
 local function readStats(raw: unknown): ProfileStats
 	local stats = ProfileSchema.emptyStats() :: any
@@ -190,6 +228,9 @@ function ProfileSchema.fromStored(raw: unknown, now: number): (Profile, boolean)
 		profile.stats = readStats(data.stats)
 		profile.puffs = PuffInventory.fromStored(data.puffs, now)
 		profile.equippedPuff = PuffInventory.validEquipped(profile.puffs, data.equippedPuff)
+		profile.daily = DailyRules.readDaily(data.daily)
+		profile.challenges = DailyRules.readChallenges(data.challenges)
+		profile.secrets = readSecrets(data.secrets, now)
 		profile.session = readSession(data.session)
 		return profile, true
 	end
@@ -219,6 +260,10 @@ function ProfileSchema.fromStored(raw: unknown, now: number): (Profile, boolean)
 		ticketsSpent = cleanNumber(data.ticketsSpent, 0),
 		machinePulls = cleanNumber(data.machinePulls, 0),
 		machinePity = math.min(cleanNumber(data.machinePity, 0), RewardConfig.PityThreshold),
+		daily = DailyRules.readDaily(data.daily),
+		challenges = DailyRules.readChallenges(data.challenges),
+		challengesCompleted = cleanNumber(data.challengesCompleted, 0),
+		secrets = readSecrets(data.secrets, now),
 		appliedRounds = readAppliedRounds(data.appliedRounds),
 		createdAt = cleanNumber(data.createdAt, now),
 		updatedAt = cleanNumber(data.updatedAt, now),
@@ -278,6 +323,15 @@ function ProfileSchema.addStats(stats: ProfileStats, delta: RoundDelta): Profile
 	return result :: ProfileStats
 end
 
+-- Cópia do perfil com tickets somados (respeita o teto de saldo).
+function ProfileSchema.withTickets(profile: Profile, tickets: number): Profile
+	local updated = table.clone(profile)
+	local amount = math.max(0, math.floor(tickets))
+	updated.tickets = math.min(RewardConfig.MaxTickets, profile.tickets + amount)
+	updated.ticketsEarned = profile.ticketsEarned + amount
+	return updated
+end
+
 -- Guarda a chave da rodada aplicada, mantendo só as `keep` mais recentes.
 function ProfileSchema.withAppliedRound(rounds: { string }, roundKey: string, keep: number): { string }
 	local result = table.clone(rounds)
@@ -304,6 +358,10 @@ function ProfileSchema.toStored(profile: Profile): { [string]: any }
 		ticketsSpent = profile.ticketsSpent,
 		machinePulls = profile.machinePulls,
 		machinePity = profile.machinePity,
+		daily = table.clone(profile.daily),
+		challenges = DailyRules.toStoredChallenges(profile.challenges),
+		challengesCompleted = profile.challengesCompleted,
+		secrets = table.clone(profile.secrets),
 		appliedRounds = table.clone(profile.appliedRounds),
 		createdAt = profile.createdAt,
 		updatedAt = profile.updatedAt,

@@ -23,6 +23,32 @@ export type ProfileStats = {
 	comebacks: number,
 }
 
+-- Desafio do dia (4.3): progresso e se já foi concluído (os tickets saem
+-- na hora da conclusão).
+export type ChallengeState = {
+	id: string,
+	progress: number,
+	done: boolean,
+}
+
+-- Retorno diário: último dia com recompensa, sequência atual e recorde.
+export type DailyState = {
+	lastDay: number,
+	streak: number,
+	best: number,
+}
+
+-- Recompensa de retorno diário recém-entregue (para comemorar).
+export type DailyReward = {
+	streak: number,
+	tickets: number,
+}
+
+export type SecretState = {
+	id: string,
+	obtainedAt: number,
+}
+
 -- XP de uma rodada, por fonte (para o pós-partida e o aviso de nível).
 export type XpLine = {
 	source: string,
@@ -55,6 +81,16 @@ export type ProfileSnapshot = {
 	-- Tickets da Puff Machine e giros seguidos sem Épico ou melhor.
 	tickets: number,
 	machinePity: number,
+	-- Desafios e retorno diário (4.3). `nextResetAt` = os.time() da virada
+	-- do dia do jogo (novos desafios).
+	daily: DailyState,
+	challenges: { ChallengeState },
+	nextResetAt: number,
+	secrets: { SecretState },
+	-- Eventos desta atualização (para comemorar uma vez só).
+	dailyReward: DailyReward?,
+	completedChallenges: { string }?,
+	newSecrets: { string }?,
 	-- Presente só na atualização logo depois de uma rodada.
 	award: XpAward?,
 	-- Puffs recém-desbloqueados nesta atualização (para comemorar).

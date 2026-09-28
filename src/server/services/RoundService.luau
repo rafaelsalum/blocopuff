@@ -26,6 +26,7 @@ local PuffMomentService = require(script.Parent.PuffMomentService)
 local CorridorTelemetryService = require(script.Parent.CorridorTelemetryService)
 local RoundStatsService = require(script.Parent.RoundStatsService)
 local PlayerDataService = require(script.Parent.PlayerDataService)
+local SecretAchievementService = require(script.Parent.SecretAchievementService)
 local XpCalculator = require(script.Parent.Parent.data.XpCalculator)
 local ProfileSchema = require(script.Parent.Parent.data.ProfileSchema)
 local ResultTypes = require(ReplicatedStorage.Shared.types.ResultTypes)
@@ -506,6 +507,7 @@ local function beginRound(timings: RoundTimings)
 	TocaService.beginRound(currentRoundId)
 	PuffMomentService.beginRound()
 	RoundStatsService.beginRound()
+	SecretAchievementService.beginRound()
 	PlayerDataService.roundStarted(participantOrder)
 	CorridorTelemetryService.beginRound(currentRoundId)
 	-- O Barão acorda e o cofre destranca no mesmo instante sorteado.
@@ -652,6 +654,14 @@ local function publishResult()
 	local committed, commitFailure = pcall(commitProfiles, result)
 	if not committed then
 		warn(string.format("[BlocoPuff] Could not save round to profiles: %s", tostring(commitFailure)))
+	end
+	-- Conquista "Por um Fio" (arena quase vazia); chamada antes de restaurar os pisos.
+	local total = ArenaService.getTotalBlockCount()
+	local remainingRatio = if total > 0 then ArenaService.getRemainingBlockCount() / total else 1
+	local secretWinner = if result.draw then nil else winnerPlayer
+	local secretsOk, secretsFailure = pcall(SecretAchievementService.roundFinished, secretWinner, remainingRatio)
+	if not secretsOk then
+		warn(string.format("[BlocoPuff] Secret achievements check failed: %s", tostring(secretsFailure)))
 	end
 	RoundStatsService.endRound()
 	if remote == nil then

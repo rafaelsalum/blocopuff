@@ -15,6 +15,11 @@
 --   * Tickets (4.2): ganhos só no fim da rodada, calculados aqui; gastos só
 --     na Puff Machine, numa única atualização do perfil (sem pausa entre
 --     conferir o saldo e gastar), salva na hora.
+--   * Dia do jogo (4.3): no login e no fim de cada rodada o servidor entrega
+--     o retorno diário (uma vez por dia) e troca os desafios se o dia virou.
+--     O progresso dos desafios sai da soma da rodada; concluir dá tickets
+--     na hora. Conquistas secretas chegam do SecretAchievementService e
+--     valem uma vez só (indexadas pelo id).
 --   * Puffdex: os Puffs merecidos (nível e façanhas) são concedidos pelo
 --     servidor ao carregar e depois de cada rodada. O inventário é indexado
 --     pelo id do Puff: nada duplica ao reconectar.
@@ -34,7 +39,8 @@ local ProfileSchema = require(script.Parent.Parent.data.ProfileSchema)
 local DataStoreErrors = require(script.Parent.Parent.data.DataStoreErrors)
 local PuffInventory = require(script.Parent.Parent.data.PuffInventory)
 local RewardRules = require(script.Parent.Parent.data.RewardRules)
-local RewardConfig = require(ReplicatedStorage.Shared.config.RewardConfig)
+local DailyRules = require(script.Parent.Parent.data.DailyRules)
+local SecretCatalog = require(ReplicatedStorage.Shared.config.SecretCatalog)
 local ProgressionConfig = require(ReplicatedStorage.Shared.config.ProgressionConfig)
 local LevelCurve = require(ReplicatedStorage.Shared.modules.LevelCurve)
 local TelemetryService = require(script.Parent.TelemetryService)
@@ -44,6 +50,16 @@ type RoundDelta = ProfileSchema.RoundDelta
 type ProfileSnapshot = ProfileTypes.ProfileSnapshot
 type XpAward = ProfileTypes.XpAward
 type XpLine = ProfileTypes.XpLine
+type DailyReward = ProfileTypes.DailyReward
+type SecretState = ProfileTypes.SecretState
+
+-- O que aconteceu nesta atualização (o cliente comemora uma vez só).
+export type Events = {
+	newPuffs: { string }?,
+	dailyReward: DailyReward?,
+	completedChallenges: { string }?,
+	newSecrets: { string }?,
+}
 
 -- XP calculado pelo RoundService para a rodada (ver XpCalculator).
 export type RoundXp = {
@@ -78,19 +94,7 @@ type PendingRound = {
 }
 
 export type ProfileListener = (player: Player, snapshot: ProfileSnapshot) -> ()
-
--- Resultado de um giro da Puff Machine.
-export type MachineResult = {
-	puffId: string,
-	duplicate: boolean,
-	refund: number,
-	tickets: number,
-	pity: number,
-}
-
--- Motivos de falha do giro (o PuffMachineService ainda usa "Cooldown" e
--- "Competing", decididos antes de chegar aqui).
-export type MachineFailure = "NotLoaded" | "NotSaved" | "NoTickets" | "Empty"
+export type Updater = (profile: Profile, canSave: boolean) -> (Profile?, Events?)
 
 local SESSION_ID = if game.JobId ~= "" then game.JobId else `studio-{HttpService:GenerateGUID(false)}`
 local BIND_TO_CLOSE_TIMEOUT = 25
@@ -123,8 +127,23 @@ local function keyFor(player: Player): string
 	return `{ProfileConfig.KeyPrefix}{player.UserId}`
 end
 
-local function snapshotOf(entry: Entry, award: XpAward?, newPuffs: { string }?): ProfileSnapshot
+local function nonEmpty(list: { string }?): { string }?
+	return if list ~= nil and #list > 0 then list else nil
+end
+
+local function snapshotOf(entry: Entry, award: XpAward?, events: Events?): ProfileSnapshot
 	local profile = entry.profile
+	local secrets: { SecretState } = {}
+	for _, definition in ipairs(SecretCatalog.all()) do
+		local obtainedAt = profile.secrets[definition.id]
+		if obtainedAt ~= nil then
+			table.insert(secrets, { id = definition.id, obtainedAt = obtainedAt })
+		end
+	end
+	local challenges = {}
+	for _, state in ipairs(profile.challenges.list) do
+		table.insert(challenges, table.clone(state))
+	end
 	return {
 		stats = table.clone(profile.stats),
 		xp = profile.xp,
@@ -135,18 +154,25 @@ local function snapshotOf(entry: Entry, award: XpAward?, newPuffs: { string }?):
 		equippedPuff = profile.equippedPuff,
 		tickets = profile.tickets,
 		machinePity = profile.machinePity,
+		daily = table.clone(profile.daily),
+		challenges = challenges,
+		nextResetAt = DailyRules.nextResetAt(now()),
+		secrets = secrets,
 		award = award,
-		newPuffs = if newPuffs ~= nil and #newPuffs > 0 then newPuffs else nil,
+		newPuffs = if events ~= nil then nonEmpty(events.newPuffs) else nil,
+		dailyReward = if events ~= nil then events.dailyReward else nil,
+		completedChallenges = if events ~= nil then nonEmpty(events.completedChallenges) else nil,
+		newSecrets = if events ~= nil then nonEmpty(events.newSecrets) else nil,
 	}
 end
 
-local function publish(entry: Entry, award: XpAward?, newPuffs: { string }?)
+local function publish(entry: Entry, award: XpAward?, events: Events?)
 	-- O Puff equipado vai num atributo do jogador: todos os clientes (e o
 	-- PuffadorService, ao disparar) leem dali.
 	if entry.player.Parent ~= nil and entry.player:GetAttribute(StateAttributeNames.PlayerEquippedPuff) ~= entry.profile.equippedPuff then
 		entry.player:SetAttribute(StateAttributeNames.PlayerEquippedPuff, entry.profile.equippedPuff)
 	end
-	local snapshot = snapshotOf(entry, award, newPuffs)
+	local snapshot = snapshotOf(entry, award, events)
 	local remote = snapshotRemote
 	if remote ~= nil and entry.player.Parent ~= nil then
 		remote:FireClient(entry.player, snapshot)
@@ -212,6 +238,72 @@ local function grantPuffs(entry: Entry): { string }
 	end
 	TelemetryService.lobbyEvent(entry.player, "PuffCollection", owned, `Of{total}`)
 	return granted
+end
+
+-- Soma tickets ao perfil atual (cópia nova).
+local function addTickets(entry: Entry, tickets: number)
+	if tickets <= 0 then
+		return
+	end
+	entry.profile = ProfileSchema.withTickets(entry.profile, tickets)
+	entry.dirty = true
+end
+
+-- Virada do dia: troca os desafios se o dia mudou e entrega o retorno
+-- diário (uma vez por dia). Devolve a recompensa para comemorar (só com
+-- perfil salvo, pelo mesmo motivo dos Puffs: senão ela voltaria amanhã
+-- como se fosse nova).
+local function refreshDay(entry: Entry): DailyReward?
+	local profile = entry.profile
+	local today = DailyRules.dayIndex(now())
+	local challenges, replaced = DailyRules.ensureToday(profile.challenges, entry.player.UserId, today)
+	local daily, reward = DailyRules.claimDaily(profile.daily, today)
+	if not replaced and reward == nil then
+		return nil
+	end
+	local updated = table.clone(profile)
+	updated.challenges = challenges
+	updated.daily = daily
+	entry.profile = updated
+	entry.dirty = true
+	if replaced and entry.canSave then
+		for _, state in ipairs(challenges.list) do
+			TelemetryService.lobbyEvent(entry.player, "ChallengeAssigned", 1, state.id)
+		end
+	end
+	if reward == nil then
+		return nil
+	end
+	addTickets(entry, reward.tickets)
+	if not entry.canSave then
+		return nil
+	end
+	TelemetryService.lobbyEvent(entry.player, "DailyReturn", reward.streak, `Tickets{reward.tickets}`, `Best{daily.best}`)
+	TelemetryService.lobbyEvent(entry.player, "TicketsEarned", reward.tickets, "Daily")
+	return reward
+end
+
+-- Progresso dos desafios com a soma limpa da rodada. Só conta rodada
+-- jogada de verdade (com XP). Devolve os desafios concluídos agora.
+local function progressChallenges(entry: Entry, delta: RoundDelta, gainedXp: number): { string }
+	if gainedXp <= 0 then
+		return {}
+	end
+	local profile = entry.profile
+	local challenges, completed, tickets = DailyRules.applyRound(profile.challenges, delta :: any)
+	local updated = table.clone(profile)
+	updated.challenges = challenges
+	updated.challengesCompleted = profile.challengesCompleted + #completed
+	entry.profile = updated
+	entry.dirty = true
+	addTickets(entry, tickets)
+	for _, id in ipairs(completed) do
+		TelemetryService.lobbyEvent(entry.player, "ChallengeCompleted", entry.profile.challengesCompleted, id)
+	end
+	if tickets > 0 then
+		TelemetryService.lobbyEvent(entry.player, "TicketsEarned", tickets, "Challenge")
+	end
+	return if entry.canSave then completed else {}
 end
 
 type LoadOutcome = "Loaded" | "Locked" | "Future" | "Error"
@@ -361,8 +453,10 @@ local function load(player: Player)
 	entries[player] = entry
 	-- Puffs já merecidos (inclusive por perfis antigos, sem Puffdex).
 	local newPuffs = grantPuffs(entry)
-	publish(entry, nil, newPuffs)
-	if #newPuffs > 0 then
+	-- Retorno diário e desafios de hoje.
+	local dailyReward = refreshDay(entry)
+	publish(entry, nil, { newPuffs = newPuffs, dailyReward = dailyReward })
+	if entry.dirty then
 		task.spawn(save, entry, false)
 	end
 
@@ -419,9 +513,7 @@ function PlayerDataService.applyRound(player: Player, roundKey: string, delta: R
 	local newLevel = LevelCurve.levelForXp(newXp)
 	local timestamp = now()
 	local tickets, ticketLines = RewardRules.ticketsForRound(clean, gained, newLevel - profile.level)
-	local updated = table.clone(profile)
-	updated.tickets = math.min(RewardConfig.MaxTickets, profile.tickets + tickets)
-	updated.ticketsEarned = profile.ticketsEarned + tickets
+	local updated = ProfileSchema.withTickets(profile, tickets)
 	updated.stats = ProfileSchema.addStats(profile.stats, clean)
 	updated.appliedRounds = ProfileSchema.withAppliedRound(profile.appliedRounds, roundKey, ProfileConfig.AppliedRoundsKept)
 	updated.xp = newXp
@@ -444,6 +536,9 @@ function PlayerDataService.applyRound(player: Player, roundKey: string, delta: R
 		TelemetryService.lobbyEvent(player, "TicketsEarned", line.tickets, line.source)
 	end
 
+	-- Dia do jogo (pode ter virado com o jogador online) e desafios.
+	local dailyReward = refreshDay(entry)
+	local completed = progressChallenges(entry, clean, gained)
 	local newPuffs = grantPuffs(entry)
 	publish(entry, {
 		roundId = roundXp.roundId,
@@ -452,7 +547,7 @@ function PlayerDataService.applyRound(player: Player, roundKey: string, delta: R
 		levelBefore = profile.level,
 		levelAfter = newLevel,
 		tickets = tickets,
-	}, newPuffs)
+	}, { newPuffs = newPuffs, dailyReward = dailyReward, completedChallenges = completed })
 	-- Grava logo: o fim da rodada é o momento mais importante de não perder.
 	task.spawn(save, entry, false)
 	return true
@@ -509,76 +604,28 @@ function PlayerDataService.prestige(player: Player): boolean
 	return true
 end
 
--- Equipa um Puff que o jogador tem (só visual). Falso se não tiver.
-function PlayerDataService.equipPuff(player: Player, puffId: string): boolean
-	local entry = entries[player]
-	if entry == nil or not PuffInventory.owns(entry.profile.puffs, puffId) then
-		return false
-	end
-	if entry.profile.equippedPuff == puffId then
-		return true
-	end
-	local updated = table.clone(entry.profile)
-	updated.equippedPuff = puffId
-	entry.profile = updated
-	entry.dirty = true
-	local definition = PuffCatalog.get(puffId)
-	TelemetryService.lobbyEvent(player, "PuffEquipped", 1, puffId, if definition ~= nil then definition.rarity else nil)
-	publish(entry)
-	return true
-end
-
--- Um giro da Puff Machine: confere o saldo, gasta, sorteia e guarda o Puff
--- numa única atualização (nada aqui pausa, então dois pedidos seguidos
--- nunca gastam o mesmo saldo). Só com perfil salvo: um Puff que sumisse na
--- próxima sessão pareceria roubo. Salva logo em seguida.
-function PlayerDataService.machinePull(player: Player, rng: Random): (MachineResult?, MachineFailure?)
+-- Atualização genérica e atômica do perfil, para os outros serviços
+-- (Puffdex, Puff Machine, conquistas secretas). `updater` recebe o perfil
+-- atual e se ele é salvo nesta sessão, e devolve o perfil NOVO (ou nil para
+-- não mudar nada) e os eventos a comemorar. `updater` não pode pausar
+-- (nada de wait/yield): é isso que garante que conferir e gravar acontecem
+-- juntos. Com `saveNow`, grava logo em seguida.
+function PlayerDataService.update(player: Player, updater: Updater, saveNow: boolean?): boolean
 	local entry = entries[player]
 	if entry == nil then
-		return nil, "NotLoaded"
+		return false
 	end
-	if not entry.canSave then
-		return nil, "NotSaved"
+	local updated, events = updater(entry.profile, entry.canSave)
+	if updated == nil then
+		return false
 	end
-	local profile = entry.profile
-	if profile.tickets < RewardConfig.MachineCost then
-		return nil, "NoTickets"
-	end
-	local picked, nextPity = RewardRules.rollMachine(rng, profile.machinePity)
-	if picked == nil then
-		return nil, "Empty"
-	end
-	local timestamp = now()
-	local puffs, duplicate = PuffInventory.addPuff(profile.puffs, picked.id, "Machine", timestamp)
-	local refund = if duplicate then RewardConfig.DuplicateRefund else 0
-	local updated = table.clone(profile)
-	updated.puffs = puffs
-	updated.tickets = math.min(RewardConfig.MaxTickets, profile.tickets - RewardConfig.MachineCost + refund)
-	updated.ticketsSpent = profile.ticketsSpent + RewardConfig.MachineCost - refund
-	updated.machinePulls = profile.machinePulls + 1
-	updated.machinePity = nextPity
 	entry.profile = updated
 	entry.dirty = true
-
-	TelemetryService.lobbyEvent(player, "TicketsSpent", RewardConfig.MachineCost, "PuffMachine")
-	TelemetryService.lobbyEvent(player, "PuffMachinePull", updated.machinePulls, picked.id, `{picked.rarity}:{if duplicate then "Duplicate" else "New"}`)
-	if duplicate then
-		TelemetryService.lobbyEvent(player, "TicketsEarned", refund, "DuplicateRefund")
-	else
-		TelemetryService.lobbyEvent(player, "PuffUnlocked", PuffInventory.countOwned(puffs), picked.id, `{picked.rarity}:Machine`)
-		TelemetryService.lobbyEvent(player, "PuffCollection", PuffInventory.countOwned(puffs), `Of{#PuffCatalog.all()}`)
+	publish(entry, nil, events)
+	if saveNow then
+		task.spawn(save, entry, false)
 	end
-
-	-- Sem `newPuffs`: a própria máquina faz a revelação.
-	publish(entry)
-	task.spawn(save, entry, false)
-	return {
-		puffId = picked.id,
-		duplicate = duplicate,
-		refund = refund,
-		tickets = updated.tickets,
-		pity = nextPity,
-	}, nil
+	return true
 end
 
 -- Chave única da rodada para `applyRound`.
