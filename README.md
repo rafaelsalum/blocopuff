@@ -320,6 +320,32 @@ Escopo em `docs/FASE_2_SEGREDOS_COFRE_BARAO.md`.
 - **Ajustes:** ficam em `GameConfig.Barao` e `GameConfig.Toca`. Os sons atuais são provisórios, embutidos no Roblox; troque `BarkSoundIds`, `FunnySoundIds` e `FootstepSoundId` por áudios da Creator Store (`rbxassetid://...`).
 - **Código:** `BaraoService` (comportamento), `BaraoModel`, `TocaService`, `CorridorBuilder` (nichos) e `BuildingLayout.getTocas` / `isInsideToca` / `getCorridorFloorY`. No cliente, `BaraoController` mostra os avisos.
 
+### Perfil persistente (Fase 3, entrega 3.1)
+
+Escopo em `docs/FASE_3_PROGRESSAO_COMPETICAO.md`.
+
+- **O que é salvo** (DataStore `BlocoPuffProfiles_v1`, chave `u_<UserId>`):
+  - partidas, vitórias, Top 3 (só em partidas com 4 ou mais participantes);
+  - derrubadas, blocos destruídos e blocos construídos;
+  - cofres abertos e conquistados, fugas do Barão, passagens descobertas e Voltas por Cima;
+  - XP, nível e prestígio, preparados para a 3.2.
+- **Quem calcula:** tudo é calculado pelo servidor no fim da rodada, a partir do resultado (`RoundService.commitProfiles`). O cliente nunca envia estatística nem XP. Quem sai no meio da rodada não recebe a rodada. Se o perfil ainda estiver carregando no fim da rodada, a rodada fica guardada e é somada quando ele carregar.
+- **Sem duplicação:** cada rodada tem uma chave única (servidor + rodada + início). O perfil guarda as últimas 10 chaves aplicadas, então a mesma rodada nunca é somada duas vezes, nem ao reconectar.
+- **Trava de sessão:** só um servidor por vez salva o perfil de um jogador. Ao entrar, o servidor grava no perfil uma trava única: JobId mais um identificador do carregamento, para que sair e voltar rápido no mesmo servidor não confunda as sessões. O salvamento automático grava quem mudou e renova as travas, um jogador por vez; ao sair, o servidor salva e libera a trava.
+  - **Troca de servidor:** se outro servidor ainda segura o perfil, o novo tenta de novo por até 30 s. Se não conseguir, o jogador joga com um perfil que não é salvo nesta sessão (`saved = false` na cópia do cliente).
+  - **Trava abandonada:** uma trava sem renovação há 10 min, de um servidor que caiu, é assumida pelo próximo.
+  - **Fechamento do servidor:** `BindToClose` espera os carregamentos em andamento e salva todos os perfis.
+- **Valores impossíveis:** cada soma de rodada é limitada ao máximo possível (por exemplo, derrubadas ≤ jogadores − 1, blocos ≤ total da arena). Um corte gera aviso no log do servidor e o evento de telemetria `ProfileAnomaly`.
+- **Versões do formato:** `ProfileSchema.CurrentVersion` com passos de migração em `MIGRATIONS`. Dados de uma versão mais nova que o servidor conhece (atualização em andamento) são carregados só para leitura, para não apagar campos novos. Valores corrompidos (negativos, NaN, tipos errados) viram 0 ao carregar.
+- **Procedimento para dados inválidos** (correção administrativa):
+  1. Confirme o problema pelo log (`Profile anomaly for ...`) ou pela telemetria `ProfileAnomaly`.
+  2. Peça ao jogador para sair de todos os servidores; sem isso, a trava de sessão sobrescreve a correção.
+  3. No Creator Hub (Data Stores Manager) ou via Open Cloud, abra `BlocoPuffProfiles_v1` / `u_<UserId>` e corrija só os campos de `stats` (inteiros ≥ 0). Não mexa em `session` nem em `appliedRounds`.
+  4. Se `session` estiver preso a um servidor que não existe mais, apague só `session` ou espere 10 min.
+  5. Registre a correção (quem, quando, o quê e por quê) fora do jogo.
+- **Studio:** para salvar de verdade, ative "Enable Studio Access to API Services". Sem isso, o perfil funciona só na memória e o log avisa.
+- **Código:** `PlayerDataService`, `ProfileSchema`, `RoundStatsService`, `config/ProfileConfig` e `ProfileTypes`. No cliente, `ProfileController`, que recebe a cópia, pede de novo ao iniciar e avisa as telas.
+
 ### Alertas, Momentos Puff e telemetria dos segredos (Fase 2, entrega 2.4)
 
 - **Prioridade dos alertas** (`NotificationManager`, faixa do topo): alertas críticos passam na frente dos menores e nada se sobrepõe.

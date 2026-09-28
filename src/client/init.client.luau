@@ -14,6 +14,7 @@ local SecretPassageController = require(script.controllers.SecretPassageControll
 local BaraoController = require(script.controllers.BaraoController)
 local BaraoTensionController = require(script.controllers.BaraoTensionController)
 local PuffMomentController = require(script.controllers.PuffMomentController)
+local ProfileController = require(script.controllers.ProfileController)
 
 print("[BlocoPuff] Client initialized")
 
@@ -113,4 +114,11 @@ local momentOk, momentErr = pcall(function()
 end)
 if not momentOk then
 	warn(string.format("[BlocoPuff] Failed to start Puff moment controller: %s", tostring(momentErr)))
+end
+
+local profileOk, profileErr = pcall(function()
+	ProfileController.start()
+end)
+if not profileOk then
+	warn(string.format("[BlocoPuff] Failed to start profile controller: %s", tostring(profileErr)))
 end

@@ -24,6 +24,9 @@ local BaraoService = require(script.Parent.BaraoService)
 local BuildModeService = require(script.Parent.BuildModeService)
 local PuffMomentService = require(script.Parent.PuffMomentService)
 local CorridorTelemetryService = require(script.Parent.CorridorTelemetryService)
+local RoundStatsService = require(script.Parent.RoundStatsService)
+local PlayerDataService = require(script.Parent.PlayerDataService)
+local ResultTypes = require(ReplicatedStorage.Shared.types.ResultTypes)
 
 local awakeningRandom = Random.new()
 local PuffadorConstants = require(ReplicatedStorage.Shared.modules.PuffadorConstants)
@@ -46,6 +49,8 @@ local POLL_INTERVAL = 1
 -- Tempo em que quedas são ignoradas logo após a Segunda Chance: só cobre a
 -- posição antiga ainda chegando do cliente, não uma nova queda de verdade.
 local RESPAWN_FALL_GRACE = 1
+-- Top 3 só conta no perfil em partidas com pelo menos 4 participantes.
+local TOP3_MIN_PARTICIPANTS = 4
 local TICK_INTERVAL = 1
 
 -- Atributos autoritativos escritos pelo servidor em cada Player, usados pelo
@@ -70,6 +75,8 @@ local RoundService = {}
 local isRunning = false
 local currentState: RoundState = RoundTypes.WaitingForPlayers
 local currentRoundId = 0
+-- os.time() do início da rodada, parte da chave única usada no perfil.
+local currentRoundStartedAt = 0
 
 local participants: { [Player]: Participant } = {}
 local participantOrder: { Player } = {}
@@ -236,6 +243,14 @@ end
 -- (Humanoid.Died) quanto pelo callback fornecido ao EliminationService para
 -- a zona de queda. Marca o participante inativo antes de zerar o Humanoid,
 -- para que um Died disparado por essa própria chamada não sobrescreva a causa.
+-- Volta por Cima: Momento Puff e estatística, no máximo uma vez por rodada.
+local function recordComeback(player: Player, detail: string)
+	if RoundStatsService.get(player).comebacks == 0 then
+		RoundStatsService.comeback(player)
+	end
+	PuffMomentService.record(player, "Comeback", detail)
+end
+
 -- Credita a derrubada a quem empurrou o jogador por último, se foi há pouco.
 local function creditKnockout(victim: Player)
 	local attacker = KnockbackService.getRecentAttacker(victim)
@@ -247,7 +262,7 @@ local function creditKnockout(victim: Player)
 	local count = if typeof(current) == "number" then current else 0
 	attacker:SetAttribute(ATTR_ROUND_KNOCKOUTS, count + 1)
 	if usedSecondChance[attacker] then
-		PuffMomentService.record(attacker, "Comeback", "Knockout")
+		recordComeback(attacker, "Knockout")
 	end
 end
 
@@ -466,6 +481,7 @@ end
 
 local function beginRound(timings: RoundTimings)
 	currentRoundId += 1
+	currentRoundStartedAt = os.time()
 
 	-- A arena precisa estar totalmente restaurada e com a destruição
 	-- habilitada para a nova rodada antes que qualquer jogador chegue nela.
@@ -487,6 +503,7 @@ local function beginRound(timings: RoundTimings)
 	SecretPassageService.beginRound(currentRoundId)
 	TocaService.beginRound(currentRoundId)
 	PuffMomentService.beginRound()
+	RoundStatsService.beginRound()
 	CorridorTelemetryService.beginRound(currentRoundId)
 	-- O Barão acorda e o cofre destranca no mesmo instante sorteado.
 	local awakening = timings.RoundDuration * awakeningRandom:NextNumber(GameConfig.Barao.WakeMinFraction, GameConfig.Barao.WakeMaxFraction)
@@ -559,11 +576,35 @@ local function runActive(timings: RoundTimings)
 	end
 end
 
+-- Soma a rodada ao perfil de quem terminou a rodada no servidor (quem saiu
+-- no meio não recebe). Tudo vem do resultado calculado aqui no servidor.
+local function commitProfiles(result: ResultTypes.RoundResult)
+	local roundKey = PlayerDataService.roundKey(currentRoundId, currentRoundStartedAt)
+	for _, entry in ipairs(result.entries) do
+		local player = Players:GetPlayerByUserId(entry.userId)
+		if player ~= nil and participants[player] ~= nil then
+			local extra = RoundStatsService.get(player)
+			local won = not result.draw and result.winnerUserId == entry.userId
+			local podium = won or (entry.position <= 3 and result.participantCount >= TOP3_MIN_PARTICIPANTS)
+			PlayerDataService.applyRound(player, roundKey, {
+				matches = 1,
+				wins = if won then 1 else 0,
+				top3 = if podium then 1 else 0,
+				knockouts = entry.knockouts,
+				blocksDestroyed = entry.blocks,
+				vaultsOpened = extra.vaultsOpened,
+				vaultsConquered = extra.vaultsConquered,
+				baraoEscapes = extra.baraoEscapes,
+				secretsFound = extra.secretsFound,
+				blocksBuilt = extra.blocksBuilt,
+				comebacks = extra.comebacks,
+			})
+		end
+	end
+end
+
 local function publishResult()
 	local remote = resultRemote
-	if remote == nil then
-		return
-	end
 	local snapshots: { RoundResultBuilder.ParticipantSnapshot } = {}
 	local winnerPlayer: Player? = nil
 	for _, player in ipairs(participantOrder) do
@@ -580,8 +621,17 @@ local function publishResult()
 			end
 		end
 	end
+	local result = RoundResultBuilder.build(currentRoundId, snapshots, winnerPlayer)
+	local committed, commitFailure = pcall(commitProfiles, result)
+	if not committed then
+		warn(string.format("[BlocoPuff] Could not save round to profiles: %s", tostring(commitFailure)))
+	end
+	RoundStatsService.endRound()
+	if remote == nil then
+		return
+	end
 	local ok, failure = pcall(function()
-		remote:FireAllClients(RoundResultBuilder.build(currentRoundId, snapshots, winnerPlayer))
+		remote:FireAllClients(result)
 	end)
 	if not ok then
 		warn(string.format("[BlocoPuff] Could not publish round result: %s", tostring(failure)))
@@ -605,7 +655,7 @@ local function runEnding(timings: RoundTimings)
 	if roundWinner ~= nil then
 		for _, player in ipairs(participantOrder) do
 			if player.UserId == roundWinner.userId and usedSecondChance[player] then
-				PuffMomentService.record(player, "Comeback", "Win")
+				recordComeback(player, "Win")
 			end
 		end
 	end

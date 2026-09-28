@@ -1,0 +1,434 @@
+--!strict
+
+-- Perfil persistente dos jogadores (DataStore). Regras de segurança:
+--   * Trava de sessão: só um servidor por vez pode salvar o perfil de um
+--     jogador. Ao entrar, o servidor grava sua JobId no perfil; ao sair,
+--     salva e libera. Se outro servidor ainda segura o perfil (troca rápida
+--     de servidor), tenta de novo por alguns segundos; se não conseguir,
+--     o jogador joga com um perfil que NÃO é salvo nesta sessão.
+--   * Toda soma vem do servidor (RoundService, ao fim de cada rodada), é
+--     limitada por ProfileSchema.clampDelta e marcada com a chave da rodada:
+--     a mesma rodada nunca é somada duas vezes, nem ao reconectar.
+--   * Dados de uma versão mais nova do formato (atualização em andamento)
+--     são carregados só para leitura, para não apagar campos novos.
+--   * Quem sai no meio da rodada não recebe a rodada.
+
+local DataStoreService = game:GetService("DataStoreService")
+local HttpService = game:GetService("HttpService")
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
+
+local PuffadorConstants = require(ReplicatedStorage.Shared.modules.PuffadorConstants)
+local ProfileTypes = require(ReplicatedStorage.Shared.types.ProfileTypes)
+local ProfileConfig = require(script.Parent.Parent.config.ProfileConfig)
+local ProfileSchema = require(script.Parent.Parent.data.ProfileSchema)
+local TelemetryService = require(script.Parent.TelemetryService)
+
+type Profile = ProfileSchema.Profile
+type RoundDelta = ProfileSchema.RoundDelta
+type ProfileSnapshot = ProfileTypes.ProfileSnapshot
+
+type Entry = {
+	player: Player,
+	key: string,
+	-- Trava única deste carregamento (servidor + GUID): uma saída e volta
+	-- rápida no mesmo servidor não confunde as duas sessões.
+	lockId: string,
+	profile: Profile,
+	-- Falso: perfil desta sessão não é salvo (sem trava, versão futura ou
+	-- DataStore indisponível).
+	canSave: boolean,
+	dirty: boolean,
+	saving: boolean,
+	released: boolean,
+	lastSavedAt: number,
+}
+
+type PendingRound = {
+	roundKey: string,
+	delta: RoundDelta,
+}
+
+export type ProfileListener = (player: Player, snapshot: ProfileSnapshot) -> ()
+
+local SESSION_ID = if game.JobId ~= "" then game.JobId else `studio-{HttpService:GenerateGUID(false)}`
+local BIND_TO_CLOSE_TIMEOUT = 25
+local REQUEST_COOLDOWN = 3
+local MAX_ROUND_KEY_LENGTH = 80
+-- Sem mudanças, o salvamento automático só renova a trava depois deste tempo.
+local LOCK_REFRESH_INTERVAL = 300
+local AUTOSAVE_STAGGER = 0.5
+
+local PlayerDataService = {}
+
+local store: DataStore? = nil
+local entries: { [Player]: Entry } = {}
+local loading: { [Player]: boolean } = {}
+local snapshotRemote: RemoteEvent? = nil
+local listeners: { ProfileListener } = {}
+local started = false
+local connections: { RBXScriptConnection } = {}
+local lastRequest: { [Player]: number } = {}
+-- Rodadas terminadas enquanto o perfil ainda carregava: aplicadas ao carregar.
+local pendingRounds: { [Player]: { PendingRound } } = {}
+
+local function now(): number
+	return os.time()
+end
+
+local function keyFor(player: Player): string
+	return `{ProfileConfig.KeyPrefix}{player.UserId}`
+end
+
+local function snapshotOf(entry: Entry): ProfileSnapshot
+	local profile = entry.profile
+	return {
+		stats = table.clone(profile.stats),
+		xp = profile.xp,
+		level = profile.level,
+		prestige = profile.prestige,
+		saved = entry.canSave,
+	}
+end
+
+local function publish(entry: Entry)
+	local snapshot = snapshotOf(entry)
+	local remote = snapshotRemote
+	if remote ~= nil and entry.player.Parent ~= nil then
+		remote:FireClient(entry.player, snapshot)
+	end
+	for _, listener in ipairs(listeners) do
+		task.spawn(listener, entry.player, snapshot)
+	end
+end
+
+-- Chamada ao DataStore com algumas tentativas (rede e limites de uso).
+local function withRetries<T>(label: string, callback: () -> T): (boolean, T?)
+	local lastError: any = nil
+	for attempt = 1, ProfileConfig.RequestRetries do
+		local ok, result = pcall(callback)
+		if ok then
+			return true, result
+		end
+		lastError = result
+		if attempt < ProfileConfig.RequestRetries then
+			task.wait(attempt)
+		end
+	end
+	warn(string.format("[BlocoPuff] Profile %s failed: %s", label, tostring(lastError)))
+	return false, nil
+end
+
+type LoadOutcome = "Loaded" | "Locked" | "Future" | "Error"
+
+-- Uma tentativa de carregar e travar o perfil.
+local function tryLoad(key: string, lockId: string): (LoadOutcome, Profile?)
+	local dataStore = store
+	if dataStore == nil then
+		return "Error", nil
+	end
+	local outcome: LoadOutcome = "Error"
+	local loaded: Profile? = nil
+	local ok = withRetries(`load {key}`, function()
+		dataStore:UpdateAsync(key, function(stored: any)
+			local profile, isFuture = ProfileSchema.fromStored(stored, now())
+			if isFuture then
+				outcome = "Future"
+				loaded = profile
+				return nil
+			end
+			local session = profile.session
+			if session ~= nil and session.jobId ~= lockId and now() - session.lockedAt < ProfileConfig.SessionLockTimeout then
+				outcome = "Locked"
+				loaded = nil
+				return nil
+			end
+			profile.session = { jobId = lockId, lockedAt = now() }
+			outcome = "Loaded"
+			loaded = profile
+			return ProfileSchema.toStored(profile)
+		end)
+		return true
+	end)
+	if not ok then
+		return "Error", nil
+	end
+	return outcome, loaded
+end
+
+-- Grava o perfil em memória, se este servidor ainda for o dono da trava.
+-- `release` libera a trava (jogador saindo ou servidor fechando).
+local function save(entry: Entry, release: boolean)
+	local dataStore = store
+	if dataStore == nil or not entry.canSave or entry.released then
+		return
+	end
+	-- Uma gravação por vez por jogador; a próxima espera a anterior.
+	while entry.saving do
+		task.wait(0.1)
+	end
+	if entry.released or not entry.canSave then
+		return
+	end
+	entry.saving = true
+	entry.dirty = false
+	local timestamp = now()
+	local profile = entry.profile
+	local lostLock = false
+	local ok = withRetries(`save {entry.key}`, function()
+		dataStore:UpdateAsync(entry.key, function(stored: any)
+			local current = ProfileSchema.fromStored(stored, timestamp)
+			local session = current.session
+			if session ~= nil and session.jobId ~= entry.lockId then
+				lostLock = true
+				return nil
+			end
+			local toStore = ProfileSchema.toStored(profile)
+			toStore.updatedAt = timestamp
+			toStore.session = if release then nil else { jobId = entry.lockId, lockedAt = timestamp }
+			return toStore
+		end)
+		return true
+	end)
+	entry.saving = false
+	entry.lastSavedAt = os.clock()
+	if not ok then
+		entry.dirty = true
+		return
+	end
+	if lostLock then
+		-- Outro servidor assumiu o perfil (esta sessão ficou para trás).
+		entry.canSave = false
+		warn(string.format("[BlocoPuff] Profile %s is owned by another server; stopped saving here", entry.key))
+		return
+	end
+	if release then
+		entry.released = true
+	end
+end
+
+local function load(player: Player)
+	if loading[player] or entries[player] ~= nil then
+		return
+	end
+	loading[player] = true
+	local key = keyFor(player)
+	local lockId = `{SESSION_ID}:{HttpService:GenerateGUID(false)}`
+	local outcome: LoadOutcome = "Error"
+	local profile: Profile? = nil
+	if store ~= nil then
+		for attempt = 1, ProfileConfig.LoadLockedRetries do
+			outcome, profile = tryLoad(key, lockId)
+			if outcome ~= "Locked" or player.Parent == nil then
+				break
+			end
+			if attempt < ProfileConfig.LoadLockedRetries then
+				task.wait(ProfileConfig.LoadRetryDelay)
+			end
+		end
+	end
+	loading[player] = nil
+	if player.Parent == nil then
+		-- Saiu enquanto carregava: libera a trava que acabou de pegar.
+		if outcome == "Loaded" and profile ~= nil then
+			save({
+				player = player,
+				key = key,
+				lockId = lockId,
+				profile = profile,
+				canSave = true,
+				dirty = false,
+				saving = false,
+				released = false,
+				lastSavedAt = os.clock(),
+			}, true)
+		end
+		pendingRounds[player] = nil
+		return
+	end
+
+	local canSave = outcome == "Loaded"
+	if not canSave then
+		warn(string.format("[BlocoPuff] Profile for %s not saved this session (%s)", player.Name, outcome))
+	end
+	local entry: Entry = {
+		player = player,
+		key = key,
+		lockId = lockId,
+		profile = profile or ProfileSchema.default(now()),
+		canSave = canSave,
+		dirty = false,
+		saving = false,
+		released = false,
+		lastSavedAt = os.clock(),
+	}
+	entries[player] = entry
+	publish(entry)
+
+	local pending = pendingRounds[player]
+	pendingRounds[player] = nil
+	if pending ~= nil then
+		for _, round in ipairs(pending) do
+			PlayerDataService.applyRound(player, round.roundKey, round.delta)
+		end
+	end
+end
+
+local function unload(player: Player)
+	loading[player] = nil
+	lastRequest[player] = nil
+	pendingRounds[player] = nil
+	local entry = entries[player]
+	if entry == nil then
+		return
+	end
+	entries[player] = nil
+	save(entry, true)
+end
+
+-- Soma a rodada ao perfil de um jogador presente. `roundKey` identifica a
+-- rodada de forma única (servidor + rodada): repetir a chave não soma de novo.
+function PlayerDataService.applyRound(player: Player, roundKey: string, delta: RoundDelta): boolean
+	local entry = entries[player]
+	if entry == nil then
+		if loading[player] then
+			-- Perfil ainda carregando: guarda a rodada para somar ao carregar.
+			local queue = pendingRounds[player] or {}
+			table.insert(queue, { roundKey = roundKey, delta = delta })
+			pendingRounds[player] = queue
+			return true
+		end
+		warn(string.format("[BlocoPuff] Round %s not applied to %s: profile not loaded", roundKey, player.Name))
+		TelemetryService.event(player, "ProfileRoundSkipped")
+		return false
+	end
+	local profile = entry.profile
+	if table.find(profile.appliedRounds, roundKey) ~= nil then
+		return false
+	end
+	local clean, anomalies = ProfileSchema.clampDelta(delta)
+	if #anomalies > 0 then
+		local detail = table.concat(anomalies, ",")
+		warn(string.format("[BlocoPuff] Profile anomaly for %s in %s: %s", player.Name, roundKey, detail))
+		TelemetryService.event(player, "ProfileAnomaly", #anomalies, string.sub(detail, 1, 50))
+	end
+	entry.profile = table.clone(profile)
+	entry.profile.stats = ProfileSchema.addStats(profile.stats, clean)
+	entry.profile.appliedRounds = ProfileSchema.withAppliedRound(profile.appliedRounds, roundKey, ProfileConfig.AppliedRoundsKept)
+	entry.dirty = true
+	publish(entry)
+	-- Grava logo: o fim da rodada é o momento mais importante de não perder.
+	task.spawn(save, entry, false)
+	return true
+end
+
+function PlayerDataService.getSnapshot(player: Player): ProfileSnapshot?
+	local entry = entries[player]
+	return if entry ~= nil then snapshotOf(entry) else nil
+end
+
+function PlayerDataService.isLoaded(player: Player): boolean
+	return entries[player] ~= nil
+end
+
+-- Avisado quando o perfil de alguém carrega ou muda.
+function PlayerDataService.addListener(listener: ProfileListener)
+	table.insert(listeners, listener)
+end
+
+-- Chave única da rodada para `applyRound`.
+function PlayerDataService.roundKey(roundId: number, startedAt: number): string
+	return string.sub(`{SESSION_ID}:{roundId}:{startedAt}`, 1, MAX_ROUND_KEY_LENGTH)
+end
+
+local function autosaveLoop()
+	while started do
+		task.wait(ProfileConfig.AutosaveInterval)
+		-- Só quem mudou (ou cuja trava precisa ser renovada), um de cada vez
+		-- com um pequeno intervalo para não estourar o limite do DataStore.
+		local due: { Entry } = {}
+		for _, entry in pairs(entries) do
+			if entry.dirty or os.clock() - entry.lastSavedAt >= LOCK_REFRESH_INTERVAL then
+				table.insert(due, entry)
+			end
+		end
+		for _, entry in ipairs(due) do
+			if not entry.released then
+				task.spawn(save, entry, false)
+			end
+			task.wait(AUTOSAVE_STAGGER)
+		end
+	end
+end
+
+local function saveAllOnClose()
+	local deadline = os.clock() + BIND_TO_CLOSE_TIMEOUT
+	-- Espera carregamentos em andamento terminarem (para liberar a trava).
+	while next(loading) ~= nil and os.clock() < deadline - 10 do
+		task.wait(0.2)
+	end
+	local pending = 0
+	for player, entry in pairs(entries) do
+		entries[player] = nil
+		pending += 1
+		task.spawn(function()
+			save(entry, true)
+			pending -= 1
+		end)
+	end
+	while pending > 0 and os.clock() < deadline do
+		task.wait(0.2)
+	end
+end
+
+function PlayerDataService.start(remotesFolder: Folder?)
+	if started then
+		return
+	end
+	started = true
+
+	local ok, result = pcall(function()
+		return DataStoreService:GetDataStore(ProfileConfig.StoreName)
+	end)
+	if ok then
+		store = result
+	else
+		warn(string.format("[BlocoPuff] Profiles will not be saved: %s", tostring(result)))
+	end
+
+	if remotesFolder ~= nil then
+		local remote = Instance.new("RemoteEvent")
+		remote.Name = PuffadorConstants.ProfileSnapshotRemoteName
+		remote.Parent = remotesFolder
+		snapshotRemote = remote
+		-- O cliente pede a cópia ao iniciar (pode ter perdido o primeiro envio).
+		table.insert(connections, remote.OnServerEvent:Connect(function(player: Player)
+			local clock = os.clock()
+			local last = lastRequest[player]
+			if last ~= nil and clock - last < REQUEST_COOLDOWN then
+				return
+			end
+			lastRequest[player] = clock
+			local entry = entries[player]
+			if entry ~= nil then
+				remote:FireClient(player, snapshotOf(entry))
+			end
+		end))
+	end
+
+	table.insert(connections, Players.PlayerAdded:Connect(function(player)
+		task.spawn(load, player)
+	end))
+	table.insert(connections, Players.PlayerRemoving:Connect(unload))
+	for _, player in ipairs(Players:GetPlayers()) do
+		task.spawn(load, player)
+	end
+	game:BindToClose(saveAllOnClose)
+	task.spawn(autosaveLoop)
+	if RunService:IsStudio() then
+		print(string.format("[BlocoPuff] Profiles session %s", SESSION_ID))
+	end
+end
+
+return table.freeze(PlayerDataService)

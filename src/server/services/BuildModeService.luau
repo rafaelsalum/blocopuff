@@ -22,6 +22,7 @@ local PuffadorConstants = require(ReplicatedStorage.Shared.modules.PuffadorConst
 local ArenaService = require(script.Parent.ArenaService)
 local PuffadorService = require(script.Parent.PuffadorService)
 local TelemetryService = require(script.Parent.TelemetryService)
+local RoundStatsService = require(script.Parent.RoundStatsService)
 
 type Cell = BuildTargeting.Cell
 
@@ -147,6 +148,7 @@ local function onRequestBuild(player: Player, rawAimTarget: unknown, rawAimOrigi
 	PuffadorService.sendFeedback(player, "BuildDone", cell.floor)
 	playBuildSound(cell.center)
 	TelemetryService.blockBuilt(player, cell.floor)
+	RoundStatsService.blockBuilt(player)
 end
 
 function BuildModeService.start()
