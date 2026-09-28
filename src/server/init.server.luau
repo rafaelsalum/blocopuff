@@ -27,6 +27,7 @@ local PuffdexService = require(script.services.PuffdexService)
 local PuffMachineService = require(script.services.PuffMachineService)
 local SecretAchievementService = require(script.services.SecretAchievementService)
 local PartyService = require(script.services.PartyService)
+local MatchQueueService = require(script.services.MatchQueueService)
 local ReactionService = require(script.services.ReactionService)
 local LobbyStationsService = require(script.services.LobbyStationsService)
 local TrainingService = require(script.services.TrainingService)
@@ -189,6 +190,11 @@ end
 PartyService.start(PuffadorService.getRemotesFolder())
 ReactionService.start(PuffadorService.getRemotesFolder())
 print("[BlocoPuff] Party and spectator reactions ready")
+
+-- Fila da partida (quem está no mirante). Antes do RoundService, que só
+-- conta e escala quem está nela.
+MatchQueueService.start(world, PuffadorService.getRemotesFolder())
+print("[BlocoPuff] Match queue ready")
 
 RoundService.start()
 print("[BlocoPuff] Round cycle started")

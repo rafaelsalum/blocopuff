@@ -12,11 +12,8 @@ type LivesState = CombatHudView.LivesState
 
 export type HudViewHandle = {
 	setRoundMode: (mode: RoundHudMode) -> (),
-	setRoundStatus: (text: string) -> (),
-	setRoundParticipants: (text: string) -> (),
 	setCountdown: (text: string) -> (),
-	setQueueText: (text: string) -> (),
-	setQueueVisible: (visible: boolean) -> (),
+	setQueue: (title: string, subtitle: string, inQueue: boolean) -> (),
 	setCombatVisible: (visible: boolean) -> (),
 	setCombatTimer: (text: string) -> (),
 	setCombatParticipants: (count: number) -> (),
@@ -29,17 +26,15 @@ export type HudViewHandle = {
 
 local HudView = {}
 
-function HudView.new(playerGui: PlayerGui): HudViewHandle
-	local roundHud = RoundHudView.new(playerGui)
+-- `onJoin`: botão JOGAR da etiqueta da fila (leva ao mirante).
+function HudView.new(playerGui: PlayerGui, onJoin: () -> ()): HudViewHandle
+	local roundHud = RoundHudView.new(playerGui, onJoin)
 	local combatHud = CombatHudView.new(playerGui)
 
 	local handle = {} :: HudViewHandle
 	handle.setRoundMode = roundHud.setMode
-	handle.setRoundStatus = roundHud.setStatus
-	handle.setRoundParticipants = roundHud.setParticipants
 	handle.setCountdown = roundHud.setCountdown
-	handle.setQueueText = roundHud.setQueueText
-	handle.setQueueVisible = roundHud.setQueueVisible
+	handle.setQueue = roundHud.setQueue
 	handle.setCombatVisible = combatHud.setVisible
 	handle.setCombatTimer = combatHud.setTimer
 	handle.setCombatParticipants = combatHud.setParticipants

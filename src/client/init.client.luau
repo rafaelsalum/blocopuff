@@ -23,6 +23,7 @@ local ChallengesController = require(script.controllers.ChallengesController)
 local PartyController = require(script.controllers.PartyController)
 local ReactionController = require(script.controllers.ReactionController)
 local LobbyStationsController = require(script.controllers.LobbyStationsController)
+local MatchQueueController = require(script.controllers.MatchQueueController)
 
 print("[BlocoPuff] Client initialized")
 
@@ -171,6 +172,13 @@ local reactionOk, reactionErr = pcall(function()
 end)
 if not reactionOk then
 	warn(string.format("[BlocoPuff] Failed to start reaction controller: %s", tostring(reactionErr)))
+end
+
+local queueOk, queueErr = pcall(function()
+	MatchQueueController.start()
+end)
+if not queueOk then
+	warn(string.format("[BlocoPuff] Failed to start match queue controller: %s", tostring(queueErr)))
 end
 
 local stationsOk, stationsErr = pcall(function()

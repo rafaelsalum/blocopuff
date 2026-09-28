@@ -35,6 +35,9 @@ export type StateAttributeNames = {
 	PlayerEquippedPuff: string,
 	-- Party do jogador (id), escrito pelo PartyService.
 	PlayerPartyId: string,
+	-- Na fila da partida (no mirante ou com alguém da Party lá), escrito
+	-- pelo MatchQueueService.
+	PlayerInMatchQueue: string,
 }
 
 local StateAttributeNames: StateAttributeNames = {
@@ -66,6 +69,7 @@ local StateAttributeNames: StateAttributeNames = {
 	PlayerRoundKnockouts = "RoundKnockouts",
 	PlayerEquippedPuff = "EquippedPuff",
 	PlayerPartyId = "PartyId",
+	PlayerInMatchQueue = "InMatchQueue",
 }
 
 return table.freeze(StateAttributeNames)

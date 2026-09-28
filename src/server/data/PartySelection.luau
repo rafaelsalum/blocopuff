@@ -10,13 +10,17 @@
 --     à frente na fila);
 --   * se a Party não cabe nas vagas que sobram, ela espera na FRENTE da
 --     fila (entra primeiro na próxima) e quem vem atrás pode ocupar as vagas;
---   * quem jogou vai para o fim da fila, como antes.
+--   * quem jogou vai para o fim da fila, como antes;
+--   * com `eligible` (fila da partida), só joga o grupo em que algum
+--     membro é elegível; os demais ficam na fila, na mesma posição, sem
+--     contar como adiados.
 
 export type GroupOf = (player: Player) -> { Player }
+export type Eligible = (player: Player) -> boolean
 
 local PartySelection = {}
 
-function PartySelection.select(queue: { Player }, groupOf: GroupOf, maxPlayers: number): ({ Player }, { Player }, { { Player } })
+function PartySelection.select(queue: { Player }, groupOf: GroupOf, maxPlayers: number, eligible: Eligible?): ({ Player }, { Player }, { { Player } })
 	local inQueue: { [Player]: boolean } = {}
 	for _, player in ipairs(queue) do
 		inQueue[player] = true
@@ -43,7 +47,21 @@ function PartySelection.select(queue: { Player }, groupOf: GroupOf, maxPlayers: 
 				end
 			end
 
-			if #selected + #group <= maxPlayers then
+			local groupEligible = eligible == nil
+			if eligible ~= nil then
+				for _, member in ipairs(group) do
+					if eligible(member) then
+						groupEligible = true
+						break
+					end
+				end
+			end
+
+			if not groupEligible then
+				for _, member in ipairs(group) do
+					table.insert(waiting, member)
+				end
+			elseif #selected + #group <= maxPlayers then
 				for _, member in ipairs(group) do
 					table.insert(selected, member)
 				end

@@ -9,7 +9,7 @@ export type RoundMessagesModule = {
 }
 
 local RoundMessages: RoundMessagesModule = {
-	WaitingForPlayers = "Aguardando jogadores",
+	WaitingForPlayers = "Entre no mirante para jogar",
 	Active = "Partida em andamento",
 	EndedNoWinner = "Partida encerrada",
 

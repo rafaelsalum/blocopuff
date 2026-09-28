@@ -28,6 +28,7 @@ local RoundStatsService = require(script.Parent.RoundStatsService)
 local PlayerDataService = require(script.Parent.PlayerDataService)
 local SecretAchievementService = require(script.Parent.SecretAchievementService)
 local PartyService = require(script.Parent.PartyService)
+local MatchQueueService = require(script.Parent.MatchQueueService)
 local PartySelection = require(script.Parent.Parent.data.PartySelection)
 local XpCalculator = require(script.Parent.Parent.data.XpCalculator)
 local ProfileSchema = require(script.Parent.Parent.data.ProfileSchema)
@@ -100,8 +101,10 @@ local eliminationPositions: { [Player]: number } = {}
 local eliminationTimes: { [Player]: number } = {}
 local resultRemote: RemoteEvent? = nil
 
-local function countConnectedPlayers(): number
-	return #Players:GetPlayers()
+-- Quantos estão na fila da partida (no mirante, com as Parties).
+local function countQueued(): number
+	MatchQueueService.refresh()
+	return MatchQueueService.count()
 end
 
 local function setState(newState: RoundState)
@@ -174,9 +177,11 @@ end
 -- conectados, seleciona a partir da frente da fila e manda quem acabou de
 -- jogar para o fim dela, dando prioridade a quem ainda está esperando.
 -- Parties entram inteiras; se não couberem, esperam na frente da fila e
--- são avisadas (PartySelection).
+-- são avisadas (PartySelection). Só joga quem está no mirante (ou tem
+-- alguém da Party lá); os demais seguem passeando e mantêm a posição.
 local function selectParticipants(): { Player }
-	local selected, waiting, deferredParties = PartySelection.select(rotationQueue, PartyService.groupOf, GameConfig.MaximumPlayers)
+	MatchQueueService.refresh()
+	local selected, waiting, deferredParties = PartySelection.select(rotationQueue, PartyService.groupOf, GameConfig.MaximumPlayers, MatchQueueService.isInZone)
 	rotationQueue = waiting
 	publishQueuePositions()
 	PartyService.roundSelected(selected, deferredParties)
@@ -435,14 +440,15 @@ end
 
 local function runWaitingForPlayers()
 	setState(RoundTypes.WaitingForPlayers)
+	MatchQueueService.setOpen(true)
 	ReplicatedState.setTimeRemaining(0)
 	ReplicatedState.clearWinner()
 	ReplicatedState.setStatusMessage(RoundMessages.WaitingForPlayers)
-	ReplicatedState.setParticipantCount(countConnectedPlayers())
+	ReplicatedState.setParticipantCount(countQueued())
 
-	while isRunning and countConnectedPlayers() < GameConfig.MinimumPlayers do
+	while isRunning and countQueued() < GameConfig.MinimumPlayers do
 		task.wait(POLL_INTERVAL)
-		ReplicatedState.setParticipantCount(countConnectedPlayers())
+		ReplicatedState.setParticipantCount(countQueued())
 	end
 end
 
@@ -452,7 +458,7 @@ local function runCountdown(timings: RoundTimings): boolean
 	local remaining = timings.LobbyCountdown
 	ReplicatedState.setTimeRemaining(remaining)
 	ReplicatedState.setStatusMessage(RoundMessages.countdown(remaining))
-	ReplicatedState.setParticipantCount(countConnectedPlayers())
+	ReplicatedState.setParticipantCount(countQueued())
 
 	while isRunning and remaining > 0 do
 		task.wait(TICK_INTERVAL)
@@ -461,20 +467,28 @@ local function runCountdown(timings: RoundTimings): boolean
 			return false
 		end
 
-		if countConnectedPlayers() < GameConfig.MinimumPlayers then
+		if countQueued() < GameConfig.MinimumPlayers then
 			return false
 		end
 
 		remaining -= 1
 		ReplicatedState.setTimeRemaining(remaining)
 		ReplicatedState.setStatusMessage(RoundMessages.countdown(remaining))
-		ReplicatedState.setParticipantCount(countConnectedPlayers())
+		ReplicatedState.setParticipantCount(countQueued())
 	end
 
 	return isRunning
 end
 
-local function beginRound(timings: RoundTimings)
+-- Devolve false (sem começar nada) se a fila esvaziou no último instante
+-- e não há participantes suficientes: a espera recomeça.
+local function beginRound(timings: RoundTimings): boolean
+	local selected = selectParticipants()
+	if #selected < GameConfig.MinimumPlayers then
+		print(string.format("[BlocoPuff] Round start cancelled: only %d in the queue", #selected))
+		return false
+	end
+	MatchQueueService.setOpen(false)
 	currentRoundId += 1
 	currentRoundStartedAt = os.time()
 
@@ -483,7 +497,6 @@ local function beginRound(timings: RoundTimings)
 	ArenaService.restoreAllBlocks()
 	ArenaService.beginRound(currentRoundId)
 
-	local selected = selectParticipants()
 	clearRoundParticipants()
 	for _, player in ipairs(selected) do
 		participants[player] = { player = player, alive = true }
@@ -520,6 +533,7 @@ local function beginRound(timings: RoundTimings)
 	ReplicatedState.setStatusMessage(RoundMessages.Active)
 
 	print(string.format("[BlocoPuff] Round %d started with %d participants", currentRoundId, #participantOrder))
+	return true
 end
 
 local function startFinalChaos(duration: number)
@@ -763,7 +777,9 @@ local function runRoundLifecycle()
 			continue
 		end
 
-		beginRound(timings)
+		if not beginRound(timings) then
+			continue
+		end
 		runActive(timings)
 		if not isRunning then
 			break

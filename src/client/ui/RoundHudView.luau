@@ -1,5 +1,10 @@
 --!strict
 
+-- HUD da espera no lobby, no canto superior direito (o centro da tela fica
+-- livre para o Casarão): a etiqueta da fila da partida ("🏟 FILA 1/2"), o
+-- botão JOGAR (leva ao mirante) para quem está fora da fila e, na contagem,
+-- o cronômetro logo acima da etiqueta.
+
 local TweenService = game:GetService("TweenService")
 
 local ResponsiveScale = require(script.Parent.ResponsiveScale)
@@ -12,16 +17,22 @@ export type RoundHudMode = "Hidden" | "Waiting" | "Countdown"
 
 export type RoundHudViewHandle = {
 	setMode: (mode: RoundHudMode) -> (),
-	setStatus: (text: string) -> (),
-	setParticipants: (text: string) -> (),
 	setCountdown: (text: string) -> (),
-	setQueueText: (text: string) -> (),
-	setQueueVisible: (visible: boolean) -> (),
+	-- `inQueue` pinta a etiqueta de verde e esconde o botão JOGAR.
+	setQueue: (title: string, subtitle: string, inQueue: boolean) -> (),
 	destroy: () -> (),
 }
 
 local GUI_NAME = "BlocoPuffRoundHud"
 local REFERENCE_VIEWPORT = Vector2.new(1280, 720)
+local EDGE = 18
+local QUEUE_SIZE = Vector2.new(236, 56)
+local JOIN_HEIGHT = 40
+local JOIN_GAP = 6
+-- A etiqueta fica no topo na espera e desce para baixo do cronômetro
+-- (58 de altura) na contagem.
+local QUEUE_Y_WAITING = 16
+local QUEUE_Y_COUNTDOWN = 82
 
 local RoundHudView = {}
 
@@ -52,7 +63,7 @@ local function createAnimationGroup(
 ): (Frame, Frame, UIScale, ResponsiveScaleHandle)
 	local responsiveRoot = Instance.new("Frame")
 	responsiveRoot.Name = `{name}ResponsiveRoot`
-	responsiveRoot.AnchorPoint = Vector2.new(0.5, 0.5)
+	responsiveRoot.AnchorPoint = Vector2.new(1, 0)
 	responsiveRoot.Position = position
 	responsiveRoot.Size = size
 	responsiveRoot.BackgroundTransparency = 1
@@ -72,88 +83,57 @@ local function createAnimationGroup(
 	return responsiveRoot, animationGroup, animationScale, responsiveHandle
 end
 
-function RoundHudView.new(playerGui: PlayerGui): RoundHudViewHandle
+function RoundHudView.new(playerGui: PlayerGui, onJoin: () -> ()): RoundHudViewHandle
 	local screenGui = UiTheme.createScreenGui(GUI_NAME, playerGui, 10)
 
-	local waitingRoot, waitingGroup, waitingScale, waitingResponsive = createAnimationGroup(
+	local queueRoot, queueGroup, queueScale, queueResponsive = createAnimationGroup(
 		screenGui,
-		"WaitingGroup",
-		-- Compacto e colado no topo: o lobby (Casarão) fica visível.
-		UDim2.new(0.5, 0, 0, 98),
-		UDim2.fromOffset(320, 68)
+		"QueueGroup",
+		UDim2.new(1, -EDGE, 0, QUEUE_Y_WAITING),
+		UDim2.fromOffset(QUEUE_SIZE.X, QUEUE_SIZE.Y + JOIN_GAP + JOIN_HEIGHT)
 	)
-	waitingRoot.Visible = false
+	queueRoot.Visible = false
 
-	-- Logotipo do jogo acima do cartão de espera: é a primeira coisa que o
-	-- jogador vê no lobby e fixa a identidade visual.
-	local wordmark = UiKit.createWordmark(waitingGroup, 46, 3)
-	wordmark.AnchorPoint = Vector2.new(0.5, 1)
-	wordmark.Position = UDim2.new(0.5, 0, 0, -4)
+	local queueCard = Instance.new("Frame")
+	queueCard.Name = "QueueCard"
+	queueCard.Size = UDim2.fromOffset(QUEUE_SIZE.X, QUEUE_SIZE.Y)
+	queueCard.ZIndex = 1
+	queueCard.Parent = queueGroup
+	local queueStroke = UiTheme.stylePanel(queueCard, { accent = UiTheme.Colors.Brand, radius = 14 })
+	local queueGradient = queueStroke:FindFirstChildOfClass("UIGradient") :: UIGradient?
 
-	UiTheme.createShadow(waitingGroup, UDim2.fromScale(0.5, 0.5), UDim2.fromScale(1, 1), 20)
+	local queueTitle = createTextLabel("QueueTitle", queueCard, UiTheme.Fonts.Display, 17, UiTheme.Colors.Gold)
+	queueTitle.Position = UDim2.fromOffset(14, 6)
+	queueTitle.Size = UDim2.new(1, -28, 0, 24)
+	queueTitle.TextXAlignment = Enum.TextXAlignment.Left
+	queueTitle.TextScaled = true
+	UiTheme.addTextConstraint(queueTitle, 12, 17)
+	UiTheme.addTextOutline(queueTitle, 2)
 
-	local waitingCard = Instance.new("Frame")
-	waitingCard.Name = "WaitingCard"
-	waitingCard.Size = UDim2.fromScale(1, 1)
-	waitingCard.ZIndex = 1
-	waitingCard.Parent = waitingGroup
-	UiTheme.stylePanel(waitingCard, { accent = UiTheme.Colors.Brand, radius = 16 })
-	UiTheme.addPadding(waitingCard, 18, 9)
+	local queueSubtitle = createTextLabel("QueueSubtitle", queueCard, UiTheme.Fonts.BodyBold, 12, UiTheme.Colors.Ink)
+	queueSubtitle.Position = UDim2.fromOffset(14, 31)
+	queueSubtitle.Size = UDim2.new(1, -28, 0, 18)
+	queueSubtitle.TextXAlignment = Enum.TextXAlignment.Left
+	queueSubtitle.TextScaled = true
+	UiTheme.addTextConstraint(queueSubtitle, 10, 12)
 
-	local waitingLayout = Instance.new("UIListLayout")
-	waitingLayout.FillDirection = Enum.FillDirection.Vertical
-	waitingLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
-	waitingLayout.VerticalAlignment = Enum.VerticalAlignment.Center
-	waitingLayout.SortOrder = Enum.SortOrder.LayoutOrder
-	waitingLayout.Padding = UDim.new(0, 3)
-	waitingLayout.Parent = waitingCard
-
-	local statusLabel = createTextLabel(
-		"StatusLabel",
-		waitingCard,
-		UiTheme.Fonts.Heading,
-		20,
-		UiTheme.Colors.Ink
-	)
-	statusLabel.Size = UDim2.new(1, 0, 0, 28)
-	statusLabel.LayoutOrder = 1
-	UiTheme.addTextOutline(statusLabel, 2)
-
-	local participantsLabel = createTextLabel(
-		"ParticipantsLabel",
-		waitingCard,
-		UiTheme.Fonts.BodyBold,
-		11,
-		UiTheme.Colors.InkSoft
-	)
-	participantsLabel.Size = UDim2.new(1, 0, 0, 17)
-	participantsLabel.LayoutOrder = 2
-
-	local queueBadge = Instance.new("Frame")
-	queueBadge.Name = "QueueBadge"
-	queueBadge.AnchorPoint = Vector2.new(0.5, 0)
-	queueBadge.Position = UDim2.new(0.5, 0, 1, 12)
-	queueBadge.Size = UDim2.fromOffset(292, 32)
-	queueBadge.Visible = false
-	queueBadge.ZIndex = 2
-	queueBadge.Parent = waitingGroup
-	UiTheme.stylePanel(queueBadge, { accent = UiTheme.Colors.Gold, radius = 10 })
-
-	local queueLabel = createTextLabel(
-		"QueueLabel",
-		queueBadge,
-		UiTheme.Fonts.BodyBold,
-		11,
-		UiTheme.Colors.Ink
-	)
+	local joinButton = UiKit.createButton(queueGroup, {
+		name = "JoinButton",
+		text = "🏟 JOGAR",
+		variant = "Success",
+		size = UDim2.fromOffset(QUEUE_SIZE.X, JOIN_HEIGHT),
+		position = UDim2.fromOffset(0, QUEUE_SIZE.Y + JOIN_GAP),
+		textSize = 16,
+		zIndex = 2,
+	})
+	joinButton.button.Activated:Connect(onJoin)
 
 	local countdownRoot, countdownGroup, countdownScale, countdownResponsive = createAnimationGroup(
 		screenGui,
 		"CountdownGroup",
-		UDim2.new(1, -18, 0, 16),
+		UDim2.new(1, -EDGE, 0, 16),
 		UDim2.fromOffset(184, 58)
 	)
-	countdownRoot.AnchorPoint = Vector2.new(1, 0)
 	countdownRoot.Visible = false
 
 	UiTheme.createShadow(countdownGroup, UDim2.fromScale(0.5, 0.5), UDim2.fromScale(1, 1), 18)
@@ -211,6 +191,7 @@ function RoundHudView.new(playerGui: PlayerGui): RoundHudViewHandle
 	UiTheme.addTextOutline(countdownLabel, 2.5)
 
 	local currentMode: RoundHudMode = "Hidden"
+	local currentInQueue: boolean? = nil
 
 	local function popIn(root: Frame, scale: UIScale)
 		root.Visible = true
@@ -225,23 +206,37 @@ function RoundHudView.new(playerGui: PlayerGui): RoundHudViewHandle
 		if mode == currentMode then
 			return
 		end
+		local wasShowingQueue = currentMode ~= "Hidden"
 		currentMode = mode
-		waitingRoot.Visible = false
 		countdownRoot.Visible = false
+		queueRoot.Position = UDim2.new(1, -EDGE, 0, if mode == "Countdown" then QUEUE_Y_COUNTDOWN else QUEUE_Y_WAITING)
 
-		if mode == "Waiting" then
-			popIn(waitingRoot, waitingScale)
-		elseif mode == "Countdown" then
+		if mode == "Hidden" then
+			queueRoot.Visible = false
+			return
+		end
+		if not wasShowingQueue then
+			popIn(queueRoot, queueScale)
+		end
+		if mode == "Countdown" then
 			popIn(countdownRoot, countdownScale)
 		end
 	end
 
-	handle.setStatus = function(text: string)
-		statusLabel.Text = text
-	end
-
-	handle.setParticipants = function(text: string)
-		participantsLabel.Text = text
+	handle.setQueue = function(title: string, subtitle: string, inQueue: boolean)
+		queueTitle.Text = title
+		queueSubtitle.Text = subtitle
+		if inQueue == currentInQueue then
+			return
+		end
+		currentInQueue = inQueue
+		joinButton.root.Visible = not inQueue
+		local color = if inQueue then UiTheme.Colors.Green else UiTheme.Colors.Brand
+		queueTitle.TextColor3 = if inQueue then UiTheme.Colors.Green else UiTheme.Colors.Gold
+		if queueGradient ~= nil then
+			queueGradient.Color = ColorSequence.new(color, color:Lerp(UiTheme.Colors.White, 0.3))
+		end
+		UiKit.pop(queueCard)
 	end
 
 	handle.setCountdown = function(text: string)
@@ -253,16 +248,8 @@ function RoundHudView.new(playerGui: PlayerGui): RoundHudViewHandle
 		TweenService:Create(countdownScale, TweenInfo.new(0.18, Enum.EasingStyle.Back), { Scale = 1 }):Play()
 	end
 
-	handle.setQueueText = function(text: string)
-		queueLabel.Text = text
-	end
-
-	handle.setQueueVisible = function(visible: boolean)
-		queueBadge.Visible = visible
-	end
-
 	handle.destroy = function()
-		waitingResponsive.destroy()
+		queueResponsive.destroy()
 		countdownResponsive.destroy()
 		screenGui:Destroy()
 	end

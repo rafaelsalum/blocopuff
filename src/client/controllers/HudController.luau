@@ -12,6 +12,7 @@ local RoundTypes = require(ReplicatedStorage.Shared.types.RoundTypes)
 local StateAttributeNames = require(ReplicatedStorage.Shared.types.StateAttributeNames)
 local HudView = require(script.Parent.Parent.ui.HudView)
 local NotificationManager = require(script.Parent.Parent.notifications.NotificationManager)
+local MatchQueueController = require(script.Parent.MatchQueueController)
 
 type RoundState = RoundTypes.RoundState
 type HudViewHandle = HudView.HudViewHandle
@@ -44,6 +45,7 @@ local cached = {
 	roundBlocksDestroyed = 0,
 	finalChaos = false,
 	hasSecondChance = false,
+	inMatchQueue = false,
 }
 
 local function readRoundState(instance: Instance): RoundState
@@ -91,11 +93,33 @@ local function formatMinutesSeconds(totalSeconds: number): string
 	return string.format("%02d:%02d", minutes, seconds)
 end
 
+-- Para quem está na fila.
 local function getQueueMessage(): string
 	if cached.roundsUntilTurn >= 2 then
 		return string.format("Sua vez chega em %d rodadas", cached.roundsUntilTurn)
 	end
 	return "Você participa da próxima rodada"
+end
+
+-- Etiqueta da fila (canto superior direito) na espera e na contagem.
+local function renderQueue(currentView: HudViewHandle, counting: boolean)
+	local count = math.max(0, math.floor(cached.participantCount))
+	local minimum = math.max(1, math.floor(cached.minimumPlayers))
+	if cached.inMatchQueue then
+		local subtitle: string
+		if cached.roundsUntilTurn >= 2 then
+			subtitle = getQueueMessage()
+		elseif counting then
+			subtitle = string.format("%d na fila · fique no mirante", count)
+		else
+			local missing = math.max(0, minimum - count)
+			subtitle = if missing == 1 then "Falta 1 jogador para começar" else string.format("Faltam %d jogadores para começar", missing)
+		end
+		currentView.setQueue(if counting then "✅ VOCÊ ESTÁ NA FILA" else string.format("🏟 NA FILA  %d/%d", count, minimum), subtitle, true)
+	else
+		local title = if counting then string.format("🏟 %d NA FILA", count) else string.format("🏟 FILA  %d/%d", count, minimum)
+		currentView.setQueue(title, "Vá ao mirante para jogar", false)
+	end
 end
 
 local function clearAnnouncement(_currentView: HudViewHandle)
@@ -137,12 +161,7 @@ end
 
 local function renderWaiting(currentView: HudViewHandle)
 	currentView.setRoundMode("Waiting")
-	currentView.setRoundStatus(if cached.statusMessage ~= "" then cached.statusMessage else "Aguardando jogadores")
-	currentView.setRoundParticipants(
-		string.format("%d DE %d JOGADORES", cached.participantCount, cached.minimumPlayers)
-	)
-	currentView.setQueueText(getQueueMessage())
-	currentView.setQueueVisible(cached.roundsUntilTurn >= 2)
+	renderQueue(currentView, false)
 	currentView.setCombatVisible(false)
 	clearAnnouncement(currentView)
 end
@@ -150,7 +169,7 @@ end
 local function renderCountdown(currentView: HudViewHandle)
 	currentView.setRoundMode("Countdown")
 	currentView.setCountdown(tostring(math.max(0, math.floor(cached.timeRemaining))))
-	currentView.setQueueVisible(false)
+	renderQueue(currentView, true)
 	currentView.setCombatVisible(false)
 	clearAnnouncement(currentView)
 end
@@ -166,7 +185,6 @@ end
 
 local function renderActive(currentView: HudViewHandle)
 	currentView.setRoundMode("Hidden")
-	currentView.setQueueVisible(false)
 	currentView.setCombatVisible(true)
 	currentView.setCombatTimer(formatMinutesSeconds(cached.timeRemaining))
 	currentView.setCombatParticipants(cached.participantCount)
@@ -187,16 +205,20 @@ local function renderActive(currentView: HudViewHandle)
 	end
 
 	if not cached.isParticipant then
-		showAnnouncement(
-			currentView,
-			string.format("%d:waiting:%d", cached.roundId, cached.roundsUntilTurn),
-			"AGUARDE SUA VEZ",
-			getQueueMessage(),
-			"Warning",
-			3,
-			"Round",
-			"Low"
-		)
+		-- Só avisa quem está na fila e ficou de fora; quem passeia pelo
+		-- Casarão não é interrompido a cada partida.
+		if cached.inMatchQueue then
+			showAnnouncement(
+				currentView,
+				string.format("%d:waiting:%d", cached.roundId, cached.roundsUntilTurn),
+				"AGUARDE SUA VEZ",
+				getQueueMessage(),
+				"Warning",
+				3,
+				"Round",
+				"Low"
+			)
+		end
 	elseif cached.isEliminated then
 		local reason = cached.eliminationReason
 		local title = if reason == EliminationTypes.FellFromArena then "VOCÊ CAIU!" else "ELIMINADO!"
@@ -248,7 +270,6 @@ end
 
 local function renderEnding(currentView: HudViewHandle)
 	currentView.setRoundMode("Hidden")
-	currentView.setQueueVisible(false)
 	currentView.setCombatVisible(false)
 	currentView.setTimerDanger(false)
 
@@ -308,7 +329,7 @@ function HudController.start()
 	end
 
 	NotificationManager.init(playerGuiInstance)
-	view = HudView.new(playerGuiInstance)
+	view = HudView.new(playerGuiInstance, MatchQueueController.join)
 
 	local function refreshFromContainer()
 		cached.roundState = readRoundState(containerInstance)
@@ -334,6 +355,7 @@ function HudController.start()
 			StateAttributeNames.PlayerRoundBlocksDestroyed
 		)
 		cached.hasSecondChance = readBooleanAttribute(localPlayer, StateAttributeNames.PlayerHasSecondChance)
+		cached.inMatchQueue = readBooleanAttribute(localPlayer, StateAttributeNames.PlayerInMatchQueue)
 	end
 
 	refreshFromContainer()
@@ -367,6 +389,7 @@ function HudController.start()
 		StateAttributeNames.PlayerRoundsUntilTurn,
 		StateAttributeNames.PlayerRoundBlocksDestroyed,
 		StateAttributeNames.PlayerHasSecondChance,
+		StateAttributeNames.PlayerInMatchQueue,
 	}
 	for _, attributeName in ipairs(playerAttributeNames) do
 		connectAttribute(localPlayer, attributeName, function()

@@ -4,8 +4,10 @@
 -- o que garante que dois alertas nunca se sobreponham.
 --
 -- Canais (cada um mostra um alerta por vez, em regiões diferentes da tela):
---   Center: anúncio grande no meio (rodada, eliminação, Caos Final, vitória).
---   Banner: faixa no topo (cofre, avisos de administrador).
+--   Center: cartão de anúncio na borda esquerda (rodada, eliminação, Caos
+--           Final, vitória).
+--   Banner: cartão de aviso na borda esquerda, abaixo do anúncio (cofre,
+--           lobby, avisos de administrador).
 --
 -- Regras de cada canal:
 --   • Prioridade: Critical > High > Normal > Low. Um alerta mais importante

@@ -216,9 +216,8 @@ local function getFaces(mansion: Mansion): { Face }
 	end
 
 	local passages: { Opening } = {}
-	for index, z in ipairs(mansion.passages) do
-		local middle = index == math.ceil(#mansion.passages / 2)
-		table.insert(passages, opening(mansion.minX, z, passage, if middle then "🏟 MIRANTE DA ARENA" else nil))
+	for _, z in ipairs(mansion.passages) do
+		table.insert(passages, opening(mansion.minX, z, passage, "🏟 MIRANTE · JOGAR"))
 	end
 	local x0, x1 = mansion.minX, mansion.maxX
 	local z0, z1 = mansion.minZ, mansion.maxZ

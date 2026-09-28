@@ -320,6 +320,27 @@ Escopo em `docs/FASE_2_SEGREDOS_COFRE_BARAO.md`.
 - **Ajustes:** ficam em `GameConfig.Barao` e `GameConfig.Toca`. Os sons atuais são provisórios, embutidos no Roblox; troque `BarkSoundIds`, `FunnySoundIds` e `FootstepSoundId` por áudios da Creator Store (`rbxassetid://...`).
 - **Código:** `BaraoService` (comportamento), `BaraoModel`, `TocaService`, `CorridorBuilder` (nichos) e `BuildingLayout.getTocas` / `isInsideToca` / `getCorridorFloorY`. No cliente, `BaraoController` mostra os avisos.
 
+### Fila da partida no mirante (Fase 4, ajuste pós-4.5)
+
+A partida só puxa quem quer jogar: **o mirante (a galeria envidraçada) é a fila da partida**. Quem está passeando pelo Casarão não é escalado.
+
+- **Entrar e sair:**
+  - estar no mirante coloca na fila (`MatchQueueService`);
+  - com **2 na fila** começa a contagem de **20 s**, e se sobrar menos de 2 ela para;
+  - sair do mirante tira da fila.
+- **Quem joga:** só quem está na fila quando a contagem acaba. A rotação justa continua, e quem está fora mantém a posição (`PartySelection` com `eligible`).
+- **Party:** basta um membro no mirante para o grupo todo entrar na fila. Os demais vão direto para a arena quando a partida começa.
+- **Depois da partida:** quem jogou volta para o mirante, já na fila da próxima, e quem quiser passear sai de lá. Eliminados também renascem no mirante, assistindo à arena. Quem acabou de entrar no jogo nasce no Salão Principal.
+- **HUD:**
+  - o cartão central "BlocoPuff / Aguardando jogadores" saiu;
+  - no canto superior direito fica uma etiqueta da fila ("🏟 FILA 1/2", "🏟 NA FILA 1/2", "✅ VOCÊ ESTÁ NA FILA") com o botão **🏟 JOGAR**, que leva ao mirante;
+  - na contagem, o cronômetro fica acima da etiqueta;
+  - o aviso "AGUARDE SUA VEZ" só aparece para quem estava na fila.
+- **No mapa:** faixa verde e placa "🏟 FILA DA PARTIDA" em cada porta do mirante, e placas "🏟 MIRANTE · JOGAR" no Salão Principal.
+- **Sozinho na fila por 60 s:** aviso discreto "CHAME UM AMIGO", uma vez por espera.
+- **Telemetria:** `QueueJoinButton` e `QueueLonely`.
+- **Código:** `QueueConfig`, `MatchQueueService` (atributo `InMatchQueue`, remote `MatchQueue`) e, no cliente, `MatchQueueController`.
+
 ### O Casarão e alertas fora do centro (Fase 4, ajuste pós-4.5)
 
 O lobby virou um **Casarão** de 110 × 130 studs (a galeria tinha 20 × 90), anexo a leste do prédio da arena, com pé-direito de 24 studs. Três portas largas na parede leste da galeria levam ao Salão Principal; a galeria continua sendo o mirante da arena, com o Hall da Fama acima das portas.

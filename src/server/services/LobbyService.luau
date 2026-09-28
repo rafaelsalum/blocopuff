@@ -1,9 +1,9 @@
 --!strict
 
 -- O lobby é o Casarão (MansionService), ligado à galeria envidraçada do
--- prédio: todos nascem e aguardam no Salão Principal, livres para andar
--- pelas salas ou ir à galeria assistir à arena. Ao iniciar a partida, só os
--- participantes descem para o piso de cima; eliminados renascem no Salão e,
+-- prédio: todos nascem no Salão Principal, livres para andar pelas salas.
+-- A galeria é o mirante, a fila da partida (MatchQueueService): ao iniciar,
+-- os escalados descem para o piso de cima; eliminados renascem no mirante e,
 -- ao final, os participantes restantes voltam para ele.
 
 local Players = game:GetService("Players")
@@ -29,6 +29,7 @@ local SERVICE_NAME = "LobbyService"
 local SPAWN_SIZE = Vector3.new(6, 1, 6)
 -- Nascimento a oeste da estátua do Salão, perto das portas da galeria.
 local SPAWN_OFFSET = Vector3.new(-15, 0, 0)
+local MIRANTE_SLOT_COUNT = 45
 local SLOT_SPREAD_TOLERANCE = 0.85
 local ROOT_WAIT_TIMEOUT = 5
 local RECOVERY_INTERVAL = 0.2
@@ -133,11 +134,20 @@ local function isReserved(position: Vector3): boolean
 	return false
 end
 
--- Posições candidatas no Salão Principal (bem mais que jogadores, para
--- sempre haver um lugar livre longe de quem já está lá).
-local function getLobbySlots(): { CFrame }
-	if currentArena == nil or currentBuilding == nil then
+-- Onde colocar alguém: o Salão Principal do Casarão ou o mirante (a
+-- galeria, que é a fila da partida).
+type LobbyArea = "Hall" | "Mirante"
+
+-- Posições candidatas na área (bem mais que jogadores, para sempre haver
+-- um lugar livre longe de quem já está lá).
+local function getLobbySlots(area: LobbyArea): { CFrame }
+	local arena = currentArena
+	local building = currentBuilding
+	if arena == nil or building == nil then
 		return {}
+	end
+	if area == "Mirante" then
+		return BuildingLayout.getGallerySpawnCFrames(arena, building, MIRANTE_SLOT_COUNT)
 	end
 	local all = MansionLayout.spawnCFrames()
 	local slots: { CFrame } = {}
@@ -186,8 +196,8 @@ end
 
 -- Escolhe a posição do lobby mais distante de todos os ocupados (sorteando
 -- entre as quase tão boas), garantindo que ninguém nasça em cima de outro.
-local function pickFreeSlot(occupied: { Vector3 }): CFrame?
-	local slots = getLobbySlots()
+local function pickFreeSlot(area: LobbyArea, occupied: { Vector3 }): CFrame?
+	local slots = getLobbySlots(area)
 	if #slots == 0 then
 		return nil
 	end
@@ -215,9 +225,9 @@ local function pickFreeSlot(occupied: { Vector3 }): CFrame?
 	return candidates[slotRandom:NextInteger(1, #candidates)]
 end
 
--- Leva os jogadores para lugares livres do lobby, um de cada vez, contando
+-- Leva os jogadores para lugares livres da área, um de cada vez, contando
 -- cada lugar já escolhido como ocupado para o próximo.
-local function placeInLobby(players: { Player })
+local function placeIn(area: LobbyArea, players: { Player })
 	local moving: { [Player]: boolean } = {}
 	for _, player in ipairs(players) do
 		moving[player] = true
@@ -225,13 +235,19 @@ local function placeInLobby(players: { Player })
 	local occupied = getOccupiedPositions(moving)
 
 	for _, player in ipairs(players) do
-		local slot = pickFreeSlot(occupied)
+		local slot = pickFreeSlot(area, occupied)
 		if slot == nil then
 			return
 		end
 		moveCharacterTo(player, slot)
 		table.insert(occupied, slot.Position)
 	end
+end
+
+-- Eliminado da partida em andamento volta para o mirante (assiste à arena
+-- e já fica na fila); os demais vão para o Salão Principal.
+local function areaFor(player: Player): LobbyArea
+	return if player:GetAttribute(ATTR_IS_PARTICIPANT) == true then "Mirante" else "Hall"
 end
 
 -- Todo personagem nasce no único SpawnLocation do lobby; logo em seguida o
@@ -246,7 +262,7 @@ local function onCharacterAdded(player: Player, character: Model)
 	if player.Character ~= character or isActiveCompetitor(player) then
 		return
 	end
-	placeInLobby({ player })
+	placeIn(areaFor(player), { player })
 end
 
 local function watchCharacters(player: Player)
@@ -279,7 +295,7 @@ local function recoverFallenSpectators(generation: number)
 				if not isActiveCompetitor(player) then
 					local _, rootPart = getLivingRoot(player)
 					if rootPart ~= nil and rootPart.Position.Y < recoveryY then
-						placeInLobby({ player })
+						placeIn(areaFor(player), { player })
 					end
 				end
 			end
@@ -356,9 +372,15 @@ function LobbyService.create(worldRoot: Model, arena: ArenaConfig, building: Bui
 end
 
 -- Chamado quando a partida termina, antes de restaurar os pisos: quem
--- ainda está na arena volta para o Salão Principal.
+-- ainda está na arena volta para o mirante, já na fila da próxima (quem
+-- quiser passear sai de lá).
 function LobbyService.returnToLobby(players: { Player })
-	placeInLobby(players)
+	placeIn("Mirante", players)
+end
+
+-- Botão JOGAR (MatchQueueService): leva ao mirante, a fila da partida.
+function LobbyService.placeInMirante(players: { Player })
+	placeIn("Mirante", players)
 end
 
 -- Móveis (MansionService) e estações (LobbyStationsService, TrainingService)
