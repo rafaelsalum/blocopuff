@@ -320,6 +320,34 @@ Escopo em `docs/FASE_2_SEGREDOS_COFRE_BARAO.md`.
 - **Ajustes:** ficam em `GameConfig.Barao` e `GameConfig.Toca`. Os sons atuais são provisórios, embutidos no Roblox; troque `BarkSoundIds`, `FunnySoundIds` e `FootstepSoundId` por áudios da Creator Store (`rbxassetid://...`).
 - **Código:** `BaraoService` (comportamento), `BaraoModel`, `TocaService`, `CorridorBuilder` (nichos) e `BuildingLayout.getTocas` / `isInsideToca` / `getCorridorFloorY`. No cliente, `BaraoController` mostra os avisos.
 
+### Ranking global e Hall da Fama (Fase 3, entrega 3.4)
+
+- **Categorias** (poucas de propósito): vitórias, derrubadas, blocos destruídos e cofres conquistados. Cada uma tem um OrderedDataStore (`BlocoPuffLB_v1_<categoria>`, chave = UserId).
+- **Integridade:**
+  - os valores vêm só do perfil calculado e salvo pelo servidor (`PlayerDataService`), e só de perfis que estão sendo salvos de verdade;
+  - o cliente nunca envia números para o ranking;
+  - valores acima de 10 milhões são ignorados, e empates dividem a mesma posição.
+- **Atualização:**
+  - **Gravação:** a cada 60 s, só das categorias que mudaram, e também quando o jogador sai ou o servidor fecha.
+  - **Leitura:** o top 10 é lido a cada 2 min em segundo plano, então o lobby nunca espera o DataStore.
+  - **Falhas:** se uma categoria falhar, fica a leitura anterior.
+- **Hall da Fama** (`HallOfFameService`): cinco painéis no alto da parede leste da galeria, entre o topo das janelas e a sanca. Da esquerda para a direita:
+  - Vitórias;
+  - Derrubadas;
+  - **Lenda do BlocoPuff** (1º em vitórias, com foto) e a linha "Ranking da temporada: em breve";
+  - Blocos destruídos;
+  - Cofres conquistados.
+
+  Cada painel mostra o top 5. O texto é desenhado pelo servidor.
+- **Painel RANKING:** botão 🏆 ao lado do cartão de perfil, com o top 10 por categoria em abas, foto, posição e valor; a sua linha fica em dourado. A aba 📅 de temporada está reservada e desativada. O painel fecha quando você entra na partida.
+- **Telemetria:** `LeaderboardOpened` (com a aba) e `HallOfFameViewed` (ficou 3 s na galeria virado para os painéis; uma vez por sessão).
+- **Corrigir o ranking:**
+  1. Corrija primeiro o perfil (procedimento da entrega 3.1).
+  2. No Data Stores Manager, ajuste ou apague a chave `<UserId>` em cada `BlocoPuffLB_v1_<categoria>`.
+  3. O valor volta a ser gravado a partir do perfil na próxima vez que ele mudar.
+- **Studio:** sem acesso às APIs, os painéis mostram "Ranking indisponível".
+- **Código:** `LeaderboardService`, `HallOfFameService` e `LeaderboardTypes`. No cliente, `LeaderboardController` e `LeaderboardView`.
+
 ### Resultado avançado (Fase 3, entrega 3.3)
 
 - **Pódio:** os três primeiros, com foto (headshot), nome e degraus de ouro, prata e bronze. Em empate, o texto mostra a mesma posição.

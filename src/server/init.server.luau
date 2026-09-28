@@ -21,6 +21,8 @@ local PuffMomentService = require(script.services.PuffMomentService)
 local CorridorTelemetryService = require(script.services.CorridorTelemetryService)
 local RoundStatsService = require(script.services.RoundStatsService)
 local PlayerDataService = require(script.services.PlayerDataService)
+local LeaderboardService = require(script.services.LeaderboardService)
+local HallOfFameService = require(script.services.HallOfFameService)
 local WorldVisualService = require(script.services.WorldVisualService)
 local BuildingService = require(script.services.BuildingService)
 local AdminService = require(script.services.AdminService)
@@ -132,6 +134,11 @@ print("[BlocoPuff] Puff moments and secrets telemetry ready")
 -- Perfil persistente: carrega quem já está no servidor e quem entrar.
 PlayerDataService.start(PuffadorService.getRemotesFolder())
 print("[BlocoPuff] Player profiles ready")
+
+-- Ranking global (lê os perfis salvos) e os painéis do Hall da Fama no lobby.
+LeaderboardService.start(PuffadorService.getRemotesFolder())
+HallOfFameService.start(world, LeaderboardService.addListener)
+print("[BlocoPuff] Leaderboards and Hall of Fame ready")
 
 RoundService.start()
 print("[BlocoPuff] Round cycle started")

@@ -20,8 +20,8 @@
     "semantic_hash": ""
   },
   "src/client/init.client.luau": {
-    "mtime": 1790554097.6565676,
-    "ast_hash": "a2e6a4a7aa7d9a653f5b9d20159f21cf",
+    "mtime": 1790555707.380662,
+    "ast_hash": "b26884b31cf08938234b3467e10b6e27",
     "semantic_hash": ""
   },
   "src/client/ui/CrosshairView.luau": {
@@ -45,8 +45,8 @@
     "semantic_hash": ""
   },
   "src/server/init.server.luau": {
-    "mtime": 1790553271.2500618,
-    "ast_hash": "4c130d8cfe523831158ed13cee5988da",
+    "mtime": 1790555707.3808758,
+    "ast_hash": "290c97ac94549906a36d4c5098000786",
     "semantic_hash": ""
   },
   "src/server/services/ArenaService.luau": {
@@ -90,8 +90,8 @@
     "semantic_hash": ""
   },
   "src/shared/modules/PuffadorConstants.luau": {
-    "mtime": 1790553225.3112454,
-    "ast_hash": "8ac0ea8ba23d54b253f820bd921800cd",
+    "mtime": 1790555516.1603634,
+    "ast_hash": "392540d79be82849fc04d8c5a43dfb36",
     "semantic_hash": ""
   },
   "src/shared/modules/RoundMessages.luau": {
@@ -125,8 +125,8 @@
     "semantic_hash": ""
   },
   "README.md": {
-    "mtime": 1790555089.0977426,
-    "ast_hash": "274064884b61f798275fe6d4d508f947",
+    "mtime": 1790555732.7593033,
+    "ast_hash": "cffa734c82aa9fb150df5ad709a6b77f",
     "semantic_hash": ""
   },
   "src/client/controllers/CombatCameraController.luau": {
@@ -355,8 +355,8 @@
     "semantic_hash": ""
   },
   "src/server/services/TelemetryService.luau": {
-    "mtime": 1790551949.291845,
-    "ast_hash": "efd545c58079c55510c9fe7be14ce68c",
+    "mtime": 1790555516.1606479,
+    "ast_hash": "ea090379310ad478f8aab469604d2b21",
     "semantic_hash": ""
   },
   "src/client/controllers/SecretPassageController.luau": {
@@ -465,13 +465,13 @@
     "semantic_hash": ""
   },
   "src/client/controllers/ProgressionController.luau": {
-    "mtime": 1790554796.1736414,
-    "ast_hash": "47442db9eeebcec5a3d18630d5f8d077",
+    "mtime": 1790555707.3803399,
+    "ast_hash": "27043b1e6eb33d0a3ffdd687ad3b3a72",
     "semantic_hash": ""
   },
   "src/client/ui/ProfileCardView.luau": {
-    "mtime": 1790554076.2734942,
-    "ast_hash": "0d7d46d3825031cb64e60bd19442f982",
+    "mtime": 1790555707.3800592,
+    "ast_hash": "4e5a6bbcf9bbf25211948a8771e45fea",
     "semantic_hash": ""
   },
   "src/server/data/XpCalculator.luau": {
@@ -487,6 +487,31 @@
   "src/shared/modules/LevelCurve.luau": {
     "mtime": 1790553951.700797,
     "ast_hash": "08f21af252aa371a9e0bcab3ae5b36ca",
+    "semantic_hash": ""
+  },
+  "src/client/controllers/LeaderboardController.luau": {
+    "mtime": 1790555732.7588007,
+    "ast_hash": "d1cc450ae5ab9f53bd312ba1cd33b8ac",
+    "semantic_hash": ""
+  },
+  "src/client/ui/LeaderboardView.luau": {
+    "mtime": 1790555678.5608833,
+    "ast_hash": "9fb8828e7b5b9e4776259e01942de3a7",
+    "semantic_hash": ""
+  },
+  "src/server/services/HallOfFameService.luau": {
+    "mtime": 1790556000.9078684,
+    "ast_hash": "b21318bcbaaa6ad0edfa591eabef3c6a",
+    "semantic_hash": ""
+  },
+  "src/server/services/LeaderboardService.luau": {
+    "mtime": 1790556000.907663,
+    "ast_hash": "a37e69b1ea0bfd57fb3ed86b43124aad",
+    "semantic_hash": ""
+  },
+  "src/shared/types/LeaderboardTypes.luau": {
+    "mtime": 1790555516.0290906,
+    "ast_hash": "fc8f3c6f39b264e5bca3af27d63b6428",
     "semantic_hash": ""
   }
 }

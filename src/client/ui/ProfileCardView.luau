@@ -1,7 +1,8 @@
 --!strict
 
 -- Cartão de perfil no canto superior esquerdo do lobby: nível (e prestígio),
--- barra de XP e um botão que abre as estatísticas da carreira. Some durante
+-- barra de XP, um botão que abre as estatísticas da carreira e, ao lado, o
+-- botão 🏆 do ranking global. Some durante
 -- a partida (o HUD de combate usa esse canto). Só visual.
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -47,13 +48,14 @@ local function formatNumber(value: number): string
 	return (string.gsub(formatted, "^%.", ""))
 end
 
-function ProfileCardView.new(playerGui: PlayerGui): ProfileCardViewHandle
+-- `onRanking`: abre o painel RANKING (botão 🏆 ao lado do cartão).
+function ProfileCardView.new(playerGui: PlayerGui, onRanking: () -> ()): ProfileCardViewHandle
 	local screenGui = UiTheme.createScreenGui(GUI_NAME, playerGui, 12)
 
 	local root = Instance.new("Frame")
 	root.Name = "Root"
 	root.Position = UDim2.fromOffset(18, 16)
-	root.Size = UDim2.fromOffset(CARD_SIZE.X, CARD_SIZE.Y + STATS_SIZE.Y + 8)
+	root.Size = UDim2.fromOffset(CARD_SIZE.X + 58, CARD_SIZE.Y + STATS_SIZE.Y + 8)
 	root.BackgroundTransparency = 1
 	root.Visible = false
 	root.Parent = screenGui
@@ -124,6 +126,20 @@ function ProfileCardView.new(playerGui: PlayerGui): ProfileCardViewHandle
 		textSize = 12,
 		zIndex = 4,
 	})
+
+	local rankingButton = UiKit.createButton(root, {
+		name = "RankingButton",
+		text = "🏆",
+		variant = "Gold",
+		size = UDim2.fromOffset(50, CARD_SIZE.Y),
+		position = UDim2.fromOffset(CARD_SIZE.X + 8, 0),
+		textSize = 24,
+		zIndex = 4,
+	})
+	rankingButton.button.Activated:Connect(function()
+		UiKit.playClick()
+		onRanking()
+	end)
 
 	-- Painel das estatísticas (abre abaixo do cartão).
 	local stats = Instance.new("Frame")

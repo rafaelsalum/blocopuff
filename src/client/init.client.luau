@@ -16,6 +16,7 @@ local BaraoTensionController = require(script.controllers.BaraoTensionController
 local PuffMomentController = require(script.controllers.PuffMomentController)
 local ProfileController = require(script.controllers.ProfileController)
 local ProgressionController = require(script.controllers.ProgressionController)
+local LeaderboardController = require(script.controllers.LeaderboardController)
 
 print("[BlocoPuff] Client initialized")
 
@@ -122,6 +123,13 @@ local profileOk, profileErr = pcall(function()
 end)
 if not profileOk then
 	warn(string.format("[BlocoPuff] Failed to start profile controller: %s", tostring(profileErr)))
+end
+
+local leaderboardOk, leaderboardErr = pcall(function()
+	LeaderboardController.start()
+end)
+if not leaderboardOk then
+	warn(string.format("[BlocoPuff] Failed to start leaderboard controller: %s", tostring(leaderboardErr)))
 end
 
 local progressionOk, progressionErr = pcall(function()
