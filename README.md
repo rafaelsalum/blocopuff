@@ -320,6 +320,26 @@ Escopo em `docs/FASE_2_SEGREDOS_COFRE_BARAO.md`.
 - **Ajustes:** ficam em `GameConfig.Barao` e `GameConfig.Toca`. Os sons atuais são provisórios, embutidos no Roblox; troque `BarkSoundIds`, `FunnySoundIds` e `FootstepSoundId` por áudios da Creator Store (`rbxassetid://...`).
 - **Código:** `BaraoService` (comportamento), `BaraoModel`, `TocaService`, `CorridorBuilder` (nichos) e `BuildingLayout.getTocas` / `isInsideToca` / `getCorridorFloorY`. No cliente, `BaraoController` mostra os avisos.
 
+### Party e espectador social (Fase 4, entrega 4.4)
+
+- **Party** (`PartyService`, `shared/config/SocialConfig`): grupo de até 4 jogadores do mesmo servidor, um terço da sala de 12, então sobra vaga para quem joga sozinho.
+  - Chamar alguém do servidor manda um convite, que expira em 30 s. O cartão de convite aparece na lateral esquerda com ENTRAR e AGORA NÃO.
+  - Quem está competindo só vê o convite ao voltar ao lobby, se ele ainda não tiver expirado.
+  - O líder (👑) pode remover alguém. Se o líder sai, o próximo assume; Party de uma pessoa só acaba.
+  - O botão "CHAMAR AMIGOS PARA O JOGO" abre o convite nativo do Roblox (`SocialService`).
+- **Entrar junto:** a seleção de participantes (`PartySelection`) põe a Party inteira ou nenhum membro.
+  - Se a Party não cabe nas vagas que sobram, ela espera na frente da fila (entra primeiro na próxima), quem vem atrás ocupa as vagas, e os membros recebem o aviso "A partida lotou para a sua Party".
+  - Quem jogou vai para o fim da fila, como antes, então a Party segue junta partida após partida.
+- **Na partida** cada um joga por si: a Party não dá nenhuma vantagem.
+- **Espectador social:**
+  - o eliminado segue primeiro alguém da própria Party (marcado com 👥) e continua trocando a câmera pelas setas, D-Pad ou botões;
+  - reações com 5 emojis fixos (👏 😮 😂 🔥 💜), sem texto livre;
+  - só quem não está competindo reage, e só quem não está competindo vê: nada aparece na tela de quem joga. A barra fica discreta no canto inferior direito;
+  - **torcida:** o eliminado que fica assistindo até o fim da partida ganha +1 🎟 (só quem jogou a rodada de verdade, então não dá para ganhar parado no lobby).
+- **Cartão de perfil:** os atalhos agora ficam numa fileira embaixo do cartão (🏆 ✨ 🎰 📋 👥), para caber em celular. O 👥 mostra o tamanho da Party.
+- **Telemetria:** `PartyCreated`, `PartyInvite`, `PartyJoined`, `PartyLeft` (motivo), `PartyMatch` (Party jogando junta), `PartyReplay` (de novo na partida seguinte), `PartyDeferred` (sem vaga), `Reaction`, `SpectatorSwitch` e `TicketsEarned` com a fonte `Spectator`.
+- **Código:** `PartyService`, `data/PartySelection`, `ReactionService` e `SocialConfig`. No cliente, `PartyController`, `PartyView`, `PartyInviteView`, `ReactionController`, `ReactionView` e `SpectatorController`.
+
 ### Desafios, retorno diário e conquistas secretas (Fase 4, entrega 4.3)
 
 - **Desafios diários** (`shared/config/DailyConfig`): 3 por dia, um de cada nível (fácil, médio e difícil), sorteados de forma fixa por jogador e dia (o mesmo em qualquer servidor).

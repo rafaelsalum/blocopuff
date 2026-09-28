@@ -26,6 +26,8 @@ local HallOfFameService = require(script.services.HallOfFameService)
 local PuffdexService = require(script.services.PuffdexService)
 local PuffMachineService = require(script.services.PuffMachineService)
 local SecretAchievementService = require(script.services.SecretAchievementService)
+local PartyService = require(script.services.PartyService)
+local ReactionService = require(script.services.ReactionService)
 local WorldVisualService = require(script.services.WorldVisualService)
 local BuildingService = require(script.services.BuildingService)
 local AdminService = require(script.services.AdminService)
@@ -161,6 +163,11 @@ end
 LeaderboardService.start(PuffadorService.getRemotesFolder())
 HallOfFameService.start(world, LeaderboardService.addListener)
 print("[BlocoPuff] Leaderboards and Hall of Fame ready")
+
+-- Party (entra junto nas partidas) e reações de quem está assistindo.
+PartyService.start(PuffadorService.getRemotesFolder())
+ReactionService.start(PuffadorService.getRemotesFolder())
+print("[BlocoPuff] Party and spectator reactions ready")
 
 RoundService.start()
 print("[BlocoPuff] Round cycle started")

@@ -67,6 +67,8 @@ export type RoundXp = {
 	lines: { XpLine },
 	total: number,
 	won: boolean,
+	-- Eliminado que ficou assistindo até o fim (ticket de torcida).
+	stayedAsSpectator: boolean?,
 }
 
 type Entry = {
@@ -512,7 +514,7 @@ function PlayerDataService.applyRound(player: Player, roundKey: string, delta: R
 	local newXp = math.min(LevelCurve.maxXp(), profile.xp + gained)
 	local newLevel = LevelCurve.levelForXp(newXp)
 	local timestamp = now()
-	local tickets, ticketLines = RewardRules.ticketsForRound(clean, gained, newLevel - profile.level)
+	local tickets, ticketLines = RewardRules.ticketsForRound(clean, gained, newLevel - profile.level, roundXp.stayedAsSpectator)
 	local updated = ProfileSchema.withTickets(profile, tickets)
 	updated.stats = ProfileSchema.addStats(profile.stats, clean)
 	updated.appliedRounds = ProfileSchema.withAppliedRound(profile.appliedRounds, roundKey, ProfileConfig.AppliedRoundsKept)

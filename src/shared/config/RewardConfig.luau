@@ -29,6 +29,8 @@ export type RewardConfig = {
 	TicketsWin: number,
 	-- Por nível ganho.
 	TicketsPerLevelUp: number,
+	-- Eliminado que ficou assistindo até o fim da partida (torcida, 4.4).
+	TicketsSpectator: number,
 	-- Teto por rodada (defesa extra).
 	MaxTicketsPerRound: number,
 	MaxTickets: number,
@@ -48,6 +50,7 @@ local RewardConfig: RewardConfig = {
 	TicketsTop3 = 1,
 	TicketsWin = 1,
 	TicketsPerLevelUp = 2,
+	TicketsSpectator = 1,
 	MaxTicketsPerRound = 12,
 	MaxTickets = 99999,
 

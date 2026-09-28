@@ -20,6 +20,8 @@ local LeaderboardController = require(script.controllers.LeaderboardController)
 local PuffdexController = require(script.controllers.PuffdexController)
 local PuffMachineController = require(script.controllers.PuffMachineController)
 local ChallengesController = require(script.controllers.ChallengesController)
+local PartyController = require(script.controllers.PartyController)
+local ReactionController = require(script.controllers.ReactionController)
 
 print("[BlocoPuff] Client initialized")
 
@@ -154,6 +156,20 @@ local challengesOk, challengesErr = pcall(function()
 end)
 if not challengesOk then
 	warn(string.format("[BlocoPuff] Failed to start challenges controller: %s", tostring(challengesErr)))
+end
+
+local partyOk, partyErr = pcall(function()
+	PartyController.start()
+end)
+if not partyOk then
+	warn(string.format("[BlocoPuff] Failed to start Party controller: %s", tostring(partyErr)))
+end
+
+local reactionOk, reactionErr = pcall(function()
+	ReactionController.start()
+end)
+if not reactionOk then
+	warn(string.format("[BlocoPuff] Failed to start reaction controller: %s", tostring(reactionErr)))
 end
 
 local progressionOk, progressionErr = pcall(function()

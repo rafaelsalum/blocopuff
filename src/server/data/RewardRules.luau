@@ -31,8 +31,9 @@ end
 
 -- Tickets da rodada. `delta` já passou por ProfileSchema.clampDelta.
 -- Quem não ganhou XP (não jogou de verdade) não ganha ticket de rodada; a
--- subida de nível sempre vale.
-function RewardRules.ticketsForRound(delta: ProfileStats, gainedXp: number, levelsGained: number): (number, { TicketLine })
+-- subida de nível sempre vale. `stayedAsSpectator`: foi eliminado e ficou
+-- assistindo até o fim (torcida).
+function RewardRules.ticketsForRound(delta: ProfileStats, gainedXp: number, levelsGained: number, stayedAsSpectator: boolean?): (number, { TicketLine })
 	local lines: { TicketLine } = {}
 	local function add(source: string, tickets: number)
 		if tickets > 0 then
@@ -43,6 +44,7 @@ function RewardRules.ticketsForRound(delta: ProfileStats, gainedXp: number, leve
 		add("Round", RewardConfig.TicketsPerRound)
 		add("Top3", if delta.top3 > 0 then RewardConfig.TicketsTop3 else 0)
 		add("Win", if delta.wins > 0 then RewardConfig.TicketsWin else 0)
+		add("Spectator", if stayedAsSpectator then RewardConfig.TicketsSpectator else 0)
 	end
 	add("LevelUp", math.max(0, levelsGained) * RewardConfig.TicketsPerLevelUp)
 	local total = 0

@@ -17,6 +17,7 @@ local LeaderboardController = require(script.Parent.LeaderboardController)
 local PuffdexController = require(script.Parent.PuffdexController)
 local PuffMachineController = require(script.Parent.PuffMachineController)
 local ChallengesController = require(script.Parent.ChallengesController)
+local PartyController = require(script.Parent.PartyController)
 
 type ProfileSnapshot = ProfileTypes.ProfileSnapshot
 type XpAward = ProfileTypes.XpAward
@@ -80,7 +81,8 @@ function ProgressionController.start()
 		return
 	end
 	NotificationManager.init(playerGui)
-	local card = ProfileCardView.new(playerGui, LeaderboardController.open, PuffdexController.open, PuffMachineController.open, ChallengesController.open)
+	local card = ProfileCardView.new(playerGui, LeaderboardController.open, PuffdexController.open, PuffMachineController.open, ChallengesController.open, PartyController.open)
+	PartyController.SizeChanged:Connect(card.setPartySize)
 
 	-- Cartão só no lobby: some enquanto o jogador está competindo.
 	local hasProfile = false

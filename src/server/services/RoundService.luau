@@ -27,6 +27,8 @@ local CorridorTelemetryService = require(script.Parent.CorridorTelemetryService)
 local RoundStatsService = require(script.Parent.RoundStatsService)
 local PlayerDataService = require(script.Parent.PlayerDataService)
 local SecretAchievementService = require(script.Parent.SecretAchievementService)
+local PartyService = require(script.Parent.PartyService)
+local PartySelection = require(script.Parent.Parent.data.PartySelection)
 local XpCalculator = require(script.Parent.Parent.data.XpCalculator)
 local ProfileSchema = require(script.Parent.Parent.data.ProfileSchema)
 local ResultTypes = require(ReplicatedStorage.Shared.types.ResultTypes)
@@ -171,23 +173,13 @@ end
 -- Fila de rotação justa: em vez de sempre pegar os primeiros jogadores
 -- conectados, seleciona a partir da frente da fila e manda quem acabou de
 -- jogar para o fim dela, dando prioridade a quem ainda está esperando.
+-- Parties entram inteiras; se não couberem, esperam na frente da fila e
+-- são avisadas (PartySelection).
 local function selectParticipants(): { Player }
-	local selected: { Player } = {}
-	local waiting: { Player } = {}
-
-	for _, player in ipairs(rotationQueue) do
-		if #selected < GameConfig.MaximumPlayers then
-			table.insert(selected, player)
-		else
-			table.insert(waiting, player)
-		end
-	end
-
-	for _, player in ipairs(selected) do
-		table.insert(waiting, player)
-	end
+	local selected, waiting, deferredParties = PartySelection.select(rotationQueue, PartyService.groupOf, GameConfig.MaximumPlayers)
 	rotationQueue = waiting
 	publishQueuePositions()
+	PartyService.roundSelected(selected, deferredParties)
 
 	return selected
 end
@@ -621,7 +613,13 @@ local function commitProfiles(result: ResultTypes.RoundResult)
 				blocksBuilt = trusted.blocksBuilt,
 				shots = extra.shots,
 			})
-			PlayerDataService.applyRound(player, roundKey, delta, { roundId = currentRoundId, lines = xpLines, total = xpTotal, won = won })
+			PlayerDataService.applyRound(player, roundKey, delta, {
+				roundId = currentRoundId,
+				lines = xpLines,
+				total = xpTotal,
+				won = won,
+				stayedAsSpectator = not entry.survived,
+			})
 		end
 	end
 end

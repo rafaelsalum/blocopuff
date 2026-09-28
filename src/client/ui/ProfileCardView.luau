@@ -1,10 +1,10 @@
 --!strict
 
 -- Cartão de perfil no canto superior esquerdo do lobby: nível (e prestígio),
--- barra de XP, um botão que abre as estatísticas da carreira e, ao lado, os
--- botões 🏆 do ranking global, ✨ do Puffdex, 🎰 da Puff Machine (com o
--- saldo de tickets) e 📋 dos desafios. Some durante a partida (o HUD de combate usa esse
--- canto). Só visual.
+-- barra de XP e um botão que abre as estatísticas da carreira. Embaixo, uma
+-- fileira de atalhos: 🏆 ranking global, ✨ Puffdex, 🎰 Puff Machine (com o
+-- saldo de tickets), 📋 desafios e 👥 Party. Some durante a partida (o HUD
+-- de combate usa esse canto). Só visual.
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TweenService = game:GetService("TweenService")
@@ -20,6 +20,8 @@ type ProfileSnapshot = ProfileTypes.ProfileSnapshot
 export type ProfileCardViewHandle = {
 	setProfile: (snapshot: ProfileSnapshot) -> (),
 	setVisible: (visible: boolean) -> (),
+	-- Membros da Party (0 = sem Party), mostrado no selo do botão 👥.
+	setPartySize: (size: number) -> (),
 	celebrateLevel: () -> (),
 	destroy: () -> (),
 }
@@ -27,8 +29,10 @@ export type ProfileCardViewHandle = {
 local GUI_NAME = "BlocoPuffProfileCard"
 local CARD_SIZE = Vector2.new(236, 66)
 local STATS_SIZE = Vector2.new(236, 212)
-local SIDE_BUTTON_WIDTH = 50
-local SIDE_BUTTON_GAP = 8
+local SHORTCUT_GAP = 4
+local SHORTCUT_HEIGHT = 44
+local SHORTCUT_Y = CARD_SIZE.Y + 6
+local STATS_Y = SHORTCUT_Y + SHORTCUT_HEIGHT + 14
 
 -- Estatísticas mostradas no painel, na ordem.
 local STAT_ROWS: { { key: string, label: string } } = {
@@ -53,20 +57,21 @@ end
 
 -- `onRanking`: abre o painel RANKING (botão 🏆 ao lado do cartão).
 -- `onPuffdex`: abre o PUFFDEX (botão ✨). `onMachine`: abre a PUFF MACHINE (🎰).
--- `onChallenges`: abre os DESAFIOS (📋).
+-- `onChallenges`: abre os DESAFIOS (📋). `onParty`: abre a PARTY (👥).
 function ProfileCardView.new(
 	playerGui: PlayerGui,
 	onRanking: () -> (),
 	onPuffdex: () -> (),
 	onMachine: () -> (),
-	onChallenges: () -> ()
+	onChallenges: () -> (),
+	onParty: () -> ()
 ): ProfileCardViewHandle
 	local screenGui = UiTheme.createScreenGui(GUI_NAME, playerGui, 12)
 
 	local root = Instance.new("Frame")
 	root.Name = "Root"
 	root.Position = UDim2.fromOffset(18, 16)
-	root.Size = UDim2.fromOffset(CARD_SIZE.X + (SIDE_BUTTON_WIDTH + SIDE_BUTTON_GAP) * 4, CARD_SIZE.Y + STATS_SIZE.Y + 8)
+	root.Size = UDim2.fromOffset(CARD_SIZE.X, STATS_Y + STATS_SIZE.Y)
 	root.BackgroundTransparency = 1
 	root.Visible = false
 	root.Parent = screenGui
@@ -138,60 +143,33 @@ function ProfileCardView.new(
 		zIndex = 4,
 	})
 
-	local rankingButton = UiKit.createButton(root, {
-		name = "RankingButton",
-		text = "🏆",
-		variant = "Gold",
-		size = UDim2.fromOffset(SIDE_BUTTON_WIDTH, CARD_SIZE.Y),
-		position = UDim2.fromOffset(CARD_SIZE.X + SIDE_BUTTON_GAP, 0),
-		textSize = 24,
-		zIndex = 4,
-	})
-	rankingButton.button.Activated:Connect(function()
-		UiKit.playClick()
-		onRanking()
-	end)
+	-- Fileira de atalhos embaixo do cartão (cabe no mesmo canto em celular).
+	local shortcuts: { { name: string, text: string, variant: UiKit.ButtonVariant, action: () -> () } } = {
+		{ name = "RankingButton", text = "🏆", variant = "Gold", action = onRanking },
+		{ name = "PuffdexButton", text = "✨", variant = "Primary", action = onPuffdex },
+		{ name = "MachineButton", text = "🎰", variant = "Gold", action = onMachine },
+		{ name = "ChallengesButton", text = "📋", variant = "Success", action = onChallenges },
+		{ name = "PartyButton", text = "👥", variant = "Primary", action = onParty },
+	}
+	local buttonWidth = (CARD_SIZE.X - SHORTCUT_GAP * (#shortcuts - 1)) / #shortcuts
+	local buttons: { [string]: UiKit.ButtonHandle } = {}
+	for index, shortcut in ipairs(shortcuts) do
+		local button = UiKit.createButton(root, {
+			name = shortcut.name,
+			text = shortcut.text,
+			variant = shortcut.variant,
+			size = UDim2.fromOffset(buttonWidth, SHORTCUT_HEIGHT),
+			position = UDim2.fromOffset((index - 1) * (buttonWidth + SHORTCUT_GAP), SHORTCUT_Y),
+			textSize = 22,
+			zIndex = 4,
+		})
+		button.button.Activated:Connect(function()
+			UiKit.playClick()
+			shortcut.action()
+		end)
+		buttons[shortcut.name] = button
+	end
 
-	local puffdexButton = UiKit.createButton(root, {
-		name = "PuffdexButton",
-		text = "✨",
-		variant = "Primary",
-		size = UDim2.fromOffset(SIDE_BUTTON_WIDTH, CARD_SIZE.Y),
-		position = UDim2.fromOffset(CARD_SIZE.X + SIDE_BUTTON_GAP * 2 + SIDE_BUTTON_WIDTH, 0),
-		textSize = 24,
-		zIndex = 4,
-	})
-	puffdexButton.button.Activated:Connect(function()
-		UiKit.playClick()
-		onPuffdex()
-	end)
-
-	local machineButton = UiKit.createButton(root, {
-		name = "MachineButton",
-		text = "🎰",
-		variant = "Gold",
-		size = UDim2.fromOffset(SIDE_BUTTON_WIDTH, CARD_SIZE.Y),
-		position = UDim2.fromOffset(CARD_SIZE.X + SIDE_BUTTON_GAP * 3 + SIDE_BUTTON_WIDTH * 2, 0),
-		textSize = 24,
-		zIndex = 4,
-	})
-	machineButton.button.Activated:Connect(function()
-		UiKit.playClick()
-		onMachine()
-	end)
-	local challengesButton = UiKit.createButton(root, {
-		name = "ChallengesButton",
-		text = "📋",
-		variant = "Success",
-		size = UDim2.fromOffset(SIDE_BUTTON_WIDTH, CARD_SIZE.Y),
-		position = UDim2.fromOffset(CARD_SIZE.X + SIDE_BUTTON_GAP * 4 + SIDE_BUTTON_WIDTH * 3, 0),
-		textSize = 24,
-		zIndex = 4,
-	})
-	challengesButton.button.Activated:Connect(function()
-		UiKit.playClick()
-		onChallenges()
-	end)
 	-- Aviso de desafio pendente (bolinha) quando ainda há desafio do dia a fazer.
 	local pendingDot = Instance.new("Frame")
 	pendingDot.Name = "Pending"
@@ -201,15 +179,26 @@ function ProfileCardView.new(
 	pendingDot.BackgroundColor3 = UiTheme.Colors.Danger
 	pendingDot.ZIndex = 8
 	pendingDot.Visible = false
-	pendingDot.Parent = challengesButton.root
+	pendingDot.Parent = buttons.ChallengesButton.root
 	UiTheme.addCorner(pendingDot, 999)
 	UiTheme.addStroke(pendingDot, UiTheme.Colors.Outline, 1.5)
 
+	-- Tamanho da Party num selo no botão 👥.
+	local partyBadge = UiTheme.createLabel(buttons.PartyButton.root, "PartySize", "", UiTheme.Fonts.Display, 11, UiTheme.Colors.White)
+	partyBadge.AnchorPoint = Vector2.new(0.5, 0.5)
+	partyBadge.Position = UDim2.new(1, -4, 0, 4)
+	partyBadge.Size = UDim2.fromOffset(18, 18)
+	partyBadge.BackgroundTransparency = 0
+	partyBadge.BackgroundColor3 = UiTheme.Colors.Green
+	partyBadge.ZIndex = 8
+	partyBadge.Visible = false
+	UiTheme.addCorner(partyBadge, 999)
+
 	-- Saldo de tickets num selo embaixo do botão.
-	local ticketBadge = UiTheme.createLabel(machineButton.root, "Tickets", "🎟 0", UiTheme.Fonts.Display, 11, UiTheme.Colors.White)
+	local ticketBadge = UiTheme.createLabel(buttons.MachineButton.root, "Tickets", "🎟 0", UiTheme.Fonts.Display, 11, UiTheme.Colors.White)
 	ticketBadge.AnchorPoint = Vector2.new(0.5, 0.5)
 	ticketBadge.Position = UDim2.new(0.5, 0, 1, -2)
-	ticketBadge.Size = UDim2.fromOffset(SIDE_BUTTON_WIDTH + 6, 18)
+	ticketBadge.Size = UDim2.fromOffset(buttonWidth + 10, 18)
 	ticketBadge.BackgroundTransparency = 0
 	ticketBadge.BackgroundColor3 = UiTheme.Colors.Outline
 	ticketBadge.TextScaled = true
@@ -220,7 +209,7 @@ function ProfileCardView.new(
 	-- Painel das estatísticas (abre abaixo do cartão).
 	local stats = Instance.new("Frame")
 	stats.Name = "Stats"
-	stats.Position = UDim2.fromOffset(0, CARD_SIZE.Y + 8)
+	stats.Position = UDim2.fromOffset(0, STATS_Y)
 	stats.Size = UDim2.fromOffset(STATS_SIZE.X, STATS_SIZE.Y)
 	stats.Visible = false
 	stats.Parent = root
@@ -304,6 +293,11 @@ function ProfileCardView.new(
 			stats.Visible = false
 			statsButton.setText("PERFIL")
 		end
+	end
+
+	handle.setPartySize = function(size: number)
+		partyBadge.Visible = size > 1
+		partyBadge.Text = tostring(size)
 	end
 
 	handle.celebrateLevel = function()

@@ -13,6 +13,9 @@
 -- Alternância manual do alvo observado: setas do teclado, D-Pad do gamepad,
 -- e botões na tela (mouse/toque) via SpectatorView. Todos os caminhos levam
 -- à mesma função cycleTarget, então nenhum dispositivo tem lógica especial.
+--
+-- Party (4.4): o primeiro alvo é alguém da própria Party ainda na partida
+-- (marcado com 👥). Trocar de alvo avisa o servidor só para telemetria.
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -20,6 +23,7 @@ local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
 local Workspace = game:GetService("Workspace")
 
+local PuffadorConstants = require(ReplicatedStorage.Shared.modules.PuffadorConstants)
 local RoundTypes = require(ReplicatedStorage.Shared.types.RoundTypes)
 local StateAttributeNames = require(ReplicatedStorage.Shared.types.StateAttributeNames)
 local SpectatorView = require(script.Parent.Parent.ui.SpectatorView)
@@ -144,6 +148,24 @@ local function getActiveParticipantList(roundId: number): { Player }
 	return list
 end
 
+local function isPartyMate(candidate: Player): boolean
+	local player = localPlayer
+	local partyId = if player ~= nil then player:GetAttribute(StateAttributeNames.PlayerPartyId) else nil
+	return typeof(partyId) == "string" and candidate:GetAttribute(StateAttributeNames.PlayerPartyId) == partyId
+end
+
+local function targetLabel(target: Player): string
+	return if isPartyMate(target) then `👥 {target.Name}` else target.Name
+end
+
+local function reportSpectating()
+	local remotes = ReplicatedStorage:FindFirstChild(PuffadorConstants.RemotesContainerName)
+	local remote = if remotes ~= nil then remotes:FindFirstChild(PuffadorConstants.ReactionRemoteName) else nil
+	if remote ~= nil and remote:IsA("RemoteEvent") then
+		remote:FireServer("Spectating")
+	end
+end
+
 local function refreshSpectator()
 	local player = localPlayer
 	local container = stateContainer
@@ -180,12 +202,21 @@ local function refreshSpectator()
 	end
 
 	if currentTarget == nil then
-		currentTarget = list[1]
+		-- Primeiro alguém da Party, se ainda estiver na partida.
+		for _, candidate in ipairs(list) do
+			if isPartyMate(candidate) then
+				currentTarget = candidate
+				break
+			end
+		end
+		if currentTarget == nil then
+			currentTarget = list[1]
+		end
 	end
 
 	if view ~= nil then
 		if currentTarget ~= nil then
-			view.setTargetInfo(currentTarget.Name, #list)
+			view.setTargetInfo(targetLabel(currentTarget), #list)
 			view.setVisible(true)
 		else
 			view.setVisible(false)
@@ -225,9 +256,10 @@ local function cycleTarget(direction: number)
 	end
 
 	currentTarget = list[nextIndex]
+	reportSpectating()
 
 	if view ~= nil and currentTarget ~= nil then
-		view.setTargetInfo(currentTarget.Name, #list)
+		view.setTargetInfo(targetLabel(currentTarget), #list)
 	end
 end
 
