@@ -648,8 +648,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_client_controllers_leaderboardcontroller",
-      "community": 21,
-      "community_name": "LeaderboardService.luau",
+      "community": 67,
+      "community_name": "ProfileController.luau",
       "norm_label": "leaderboardcontroller.luau"
     },
     {
@@ -659,8 +659,8 @@
       "source_location": "L30",
       "_origin": "ast",
       "id": "src_client_controllers_leaderboardcontroller_asnumber",
-      "community": 21,
-      "community_name": "LeaderboardService.luau",
+      "community": 67,
+      "community_name": "ProfileController.luau",
       "norm_label": "asnumber()"
     },
     {
@@ -670,8 +670,8 @@
       "source_location": "L67",
       "_origin": "ast",
       "id": "src_client_controllers_leaderboardcontroller_leaderboardcontroller_open",
-      "community": 21,
-      "community_name": "LeaderboardService.luau",
+      "community": 67,
+      "community_name": "ProfileController.luau",
       "norm_label": "leaderboardcontroller.open()"
     },
     {
@@ -681,8 +681,8 @@
       "source_location": "L79",
       "_origin": "ast",
       "id": "src_client_controllers_leaderboardcontroller_leaderboardcontroller_start",
-      "community": 21,
-      "community_name": "LeaderboardService.luau",
+      "community": 67,
+      "community_name": "ProfileController.luau",
       "norm_label": "leaderboardcontroller.start()"
     },
     {
@@ -725,8 +725,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_client_controllers_profilecontroller",
-      "community": 21,
-      "community_name": "LeaderboardService.luau",
+      "community": 67,
+      "community_name": "ProfileController.luau",
       "norm_label": "profilecontroller.luau"
     },
     {
@@ -736,8 +736,8 @@
       "source_location": "L27",
       "_origin": "ast",
       "id": "src_client_controllers_profilecontroller_readnumber",
-      "community": 21,
-      "community_name": "LeaderboardService.luau",
+      "community": 67,
+      "community_name": "ProfileController.luau",
       "norm_label": "readnumber()"
     },
     {
@@ -747,8 +747,8 @@
       "source_location": "L36",
       "_origin": "ast",
       "id": "src_client_controllers_profilecontroller_parseaward",
-      "community": 21,
-      "community_name": "LeaderboardService.luau",
+      "community": 67,
+      "community_name": "ProfileController.luau",
       "norm_label": "parseaward()"
     },
     {
@@ -758,8 +758,8 @@
       "source_location": "L61",
       "_origin": "ast",
       "id": "src_client_controllers_profilecontroller_parse",
-      "community": 21,
-      "community_name": "LeaderboardService.luau",
+      "community": 67,
+      "community_name": "ProfileController.luau",
       "norm_label": "parse()"
     },
     {
@@ -769,8 +769,8 @@
       "source_location": "L83",
       "_origin": "ast",
       "id": "src_client_controllers_profilecontroller_profilecontroller_get",
-      "community": 21,
-      "community_name": "LeaderboardService.luau",
+      "community": 4,
+      "community_name": "NotificationManager.luau",
       "norm_label": "profilecontroller.get()"
     },
     {
@@ -780,8 +780,8 @@
       "source_location": "L90",
       "_origin": "ast",
       "id": "src_client_controllers_profilecontroller_profilecontroller_start",
-      "community": 21,
-      "community_name": "LeaderboardService.luau",
+      "community": 67,
+      "community_name": "ProfileController.luau",
       "norm_label": "profilecontroller.start()"
     },
     {
@@ -791,8 +791,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_client_controllers_progressioncontroller",
-      "community": 21,
-      "community_name": "LeaderboardService.luau",
+      "community": 4,
+      "community_name": "NotificationManager.luau",
       "norm_label": "progressioncontroller.luau"
     },
     {
@@ -802,8 +802,8 @@
       "source_location": "L28",
       "_origin": "ast",
       "id": "src_client_controllers_progressioncontroller_playlevelup",
-      "community": 21,
-      "community_name": "LeaderboardService.luau",
+      "community": 4,
+      "community_name": "NotificationManager.luau",
       "norm_label": "playlevelup()"
     },
     {
@@ -813,8 +813,8 @@
       "source_location": "L46",
       "_origin": "ast",
       "id": "src_client_controllers_progressioncontroller_announce",
-      "community": 21,
-      "community_name": "LeaderboardService.luau",
+      "community": 4,
+      "community_name": "NotificationManager.luau",
       "norm_label": "announce()"
     },
     {
@@ -824,8 +824,8 @@
       "source_location": "L65",
       "_origin": "ast",
       "id": "src_client_controllers_progressioncontroller_progressioncontroller_start",
-      "community": 21,
-      "community_name": "LeaderboardService.luau",
+      "community": 4,
+      "community_name": "NotificationManager.luau",
       "norm_label": "progressioncontroller.start()"
     },
     {
@@ -1110,8 +1110,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_client_controllers_resultscontroller",
-      "community": 21,
-      "community_name": "LeaderboardService.luau",
+      "community": 67,
+      "community_name": "ProfileController.luau",
       "norm_label": "resultscontroller.luau"
     },
     {
@@ -1121,8 +1121,8 @@
       "source_location": "L47",
       "_origin": "ast",
       "id": "src_client_controllers_resultscontroller_parseresult",
-      "community": 21,
-      "community_name": "LeaderboardService.luau",
+      "community": 67,
+      "community_name": "ProfileController.luau",
       "norm_label": "parseresult()"
     },
     {
@@ -2435,6 +2435,28 @@
       "norm_label": "profileconfig.luau"
     },
     {
+      "label": "DataStoreErrors.luau",
+      "file_type": "code",
+      "source_file": "src/server/data/DataStoreErrors.luau",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "src_server_data_datastoreerrors",
+      "community": 21,
+      "community_name": "LeaderboardService.luau",
+      "norm_label": "datastoreerrors.luau"
+    },
+    {
+      "label": "DataStoreErrors.isStudioAccessDenied()",
+      "file_type": "code",
+      "source_file": "src/server/data/DataStoreErrors.luau",
+      "source_location": "L8",
+      "_origin": "ast",
+      "id": "src_server_data_datastoreerrors_datastoreerrors_isstudioaccessdenied",
+      "community": 21,
+      "community_name": "LeaderboardService.luau",
+      "norm_label": "datastoreerrors.isstudioaccessdenied()"
+    },
+    {
       "label": "ProfileSchema.luau",
       "file_type": "code",
       "source_file": "src/server/data/ProfileSchema.luau",
@@ -2584,8 +2606,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_server_data_xpcalculator",
-      "community": 0,
-      "community_name": "RoundService.luau",
+      "community": 56,
+      "community_name": "ProfileSchema.luau",
       "norm_label": "xpcalculator.luau"
     },
     {
@@ -2595,8 +2617,8 @@
       "source_location": "L32",
       "_origin": "ast",
       "id": "src_server_data_xpcalculator_participantmultiplier",
-      "community": 0,
-      "community_name": "RoundService.luau",
+      "community": 56,
+      "community_name": "ProfileSchema.luau",
       "norm_label": "participantmultiplier()"
     },
     {
@@ -2606,8 +2628,8 @@
       "source_location": "L39",
       "_origin": "ast",
       "id": "src_server_data_xpcalculator_xpcalculator_compute",
-      "community": 0,
-      "community_name": "RoundService.luau",
+      "community": 56,
+      "community_name": "ProfileSchema.luau",
       "norm_label": "xpcalculator.compute()"
     },
     {
@@ -3882,8 +3904,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_server_services_corridorbuilder",
-      "community": 25,
-      "community_name": "BuildingDecor.createPart",
+      "community": 69,
+      "community_name": "CorridorBuilder.luau",
       "norm_label": "corridorbuilder.luau"
     },
     {
@@ -3893,8 +3915,8 @@
       "source_location": "L41",
       "_origin": "ast",
       "id": "src_server_services_corridorbuilder_solid",
-      "community": 25,
-      "community_name": "BuildingDecor.createPart",
+      "community": 69,
+      "community_name": "CorridorBuilder.luau",
       "norm_label": "solid()"
     },
     {
@@ -3904,8 +3926,8 @@
       "source_location": "L45",
       "_origin": "ast",
       "id": "src_server_services_corridorbuilder_decor",
-      "community": 25,
-      "community_name": "BuildingDecor.createPart",
+      "community": 69,
+      "community_name": "CorridorBuilder.luau",
       "norm_label": "decor()"
     },
     {
@@ -3915,8 +3937,8 @@
       "source_location": "L49",
       "_origin": "ast",
       "id": "src_server_services_corridorbuilder_addlamp",
-      "community": 25,
-      "community_name": "BuildingDecor.createPart",
+      "community": 69,
+      "community_name": "CorridorBuilder.luau",
       "norm_label": "addlamp()"
     },
     {
@@ -3926,8 +3948,8 @@
       "source_location": "L63",
       "_origin": "ast",
       "id": "src_server_services_corridorbuilder_buildouterwall",
-      "community": 25,
-      "community_name": "BuildingDecor.createPart",
+      "community": 69,
+      "community_name": "CorridorBuilder.luau",
       "norm_label": "buildouterwall()"
     },
     {
@@ -3937,8 +3959,8 @@
       "source_location": "L87",
       "_origin": "ast",
       "id": "src_server_services_corridorbuilder_buildtoca",
-      "community": 25,
-      "community_name": "BuildingDecor.createPart",
+      "community": 69,
+      "community_name": "CorridorBuilder.luau",
       "norm_label": "buildtoca()"
     },
     {
@@ -3948,8 +3970,8 @@
       "source_location": "L114",
       "_origin": "ast",
       "id": "src_server_services_corridorbuilder_corridorbuilder_build",
-      "community": 25,
-      "community_name": "BuildingDecor.createPart",
+      "community": 69,
+      "community_name": "CorridorBuilder.luau",
       "norm_label": "corridorbuilder.build()"
     },
     {
@@ -4396,7 +4418,7 @@
       "label": "emptyBoards()",
       "file_type": "code",
       "source_file": "src/server/services/LeaderboardService.luau",
-      "source_location": "L60",
+      "source_location": "L61",
       "_origin": "ast",
       "id": "src_server_services_leaderboardservice_emptyboards",
       "community": 21,
@@ -4404,10 +4426,21 @@
       "norm_label": "emptyboards()"
     },
     {
+      "label": "handleFailure()",
+      "file_type": "code",
+      "source_file": "src/server/services/LeaderboardService.luau",
+      "source_location": "L70",
+      "_origin": "ast",
+      "id": "src_server_services_leaderboardservice_handlefailure",
+      "community": 21,
+      "community_name": "LeaderboardService.luau",
+      "norm_label": "handlefailure()"
+    },
+    {
       "label": "publish()",
       "file_type": "code",
       "source_file": "src/server/services/LeaderboardService.luau",
-      "source_location": "L68",
+      "source_location": "L82",
       "_origin": "ast",
       "id": "src_server_services_leaderboardservice_publish",
       "community": 21,
@@ -4418,18 +4451,18 @@
       "label": "onProfile()",
       "file_type": "code",
       "source_file": "src/server/services/LeaderboardService.luau",
-      "source_location": "L80",
+      "source_location": "L94",
       "_origin": "ast",
       "id": "src_server_services_leaderboardservice_onprofile",
-      "community": 21,
-      "community_name": "LeaderboardService.luau",
+      "community": 4,
+      "community_name": "NotificationManager.luau",
       "norm_label": "onprofile()"
     },
     {
       "label": "flushUser()",
       "file_type": "code",
       "source_file": "src/server/services/LeaderboardService.luau",
-      "source_location": "L95",
+      "source_location": "L109",
       "_origin": "ast",
       "id": "src_server_services_leaderboardservice_flushuser",
       "community": 21,
@@ -4440,7 +4473,7 @@
       "label": "flushAll()",
       "file_type": "code",
       "source_file": "src/server/services/LeaderboardService.luau",
-      "source_location": "L133",
+      "source_location": "L149",
       "_origin": "ast",
       "id": "src_server_services_leaderboardservice_flushall",
       "community": 21,
@@ -4451,7 +4484,7 @@
       "label": "resolveNames()",
       "file_type": "code",
       "source_file": "src/server/services/LeaderboardService.luau",
-      "source_location": "L151",
+      "source_location": "L167",
       "_origin": "ast",
       "id": "src_server_services_leaderboardservice_resolvenames",
       "community": 21,
@@ -4462,7 +4495,7 @@
       "label": "readBoard()",
       "file_type": "code",
       "source_file": "src/server/services/LeaderboardService.luau",
-      "source_location": "L181",
+      "source_location": "L197",
       "_origin": "ast",
       "id": "src_server_services_leaderboardservice_readboard",
       "community": 21,
@@ -4473,7 +4506,7 @@
       "label": "refresh()",
       "file_type": "code",
       "source_file": "src/server/services/LeaderboardService.luau",
-      "source_location": "L225",
+      "source_location": "L241",
       "_origin": "ast",
       "id": "src_server_services_leaderboardservice_refresh",
       "community": 21,
@@ -4484,7 +4517,7 @@
       "label": "LeaderboardService.get()",
       "file_type": "code",
       "source_file": "src/server/services/LeaderboardService.luau",
-      "source_location": "L246",
+      "source_location": "L262",
       "_origin": "ast",
       "id": "src_server_services_leaderboardservice_leaderboardservice_get",
       "community": 21,
@@ -4495,7 +4528,7 @@
       "label": "LeaderboardService.addListener()",
       "file_type": "code",
       "source_file": "src/server/services/LeaderboardService.luau",
-      "source_location": "L251",
+      "source_location": "L267",
       "_origin": "ast",
       "id": "src_server_services_leaderboardservice_leaderboardservice_addlistener",
       "community": 21,
@@ -4506,7 +4539,7 @@
       "label": "LeaderboardService.start()",
       "file_type": "code",
       "source_file": "src/server/services/LeaderboardService.luau",
-      "source_location": "L256",
+      "source_location": "L272",
       "_origin": "ast",
       "id": "src_server_services_leaderboardservice_leaderboardservice_start",
       "community": 21,
@@ -5642,8 +5675,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_server_services_roundresultbuilder",
-      "community": 0,
-      "community_name": "RoundService.luau",
+      "community": 56,
+      "community_name": "ProfileSchema.luau",
       "norm_label": "roundresultbuilder.luau"
     },
     {
@@ -5653,8 +5686,8 @@
       "source_location": "L55",
       "_origin": "ast",
       "id": "src_server_services_roundresultbuilder_resolveties",
-      "community": 0,
-      "community_name": "RoundService.luau",
+      "community": 56,
+      "community_name": "ProfileSchema.luau",
       "norm_label": "resolveties()"
     },
     {
@@ -5664,8 +5697,8 @@
       "source_location": "L86",
       "_origin": "ast",
       "id": "src_server_services_roundresultbuilder_readcount",
-      "community": 0,
-      "community_name": "RoundService.luau",
+      "community": 56,
+      "community_name": "ProfileSchema.luau",
       "norm_label": "readcount()"
     },
     {
@@ -5675,8 +5708,8 @@
       "source_location": "L92",
       "_origin": "ast",
       "id": "src_server_services_roundresultbuilder_pickhighlight",
-      "community": 0,
-      "community_name": "RoundService.luau",
+      "community": 56,
+      "community_name": "ProfileSchema.luau",
       "norm_label": "pickhighlight()"
     },
     {
@@ -5686,8 +5719,8 @@
       "source_location": "L106",
       "_origin": "ast",
       "id": "src_server_services_roundresultbuilder_roundresultbuilder_build",
-      "community": 0,
-      "community_name": "RoundService.luau",
+      "community": 56,
+      "community_name": "ProfileSchema.luau",
       "norm_label": "roundresultbuilder.build()"
     },
     {
@@ -5840,8 +5873,8 @@
       "source_location": "L249",
       "_origin": "ast",
       "id": "src_server_services_roundservice_recordcomeback",
-      "community": 0,
-      "community_name": "RoundService.luau",
+      "community": 56,
+      "community_name": "ProfileSchema.luau",
       "norm_label": "recordcomeback()"
     },
     {
@@ -6005,8 +6038,8 @@
       "source_location": "L584",
       "_origin": "ast",
       "id": "src_server_services_roundservice_commitprofiles",
-      "community": 0,
-      "community_name": "RoundService.luau",
+      "community": 56,
+      "community_name": "ProfileSchema.luau",
       "norm_label": "commitprofiles()"
     },
     {
@@ -6016,8 +6049,8 @@
       "source_location": "L627",
       "_origin": "ast",
       "id": "src_server_services_roundservice_publishresult",
-      "community": 0,
-      "community_name": "RoundService.luau",
+      "community": 56,
+      "community_name": "ProfileSchema.luau",
       "norm_label": "publishresult()"
     },
     {
@@ -6027,8 +6060,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_server_services_roundstatsservice",
-      "community": 0,
-      "community_name": "RoundService.luau",
+      "community": 56,
+      "community_name": "ProfileSchema.luau",
       "norm_label": "roundstatsservice.luau"
     },
     {
@@ -6038,8 +6071,8 @@
       "source_location": "L23",
       "_origin": "ast",
       "id": "src_server_services_roundstatsservice_empty",
-      "community": 0,
-      "community_name": "RoundService.luau",
+      "community": 56,
+      "community_name": "ProfileSchema.luau",
       "norm_label": "empty()"
     },
     {
@@ -6049,8 +6082,8 @@
       "source_location": "L27",
       "_origin": "ast",
       "id": "src_server_services_roundstatsservice_add",
-      "community": 0,
-      "community_name": "RoundService.luau",
+      "community": 56,
+      "community_name": "ProfileSchema.luau",
       "norm_label": "add()"
     },
     {
@@ -6060,8 +6093,8 @@
       "source_location": "L40",
       "_origin": "ast",
       "id": "src_server_services_roundstatsservice_roundstatsservice_vaultopened",
-      "community": 0,
-      "community_name": "RoundService.luau",
+      "community": 56,
+      "community_name": "ProfileSchema.luau",
       "norm_label": "roundstatsservice.vaultopened()"
     },
     {
@@ -6071,8 +6104,8 @@
       "source_location": "L44",
       "_origin": "ast",
       "id": "src_server_services_roundstatsservice_roundstatsservice_vaultconquered",
-      "community": 0,
-      "community_name": "RoundService.luau",
+      "community": 56,
+      "community_name": "ProfileSchema.luau",
       "norm_label": "roundstatsservice.vaultconquered()"
     },
     {
@@ -6082,8 +6115,8 @@
       "source_location": "L48",
       "_origin": "ast",
       "id": "src_server_services_roundstatsservice_roundstatsservice_baraoescape",
-      "community": 0,
-      "community_name": "RoundService.luau",
+      "community": 56,
+      "community_name": "ProfileSchema.luau",
       "norm_label": "roundstatsservice.baraoescape()"
     },
     {
@@ -6093,8 +6126,8 @@
       "source_location": "L52",
       "_origin": "ast",
       "id": "src_server_services_roundstatsservice_roundstatsservice_secretfound",
-      "community": 0,
-      "community_name": "RoundService.luau",
+      "community": 56,
+      "community_name": "ProfileSchema.luau",
       "norm_label": "roundstatsservice.secretfound()"
     },
     {
@@ -6104,8 +6137,8 @@
       "source_location": "L56",
       "_origin": "ast",
       "id": "src_server_services_roundstatsservice_roundstatsservice_blockbuilt",
-      "community": 0,
-      "community_name": "RoundService.luau",
+      "community": 56,
+      "community_name": "ProfileSchema.luau",
       "norm_label": "roundstatsservice.blockbuilt()"
     },
     {
@@ -6115,8 +6148,8 @@
       "source_location": "L61",
       "_origin": "ast",
       "id": "src_server_services_roundstatsservice_roundstatsservice_shot",
-      "community": 0,
-      "community_name": "RoundService.luau",
+      "community": 56,
+      "community_name": "ProfileSchema.luau",
       "norm_label": "roundstatsservice.shot()"
     },
     {
@@ -6126,8 +6159,8 @@
       "source_location": "L65",
       "_origin": "ast",
       "id": "src_server_services_roundstatsservice_roundstatsservice_comeback",
-      "community": 0,
-      "community_name": "RoundService.luau",
+      "community": 56,
+      "community_name": "ProfileSchema.luau",
       "norm_label": "roundstatsservice.comeback()"
     },
     {
@@ -6137,8 +6170,8 @@
       "source_location": "L70",
       "_origin": "ast",
       "id": "src_server_services_roundstatsservice_roundstatsservice_get",
-      "community": 0,
-      "community_name": "RoundService.luau",
+      "community": 56,
+      "community_name": "ProfileSchema.luau",
       "norm_label": "roundstatsservice.get()"
     },
     {
@@ -6159,8 +6192,8 @@
       "source_location": "L80",
       "_origin": "ast",
       "id": "src_server_services_roundstatsservice_roundstatsservice_endround",
-      "community": 0,
-      "community_name": "RoundService.luau",
+      "community": 56,
+      "community_name": "ProfileSchema.luau",
       "norm_label": "roundstatsservice.endround()"
     },
     {
@@ -6357,8 +6390,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_server_services_secretroombuilder",
-      "community": 30,
-      "community_name": "VaultService.luau",
+      "community": 25,
+      "community_name": "BuildingDecor.createPart",
       "norm_label": "secretroombuilder.luau"
     },
     {
@@ -6390,8 +6423,8 @@
       "source_location": "L46",
       "_origin": "ast",
       "id": "src_server_services_secretroombuilder_solid",
-      "community": 30,
-      "community_name": "VaultService.luau",
+      "community": 25,
+      "community_name": "BuildingDecor.createPart",
       "norm_label": "solid()"
     },
     {
@@ -6401,8 +6434,8 @@
       "source_location": "L50",
       "_origin": "ast",
       "id": "src_server_services_secretroombuilder_decor",
-      "community": 30,
-      "community_name": "VaultService.luau",
+      "community": 25,
+      "community_name": "BuildingDecor.createPart",
       "norm_label": "decor()"
     },
     {
@@ -6412,8 +6445,8 @@
       "source_location": "L54",
       "_origin": "ast",
       "id": "src_server_services_secretroombuilder_buildshell",
-      "community": 30,
-      "community_name": "VaultService.luau",
+      "community": 25,
+      "community_name": "BuildingDecor.createPart",
       "norm_label": "buildshell()"
     },
     {
@@ -6423,8 +6456,8 @@
       "source_location": "L70",
       "_origin": "ast",
       "id": "src_server_services_secretroombuilder_buildpaneling",
-      "community": 30,
-      "community_name": "VaultService.luau",
+      "community": 25,
+      "community_name": "BuildingDecor.createPart",
       "norm_label": "buildpaneling()"
     },
     {
@@ -6434,8 +6467,8 @@
       "source_location": "L86",
       "_origin": "ast",
       "id": "src_server_services_secretroombuilder_buildlockers",
-      "community": 30,
-      "community_name": "VaultService.luau",
+      "community": 25,
+      "community_name": "BuildingDecor.createPart",
       "norm_label": "buildlockers()"
     },
     {
@@ -6445,8 +6478,8 @@
       "source_location": "L104",
       "_origin": "ast",
       "id": "src_server_services_secretroombuilder_buildvaultdisk",
-      "community": 30,
-      "community_name": "VaultService.luau",
+      "community": 25,
+      "community_name": "BuildingDecor.createPart",
       "norm_label": "buildvaultdisk()"
     },
     {
@@ -6456,8 +6489,8 @@
       "source_location": "L134",
       "_origin": "ast",
       "id": "src_server_services_secretroombuilder_buildpedestal",
-      "community": 30,
-      "community_name": "VaultService.luau",
+      "community": 25,
+      "community_name": "BuildingDecor.createPart",
       "norm_label": "buildpedestal()"
     },
     {
@@ -6467,8 +6500,8 @@
       "source_location": "L143",
       "_origin": "ast",
       "id": "src_server_services_secretroombuilder_buildlights",
-      "community": 30,
-      "community_name": "VaultService.luau",
+      "community": 25,
+      "community_name": "BuildingDecor.createPart",
       "norm_label": "buildlights()"
     },
     {
@@ -6478,8 +6511,8 @@
       "source_location": "L164",
       "_origin": "ast",
       "id": "src_server_services_secretroombuilder_secretroombuilder_build",
-      "community": 30,
-      "community_name": "VaultService.luau",
+      "community": 25,
+      "community_name": "BuildingDecor.createPart",
       "norm_label": "secretroombuilder.build()"
     },
     {
@@ -15049,6 +15082,29 @@
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
+      "source_file": "src/server/data/DataStoreErrors.luau",
+      "source_location": "L8",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_server_data_datastoreerrors",
+      "target": "src_server_data_datastoreerrors_datastoreerrors_isstudioaccessdenied",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "src/server/services/LeaderboardService.luau",
+      "source_location": "L71",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_server_services_leaderboardservice_handlefailure",
+      "target": "src_server_data_datastoreerrors_datastoreerrors_isstudioaccessdenied"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
       "source_file": "src/server/data/ProfileSchema.luau",
       "source_location": "L50",
       "weight": 1.0,
@@ -19125,7 +19181,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/server/services/LeaderboardService.luau",
-      "source_location": "L60",
+      "source_location": "L61",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_server_services_leaderboardservice",
@@ -19136,7 +19192,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/server/services/LeaderboardService.luau",
-      "source_location": "L133",
+      "source_location": "L149",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_server_services_leaderboardservice",
@@ -19147,7 +19203,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/server/services/LeaderboardService.luau",
-      "source_location": "L95",
+      "source_location": "L109",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_server_services_leaderboardservice",
@@ -19158,7 +19214,18 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/server/services/LeaderboardService.luau",
-      "source_location": "L251",
+      "source_location": "L70",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_server_services_leaderboardservice",
+      "target": "src_server_services_leaderboardservice_handlefailure",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/server/services/LeaderboardService.luau",
+      "source_location": "L267",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_server_services_leaderboardservice",
@@ -19169,7 +19236,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/server/services/LeaderboardService.luau",
-      "source_location": "L246",
+      "source_location": "L262",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_server_services_leaderboardservice",
@@ -19180,7 +19247,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/server/services/LeaderboardService.luau",
-      "source_location": "L256",
+      "source_location": "L272",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_server_services_leaderboardservice",
@@ -19191,7 +19258,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/server/services/LeaderboardService.luau",
-      "source_location": "L80",
+      "source_location": "L94",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_server_services_leaderboardservice",
@@ -19202,7 +19269,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/server/services/LeaderboardService.luau",
-      "source_location": "L68",
+      "source_location": "L82",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_server_services_leaderboardservice",
@@ -19213,7 +19280,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/server/services/LeaderboardService.luau",
-      "source_location": "L181",
+      "source_location": "L197",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_server_services_leaderboardservice",
@@ -19224,7 +19291,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/server/services/LeaderboardService.luau",
-      "source_location": "L225",
+      "source_location": "L241",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_server_services_leaderboardservice",
@@ -19235,7 +19302,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/server/services/LeaderboardService.luau",
-      "source_location": "L151",
+      "source_location": "L167",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_server_services_leaderboardservice",
@@ -19247,7 +19314,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/server/services/LeaderboardService.luau",
-      "source_location": "L261",
+      "source_location": "L277",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_server_services_leaderboardservice_leaderboardservice_start",
@@ -19259,7 +19326,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/server/services/LeaderboardService.luau",
-      "source_location": "L227",
+      "source_location": "L243",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_server_services_leaderboardservice_refresh",
@@ -19271,7 +19338,31 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/server/services/LeaderboardService.luau",
-      "source_location": "L228",
+      "source_location": "L128",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_server_services_leaderboardservice_flushuser",
+      "target": "src_server_services_leaderboardservice_handlefailure",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/server/services/LeaderboardService.luau",
+      "source_location": "L206",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_server_services_leaderboardservice_readboard",
+      "target": "src_server_services_leaderboardservice_handlefailure",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/server/services/LeaderboardService.luau",
+      "source_location": "L244",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_server_services_leaderboardservice_refresh",
@@ -19283,7 +19374,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/server/services/LeaderboardService.luau",
-      "source_location": "L143",
+      "source_location": "L159",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_server_services_leaderboardservice_flushall",
@@ -19295,7 +19386,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/server/services/LeaderboardService.luau",
-      "source_location": "L304",
+      "source_location": "L320",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_server_services_leaderboardservice_leaderboardservice_start",
@@ -19307,7 +19398,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/server/services/LeaderboardService.luau",
-      "source_location": "L205",
+      "source_location": "L221",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_server_services_leaderboardservice_readboard",
@@ -19319,7 +19410,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/server/services/LeaderboardService.luau",
-      "source_location": "L235",
+      "source_location": "L251",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_server_services_leaderboardservice_refresh",
@@ -19331,7 +19422,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/server/services/LeaderboardService.luau",
-      "source_location": "L309",
+      "source_location": "L325",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_server_services_leaderboardservice_leaderboardservice_start",
@@ -27498,5 +27589,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "90c132e71208ed4db8d857c1ebaff6d97e0af9ff"
+  "built_at_commit": "b55557ea7aa144f9b7437821db51f9f864d1d092"
 }

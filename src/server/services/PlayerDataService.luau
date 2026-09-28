@@ -23,6 +23,7 @@ local PuffadorConstants = require(ReplicatedStorage.Shared.modules.PuffadorConst
 local ProfileTypes = require(ReplicatedStorage.Shared.types.ProfileTypes)
 local ProfileConfig = require(script.Parent.Parent.config.ProfileConfig)
 local ProfileSchema = require(script.Parent.Parent.data.ProfileSchema)
+local DataStoreErrors = require(script.Parent.Parent.data.DataStoreErrors)
 local ProgressionConfig = require(ReplicatedStorage.Shared.config.ProgressionConfig)
 local LevelCurve = require(ReplicatedStorage.Shared.modules.LevelCurve)
 local TelemetryService = require(script.Parent.TelemetryService)
@@ -122,7 +123,12 @@ local function publish(entry: Entry, award: XpAward?)
 end
 
 -- Chamada ao DataStore com algumas tentativas (rede e limites de uso).
+local studioDenied = false
+
 local function withRetries<T>(label: string, callback: () -> T): (boolean, T?)
+	if studioDenied then
+		return false, nil
+	end
 	local lastError: any = nil
 	for attempt = 1, ProfileConfig.RequestRetries do
 		local ok, result = pcall(callback)
@@ -130,6 +136,12 @@ local function withRetries<T>(label: string, callback: () -> T): (boolean, T?)
 			return true, result
 		end
 		lastError = result
+		-- Studio sem acesso às APIs: não adianta repetir; avisa uma vez só.
+		if DataStoreErrors.isStudioAccessDenied(result) then
+			studioDenied = true
+			warn(string.format("[BlocoPuff] Profiles are not saved in this Studio session: %s", DataStoreErrors.StudioHint))
+			return false, nil
+		end
 		if attempt < ProfileConfig.RequestRetries then
 			task.wait(attempt)
 		end

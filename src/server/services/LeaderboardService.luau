@@ -19,6 +19,7 @@ local LeaderboardTypes = require(ReplicatedStorage.Shared.types.LeaderboardTypes
 local ProfileTypes = require(ReplicatedStorage.Shared.types.ProfileTypes)
 local PlayerDataService = require(script.Parent.PlayerDataService)
 local TelemetryService = require(script.Parent.TelemetryService)
+local DataStoreErrors = require(script.Parent.Parent.data.DataStoreErrors)
 
 type LeaderboardData = LeaderboardTypes.LeaderboardData
 type Leaderboard = LeaderboardTypes.Leaderboard
@@ -63,6 +64,19 @@ local function emptyBoards(): { Leaderboard }
 		table.insert(boards, { id = category.id, title = category.title, entries = {} })
 	end
 	return boards
+end
+
+-- Studio sem acesso às APIs: desliga o ranking desta sessão com um aviso só.
+local function handleFailure(label: string, failure: unknown): boolean
+	if DataStoreErrors.isStudioAccessDenied(failure) then
+		if available then
+			available = false
+			warn(string.format("[BlocoPuff] Leaderboards disabled in this Studio session: %s", DataStoreErrors.StudioHint))
+		end
+		return true
+	end
+	warn(string.format("[BlocoPuff] Leaderboard %s failed: %s", label, tostring(failure)))
+	return false
 end
 
 local function publish()
@@ -111,8 +125,10 @@ local function flushUser(userId: number)
 			if ok then
 				already[category.id] = value
 			else
+				if handleFailure(`{category.id} write for {userId}`, failure) then
+					return
+				end
 				failed[category.id] = value
-				warn(string.format("[BlocoPuff] Leaderboard %s write failed for %d: %s", category.id, userId, tostring(failure)))
 			end
 		end
 	end
@@ -180,14 +196,14 @@ end
 
 local function readBoard(categoryId: string, title: string): Leaderboard?
 	local store = stores[categoryId]
-	if store == nil then
+	if store == nil or not available then
 		return nil
 	end
 	local ok, page = pcall(function()
 		return store:GetSortedAsync(false, LeaderboardTypes.TopCount):GetCurrentPage()
 	end)
 	if not ok or typeof(page) ~= "table" then
-		warn(string.format("[BlocoPuff] Leaderboard %s read failed: %s", categoryId, tostring(page)))
+		handleFailure(`{categoryId} read`, page)
 		return nil
 	end
 	local raw: { { userId: number, value: number } } = {}
@@ -239,7 +255,7 @@ local function refresh()
 		local board = fresh or current.boards[index]
 		table.insert(boards, board or { id = category.id, title = category.title, entries = {} })
 	end
-	current = { boards = boards, updatedAt = os.time(), available = succeeded > 0 or current.available }
+	current = { boards = boards, updatedAt = os.time(), available = available and (succeeded > 0 or current.available) }
 	publish()
 end
 
