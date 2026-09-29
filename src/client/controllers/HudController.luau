@@ -166,11 +166,31 @@ local function renderWaiting(currentView: HudViewHandle)
 	clearAnnouncement(currentView)
 end
 
+-- O cronômetro da contagem só aparece para quem está na fila; quem passeia
+-- pelo Casarão vê apenas a etiqueta.
 local function renderCountdown(currentView: HudViewHandle)
-	currentView.setRoundMode("Countdown")
-	currentView.setCountdown(tostring(math.max(0, math.floor(cached.timeRemaining))))
+	if cached.inMatchQueue or cached.isParticipant then
+		currentView.setRoundMode("Countdown")
+		currentView.setCountdown(tostring(math.max(0, math.floor(cached.timeRemaining))))
+	else
+		currentView.setRoundMode("Waiting")
+	end
 	renderQueue(currentView, true)
 	currentView.setCombatVisible(false)
+	clearAnnouncement(currentView)
+end
+
+-- Partida em andamento para quem não está nela (lobby): nada da partida
+-- (HUD de combate, avisos, cronômetro); só a etiqueta da fila da próxima.
+local function renderLobbyDuringMatch(currentView: HudViewHandle)
+	currentView.setRoundMode("Waiting")
+	currentView.setQueue(
+		"⚔️ PARTIDA EM ANDAMENTO",
+		if cached.inMatchQueue then "Você está na fila da próxima" else "Vá ao mirante para jogar a próxima",
+		cached.inMatchQueue
+	)
+	currentView.setCombatVisible(false)
+	currentView.setTimerDanger(false)
 	clearAnnouncement(currentView)
 end
 
@@ -184,6 +204,10 @@ local function getPersonalScoreSummary(): string
 end
 
 local function renderActive(currentView: HudViewHandle)
+	if not cached.isParticipant then
+		renderLobbyDuringMatch(currentView)
+		return
+	end
 	currentView.setRoundMode("Hidden")
 	currentView.setCombatVisible(true)
 	currentView.setCombatTimer(formatMinutesSeconds(cached.timeRemaining))
@@ -204,22 +228,7 @@ local function renderActive(currentView: HudViewHandle)
 		currentView.setLives("LastLife")
 	end
 
-	if not cached.isParticipant then
-		-- Só avisa quem está na fila e ficou de fora; quem passeia pelo
-		-- Casarão não é interrompido a cada partida.
-		if cached.inMatchQueue then
-			showAnnouncement(
-				currentView,
-				string.format("%d:waiting:%d", cached.roundId, cached.roundsUntilTurn),
-				"AGUARDE SUA VEZ",
-				getQueueMessage(),
-				"Warning",
-				3,
-				"Round",
-				"Low"
-			)
-		end
-	elseif cached.isEliminated then
+	if cached.isEliminated then
 		local reason = cached.eliminationReason
 		local title = if reason == EliminationTypes.FellFromArena then "VOCÊ CAIU!" else "ELIMINADO!"
 		showAnnouncement(
@@ -269,6 +278,10 @@ local function renderActive(currentView: HudViewHandle)
 end
 
 local function renderEnding(currentView: HudViewHandle)
+	if not cached.isParticipant then
+		renderLobbyDuringMatch(currentView)
+		return
+	end
 	currentView.setRoundMode("Hidden")
 	currentView.setCombatVisible(false)
 	currentView.setTimerDanger(false)

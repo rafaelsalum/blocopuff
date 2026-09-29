@@ -108,9 +108,11 @@ local function footerText(container: Instance, player: Player): string
 	local state = container:GetAttribute(StateAttributeNames.RoundState)
 	local remaining = asNumber(container:GetAttribute(StateAttributeNames.TimeRemaining)) or 0
 	local roundsUntilTurn = asNumber(player:GetAttribute(StateAttributeNames.PlayerRoundsUntilTurn)) or 0
-	local queueNote = if roundsUntilTurn >= 2
-		then string.format("Você entra em %d rodadas", roundsUntilTurn)
-		else "Você joga a próxima rodada"
+	local inQueue = player:GetAttribute(StateAttributeNames.PlayerInMatchQueue) == true
+	local queueNote = if not inQueue
+		then "Fique no mirante para jogar a próxima"
+		elseif roundsUntilTurn >= 2 then string.format("Você entra em %d rodadas", roundsUntilTurn)
+		else "Você está na fila da próxima"
 
 	if state == RoundTypes.Ending then
 		return string.format("Voltando ao lobby em %d s\n%s", remaining, queueNote)

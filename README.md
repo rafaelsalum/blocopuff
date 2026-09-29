@@ -320,6 +320,17 @@ Escopo em `docs/FASE_2_SEGREDOS_COFRE_BARAO.md`.
 - **Ajustes:** ficam em `GameConfig.Barao` e `GameConfig.Toca`. Os sons atuais são provisórios, embutidos no Roblox; troque `BarkSoundIds`, `FunnySoundIds` e `FootstepSoundId` por áudios da Creator Store (`rbxassetid://...`).
 - **Código:** `BaraoService` (comportamento), `BaraoModel`, `TocaService`, `CorridorBuilder` (nichos) e `BuildingLayout.getTocas` / `isInsideToca` / `getCorridorFloorY`. No cliente, `BaraoController` mostra os avisos.
 
+### Partida isolada do lobby e ajustes de tela (Fase 4, ajuste pós-4.5)
+
+- **Quem está no lobby não vê nada da partida:**
+  - os avisos da partida (cofre, passagens secretas, Momentos Puff) e o resultado final vão só para quem está nela (`MatchAudience`: escalados, inclusive os eliminados);
+  - no cliente, o HUD de combate, os anúncios e o cronômetro da partida ficam só com os participantes;
+  - o cronômetro da contagem só aparece para quem está na fila;
+  - quem está fora vê apenas a etiqueta "⚔️ PARTIDA EM ANDAMENTO" com a situação da fila da próxima.
+- **Reações:** só para quem assiste (eliminados e quem está no mirante), numa coluna na borda direita, no meio da altura, longe dos botões de pulo e de tiro.
+- **Botão ADM:** foi para o canto inferior esquerdo, longe do HUD do topo e dos avisos.
+- **Vitrine do Salão da Coleção sem neon:** cada Puff é uma nuvem fosca nas cores do rastro, sobre um pedestal de mármore com faixa metálica da cor da raridade.
+
 ### Fila da partida no mirante (Fase 4, ajuste pós-4.5)
 
 A partida só puxa quem quer jogar: **o mirante (a galeria envidraçada) é a fila da partida**. Quem está passeando pelo Casarão não é escalado.

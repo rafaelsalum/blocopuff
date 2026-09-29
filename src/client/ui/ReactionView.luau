@@ -1,8 +1,8 @@
 --!strict
 
--- Reações de quem está assistindo (Fase 4.4): uma barra discreta de emojis
--- no canto inferior direito e, acima dela, as reações que chegam ("Ana 👏")
--- subindo e sumindo. Só aparece para quem não está competindo.
+-- Reações de quem está assistindo (Fase 4.4): uma coluna discreta de emojis
+-- na borda direita e, à esquerda dela, as reações que chegam ("Ana 👏")
+-- subindo e sumindo. Só aparece para quem assiste (eliminados e mirante).
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TweenService = game:GetService("TweenService")
@@ -23,28 +23,29 @@ local GUI_NAME = "BlocoPuffReactions"
 local BUTTON_SIZE = 40
 local MAX_FEED = 5
 local FEED_LIFETIME = 3
+local CENTER_Y = 0.52
 
 local ReactionView = {}
 
 function ReactionView.new(playerGui: PlayerGui, onReact: (index: number) -> ()): ReactionViewHandle
 	local screenGui = UiTheme.createScreenGui(GUI_NAME, playerGui, 18)
 
+	-- Coluna na borda direita, no meio da altura: longe do botão de pulo e
+	-- do de tiro (canto inferior direito) e do HUD do topo.
 	local emojis = SocialConfig.Reactions
-	local barWidth = #emojis * (BUTTON_SIZE + 6) + 6
+	local barHeight = #emojis * (BUTTON_SIZE + 6) + 6
 	local root = Instance.new("Frame")
 	root.Name = "Root"
-	root.AnchorPoint = Vector2.new(1, 1)
-	root.Position = UDim2.new(1, -18, 1, -22)
-	root.Size = UDim2.fromOffset(barWidth, 230)
+	root.AnchorPoint = Vector2.new(1, 0.5)
+	root.Position = UDim2.new(1, -12, CENTER_Y, 0)
+	root.Size = UDim2.fromOffset(BUTTON_SIZE + 12, barHeight)
 	root.BackgroundTransparency = 1
 	root.Parent = screenGui
-	local responsive = ResponsiveScale.attach(root, Vector2.new(1280, 720), 0.75, 1.05)
+	local responsive = ResponsiveScale.attach(root, Vector2.new(1280, 720), 0.7, 1.05)
 
 	local bar = Instance.new("Frame")
 	bar.Name = "Bar"
-	bar.AnchorPoint = Vector2.new(0, 1)
-	bar.Position = UDim2.fromScale(0, 1)
-	bar.Size = UDim2.fromOffset(barWidth, BUTTON_SIZE + 12)
+	bar.Size = UDim2.fromScale(1, 1)
 	bar.BackgroundColor3 = UiTheme.Colors.Panel
 	bar.BackgroundTransparency = 0.25
 	bar.Visible = false
@@ -52,9 +53,10 @@ function ReactionView.new(playerGui: PlayerGui, onReact: (index: number) -> ()):
 	UiTheme.addCorner(bar, 14)
 	UiTheme.addStroke(bar, UiTheme.Colors.Border, 1.5)
 	local barLayout = Instance.new("UIListLayout")
-	barLayout.FillDirection = Enum.FillDirection.Horizontal
+	barLayout.FillDirection = Enum.FillDirection.Vertical
 	barLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
 	barLayout.VerticalAlignment = Enum.VerticalAlignment.Center
+	barLayout.SortOrder = Enum.SortOrder.LayoutOrder
 	barLayout.Padding = UDim.new(0, 6)
 	barLayout.Parent = bar
 
@@ -78,9 +80,10 @@ function ReactionView.new(playerGui: PlayerGui, onReact: (index: number) -> ()):
 
 	local feed = Instance.new("Frame")
 	feed.Name = "Feed"
+	-- Reações dos outros aparecem à esquerda da coluna.
 	feed.AnchorPoint = Vector2.new(1, 1)
-	feed.Position = UDim2.new(1, 0, 1, -(BUTTON_SIZE + 20))
-	feed.Size = UDim2.new(1, 40, 0, 160)
+	feed.Position = UDim2.new(0, -8, 1, 0)
+	feed.Size = UDim2.fromOffset(220, 160)
 	feed.BackgroundTransparency = 1
 	feed.Parent = root
 	local feedLayout = Instance.new("UIListLayout")

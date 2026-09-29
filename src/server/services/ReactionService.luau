@@ -3,8 +3,9 @@
 -- Espectador social (Fase 4.4). Pedidos do cliente (remote "Reaction"):
 --   "React", índice → um emoji fixo de SocialConfig.Reactions;
 --   "Spectating"    → telemetria de uso do espectador (troca de câmera).
--- Só quem NÃO está competindo reage, e a reação só chega a quem também não
--- está competindo: nada aparece na tela de quem está jogando.
+-- Só quem assiste à partida em andamento (eliminados e quem está no mirante)
+-- reage, e a reação só chega a quem também assiste: nada aparece na tela de
+-- quem está jogando nem de quem passeia pelo Casarão.
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -12,6 +13,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local SocialConfig = require(ReplicatedStorage.Shared.config.SocialConfig)
 local PuffadorConstants = require(ReplicatedStorage.Shared.modules.PuffadorConstants)
 local StateAttributeNames = require(ReplicatedStorage.Shared.types.StateAttributeNames)
+local RoundTypes = require(ReplicatedStorage.Shared.types.RoundTypes)
 local TelemetryService = require(script.Parent.TelemetryService)
 
 local SPECTATING_COOLDOWN = 10
@@ -27,6 +29,21 @@ local function isCompeting(player: Player): boolean
 		and player:GetAttribute(StateAttributeNames.PlayerIsEliminated) ~= true
 end
 
+local function isMatchActive(): boolean
+	local container = ReplicatedStorage:FindFirstChild(StateAttributeNames.ContainerName)
+	return container ~= nil and container:GetAttribute(StateAttributeNames.RoundState) == RoundTypes.Active
+end
+
+-- Quem assiste à partida em andamento: eliminados e quem está no mirante (a
+-- fila). Quem passeia pelo Casarão não recebe nem manda reações.
+local function isWatching(player: Player): boolean
+	if isCompeting(player) or not isMatchActive() then
+		return false
+	end
+	return player:GetAttribute(StateAttributeNames.PlayerIsParticipant) == true
+		or player:GetAttribute(StateAttributeNames.PlayerInMatchQueue) == true
+end
+
 local function throttled(map: { [Player]: number }, player: Player, cooldown: number): boolean
 	local clock = os.clock()
 	local last = map[player]
@@ -39,7 +56,7 @@ end
 
 local function onRequest(remote: RemoteEvent, player: Player, action: unknown, value: unknown)
 	if action == "React" then
-		if typeof(value) ~= "number" or value ~= value or isCompeting(player) then
+		if typeof(value) ~= "number" or value ~= value or not isWatching(player) then
 			return
 		end
 		local index = math.floor(value)
@@ -47,7 +64,7 @@ local function onRequest(remote: RemoteEvent, player: Player, action: unknown, v
 			return
 		end
 		for _, viewer in ipairs(Players:GetPlayers()) do
-			if not isCompeting(viewer) then
+			if isWatching(viewer) then
 				remote:FireClient(viewer, "React", player.UserId, player.DisplayName, index)
 			end
 		end

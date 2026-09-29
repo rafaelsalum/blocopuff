@@ -19,6 +19,7 @@ local PuffadorConstants = require(ReplicatedStorage.Shared.modules.PuffadorConst
 local StateAttributeNames = require(ReplicatedStorage.Shared.types.StateAttributeNames)
 local BuildingDecor = require(script.Parent.BuildingDecor)
 local ProjectileService = require(script.Parent.ProjectileService)
+local MatchAudience = require(script.Parent.MatchAudience)
 
 type Corridor = BuildingLayout.Corridor
 type WallSegment = BuildingDecor.WallSegment
@@ -179,7 +180,7 @@ local function reveal(floor: number, discoverer: Player)
 	end
 	local secretRemote = remote
 	if secretRemote ~= nil then
-		secretRemote:FireAllClients("Revealed", floor, discoverer.DisplayName, discoverer.UserId)
+		MatchAudience.fire(secretRemote, "Revealed", floor, discoverer.DisplayName, discoverer.UserId)
 	end
 	local listener = revealListener
 	if listener ~= nil then

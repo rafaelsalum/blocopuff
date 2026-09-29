@@ -124,10 +124,12 @@ function AdminPanelView.new(playerGui: PlayerGui, callbacks: AdminPanelCallbacks
 		name = "OpenButton",
 		text = "ADM",
 		variant = "Gold",
-		size = UDim2.fromOffset(56, 60),
-		position = UDim2.new(1, -16, 0, 92),
-		anchorPoint = Vector2.new(1, 0),
-		textSize = 15,
+		-- Canto inferior esquerdo: longe do HUD (topo), dos avisos (borda
+		-- esquerda, meio) e dos botões de tiro e pulo (canto direito).
+		size = UDim2.fromOffset(48, 48),
+		position = UDim2.new(0, 16, 1, -16),
+		anchorPoint = Vector2.new(0, 1),
+		textSize = 13,
 		round = true,
 		selectionOrder = 100,
 	})

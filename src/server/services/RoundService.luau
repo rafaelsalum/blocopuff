@@ -679,8 +679,13 @@ local function publishResult()
 	if remote == nil then
 		return
 	end
+	-- Só quem jogou vê o resultado; o lobby segue sem interrupção.
 	local ok, failure = pcall(function()
-		remote:FireAllClients(result)
+		for _, player in ipairs(participantOrder) do
+			if player.Parent ~= nil then
+				remote:FireClient(player, result)
+			end
+		end
 	end)
 	if not ok then
 		warn(string.format("[BlocoPuff] Could not publish round result: %s", tostring(failure)))

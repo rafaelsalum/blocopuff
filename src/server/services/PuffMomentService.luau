@@ -14,6 +14,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local PuffadorConstants = require(ReplicatedStorage.Shared.modules.PuffadorConstants)
 local TelemetryService = require(script.Parent.TelemetryService)
+local MatchAudience = require(script.Parent.MatchAudience)
 
 export type MomentKind = "BaraoEscape" | "VaultConquered" | "Comeback" | "SecretDiscovery"
 
@@ -48,7 +49,7 @@ function PuffMomentService.record(player: Player, kind: MomentKind, detail: stri
 	TelemetryService.event(player, "PuffMoment", nil, kind, detail)
 	local current = remote
 	if current ~= nil and ANNOUNCED[kind] then
-		current:FireAllClients(kind, player.DisplayName, player.UserId, detail)
+		MatchAudience.fire(current, kind, player.DisplayName, player.UserId, detail)
 	end
 end
 

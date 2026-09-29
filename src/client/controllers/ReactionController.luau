@@ -48,6 +48,9 @@ function ReactionController.start()
 		currentRemote:FireServer("React", index)
 	end)
 
+	-- Atualizado em refresh(): reações que chegam fora disso são ignoradas.
+	local watching = false
+
 	local function isCompeting(): boolean
 		return player:GetAttribute(StateAttributeNames.PlayerIsParticipant) == true
 			and player:GetAttribute(StateAttributeNames.PlayerIsEliminated) ~= true
@@ -60,15 +63,20 @@ function ReactionController.start()
 		end
 		local function refresh()
 			local state = container:GetAttribute(StateAttributeNames.RoundState)
-			local watching = state == RoundTypes.Active and not isCompeting()
+			-- Só para quem assiste: eliminados e quem está no mirante.
+			watching = state == RoundTypes.Active
+				and not isCompeting()
+				and (player:GetAttribute(StateAttributeNames.PlayerIsParticipant) == true
+					or player:GetAttribute(StateAttributeNames.PlayerInMatchQueue) == true)
 			view.setBarVisible(watching)
-			if isCompeting() then
+			if not watching then
 				view.clear()
 			end
 		end
 		container:GetAttributeChangedSignal(StateAttributeNames.RoundState):Connect(refresh)
 		player:GetAttributeChangedSignal(StateAttributeNames.PlayerIsParticipant):Connect(refresh)
 		player:GetAttributeChangedSignal(StateAttributeNames.PlayerIsEliminated):Connect(refresh)
+		player:GetAttributeChangedSignal(StateAttributeNames.PlayerInMatchQueue):Connect(refresh)
 		refresh()
 	end)
 
@@ -81,7 +89,7 @@ function ReactionController.start()
 		end
 		remote = instance
 		instance.OnClientEvent:Connect(function(kind: unknown, _userId: unknown, name: unknown, index: unknown)
-			if kind ~= "React" or isCompeting() or typeof(index) ~= "number" then
+			if kind ~= "React" or not watching or typeof(index) ~= "number" then
 				return
 			end
 			local emoji = SocialConfig.Reactions[math.floor(index)]

@@ -24,6 +24,7 @@ local StateAttributeNames = require(ReplicatedStorage.Shared.types.StateAttribut
 local PuffadorService = require(script.Parent.PuffadorService)
 local TelemetryService = require(script.Parent.TelemetryService)
 local VaultProps = require(script.Parent.VaultProps)
+local MatchAudience = require(script.Parent.MatchAudience)
 
 type DoorProps = VaultProps.DoorProps
 type OpenedListener = (player: Player) -> ()
@@ -69,7 +70,7 @@ local lastLockedFeedback: { [Player]: number } = {}
 local function fireAll(kind: string, ...: any)
 	local remote = vaultRemote
 	if remote ~= nil then
-		remote:FireAllClients(kind, ...)
+		MatchAudience.fire(remote, kind, ...)
 	end
 end
 

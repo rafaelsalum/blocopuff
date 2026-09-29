@@ -194,21 +194,31 @@ local function buildFriendlyBarao(parent: Instance, base: Vector3)
 	end)
 end
 
+-- Um Puff exposto: nuvem de três bolinhas foscas nas cores do rastro, sobre
+-- um pedestal com faixa metálica da cor da raridade. Sem neon: as cores
+-- ficam legíveis de perto e de longe (o neon estourava a luz da sala).
 local function buildPedestal(parent: Instance, index: number, definition: PuffDefinition, position: Vector3)
 	local rarity = PuffCatalog.rarity(definition.rarity)
-	part(parent, `Pedestal{index}`, Vector3.new(1.8, 2.6, 1.8), CFrame.new(position + Vector3.new(0, 1.3, 0)), Color3.fromRGB(42, 34, 71), Enum.Material.Marble)
-	part(parent, `Band{index}`, Vector3.new(1.9, 0.3, 1.9), CFrame.new(position + Vector3.new(0, 2.5, 0)), rarity.color, Enum.Material.Neon)
-	local orb = part(parent, `Orb{index}`, Vector3.new(1.2, 1.2, 1.2), CFrame.new(position + Vector3.new(0, 3.4, 0)), definition.style.trailStart, Enum.Material.Neon, Enum.PartType.Ball)
-	orb.CanCollide = false
-	local ring = part(parent, `Ring{index}`, Vector3.new(0.2, 1.8, 1.8), CFrame.new(position + Vector3.new(0, 3.4, 0)) * CFrame.Angles(0, 0, math.rad(90)), definition.style.trailEnd, Enum.Material.Neon, Enum.PartType.Cylinder)
-	ring.Transparency = 0.5
+	local style = definition.style
+	part(parent, `Pedestal{index}`, Vector3.new(1.8, 2.6, 1.8), CFrame.new(position + Vector3.new(0, 1.3, 0)), Color3.fromRGB(232, 226, 214), Enum.Material.Marble)
+	part(parent, `Band{index}`, Vector3.new(1.95, 0.3, 1.95), CFrame.new(position + Vector3.new(0, 2.45, 0)), rarity.color, Enum.Material.Metal)
+	local center = position + Vector3.new(0, 3.55, 0)
+	local cloud = part(parent, `Puff{index}`, Vector3.new(1.3, 1.3, 1.3), CFrame.new(center), style.trailStart, Enum.Material.SmoothPlastic, Enum.PartType.Ball)
+	cloud.CanCollide = false
+	for side, offset in ipairs({ Vector3.new(-0.55, -0.25, 0.1), Vector3.new(0.55, -0.2, -0.1) }) do
+		local puffball = part(parent, `Puff{index}Side{side}`, Vector3.new(0.85, 0.85, 0.85), CFrame.new(center + offset), style.trailEnd, Enum.Material.SmoothPlastic, Enum.PartType.Ball)
+		puffball.CanCollide = false
+	end
+	-- Aro de vidro fino da cor do brilho, só como moldura.
+	local ring = part(parent, `Ring{index}`, Vector3.new(0.12, 2.2, 2.2), CFrame.new(center) * CFrame.Angles(0, 0, math.rad(90)), style.glow, Enum.Material.Glass, Enum.PartType.Cylinder)
+	ring.Transparency = 0.7
 	ring.CanCollide = false
 	local label = Instance.new("BillboardGui")
-	label.Size = UDim2.new(4, 0, 1, 0)
-	label.StudsOffset = Vector3.new(0, 1.4, 0)
-	label.MaxDistance = 25
+	label.Size = UDim2.new(4.4, 0, 1.1, 0)
+	label.StudsOffset = Vector3.new(0, 1.7, 0)
+	label.MaxDistance = 30
 	label.LightInfluence = 0
-	label.Parent = orb
+	label.Parent = cloud
 	local text = Instance.new("TextLabel")
 	text.Size = UDim2.fromScale(1, 1)
 	text.BackgroundTransparency = 1
@@ -216,7 +226,7 @@ local function buildPedestal(parent: Instance, index: number, definition: PuffDe
 	text.Text = `{definition.name} · {rarity.label}`
 	text.TextColor3 = rarity.color
 	text.TextScaled = true
-	text.TextStrokeTransparency = 0.3
+	text.TextStrokeTransparency = 0.2
 	text.Parent = label
 end
 
