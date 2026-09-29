@@ -217,7 +217,8 @@ local function getFaces(mansion: Mansion): { Face }
 
 	local passages: { Opening } = {}
 	for _, z in ipairs(mansion.passages) do
-		table.insert(passages, opening(mansion.minX, z, passage, "🏟 MIRANTE · JOGAR"))
+		-- O portal "ENTRAR NA FILA" de cada porta é do MatchQueueService.
+		table.insert(passages, opening(mansion.minX, z, passage, nil))
 	end
 	local x0, x1 = mansion.minX, mansion.maxX
 	local z0, z1 = mansion.minZ, mansion.maxZ

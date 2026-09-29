@@ -68,6 +68,7 @@ local SPAWN_HEIGHT_OFFSET = 5
 local SPAWN_EDGE_BLOCKS = 1
 local SPREAD_TOLERANCE = 0.9
 local GALLERY_SPAWN_INSET = 4
+local GALLERY_SPAWN_INSET_X = 6
 local GALLERY_SPAWN_COLUMNS = 3
 
 local BuildingLayout = {}
@@ -234,7 +235,8 @@ end
 function BuildingLayout.getGallerySpawnCFrames(arena: ArenaConfig, building: BuildingConfig, count: number): { CFrame }
 	local gallery = BuildingLayout.getGallery(arena, building)
 	local spanZ = math.max(0, gallery.size.Z - (GALLERY_SPAWN_INSET * 2))
-	local spanX = math.max(0, gallery.size.X - (GALLERY_SPAWN_INSET * 2))
+	-- Mais folga na largura: os sofás das pontas ficam junto à parede leste.
+	local spanX = math.max(0, gallery.size.X - (GALLERY_SPAWN_INSET_X * 2))
 	local columns = math.max(1, math.min(GALLERY_SPAWN_COLUMNS, count))
 	local rows = math.max(1, math.ceil(count / columns))
 	local minX = gallery.center.X - (spanX / 2)

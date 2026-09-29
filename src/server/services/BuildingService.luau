@@ -133,15 +133,6 @@ local function getPassageGaps(): { DoorGap }
 	return gaps
 end
 
-local function nearPassage(z: number, clearance: number): boolean
-	for _, passageZ in ipairs(MansionLayout.get().passages) do
-		if math.abs(z - passageZ) < clearance then
-			return true
-		end
-	end
-	return false
-end
-
 -- Vãos de cada parede: a porta do cofre (oeste) e as duas entradas de cada
 -- corredor secreto (norte e sul).
 local function getDoorHoles(arena: ArenaConfig, building: BuildingConfig): { [string]: { Box } }
@@ -436,9 +427,11 @@ local function decorateGallery(parent: Instance, arena: ArenaConfig, building: B
 		{ material = Enum.Material.Wood }
 	)
 
+	-- Só dois sofás, nas pontas: o meio do mirante fica livre para a fila e
+	-- o aquecimento (as mesinhas ficavam na frente das portas).
 	local eastX = gallery.innerX + building.GalleryDepth
 	local sofaCount = math.floor(innerDepth / SOFA_SPACING)
-	for index = 1, sofaCount do
+	for _, index in ipairs(if sofaCount > 1 then { 1, sofaCount } else { 1 }) do
 		local z = bounds.center.Z - bounds.halfDepth + ((index - 0.5) * (innerDepth / sofaCount))
 		BuildingDecor.createSofa(
 			parent,
@@ -448,15 +441,6 @@ local function decorateGallery(parent: Instance, arena: ArenaConfig, building: B
 			SOFA_WIDTH,
 			building
 		)
-		local between = z + ((innerDepth / sofaCount) / 2)
-		-- Mesinhas e plantas não ficam na frente das portas do Casarão.
-		if index < sofaCount and not nearPassage(between, MansionConfig.PassageSize.X / 2 + 1.5) then
-			if index % 2 == 1 then
-				BuildingDecor.createSideTable(parent, string.format("SideTable%02d", index), Vector3.new(eastX - 1.8, gallery.floorY, between), building)
-			else
-				BuildingDecor.createPlant(parent, string.format("Plant%02d", index), Vector3.new(eastX - 1.8, gallery.floorY, between), building)
-			end
-		end
 	end
 end
 

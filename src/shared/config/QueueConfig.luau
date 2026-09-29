@@ -12,6 +12,15 @@ export type QueueConfig = {
 	JoinCooldown: number,
 	-- Folga de altura (studs) acima do piso do mirante que ainda conta.
 	ZoneHeight: number,
+	-- Nos últimos segundos da contagem as portas do mirante fecham.
+	BoardingLockSeconds: number,
+	-- Aquecimento no mirante (WarmupService): balões-Puff para estourar.
+	BalloonCount: number,
+	BalloonRiseTime: NumberRange,
+	BalloonRespawnDelay: number,
+	-- Trampolins Puff: velocidade vertical e intervalo entre impulsos.
+	TrampolineVelocity: number,
+	TrampolineCooldown: number,
 }
 
 local QueueConfig: QueueConfig = {
@@ -19,6 +28,12 @@ local QueueConfig: QueueConfig = {
 	LonelyHintSeconds = 60,
 	JoinCooldown = 1,
 	ZoneHeight = 14,
+	BoardingLockSeconds = 5,
+	BalloonCount = 8,
+	BalloonRiseTime = NumberRange.new(7, 11),
+	BalloonRespawnDelay = 1,
+	TrampolineVelocity = 62,
+	TrampolineCooldown = 0.5,
 }
 
 return table.freeze(QueueConfig)

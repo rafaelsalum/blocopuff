@@ -28,6 +28,7 @@ local PuffMachineService = require(script.services.PuffMachineService)
 local SecretAchievementService = require(script.services.SecretAchievementService)
 local PartyService = require(script.services.PartyService)
 local MatchQueueService = require(script.services.MatchQueueService)
+local WarmupService = require(script.services.WarmupService)
 local ReactionService = require(script.services.ReactionService)
 local LobbyStationsService = require(script.services.LobbyStationsService)
 local TrainingService = require(script.services.TrainingService)
@@ -195,6 +196,15 @@ print("[BlocoPuff] Party and spectator reactions ready")
 -- conta e escala quem está nela.
 MatchQueueService.start(world, PuffadorService.getRemotesFolder())
 print("[BlocoPuff] Match queue ready")
+
+-- Aquecimento no mirante (balões e trampolins). Opcional: uma falha aqui
+-- não impede a fila nem as partidas.
+local warmupOk, warmupFailure = pcall(WarmupService.start, world)
+if warmupOk then
+	print("[BlocoPuff] Overlook warm-up ready")
+else
+	warn(string.format("[BlocoPuff] Overlook warm-up unavailable: %s", tostring(warmupFailure)))
+end
 
 RoundService.start()
 print("[BlocoPuff] Round cycle started")

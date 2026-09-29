@@ -6,10 +6,19 @@
 -- RoundService só começa a contagem com GameConfig.MinimumPlayers na fila
 -- e só escala quem está nela (PartySelection com `eligible`).
 --
+-- Entrar e sair são livres (é só passar pela porta); nos últimos
+-- QueueConfig.BoardingLockSeconds da contagem as portas fecham com uma
+-- barreira de luz ("embarque encerrado") e reabrem quando a partida começa
+-- ou a contagem é cancelada. O visual (portais, barreiras, painéis) é do
+-- QueueVisuals; o aquecimento com balões, do WarmupService.
+--
 -- Pedidos do cliente (remote "MatchQueue"):
---   "Join" → botão JOGAR: leva ao mirante (fora da partida, vivo).
+--   "Join" → botão JOGAR: leva ao mirante (fora da partida, vivo, com o
+--            embarque aberto).
 -- Mensagens ao cliente: ("Lonely") → sozinho na fila há um tempo, sugere
--- chamar um amigo (uma vez por espera).
+-- chamar um amigo (uma vez por espera); ("GatesClosed") → para quem está na
+-- fila quando o embarque fecha; ("BoardingClosed") → JOGAR recusado porque
+-- o embarque já fechou.
 --
 -- O atributo "InMatchQueue" do jogador diz ao HUD se ele está na fila.
 
@@ -20,20 +29,16 @@ local RunService = game:GetService("RunService")
 local GameConfig = require(ReplicatedStorage.Shared.config.GameConfig)
 local QueueConfig = require(ReplicatedStorage.Shared.config.QueueConfig)
 local BuildingLayout = require(ReplicatedStorage.Shared.modules.BuildingLayout)
-local MansionLayout = require(ReplicatedStorage.Shared.modules.MansionLayout)
 local PuffadorConstants = require(ReplicatedStorage.Shared.modules.PuffadorConstants)
 local StateAttributeNames = require(ReplicatedStorage.Shared.types.StateAttributeNames)
 local LobbyService = require(script.Parent.LobbyService)
 local PartyService = require(script.Parent.PartyService)
 local TelemetryService = require(script.Parent.TelemetryService)
+local QueueVisuals = require(script.Parent.QueueVisuals)
 
-local FOLDER_NAME = "MatchQueue"
-local GENERATED_BY_ATTRIBUTE = "GeneratedBy"
-local SERVICE_NAME = "MatchQueueService"
+type QueueVisualsHandle = QueueVisuals.QueueVisualsHandle
+
 local ATTR_IN_QUEUE = StateAttributeNames.PlayerInMatchQueue
-local SIGN_DISTANCE = 45
-local SIGN_INSET = 3.5
-local MAT_COLOR = Color3.fromRGB(79, 214, 160)
 
 local MatchQueueService = {}
 
@@ -49,6 +54,14 @@ local aloneSince: number? = nil
 local lonelyHinted = false
 local lastJoin: { [Player]: number } = {}
 local accumulator = 0
+local visuals: QueueVisualsHandle? = nil
+local gatesClosed = false
+local countdownRemaining: number? = nil
+-- Primeiro valor da contagem atual: o embarque nunca fecha logo no início
+-- (a contagem do Studio é curta).
+local countdownStart: number? = nil
+local warmupLine = ""
+local lastBoardKey = ""
 
 local function isCompeting(player: Player): boolean
 	return player:GetAttribute(StateAttributeNames.PlayerIsParticipant) == true
@@ -94,6 +107,34 @@ local function updateLonely(clock: number)
 	end
 end
 
+-- Redesenha os painéis do mirante só quando algo visível mudou.
+local function updateBoard()
+	local current = visuals
+	if current == nil then
+		return
+	end
+	local userIds: { number } = {}
+	for player in pairs(queued) do
+		table.insert(userIds, player.UserId)
+	end
+	table.sort(userIds)
+	local remaining = countdownRemaining
+	local key = `{queuedCount}|{tostring(remaining)}|{gatesClosed}|{table.concat(userIds, ",")}|{warmupLine}`
+	if key == lastBoardKey then
+		return
+	end
+	lastBoardKey = key
+	current.setBoard({
+		count = queuedCount,
+		minimum = GameConfig.MinimumPlayers,
+		maximum = GameConfig.MaximumPlayers,
+		remaining = remaining,
+		gatesClosed = gatesClosed,
+		userIds = userIds,
+		warmup = warmupLine,
+	})
+end
+
 local function refresh()
 	local arena = GameConfig.Arena
 	local building = GameConfig.Building
@@ -126,6 +167,7 @@ local function refresh()
 	queued = nextQueued
 	queuedCount = count
 	updateLonely(os.clock())
+	updateBoard()
 end
 
 local function onRequest(player: Player, action: unknown)
@@ -141,77 +183,15 @@ local function onRequest(player: Player, action: unknown)
 	if isCompeting(player) or livingRoot(player) == nil or inZone[player] then
 		return
 	end
+	local currentRemote = remote
+	if gatesClosed then
+		if currentRemote ~= nil then
+			currentRemote:FireClient(player, "BoardingClosed")
+		end
+		return
+	end
 	LobbyService.placeInMirante({ player })
 	TelemetryService.lobbyEvent(player, "QueueJoinButton", 1)
-end
-
-local function createSign(parent: Instance, name: string, position: Vector3, title: string, subtitle: string)
-	local anchor = Instance.new("Part")
-	anchor.Name = name
-	anchor.Anchored = true
-	anchor.CanCollide = false
-	anchor.CanQuery = false
-	anchor.CanTouch = false
-	anchor.Transparency = 1
-	anchor.Size = Vector3.new(0.2, 0.2, 0.2)
-	anchor.Position = position
-	anchor.Parent = parent
-	local gui = Instance.new("BillboardGui")
-	gui.Size = UDim2.new(9, 0, 2.2, 0)
-	gui.MaxDistance = SIGN_DISTANCE
-	gui.LightInfluence = 0
-	gui.Parent = anchor
-	local titleLabel = Instance.new("TextLabel")
-	titleLabel.Size = UDim2.fromScale(1, 0.6)
-	titleLabel.BackgroundTransparency = 1
-	titleLabel.Font = Enum.Font.FredokaOne
-	titleLabel.Text = title
-	titleLabel.TextColor3 = Color3.fromRGB(255, 209, 102)
-	titleLabel.TextScaled = true
-	titleLabel.TextStrokeTransparency = 0.2
-	titleLabel.Parent = gui
-	local subtitleLabel = Instance.new("TextLabel")
-	subtitleLabel.Position = UDim2.fromScale(0, 0.6)
-	subtitleLabel.Size = UDim2.fromScale(1, 0.4)
-	subtitleLabel.BackgroundTransparency = 1
-	subtitleLabel.Font = Enum.Font.GothamBold
-	subtitleLabel.Text = subtitle
-	subtitleLabel.TextColor3 = Color3.fromRGB(255, 248, 238)
-	subtitleLabel.TextScaled = true
-	subtitleLabel.TextStrokeTransparency = 0.3
-	subtitleLabel.Parent = gui
-end
-
--- Faixa verde no chão logo na entrada de cada porta e uma placa acima.
-local function buildMarkers(worldRoot: Model)
-	local existing = worldRoot:FindFirstChild(FOLDER_NAME)
-	if existing ~= nil then
-		if existing:GetAttribute(GENERATED_BY_ATTRIBUTE) ~= SERVICE_NAME then
-			error(`Cannot replace {existing:GetFullName()} because it is not owned by {SERVICE_NAME}`)
-		end
-		existing:Destroy()
-	end
-	local folder = Instance.new("Folder")
-	folder.Name = FOLDER_NAME
-	folder:SetAttribute(GENERATED_BY_ATTRIBUTE, SERVICE_NAME)
-	folder.Parent = worldRoot
-
-	local gallery = BuildingLayout.getGallery(GameConfig.Arena, GameConfig.Building)
-	local eastX = gallery.innerX + GameConfig.Building.GalleryDepth
-	for index, z in ipairs(MansionLayout.get().passages) do
-		local mat = Instance.new("Part")
-		mat.Name = `QueueMat{index}`
-		mat.Anchored = true
-		mat.CanCollide = false
-		mat.CanQuery = false
-		mat.CanTouch = false
-		mat.Size = Vector3.new(1.2, 0.14, 8)
-		mat.Position = Vector3.new(eastX - 1.2, gallery.floorY + 0.07, z)
-		mat.Color = MAT_COLOR
-		mat.Material = Enum.Material.Neon
-		mat.Parent = folder
-		createSign(folder, `QueueSign{index}`, Vector3.new(eastX - SIGN_INSET, gallery.floorY + 7.5, z), "🏟 FILA DA PARTIDA", "Fique no mirante para jogar")
-	end
 end
 
 -- Quantos estão na fila (inclui membros de Party de quem está no mirante).
@@ -230,6 +210,50 @@ function MatchQueueService.setOpen(value: boolean)
 	open = value
 end
 
+local function setGatesClosed(closed: boolean)
+	if gatesClosed == closed then
+		return
+	end
+	gatesClosed = closed
+	local current = visuals
+	if current ~= nil then
+		current.setGatesClosed(closed)
+	end
+	local currentRemote = remote
+	if closed and currentRemote ~= nil then
+		for player in pairs(queued) do
+			currentRemote:FireClient(player, "GatesClosed")
+		end
+	end
+	updateBoard()
+end
+
+-- Chamado pelo RoundService a cada segundo da contagem (nil quando ela
+-- acaba, é cancelada ou a partida começa): mostra o tempo nos painéis e
+-- fecha o embarque nos últimos segundos.
+function MatchQueueService.setCountdown(remaining: number?)
+	countdownRemaining = remaining
+	if remaining == nil then
+		countdownStart = nil
+	elseif countdownStart == nil then
+		countdownStart = remaining
+	end
+	local start = countdownStart
+	setGatesClosed(remaining ~= nil and start ~= nil and remaining < start and remaining <= QueueConfig.BoardingLockSeconds)
+	updateBoard()
+end
+
+-- Embarque aberto: dá para entrar, sair e aquecer.
+function MatchQueueService.isBoardingOpen(): boolean
+	return not gatesClosed
+end
+
+-- Linha do aquecimento nos painéis (WarmupService).
+function MatchQueueService.setWarmupLine(text: string)
+	warmupLine = text
+	updateBoard()
+end
+
 -- Recalcula na hora (antes de decidir contagem e seleção).
 function MatchQueueService.refresh()
 	refresh()
@@ -240,7 +264,7 @@ function MatchQueueService.start(worldRoot: Model, remotesFolder: Folder)
 		return
 	end
 	started = true
-	buildMarkers(worldRoot)
+	visuals = QueueVisuals.build(worldRoot)
 	local newRemote = Instance.new("RemoteEvent")
 	newRemote.Name = PuffadorConstants.MatchQueueRemoteName
 	newRemote.Parent = remotesFolder

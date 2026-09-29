@@ -224,7 +224,8 @@ local Building: BuildingConfig = table.freeze({
 	WallThickness = 2,
 	CeilingClearance = 26,
 	PitDepth = 45,
-	GalleryDepth = 20,
+	-- Largura do mirante (fila da partida), com espaço para o aquecimento.
+	GalleryDepth = 32,
 	GalleryRise = 6,
 	StoryWallpaperColors = {
 		Color3.fromRGB(112, 50, 54),

@@ -320,6 +320,27 @@ Escopo em `docs/FASE_2_SEGREDOS_COFRE_BARAO.md`.
 - **Ajustes:** ficam em `GameConfig.Barao` e `GameConfig.Toca`. Os sons atuais são provisórios, embutidos no Roblox; troque `BarkSoundIds`, `FunnySoundIds` e `FootstepSoundId` por áudios da Creator Store (`rbxassetid://...`).
 - **Código:** `BaraoService` (comportamento), `BaraoModel`, `TocaService`, `CorridorBuilder` (nichos) e `BuildingLayout.getTocas` / `isInsideToca` / `getCorridorFloorY`. No cliente, `BaraoController` mostra os avisos.
 
+### Embarque e aquecimento no mirante (Fase 4, ajuste pós-4.5)
+
+- **Entrar e sair são livres.** Passar pela porta coloca na fila, com o aviso "✅ Você está na fila!" e um som, e voltar pela porta tira da fila ("Você saiu da fila").
+- **Embarque encerrado:**
+  - nos **últimos 5 s** da contagem as portas fecham com uma barreira de luz dourada, e quem está na fila vê "🔒 EMBARQUE ENCERRADO!";
+  - a barreira reabre quando os escalados descem para a arena ou quando a contagem é cancelada;
+  - o botão JOGAR é recusado enquanto as portas estão fechadas;
+  - quem está na fila ouve bipes no "3, 2, 1".
+- **Mirante mais largo:** passou de 20 para **32 studs**, com o centro livre; só restaram dois sofás, nas pontas. O Casarão acompanha, porque tudo sai da mesma geometria.
+- **Sinalização:**
+  - do lado do Casarão, cada porta tem um portal verde com o letreiro **"🏟 ENTRAR NA FILA — Entre e saia quando quiser"** e uma passadeira com setas vindo do Salão Principal;
+  - dentro, um painel em cada ponta mostra quantos estão na fila, o tempo ou quantos faltam, os avatares de quem está na fila e o placar do aquecimento.
+- **Aquecimento no mirante** (`WarmupService`), sem prêmio:
+  - quem está na fila recebe o Puffador de treino e estoura **balões-Puff** que sobem na frente do vidro;
+  - dois **trampolins** nas pontas, com o impulso aplicado no cliente;
+  - os balões somem quando o embarque fecha.
+- **Código:**
+  - `QueueVisuals` (portais, barreiras e painéis) e `WarmupService`;
+  - `MatchQueueService.setCountdown` é chamado pelo `RoundService` a cada segundo da contagem;
+  - novos campos em `QueueConfig`.
+
 ### Partida isolada do lobby e ajustes de tela (Fase 4, ajuste pós-4.5)
 
 - **Quem está no lobby não vê nada da partida:**

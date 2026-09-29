@@ -441,6 +441,7 @@ end
 local function runWaitingForPlayers()
 	setState(RoundTypes.WaitingForPlayers)
 	MatchQueueService.setOpen(true)
+	MatchQueueService.setCountdown(nil)
 	ReplicatedState.setTimeRemaining(0)
 	ReplicatedState.clearWinner()
 	ReplicatedState.setStatusMessage(RoundMessages.WaitingForPlayers)
@@ -456,6 +457,7 @@ local function runCountdown(timings: RoundTimings): boolean
 	setState(RoundTypes.Countdown)
 
 	local remaining = timings.LobbyCountdown
+	MatchQueueService.setCountdown(remaining)
 	ReplicatedState.setTimeRemaining(remaining)
 	ReplicatedState.setStatusMessage(RoundMessages.countdown(remaining))
 	ReplicatedState.setParticipantCount(countQueued())
@@ -472,6 +474,8 @@ local function runCountdown(timings: RoundTimings): boolean
 		end
 
 		remaining -= 1
+		-- Nos últimos segundos o mirante fecha as portas (embarque).
+		MatchQueueService.setCountdown(remaining)
 		ReplicatedState.setTimeRemaining(remaining)
 		ReplicatedState.setStatusMessage(RoundMessages.countdown(remaining))
 		ReplicatedState.setParticipantCount(countQueued())
@@ -505,6 +509,8 @@ local function beginRound(timings: RoundTimings): boolean
 	end
 
 	teleportParticipantsToArena(participantOrder)
+	-- Os escalados já desceram: o mirante reabre para a fila da próxima.
+	MatchQueueService.setCountdown(nil)
 	connectParticipantDeathHandlers(participantOrder)
 	PuffadorService.beginRound(participantOrder, currentRoundId)
 	KnockbackService.beginRound(currentRoundId)
