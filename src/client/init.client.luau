@@ -3,6 +3,7 @@
 local HudController = require(script.controllers.HudController)
 local PuffadorController = require(script.controllers.PuffadorController)
 local PuffShotController = require(script.controllers.PuffShotController)
+local BaraoVisualController = require(script.controllers.BaraoVisualController)
 local SpectatorController = require(script.controllers.SpectatorController)
 local AdminController = require(script.controllers.AdminController)
 local BlockCollapseController = require(script.controllers.BlockCollapseController)
@@ -48,6 +49,14 @@ local shotsOk, shotsErr = pcall(function()
 end)
 if not shotsOk then
 	warn(string.format("[BlocoPuff] Failed to start Puff shot controller: %s", tostring(shotsErr)))
+end
+
+-- Barão desenhado e animado no cliente (arena, portinholas e Jardim).
+local baraoVisualOk, baraoVisualErr = pcall(function()
+	BaraoVisualController.start()
+end)
+if not baraoVisualOk then
+	warn(string.format("[BlocoPuff] Failed to start Barao visual controller: %s", tostring(baraoVisualErr)))
 end
 
 local spectatorOk, spectatorErr = pcall(function()

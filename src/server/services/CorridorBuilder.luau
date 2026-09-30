@@ -7,7 +7,9 @@
 -- prédio) e o que as esconde são do BuildingService e do SecretPassageService.
 -- Na parede externa, uma Toca Segura em cada patamar: um nicho raso com
 -- almofada e uma luz em cima da boca, que o TocaService pinta conforme o
--- estado (livre ou ocupada).
+-- estado (livre ou ocupada). Em cada cabeceira, a portinhola do túnel do
+-- Barão (tag BaraoDoor; o cliente balança a tampa quando o atributo "Flap"
+-- muda), placas de "Território do Barão" e pegadas no chão.
 --
 -- Espaço local (BuildingLayout.getWallFrame): X ao longo da parede, Y para
 -- cima (altura do mundo) e Z para fora do prédio; o interior vai de
@@ -32,11 +34,21 @@ local RUNNER_COLOR = Color3.fromRGB(122, 36, 44)
 local LAMP_COLOR = Color3.fromRGB(255, 176, 104)
 local CUSHION_COLOR = Color3.fromRGB(46, 128, 72)
 local TOCA_LAMP_COLOR = Color3.fromRGB(110, 230, 130)
+local DOOR_FRAME_COLOR = Color3.fromRGB(150, 108, 66)
+local DOOR_FLAP_COLOR = Color3.fromRGB(122, 84, 52)
+local DOOR_HOLE_COLOR = Color3.fromRGB(18, 12, 10)
+local SIGN_COLOR = Color3.fromRGB(58, 36, 26)
+local SIGN_TEXT_COLOR = Color3.fromRGB(255, 214, 140)
+local PAW_COLOR = Color3.fromRGB(62, 42, 30)
+local SIGN_ALONG = 35
+local PAW_STEPS = 7
 
 local CorridorBuilder = {}
 
 -- Marca da luz de cada Toca (atributo TocaName = nome da Toca).
 CorridorBuilder.TocaLampTag = "TocaLamp"
+-- Tampa da portinhola do Barão (atributos Corridor e Side = -1 ou 1).
+CorridorBuilder.BaraoDoorTag = "BaraoDoor"
 
 local function solid(parent: Instance, name: string, frame: CFrame, size: Vector3, offset: CFrame, color: Color3, material: Enum.Material): Part
 	return BuildingDecor.createPart(parent, name, size, frame * offset, color, { material = material, collide = true })
@@ -111,6 +123,57 @@ local function buildToca(parent: Instance, frame: CFrame, toca: Toca, outerZ: nu
 	light.Parent = lamp
 end
 
+local function surfaceText(part: BasePart, face: Enum.NormalId, text: string, color: Color3)
+	local gui = Instance.new("SurfaceGui")
+	gui.Face = face
+	gui.SizingMode = Enum.SurfaceGuiSizingMode.PixelsPerStud
+	gui.PixelsPerStud = 40
+	gui.LightInfluence = 0.4
+	gui.Parent = part
+	local label = Instance.new("TextLabel")
+	label.Size = UDim2.fromScale(1, 1)
+	label.BackgroundTransparency = 1
+	label.Font = Enum.Font.FredokaOne
+	label.Text = text
+	label.TextColor3 = color
+	label.TextScaled = true
+	label.Parent = gui
+end
+
+-- Portinhola na face interna da cabeceira `side` (-1 ou 1), no piso `floorY`.
+local function buildBaraoDoor(parent: Instance, frame: CFrame, corridor: Corridor, side: number, halfLength: number, floorY: number, zCenter: number)
+	local size = BuildingLayout.BaraoDoorSize
+	local width = size.X
+	local height = size.Y
+	local face = side * halfLength
+	local inside = if side > 0 then Enum.NormalId.Left else Enum.NormalId.Right
+	decor(parent, "BaraoDoorHole", frame, Vector3.new(0.1, height, width), CFrame.new(face - (side * 0.05), floorY + (height / 2), zCenter), DOOR_HOLE_COLOR, Enum.Material.SmoothPlastic)
+	decor(parent, "BaraoDoorTop", frame, Vector3.new(0.3, 0.4, width + 0.8), CFrame.new(face - (side * 0.15), floorY + height + 0.2, zCenter), DOOR_FRAME_COLOR, Enum.Material.Wood)
+	for _, edge in ipairs({ -1, 1 }) do
+		decor(parent, "BaraoDoorSide", frame, Vector3.new(0.3, height, 0.4), CFrame.new(face - (side * 0.15), floorY + (height / 2), zCenter + (edge * ((width / 2) + 0.2))), DOOR_FRAME_COLOR, Enum.Material.Wood)
+	end
+	local flap = decor(parent, "BaraoDoorFlap", frame, Vector3.new(0.12, height - 0.15, width - 0.15), CFrame.new(face - (side * 0.3), floorY + ((height - 0.15) / 2) + 0.05, zCenter), DOOR_FLAP_COLOR, Enum.Material.WoodPlanks)
+	flap:SetAttribute("Corridor", corridor.name)
+	flap:SetAttribute("Side", side)
+	CollectionService:AddTag(flap, CorridorBuilder.BaraoDoorTag)
+	surfaceText(flap, inside, "🐾", SIGN_TEXT_COLOR)
+	local plaque = decor(parent, "BaraoDoorSign", frame, Vector3.new(0.15, 0.9, 4.4), CFrame.new(face - (side * 0.1), floorY + height + 1.1, zCenter), SIGN_COLOR, Enum.Material.Wood)
+	surfaceText(plaque, inside, "TÚNEL DO BARÃO", SIGN_TEXT_COLOR)
+end
+
+-- Placa na parede externa, de frente para quem entra, e pegadas no piso.
+local function buildTerritory(parent: Instance, frame: CFrame, along: number, floorY: number, outerZ: number, zCenter: number)
+	local sign = decor(parent, "TerritorySign", frame, Vector3.new(4, 1.2, 0.12), CFrame.new(along, floorY + 5.6, outerZ - 0.06), SIGN_COLOR, Enum.Material.Wood)
+	surfaceText(sign, Enum.NormalId.Front, "🐾 TERRITÓRIO DO BARÃO", SIGN_TEXT_COLOR)
+	local direction = math.sign(along)
+	for index = 1, PAW_STEPS do
+		local x = along - (direction * (index - 1) * 1.3)
+		local z = zCenter + (if index % 2 == 0 then 0.45 else -0.45)
+		local paw = decor(parent, "PawPrint", frame, Vector3.new(0.04, 0.55, 0.55), CFrame.new(x, floorY + 0.02, z) * CFrame.Angles(0, 0, math.rad(90)), PAW_COLOR, Enum.Material.SmoothPlastic, Enum.PartType.Cylinder)
+		paw.Transparency = 0.35
+	end
+end
+
 function CorridorBuilder.build(parent: Instance, corridor: Corridor, building: BuildingConfig): Model
 	local model = Instance.new("Model")
 	model.Name = `SecretCorridor{corridor.name}`
@@ -175,6 +238,12 @@ function CorridorBuilder.build(parent: Instance, corridor: Corridor, building: B
 	addLamp(model, frame, -(halfLength + rampHalf) / 2, y1 + 7, outerZ, "LowerLamp")
 	addLamp(model, frame, 0, ((y1 + y2) / 2) + 7, outerZ, "MiddleLamp")
 	addLamp(model, frame, (halfLength + rampHalf) / 2, y2 + 7, outerZ, "UpperLamp")
+
+	-- Portinholas do túnel do Barão e o "território" em cada patamar.
+	buildBaraoDoor(model, frame, corridor, -1, halfLength, y1, zCenter)
+	buildBaraoDoor(model, frame, corridor, 1, halfLength, y2, zCenter)
+	buildTerritory(model, frame, -SIGN_ALONG, y1, outerZ, zCenter)
+	buildTerritory(model, frame, SIGN_ALONG, y2, outerZ, zCenter)
 
 	model.Parent = parent
 	return model

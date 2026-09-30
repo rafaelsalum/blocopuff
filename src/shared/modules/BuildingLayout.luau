@@ -81,15 +81,18 @@ BuildingLayout.SecretRoomSize = Vector3.new(14, 11, 12)
 -- Corredores secretos: largura interna, meio comprimento (ao longo da
 -- parede), meio comprimento da rampa, posição das entradas e pé-direito
 -- acima do andar de cima.
-BuildingLayout.CorridorWidth = 7
+BuildingLayout.CorridorWidth = 10
 BuildingLayout.CorridorHalfLength = 40
 BuildingLayout.CorridorRampHalfLength = 26
 BuildingLayout.CorridorEntranceAlong = 32
-BuildingLayout.CorridorHeadroom = 11
+BuildingLayout.CorridorHeadroom = 13
 -- Tocas Seguras: largura (ao longo), profundidade (para fora), altura e
 -- posição ao longo do corredor (uma em cada patamar).
 BuildingLayout.TocaSize = Vector3.new(4, 7, 3.5)
 BuildingLayout.TocaAlong = 29
+-- Portinhola do Barão nas cabeceiras dos corredores (largura, altura): os
+-- dois corredores se ligam por um túnel dentro das paredes, só dele.
+BuildingLayout.BaraoDoorSize = Vector2.new(3.4, 4.6)
 
 function BuildingLayout.getFloorSize(arena: ArenaConfig): (number, number)
 	local width = (arena.Columns * arena.BlockSize.X) + ((arena.Columns - 1) * arena.BlockGap)

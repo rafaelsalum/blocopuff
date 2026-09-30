@@ -320,6 +320,31 @@ Escopo em `docs/FASE_2_SEGREDOS_COFRE_BARAO.md`.
 - **Ajustes:** ficam em `GameConfig.Barao` e `GameConfig.Toca`. Os sons atuais são provisórios, embutidos no Roblox; troque `BarkSoundIds`, `FunnySoundIds` e `FootstepSoundId` por áudios da Creator Store (`rbxassetid://...`).
 - **Código:** `BaraoService` (comportamento), `BaraoModel`, `TocaService`, `CorridorBuilder` (nichos) e `BuildingLayout.getTocas` / `isInsideToca` / `getCorridorFloorY`. No cliente, `BaraoController` mostra os avisos.
 
+### Barão maior, animado e com túnel entre os corredores (Fase 4, ajuste pós-4.5)
+
+- **Maior:** o Barão está 1,35× maior (`GameConfig.Barao.ModelScale`), com ~4,3 studs, quase a altura de um jogador. O alcance do empurrão (3,4) e a altura para pular por cima (2,9) acompanham. O do Jardim do Casarão está 1,15× maior, numa caminha maior.
+- **Corredores mais largos:** largura de 7 para 10 studs e pé-direito de 11 para 13. As Tocas, a rampa e as entradas acompanham.
+- **Desenhado e animado no cliente** (`BaraoVisualController` + `effects/BaraoAnimator`):
+  - o servidor só move uma raiz invisível (com os sons) e publica o estado em atributos (`BaraoState`, `BaraoTarget`, `BaraoEnraged`, contadores `BaraoBark` e `BaraoPush`);
+  - cada jogador desenha o Barão liso a 60 quadros por segundo, com cada parte girando na sua articulação (`BaraoModel` tem um "osso" por peça);
+  - poses:
+    - dormindo, respira com "Zzz" e espreguiça ao acordar;
+    - na patrulha, trota ou fareja o chão;
+    - na perseguição, galopa com as orelhas para trás e a língua de fora, olhando para quem persegue;
+    - depois de empurrar, senta e abana o rabo por 1,6 s, com um "AU AU!" em balão;
+  - ao latir, dá um pulinho;
+  - bravo depois que abrem o cofre: olhos vermelhos e fumacinha;
+  - o do Jardim dorme e, no carinho, pula e abana o rabo;
+  - longe da câmera nada é animado.
+- **Túnel do Barão:**
+  - cada cabeceira dos corredores tem uma portinhola ("TÚNEL DO BARÃO");
+  - quando só há gente no outro corredor por 2,5 s, ele corre até a portinhola mais perto, a tampa balança com um som e ele some por 2 s;
+  - depois sai pela portinhola do outro corredor, na ponta longe de quem está lá, latindo;
+  - desiste se alguém entra no corredor dele ou se o outro esvazia;
+  - substitui o teletransporte invisível de antes.
+- **Latido de verdade:** o latido é o áudio `rbxassetid://124017572768108` (~3 s, em `GameConfig.Barao.BarkSoundIds`), tocado inteiro e com o tom um pouco variado (`BarkPitch`). Um latido não começa enquanto o anterior toca: o Barão só faz a animação de latir.
+- **Território:** placas "🐾 TERRITÓRIO DO BARÃO" e pegadas no chão de cada patamar.
+
 ### Puffador menor (Fase 4, ajuste pós-4.5)
 
 O Puffador na mão ficou 28% menor (`HELD_SCALE = 0.72` em `PuffadorModel`) para não tapar a mira. A boca do cano, a empunhadura e o brilho do Super acompanham a escala, e o disparo sai da boca como antes. O tamanho do projétil, o alcance e o acerto não mudam. O prêmio do Cofre, que é só exposição, continua em tamanho cheio. As skins do Puffador ficaram anotadas para a Fase 5 (`docs/FASE_5_LIVEOPS_TEMPORADAS_MONETIZACAO.md`, item 8.1).

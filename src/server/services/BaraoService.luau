@@ -6,7 +6,9 @@
 -- e passa a patrulhar. Quando alguém abre o cofre ele fica bravo por um
 -- tempo: late mais e corre um pouco mais. Quando
 -- vê alguém no mesmo corredor, persegue; se só houver gente no outro
--- corredor por um tempo, ele reaparece lá, pela ponta oposta.
+-- corredor por um tempo, corre até a portinhola da cabeceira mais perto,
+-- atravessa o túnel (some por TunnelTravelTime s) e sai pela portinhola do
+-- outro corredor, na ponta longe de quem está lá.
 --
 -- O Barão anda numa linha ao longo do corredor (com um pouco de desvio
 -- lateral para alcançar quem cola na parede) e segue a altura do piso,
@@ -17,6 +19,12 @@
 --
 -- A única pista é o som: passos em loop e latidos em intervalos
 -- irregulares, com áudio 3D na peça do corpo (sem indicador de distância).
+--
+-- O servidor só move uma raiz invisível ("Body", no chão, olhando para
+-- onde anda) e publica o estado em atributos do modelo: BaraoState,
+-- BaraoTarget, BaraoEnraged e os contadores BaraoBark e BaraoPush. Quem
+-- desenha e anima o Barão é cada cliente (BaraoVisualController), liso a
+-- 60 quadros por segundo.
 
 local CollectionService = game:GetService("CollectionService")
 local Players = game:GetService("Players")
@@ -26,11 +34,12 @@ local RunService = game:GetService("RunService")
 local GameConfig = require(ReplicatedStorage.Shared.config.GameConfig)
 local BuildingLayout = require(ReplicatedStorage.Shared.modules.BuildingLayout)
 local StateAttributeNames = require(ReplicatedStorage.Shared.types.StateAttributeNames)
-local BaraoModel = require(script.Parent.BaraoModel)
+local BaraoModel = require(ReplicatedStorage.Shared.modules.BaraoModel)
+local CorridorBuilder = require(script.Parent.CorridorBuilder)
 local TocaService = require(script.Parent.TocaService)
 
 type Corridor = BuildingLayout.Corridor
-type Mode = "Sleeping" | "Patrol" | "Chase" | "Pause"
+type Mode = "Sleeping" | "Patrol" | "Chase" | "Celebrate" | "ToTunnel" | "Tunnel"
 
 export type Sender = (player: Player, kind: string, value: any) -> ()
 -- Encontro (começou a perseguir alguém), contato (empurrou) e fuga ("Jump"
@@ -52,19 +61,25 @@ local STATE_ATTRIBUTE = "BaraoState"
 -- a trilha de tensão, que não diz direção nem distância.
 local TARGET_ATTRIBUTE = "BaraoTarget"
 local BARAO_TAG = "Barao"
+local ENRAGED_ATTRIBUTE = "BaraoEnraged"
+local BARK_ATTRIBUTE = "BaraoBark"
+local PUSH_ATTRIBUTE = "BaraoPush"
+local FLAP_ATTRIBUTE = "Flap"
 local ESCAPE_MIN_CHASE = 3
 local ENCOUNTER_COOLDOWN = 10
 local JUMP_ESCAPE_COOLDOWN = 3
-local EDGE_MARGIN = 1.6
-local LATERAL_MARGIN = 1.2
-local SLEEP_ALONG = -(BuildingLayout.CorridorHalfLength - 3)
-local SLEEP_SINK = 0.9
+-- Folga até as cabeceiras (o focinho fica ~3,2 × escala à frente da raiz)
+-- e até as paredes, pelo tamanho do modelo.
+local EDGE_MARGIN = 3.4 * GameConfig.Barao.ModelScale
+local LATERAL_MARGIN = 1.35 * GameConfig.Barao.ModelScale
+local SLEEP_ALONG = -(BuildingLayout.CorridorHalfLength - EDGE_MARGIN)
 -- Distância dos pés à raiz do personagem em pé (HipHeight 2 + metade da raiz).
 local ROOT_TO_FEET = 3
 local ARRIVE_DISTANCE = 0.6
 local SNIFF_TIME = NumberRange.new(0.8, 2.2)
 local SOUND_MIN_DISTANCE = 8
 local SOUND_MAX_DISTANCE = 75
+local SOUND_CLEANUP_SECONDS = 8
 
 local BaraoService = {}
 
@@ -74,6 +89,7 @@ local roundId = 0
 local model: Model? = nil
 local soundPart: BasePart? = nil
 local footsteps: Sound? = nil
+local barkSound: Sound? = nil
 local corridors: { Corridor } = {}
 local sendToPlayer: Sender? = nil
 local heartbeat: RBXScriptConnection? = nil
@@ -91,6 +107,9 @@ local patrolTarget = 0
 local nextBarkAt = 0
 local otherCorridorSince: number? = nil
 local enragedUntil = 0
+local enragedShown = false
+local tunnelSide = 1
+local tunnelUntil = 0
 local lastContact: { [Player]: number } = {}
 local eventListener: EventListener? = nil
 local chaseTarget: Player? = nil
@@ -183,10 +202,10 @@ local function beginChase(player: Player, now: number)
 	end
 end
 
-local function playOneShot(soundId: string, speed: number, volume: number)
+local function playOneShot(soundId: string, speed: number, volume: number): Sound?
 	local anchor = soundPart
 	if anchor == nil then
-		return
+		return nil
 	end
 	local sound = Instance.new("Sound")
 	sound.SoundId = soundId
@@ -200,6 +219,13 @@ local function playOneShot(soundId: string, speed: number, volume: number)
 		sound:Destroy()
 	end)
 	sound:Play()
+	-- Se o áudio não carregar, o Ended não vem: limpa assim mesmo.
+	task.delay(SOUND_CLEANUP_SECONDS, function()
+		if sound.Parent ~= nil then
+			sound:Destroy()
+		end
+	end)
+	return sound
 end
 
 local function pick(list: { string }): string?
@@ -209,20 +235,23 @@ local function pick(list: { string }): string?
 	return list[random:NextInteger(1, #list)]
 end
 
--- Latido: um ou dois "au", com tom variado para não soar repetido.
+-- Latido: o áudio inteiro (vários "au"), com tom um pouco variado. Não
+-- sobrepõe: enquanto um latido toca, o próximo só anima o Barão.
 local function bark()
+	local current = model
+	if current ~= nil then
+		current:SetAttribute(BARK_ATTRIBUTE, ((current:GetAttribute(BARK_ATTRIBUTE) :: number?) or 0) + 1)
+	end
+	local playing = barkSound
+	if playing ~= nil and playing.Parent ~= nil and playing.IsPlaying then
+		return
+	end
 	local soundId = pick(GameConfig.Barao.BarkSoundIds)
 	if soundId == nil then
 		return
 	end
-	local count = random:NextInteger(1, 2)
-	for index = 1, count do
-		task.delay((index - 1) * 0.28, function()
-			if model ~= nil then
-				playOneShot(soundId, random:NextNumber(1.35, 1.7), 0.9)
-			end
-		end)
-	end
+	local pitch = GameConfig.Barao.BarkPitch
+	barkSound = playOneShot(soundId, random:NextNumber(pitch.Min, pitch.Max), 0.9)
 end
 
 local function isEnraged(now: number): boolean
@@ -241,15 +270,14 @@ local function worldPosition(corridor: Corridor, alongValue: number, lateralValu
 end
 
 -- Coloca o modelo no ponto atual, olhando para onde anda e inclinado na rampa.
-local function place(bob: number)
+local function place(lift: number)
 	local current = model
 	local corridor = corridors[corridorIndex]
 	if current == nil or corridor == nil then
 		return
 	end
 	local floorY = BuildingLayout.getCorridorFloorY(corridor, along)
-	local sink = if mode == "Sleeping" then SLEEP_SINK else 0
-	local position = worldPosition(corridor, along, lateral, floorY - sink + bob)
+	local position = worldPosition(corridor, along, lateral, floorY + lift)
 	local aheadY = BuildingLayout.getCorridorFloorY(corridor, along + facing)
 	local look = (corridor.along * facing) + Vector3.new(0, aheadY - floorY, 0)
 	current:PivotTo(CFrame.lookAt(position, position + look))
@@ -367,8 +395,14 @@ local function push(player: Player, intruder: Intruder, now: number, corridor: C
 	if funny ~= nil then
 		playOneShot(funny, random:NextNumber(0.85, 1.35), 1)
 	end
+	local current = model
+	if current ~= nil then
+		current:SetAttribute(PUSH_ATTRIBUTE, ((current:GetAttribute(PUSH_ATTRIBUTE) :: number?) or 0) + 1)
+	end
 	pauseUntil = now + config.ContactPause
-	setMode("Pause")
+	setMode("Celebrate")
+	-- Pegou: a perseguição acabou (a trilha de tensão para enquanto comemora).
+	endChase(now)
 end
 
 local function checkContacts(intruders: { Intruder }, now: number, corridor: Corridor)
@@ -405,8 +439,30 @@ local function checkContacts(intruders: { Intruder }, now: number, corridor: Cor
 	end
 end
 
--- Só há gente no outro corredor há um tempo: reaparece lá, pela ponta mais
--- longe de quem entrou, para dar tempo de ouvir e reagir.
+-- Balança a tampa da portinhola (o cliente anima) e toca a batida dela.
+local function flapDoor(corridor: Corridor, side: number)
+	for _, door in ipairs(CollectionService:GetTagged(CorridorBuilder.BaraoDoorTag)) do
+		if door:IsA("BasePart") and door:GetAttribute("Corridor") == corridor.name and door:GetAttribute("Side") == side then
+			door:SetAttribute(FLAP_ATTRIBUTE, ((door:GetAttribute(FLAP_ATTRIBUTE) :: number?) or 0) + 1)
+			local sound = Instance.new("Sound")
+			sound.SoundId = GameConfig.Barao.DoorSoundId
+			sound.Volume = 0.8
+			sound.PlaybackSpeed = random:NextNumber(0.8, 1)
+			sound.RollOffMode = Enum.RollOffMode.InverseTapered
+			sound.RollOffMinDistance = SOUND_MIN_DISTANCE
+			sound.RollOffMaxDistance = SOUND_MAX_DISTANCE
+			sound.Parent = door
+			sound.Ended:Once(function()
+				sound:Destroy()
+			end)
+			sound:Play()
+			return
+		end
+	end
+end
+
+-- Só há gente no outro corredor há um tempo: vai até a portinhola da
+-- cabeceira mais perto para atravessar o túnel.
 local function maybeSwitchCorridor(now: number)
 	if #corridors < 2 then
 		return
@@ -426,12 +482,51 @@ local function maybeSwitchCorridor(now: number)
 		return
 	end
 	otherCorridorSince = nil
+	tunnelSide = if along >= 0 then 1 else -1
+	setMode("ToTunnel")
+	bark()
+	scheduleBark(now)
+end
+
+local function enterTunnel(now: number)
+	local corridor = corridors[corridorIndex]
+	if corridor ~= nil then
+		flapDoor(corridor, tunnelSide)
+	end
+	tunnelUntil = now + GameConfig.Barao.TunnelTravelTime
+	setMode("Tunnel")
+	local steps = footsteps
+	if steps ~= nil then
+		steps.Playing = false
+	end
+end
+
+-- Sai no outro corredor, pela ponta mais longe de quem está lá (para dar
+-- tempo de ouvir a portinhola e reagir).
+local function leaveTunnel(now: number)
+	local otherIndex = if corridorIndex == 1 then 2 else 1
+	local target = corridors[otherIndex]
+	if target == nil then
+		setMode("Patrol")
+		return
+	end
+	local others = readIntruders(target)
+	local side = tunnelSide
+	if #others > 0 then
+		local total = 0
+		for _, intruder in ipairs(others) do
+			total += intruder.along
+		end
+		side = if total >= 0 then -1 else 1
+	end
 	corridorIndex = otherIndex
-	local side = if others[1].along >= 0 then -1 else 1
 	along = side * maxAlong()
 	lateral = 0
 	facing = -side
 	patrolTarget = 0
+	flapDoor(target, side)
+	setMode("Patrol")
+	place(0)
 	bark()
 	scheduleBark(now)
 end
@@ -448,11 +543,27 @@ local function wake(now: number)
 	scheduleBark(now)
 end
 
+local function updateEnraged(now: number)
+	local enraged = isEnraged(now)
+	local current = model
+	if enraged ~= enragedShown and current ~= nil then
+		enragedShown = enraged
+		current:SetAttribute(ENRAGED_ATTRIBUTE, enraged)
+	end
+end
+
 local function step(dt: number)
 	local now = os.clock()
+	updateEnraged(now)
 	if mode == "Sleeping" then
 		if now >= wakeAt then
 			wake(now)
+		end
+		return
+	end
+	if mode == "Tunnel" then
+		if now >= tunnelUntil then
+			leaveTunnel(now)
 		end
 		return
 	end
@@ -464,7 +575,7 @@ local function step(dt: number)
 	local intruders = readIntruders(corridor)
 	local moved = 0
 
-	if mode == "Pause" then
+	if mode == "Celebrate" then
 		if now >= pauseUntil then
 			setMode("Patrol")
 		end
@@ -488,14 +599,31 @@ local function step(dt: number)
 			if chaseTarget ~= nil then
 				endChase(now)
 			end
-			if #intruders == 0 then
-				maybeSwitchCorridor(now)
+			if mode == "ToTunnel" then
+				-- Alguém entrou aqui, ou o outro corredor esvaziou: fica.
+				local otherIndex = if corridorIndex == 1 then 2 else 1
+				local other = corridors[otherIndex]
+				if #intruders > 0 or other == nil or #readIntruders(other) == 0 then
+					setMode("Patrol")
+				end
 			end
-			if now >= pauseUntil then
-				moved = moveTowards(patrolTarget, 0, GameConfig.Barao.PatrolSpeed, dt)
-				if math.abs(along - patrolTarget) <= ARRIVE_DISTANCE or math.abs(patrolTarget) > maxAlong() then
-					patrolTarget = random:NextNumber(-maxAlong(), maxAlong())
-					pauseUntil = now + random:NextNumber(SNIFF_TIME.Min, SNIFF_TIME.Max)
+			if mode == "ToTunnel" then
+				local door = tunnelSide * maxAlong()
+				moved = moveTowards(door, 0, GameConfig.Barao.ChaseSpeed * GameConfig.Barao.TunnelRunMultiplier, dt)
+				if math.abs(along - door) <= ARRIVE_DISTANCE then
+					enterTunnel(now)
+					return
+				end
+			else
+				if #intruders == 0 then
+					maybeSwitchCorridor(now)
+				end
+				if mode == "Patrol" and now >= pauseUntil then
+					moved = moveTowards(patrolTarget, 0, GameConfig.Barao.PatrolSpeed, dt)
+					if math.abs(along - patrolTarget) <= ARRIVE_DISTANCE or math.abs(patrolTarget) > maxAlong() then
+						patrolTarget = random:NextNumber(-maxAlong(), maxAlong())
+						pauseUntil = now + random:NextNumber(SNIFF_TIME.Min, SNIFF_TIME.Max)
+					end
 				end
 			end
 		end
@@ -513,8 +641,7 @@ local function step(dt: number)
 		steps.Playing = speed > 0.5
 		steps.PlaybackSpeed = 0.9 + (speed / 20)
 	end
-	local bob = if speed > 0.5 then math.abs(math.sin(now * speed * 1.2)) * 0.18 else 0
-	place(bob)
+	place(0)
 end
 
 -- Avisado de encontros, contatos e fugas (telemetria e Momentos Puff).
@@ -553,6 +680,10 @@ end
 function BaraoService.endRound()
 	active = false
 	enragedUntil = 0
+	enragedShown = false
+	if model ~= nil then
+		model:SetAttribute(ENRAGED_ATTRIBUTE, false)
+	end
 	if model ~= nil then
 		goToSleep()
 	end
@@ -573,24 +704,38 @@ function BaraoService.start(worldRoot: Instance, sender: Sender)
 		return
 	end
 
-	local newModel = BaraoModel.build()
+	-- Só a raiz invisível (e os sons); o desenho é de cada cliente.
+	local newModel = Instance.new("Model")
+	newModel.Name = "Barao"
+	local root = Instance.new("Part")
+	root.Name = BaraoModel.SoundPartName
+	root.Size = Vector3.new(1, 1, 1)
+	root.Transparency = 1
+	root.Anchored = true
+	root.CanCollide = false
+	root.CanQuery = false
+	root.CanTouch = false
+	root.CastShadow = false
+	root.Parent = newModel
+	newModel.PrimaryPart = root
 	newModel:SetAttribute(GENERATED_BY_ATTRIBUTE, SERVICE_NAME)
 	newModel:SetAttribute(TARGET_ATTRIBUTE, 0)
+	newModel:SetAttribute(BaraoModel.ScaleAttribute, GameConfig.Barao.ModelScale)
+	newModel:SetAttribute(ENRAGED_ATTRIBUTE, false)
+	newModel:SetAttribute(BARK_ATTRIBUTE, 0)
+	newModel:SetAttribute(PUSH_ATTRIBUTE, 0)
 	CollectionService:AddTag(newModel, BARAO_TAG)
-	local body = newModel:FindFirstChild(BaraoModel.SoundPartName)
-	if body ~= nil and body:IsA("BasePart") then
-		soundPart = body
-		local steps = Instance.new("Sound")
-		steps.Name = "Footsteps"
-		steps.SoundId = GameConfig.Barao.FootstepSoundId
-		steps.Looped = true
-		steps.Volume = 0.8
-		steps.RollOffMode = Enum.RollOffMode.InverseTapered
-		steps.RollOffMinDistance = SOUND_MIN_DISTANCE
-		steps.RollOffMaxDistance = SOUND_MAX_DISTANCE * 0.7
-		steps.Parent = body
-		footsteps = steps
-	end
+	soundPart = root
+	local steps = Instance.new("Sound")
+	steps.Name = "Footsteps"
+	steps.SoundId = GameConfig.Barao.FootstepSoundId
+	steps.Looped = true
+	steps.Volume = 0.8
+	steps.RollOffMode = Enum.RollOffMode.InverseTapered
+	steps.RollOffMinDistance = SOUND_MIN_DISTANCE
+	steps.RollOffMaxDistance = SOUND_MAX_DISTANCE * 0.7
+	steps.Parent = root
+	footsteps = steps
 	newModel.Parent = worldRoot
 	model = newModel
 	goToSleep()
@@ -629,6 +774,7 @@ function BaraoService.stop()
 	end
 	model = nil
 	soundPart = nil
+	barkSound = nil
 	footsteps = nil
 	sendToPlayer = nil
 	eventListener = nil

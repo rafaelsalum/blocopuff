@@ -132,6 +132,9 @@ export type BaraoConfig = {
 	LateralSpeed: number,
 	SightRange: number,
 	SwitchCorridorDelay: number,
+	TunnelTravelTime: number,
+	TunnelRunMultiplier: number,
+	ModelScale: number,
 	ContactRadius: number,
 	JumpClearance: number,
 	ContactCooldown: number,
@@ -141,9 +144,11 @@ export type BaraoConfig = {
 	BarkIntervalPatrol: NumberRange,
 	BarkIntervalChase: NumberRange,
 	BarkSoundIds: { string },
+	BarkPitch: NumberRange,
 	FunnySoundIds: { string },
 	FootstepSoundId: string,
 	TensionSoundId: string,
+	DoorSoundId: string,
 }
 
 export type TocaConfig = {
@@ -388,20 +393,33 @@ local Barao: BaraoConfig = table.freeze({
 	ChaseSpeed = 14,
 	LateralSpeed = 6,
 	SightRange = 34,
-	SwitchCorridorDelay = 4,
-	ContactRadius = 2.6,
-	JumpClearance = 2.4,
+	-- Só há gente no outro corredor há SwitchCorridorDelay s: ele corre até
+	-- a portinhola mais perto, atravessa o túnel (TunnelTravelTime s) e sai
+	-- pela portinhola do outro corredor, na ponta longe de quem está lá.
+	SwitchCorridorDelay = 2.5,
+	TunnelTravelTime = 2,
+	TunnelRunMultiplier = 1.15,
+	-- Tamanho do modelo (1 = o original, ~3,2 studs de altura).
+	ModelScale = 1.35,
+	ContactRadius = 3.4,
+	JumpClearance = 2.9,
 	ContactCooldown = 1.5,
-	ContactPause = 1.2,
+	-- Depois de empurrar alguém ele senta e abana o rabo por esse tempo.
+	ContactPause = 1.6,
 	PushSpeed = 58,
 	PushLift = 24,
 	BarkIntervalPatrol = NumberRange.new(6, 13),
 	BarkIntervalChase = NumberRange.new(2.2, 4.5),
-	BarkSoundIds = table.freeze({ "rbxasset://sounds/action_get_up.mp3", "rbxasset://sounds/action_jump.mp3" }),
+	-- Latidos de verdade (~3 s, vários "au" seguidos). Um latido não começa
+	-- enquanto o anterior ainda toca; o tom varia um pouco para não repetir.
+	BarkSoundIds = table.freeze({ "rbxassetid://124017572768108" }),
+	BarkPitch = NumberRange.new(0.94, 1.08),
 	FunnySoundIds = table.freeze({ "rbxasset://sounds/oof.ogg", "rbxasset://sounds/ouch.ogg", "rbxasset://sounds/swoosh.wav" }),
 	FootstepSoundId = "rbxasset://sounds/action_footsteps_plastic.mp3",
 	-- Batida grave, sem direção, tocada só para quem está sendo perseguido.
 	TensionSoundId = "rbxasset://sounds/action_jump_land.mp3",
+	-- Portinhola do túnel batendo quando ele entra ou sai.
+	DoorSoundId = "rbxasset://sounds/swoosh.wav",
 })
 
 -- Tocas Seguras: protegem do Barão (não do Puffador) por MaxStay segundos;

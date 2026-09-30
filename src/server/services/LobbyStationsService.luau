@@ -13,15 +13,15 @@
 -- Pensado para celular: poucas peças, nenhuma luz extra, placas com
 -- distância máxima e nada animado continuamente pelo servidor.
 
+local CollectionService = game:GetService("CollectionService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local TweenService = game:GetService("TweenService")
 
 local MansionConfig = require(ReplicatedStorage.Shared.config.MansionConfig)
 local PuffCatalog = require(ReplicatedStorage.Shared.config.PuffCatalog)
 local MansionLayout = require(ReplicatedStorage.Shared.modules.MansionLayout)
 local PuffEffects = require(ReplicatedStorage.Shared.modules.PuffEffects)
-local BaraoModel = require(script.Parent.BaraoModel)
+local BaraoModel = require(ReplicatedStorage.Shared.modules.BaraoModel)
 local TelemetryService = require(script.Parent.TelemetryService)
 
 type PuffDefinition = PuffCatalog.PuffDefinition
@@ -33,6 +33,11 @@ local STATION_ATTRIBUTE = "LobbyStation"
 local SIGN_DISTANCE = 45
 local PROMPT_DISTANCE = 9
 local PET_COOLDOWN = 2
+-- Barão do Jardim: tamanho, caminha e quanto tempo fica feliz no carinho.
+local FRIENDLY_BARAO_SCALE = 1.15
+local FRIENDLY_BED_SIZE = 6.5
+local FRIENDLY_BARAO_TAG = "BaraoFriendly"
+local PET_ATTRIBUTE = "BaraoPet"
 -- Vitrine: Puffs por fileira e distância entre pedestais.
 local SHOWCASE_PER_ROW = 11
 local SHOWCASE_SPACING = 9.4
@@ -131,26 +136,30 @@ local function buildMachine(parent: Instance, base: Vector3, facing: number)
 	model.PrimaryPart = cabinet
 end
 
--- Barão amigável: dorme numa caminha; carinho faz ele pular de alegria.
+-- Barão amigável: dorme numa caminha; carinho faz ele acordar, pular e
+-- abanar o rabo. Quem anima é o cliente (BaraoVisualController, tag
+-- BaraoFriendly); aqui só o contador "BaraoPet" avisa do carinho.
 local function buildFriendlyBarao(parent: Instance, base: Vector3)
-	-- Cilindro com o eixo (X) em pé: um disco baixo de 5 studs.
-	local bed = part(parent, "BaraoBed", Vector3.new(0.6, 5, 5), CFrame.new(base + Vector3.new(0, 0.3, 0)), Color3.fromRGB(64, 40, 70), Enum.Material.Fabric, Enum.PartType.Cylinder)
+	-- Cilindro com o eixo (X) em pé: um disco baixo.
+	local bed = part(parent, "BaraoBed", Vector3.new(0.6, FRIENDLY_BED_SIZE, FRIENDLY_BED_SIZE), CFrame.new(base + Vector3.new(0, 0.3, 0)), Color3.fromRGB(64, 40, 70), Enum.Material.Fabric, Enum.PartType.Cylinder)
 	bed.CFrame = CFrame.new(base + Vector3.new(0, 0.3, 0)) * CFrame.Angles(0, 0, math.rad(90))
-	local barao = BaraoModel.build()
+	local barao = BaraoModel.build(FRIENDLY_BARAO_SCALE)
 	barao.Name = "BaraoLobby"
 	-- De frente para o arco do Salão Principal (−X); o modelo olha para −Z.
 	local restCFrame = CFrame.new(base + Vector3.new(0, 0.6, 0)) * CFrame.Angles(0, math.pi / 2, 0)
 	barao:PivotTo(restCFrame)
+	barao:SetAttribute(PET_ATTRIBUTE, 0)
 	barao.Parent = parent
+	CollectionService:AddTag(barao, FRIENDLY_BARAO_TAG)
 	local body = barao:FindFirstChild("Body")
 	if body == nil or not body:IsA("BasePart") then
 		return
 	end
-	sign(body, "🐶 BARÃO", "Aqui ele é bonzinho", 4.2)
+	sign(body, "🐶 BARÃO", "Aqui ele é bonzinho", 4.2 * FRIENDLY_BARAO_SCALE)
 	local sleep = Instance.new("BillboardGui")
 	sleep.Name = "Sleep"
 	sleep.Size = UDim2.new(2, 0, 1.2, 0)
-	sleep.StudsOffset = Vector3.new(1.2, 2.6, 0)
+	sleep.StudsOffset = Vector3.new(1.2, 2.6, 0) * FRIENDLY_BARAO_SCALE
 	sleep.MaxDistance = SIGN_DISTANCE
 	sleep.Parent = body
 	local zzz = Instance.new("TextLabel")
@@ -163,37 +172,22 @@ local function buildFriendlyBarao(parent: Instance, base: Vector3)
 	zzz.Parent = sleep
 
 	local proximity = prompt(body, "Barao", "Fazer carinho", "Barão")
-	local hopping = false
+	local happy = false
 	proximity.Triggered:Connect(function(player: Player)
 		local clock = os.clock()
 		local last = lastPet[player]
-		if hopping or (last ~= nil and clock - last < PET_COOLDOWN) then
+		if happy or (last ~= nil and clock - last < PET_COOLDOWN) then
 			return
 		end
 		lastPet[player] = clock
-		hopping = true
+		happy = true
 		zzz.Text = "💜"
 		TelemetryService.lobbyEvent(player, "BaraoPet", 1)
-		local hop = Instance.new("CFrameValue")
-		hop.Value = restCFrame
-		local connection = hop.Changed:Connect(function(value: CFrame)
-			barao:PivotTo(value)
+		barao:SetAttribute(PET_ATTRIBUTE, ((barao:GetAttribute(PET_ATTRIBUTE) :: number?) or 0) + 1)
+		task.delay(BaraoModel.FriendlyHappySeconds, function()
+			zzz.Text = "Zzz"
+			happy = false
 		end)
-		local up = TweenService:Create(hop, TweenInfo.new(0.18, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), { Value = restCFrame + Vector3.new(0, 1.2, 0) })
-		local down = TweenService:Create(hop, TweenInfo.new(0.22, Enum.EasingStyle.Bounce, Enum.EasingDirection.Out), { Value = restCFrame })
-		up.Completed:Once(function()
-			down:Play()
-		end)
-		down.Completed:Once(function()
-			connection:Disconnect()
-			hop:Destroy()
-			barao:PivotTo(restCFrame)
-			task.delay(1.2, function()
-				zzz.Text = "Zzz"
-				hopping = false
-			end)
-		end)
-		up:Play()
 	end)
 end
 
