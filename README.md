@@ -357,7 +357,11 @@ Escopo em `docs/FASE_2_SEGREDOS_COFRE_BARAO.md`.
   - no carinho ele acorda, late baixinho, pula dando uma volta, solta corações 💜 e senta abanando o rabo olhando para você;
   - o cliente espera todas as peças chegarem do servidor antes de animar (antes, podia começar sem elas e não mexer nada);
   - cada animação roda protegida: um erro aparece uma vez na saída e não para as outras.
-- **Modelo 3D (próximo passo):** a ficha técnica para modelar o Barão em 3D (peças, articulações, orientação, limites, texturas e entrega em `.rbxm`) está em `docs/BARAO_MODELO_3D.html`.
+- **Modelo 3D:** o Barão usa o modelo 3D do Studio (`src/shared/assets/BaraoMesh.rbxm`, que vira `ReplicatedStorage.Shared.assets.BaraoMesh`): 12 MeshParts com textura PBR (SurfaceAppearance), a ficha técnica está em `docs/BARAO_MODELO_3D.html`.
+  - `BaraoModel` gira o arquivo (ele vem de frente para +Z), centraliza no chão entre as patas, ancora as peças, liga cada uma ao seu osso e calcula as articulações pela forma de cada peça (topo das patas e das orelhas, nuca, base do rabo, raiz da língua);
+  - os olhos (`Eye` e `Eye2`) seguem a cabeça; bravo, eles brilham em vermelho por um `Highlight` (a cor da peça não aparece sobre a textura);
+  - se o modelo faltar ou estiver incompleto, o jogo avisa no Output e usa o Barão de blocos (`BaraoBlocks`);
+  - as malhas e texturas precisam estar liberadas para a experiência (Creator Hub → item → Permissões), senão aparecem invisíveis ou cinza no jogo publicado.
 - **Latido de verdade:** o latido é o áudio `rbxassetid://124017572768108` (~3 s, em `GameConfig.Barao.BarkSoundIds`), tocado inteiro e com o tom um pouco variado (`BarkPitch`). Um latido não começa enquanto o anterior toca: o Barão só faz a animação de latir.
 - **Território:** placas "🐾 TERRITÓRIO DO BARÃO" e pegadas no chão de cada patamar.
 

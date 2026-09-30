@@ -241,9 +241,13 @@ function BaraoAnimator.new(model: Model, options: Options, origin: CFrame?): Ani
 			end
 		end
 	end
+	-- Articulações da versão com que o modelo foi montado (3D ou blocos),
+	-- que pode ter sido no servidor.
+	local variantValue = model:GetAttribute(BaraoModel.VariantAttribute)
+	local variant = if typeof(variantValue) == "string" then variantValue else nil
 	local pivots: { [Bone]: Vector3 } = {}
 	for _, bone in ipairs(BONES) do
-		pivots[bone] = BaraoModel.pivot(bone, scale)
+		pivots[bone] = BaraoModel.pivot(bone, scale, variant)
 	end
 	local eyeColor = if #eyes > 0 then eyes[1].Color else Color3.new()
 
@@ -287,6 +291,7 @@ function BaraoAnimator.new(model: Model, options: Options, origin: CFrame?): Ani
 	local bubbleLeft = 0
 	local zzzClock = 0
 	local enragedShown = false
+	local eyeGlows: { [number]: Highlight } = {}
 	local earLeft: Spring = { value = 0, velocity = 0 }
 	local earRight: Spring = { value = 0, velocity = 0 }
 	local tongueSpring: Spring = { value = 0, velocity = 0 }
@@ -298,9 +303,28 @@ function BaraoAnimator.new(model: Model, options: Options, origin: CFrame?): Ani
 			return
 		end
 		enragedShown = enraged
-		for _, eye in ipairs(eyes) do
-			eye.Color = if enraged then ENRAGED_EYE else eyeColor
-			eye.Material = if enraged then Enum.Material.Neon else Enum.Material.SmoothPlastic
+		for index, eye in ipairs(eyes) do
+			if eye:FindFirstChildOfClass("SurfaceAppearance") ~= nil then
+				-- Com textura PBR a cor da peça não aparece: brilho vermelho.
+				local glow = eyeGlows[index]
+				if glow == nil and enraged then
+					local created = Instance.new("Highlight")
+					created.FillColor = ENRAGED_EYE
+					created.FillTransparency = 0.15
+					created.OutlineTransparency = 1
+					created.DepthMode = Enum.HighlightDepthMode.Occluded
+					created.Adornee = eye
+					created.Parent = eye
+					eyeGlows[index] = created
+					glow = created
+				end
+				if glow ~= nil then
+					glow.Enabled = enraged
+				end
+			else
+				eye.Color = if enraged then ENRAGED_EYE else eyeColor
+				eye.Material = if enraged then Enum.Material.Neon else Enum.Material.SmoothPlastic
+			end
 		end
 		local emitter = smoke
 		if emitter ~= nil then
@@ -466,6 +490,9 @@ function BaraoAnimator.new(model: Model, options: Options, origin: CFrame?): Ani
 			emitter:Destroy()
 		end
 		setEnraged(false)
+		for _, glow in pairs(eyeGlows) do
+			glow:Destroy()
+		end
 	end
 
 	return animator

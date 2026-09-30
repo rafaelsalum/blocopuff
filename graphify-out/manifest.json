@@ -125,8 +125,8 @@
     "semantic_hash": ""
   },
   "README.md": {
-    "mtime": 1790739758.065836,
-    "ast_hash": "2fdb0bc91ef6af41fc424bf73032dd75",
+    "mtime": 1790742120.7397373,
+    "ast_hash": "a540b3ffba7bcab50b6362fd7874da66",
     "semantic_hash": ""
   },
   "src/client/controllers/CombatCameraController.luau": {
@@ -380,8 +380,8 @@
     "semantic_hash": ""
   },
   "src/server/services/BaraoService.luau": {
-    "mtime": 1790736519.378317,
-    "ast_hash": "3345d3d0a47ce43103f583bc471e0668",
+    "mtime": 1790742111.8270793,
+    "ast_hash": "ff74633f50ce87764c8ab0c440d19ada",
     "semantic_hash": ""
   },
   "src/server/services/TocaService.luau": {
@@ -740,18 +740,243 @@
     "semantic_hash": ""
   },
   "src/client/effects/BaraoAnimator.luau": {
-    "mtime": 1790738881.0585437,
-    "ast_hash": "83461e4e44d1d1e26e61b4b51a5fc7c8",
+    "mtime": 1790741982.91776,
+    "ast_hash": "4eca15426464dc96aee12fe5843a7ce6",
     "semantic_hash": ""
   },
   "src/shared/modules/BaraoModel.luau": {
-    "mtime": 1790738850.665494,
-    "ast_hash": "e62d1a2b83305a0143b096c6802f67cb",
+    "mtime": 1790741960.2006378,
+    "ast_hash": "8d3398350eb8e9a5edb8f5dec78add4c",
     "semantic_hash": ""
   },
   "docs/BARAO_MODELO_3D.html": {
     "mtime": 1790739758.065394,
     "ast_hash": "604b85a05d5fd629a83ca9a0b15fd303",
+    "semantic_hash": ""
+  },
+  "docs/capa-blocopuff.png": {
+    "mtime": 1790736953.7209516,
+    "ast_hash": "1e73fffd8106af063087e50d82878916",
+    "semantic_hash": ""
+  },
+  "assets/barao/v001/source/build_model.py": {
+    "mtime": 1790740304.1521437,
+    "ast_hash": "040d0ff07de1bbb63fbbfde09d7d6d26",
+    "semantic_hash": ""
+  },
+  "assets/blocopuff-01.png": {
+    "mtime": 1790735932.591816,
+    "ast_hash": "e8175dd6dfb5b88889b01a61b5ffc089",
+    "semantic_hash": ""
+  },
+  "assets/blocopuff-02.png": {
+    "mtime": 1790735947.3867908,
+    "ast_hash": "301574bf76a302b0dde2af639eac7376",
+    "semantic_hash": ""
+  },
+  "assets/blocopuff-03.png": {
+    "mtime": 1790735989.6124346,
+    "ast_hash": "8836e3ab3b35b9a337c683dab19ed4b7",
+    "semantic_hash": ""
+  },
+  "assets/blocopuff-04.png": {
+    "mtime": 1790736112.909833,
+    "ast_hash": "a0080c52c60347dd3e710c9a5d918ffd",
+    "semantic_hash": ""
+  },
+  "assets/logo-BlocoPuff.png": {
+    "mtime": 1790735833.7214525,
+    "ast_hash": "60f2a058b94eaf27e00f01717c81397c",
+    "semantic_hash": ""
+  },
+  "assets/barao/v001/pivots.json": {
+    "mtime": 1790740304.4212308,
+    "ast_hash": "07977d2ba4dcf45925470c5fec7180f1",
+    "semantic_hash": ""
+  },
+  "assets/barao/v001/source/inspect_model.py": {
+    "mtime": 1790740304.1734896,
+    "ast_hash": "3c9af666f795c27373a226485c2564f2",
+    "semantic_hash": ""
+  },
+  "assets/barao/v001/validation.json": {
+    "mtime": 1790740304.4898446,
+    "ast_hash": "0f56cade8d0a79b460ac74a6b3e8bae0",
+    "semantic_hash": ""
+  },
+  "assets/barao/README.md": {
+    "mtime": 1790741499.5799139,
+    "ast_hash": "6a80c505f4b8351595cbc839478e9166",
+    "semantic_hash": ""
+  },
+  "assets/barao/v001/README.md": {
+    "mtime": 1790740356.6175263,
+    "ast_hash": "66599be4c2b570cd0101df9af9bde69a",
+    "semantic_hash": ""
+  },
+  "assets/barao/v001/reference/specification.html": {
+    "mtime": 1790740304.214346,
+    "ast_hash": "604b85a05d5fd629a83ca9a0b15fd303",
+    "semantic_hash": ""
+  },
+  "assets/barao/v001/previews/contact_sheet.png": {
+    "mtime": 1790740305.4689415,
+    "ast_hash": "85ca5d46833c540c860556fbe0f20f43",
+    "semantic_hash": ""
+  },
+  "assets/barao/v001/previews/front.png": {
+    "mtime": 1790740304.924089,
+    "ast_hash": "434918e04661c5781fe30e3a11381d9f",
+    "semantic_hash": ""
+  },
+  "assets/barao/v001/previews/perspective.png": {
+    "mtime": 1790740304.7142313,
+    "ast_hash": "674d38300202c9c218f679bfe3e68df1",
+    "semantic_hash": ""
+  },
+  "assets/barao/v001/previews/rear.png": {
+    "mtime": 1790740305.42415,
+    "ast_hash": "92351b97bd38b757a35c67873e68c459",
+    "semantic_hash": ""
+  },
+  "assets/barao/v001/previews/side.png": {
+    "mtime": 1790740305.0928624,
+    "ast_hash": "09a8ca43c39806b7fcae9c4d23fd22dc",
+    "semantic_hash": ""
+  },
+  "assets/barao/v001/previews/top.png": {
+    "mtime": 1790740305.25264,
+    "ast_hash": "9f912e321949bc2ef2a866a377188734",
+    "semantic_hash": ""
+  },
+  "assets/barao/v001/reference/cover.png": {
+    "mtime": 1790740304.2177722,
+    "ast_hash": "1e73fffd8106af063087e50d82878916",
+    "semantic_hash": ""
+  },
+  "assets/barao/v001/textures/barao_basecolor.png": {
+    "mtime": 1790740304.3408506,
+    "ast_hash": "be2bde63282ba2d5f502869830000e1f",
+    "semantic_hash": ""
+  },
+  "assets/icon-blocopuff.png": {
+    "mtime": 1790736953.7209516,
+    "ast_hash": "1e73fffd8106af063087e50d82878916",
+    "semantic_hash": ""
+  },
+  "assets/barao/v002/pivots.json": {
+    "mtime": 1790741479.1516478,
+    "ast_hash": "faa7d06d51ba73bed62672e8dbf040db",
+    "semantic_hash": ""
+  },
+  "assets/barao/v002/source/build_model.py": {
+    "mtime": 1790741188.1345475,
+    "ast_hash": "87d39bcdebb3934c2fd65ae977bd5832",
+    "semantic_hash": ""
+  },
+  "assets/barao/v002/source/export_glb.py": {
+    "mtime": 1790741478.0607274,
+    "ast_hash": "948124e1d013d0c7925e23ab16361621",
+    "semantic_hash": ""
+  },
+  "assets/barao/v002/source/inspect_model.py": {
+    "mtime": 1790741478.08196,
+    "ast_hash": "be6b39b65068c9efd2066af421b7b043",
+    "semantic_hash": ""
+  },
+  "assets/barao/v002/source/mesh.py": {
+    "mtime": 1790740867.1962018,
+    "ast_hash": "46414ec83995bb81852e0731091d9d7c",
+    "semantic_hash": ""
+  },
+  "assets/barao/v002/source/render_preview.py": {
+    "mtime": 1790741478.1005614,
+    "ast_hash": "91d9ec08ad629f3e6427bdcd5e02d467",
+    "semantic_hash": ""
+  },
+  "assets/barao/v002/source/textures.py": {
+    "mtime": 1790741161.1149108,
+    "ast_hash": "a3c92668a46053c8902490d835eac8b2",
+    "semantic_hash": ""
+  },
+  "assets/barao/v002/validation.json": {
+    "mtime": 1790741479.2440789,
+    "ast_hash": "50de27fa2f36a9f139eeba4d886be960",
+    "semantic_hash": ""
+  },
+  "assets/barao/v002/README.md": {
+    "mtime": 1790741427.0827386,
+    "ast_hash": "70a07751ef163f22f04e2d06d7e9ff5e",
+    "semantic_hash": ""
+  },
+  "assets/barao/v002/reference/specification.html": {
+    "mtime": 1790740540.2175019,
+    "ast_hash": "604b85a05d5fd629a83ca9a0b15fd303",
+    "semantic_hash": ""
+  },
+  "assets/barao/v002/previews/contact_sheet.png": {
+    "mtime": 1790741482.9201326,
+    "ast_hash": "26c616ed4ae536608d7b7f9f69ca1052",
+    "semantic_hash": ""
+  },
+  "assets/barao/v002/previews/front.png": {
+    "mtime": 1790741481.1294668,
+    "ast_hash": "ecce7a8a36ed8230a81150e9172c59fc",
+    "semantic_hash": ""
+  },
+  "assets/barao/v002/previews/perspective.png": {
+    "mtime": 1790741480.472407,
+    "ast_hash": "4fad548dc170bcc5ab49bc4880548017",
+    "semantic_hash": ""
+  },
+  "assets/barao/v002/previews/rear.png": {
+    "mtime": 1790741482.8549354,
+    "ast_hash": "0b3d14e997e5428278d2f6dc4a7e3d45",
+    "semantic_hash": ""
+  },
+  "assets/barao/v002/previews/side.png": {
+    "mtime": 1790741481.6337845,
+    "ast_hash": "2396dfea5c7176aedfed6ee0d068b3ff",
+    "semantic_hash": ""
+  },
+  "assets/barao/v002/previews/top.png": {
+    "mtime": 1790741482.2457654,
+    "ast_hash": "d7f64b756282536a8b4e82f37370efec",
+    "semantic_hash": ""
+  },
+  "assets/barao/v002/reference/action.png": {
+    "mtime": 1790740540.2248893,
+    "ast_hash": "e8175dd6dfb5b88889b01a61b5ffc089",
+    "semantic_hash": ""
+  },
+  "assets/barao/v002/reference/cover.png": {
+    "mtime": 1790740540.2210865,
+    "ast_hash": "1e73fffd8106af063087e50d82878916",
+    "semantic_hash": ""
+  },
+  "assets/barao/v002/textures/barao_basecolor.png": {
+    "mtime": 1790741478.9290364,
+    "ast_hash": "1814847304c1fc0b13c14dbbdf720747",
+    "semantic_hash": ""
+  },
+  "assets/barao/v002/textures/barao_normal.png": {
+    "mtime": 1790741478.9648812,
+    "ast_hash": "3e582f3a084afef144a7ebdd6147f4f5",
+    "semantic_hash": ""
+  },
+  "assets/barao/v002/textures/barao_orm.png": {
+    "mtime": 1790741478.9713926,
+    "ast_hash": "86562594610500d5d1971f87354e445a",
+    "semantic_hash": ""
+  },
+  "assets/barao/v002/textures/barao_roughness.png": {
+    "mtime": 1790741478.9684181,
+    "ast_hash": "f9d7345442708950d11809e6fc34c083",
+    "semantic_hash": ""
+  },
+  "src/shared/modules/BaraoBlocks.luau": {
+    "mtime": 1790741927.188664,
+    "ast_hash": "af565a208e3b0d0d4b472fc3d7bac96c",
     "semantic_hash": ""
   }
 }

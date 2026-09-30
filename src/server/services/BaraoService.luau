@@ -69,9 +69,10 @@ local ESCAPE_MIN_CHASE = 3
 local ENCOUNTER_COOLDOWN = 10
 local JUMP_ESCAPE_COOLDOWN = 3
 -- Folga até as cabeceiras (o focinho fica ~3,2 × escala à frente da raiz)
--- e até as paredes, pelo tamanho do modelo.
+-- e até as paredes (as orelhas do modelo 3D abrem ~1,55 × escala para cada
+-- lado), pelo tamanho do modelo.
 local EDGE_MARGIN = 3.4 * GameConfig.Barao.ModelScale
-local LATERAL_MARGIN = 1.35 * GameConfig.Barao.ModelScale
+local LATERAL_MARGIN = 1.6 * GameConfig.Barao.ModelScale
 local SLEEP_ALONG = -(BuildingLayout.CorridorHalfLength - EDGE_MARGIN)
 -- Distância dos pés à raiz do personagem em pé (HipHeight 2 + metade da raiz).
 local ROOT_TO_FEET = 3
