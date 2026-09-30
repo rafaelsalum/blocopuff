@@ -320,6 +320,28 @@ Escopo em `docs/FASE_2_SEGREDOS_COFRE_BARAO.md`.
 - **Ajustes:** ficam em `GameConfig.Barao` e `GameConfig.Toca`. Os sons atuais são provisórios, embutidos no Roblox; troque `BarkSoundIds`, `FunnySoundIds` e `FootstepSoundId` por áudios da Creator Store (`rbxassetid://...`).
 - **Código:** `BaraoService` (comportamento), `BaraoModel`, `TocaService`, `CorridorBuilder` (nichos) e `BuildingLayout.getTocas` / `isInsideToca` / `getCorridorFloorY`. No cliente, `BaraoController` mostra os avisos.
 
+### Puffdex empolgante — Camada A (Fase 4, ajuste pós-4.5)
+
+Cada Puff agora tem um **formato de efeito** e uma **frase de história**, além das cores (`effect` em `PuffStyle` e `lore` em `PuffDefinition`).
+
+- **Formatos:**
+  - 💨 Sopro, ✨ Brilhos, 🫧 Bolhas, ☁️ Nuvenzinha, ❄️ Neve, ⚡ Raio, 🌀 Espiral, 🎉 Confete, 🔥 Chamas e 🌈 Arco-íris;
+  - são 10 formatos compartilhados pelos 22 Puffs.
+- **No disparo** (`PuffEffects`):
+  - partículas do formato acompanham o projétil;
+  - o impacto solta uma explosão das mesmas partículas;
+  - o Arco-íris pinta o rastro com o espectro inteiro;
+  - Espiral e Raio desviam só o projétil visual em espiral ou zigue-zague. O acerto continua seguindo a mira, igual para todos.
+- **No Salão da Coleção:** cada pedestal solta, com calma, as partículas do seu Puff, e a placa mostra o ícone do formato.
+- **No Puffdex:**
+  - **prévia animada** (`PuffPreview`): o Puff atravessa a janelinha em loop com o rastro e as partículas do formato. É 2D porque o ViewportFrame do Roblox não desenha partículas;
+  - **cartões por raridade** (`PuffCardFx`): Raro com brilho suave na borda, Épico com borda animada e Lendário com borda dourada e reflexo holográfico;
+  - **desbloqueio com comemoração:** clarão, pulo do cartão e som, com um Puff novo de cada vez ao abrir o painel;
+  - o detalhe mostra a raridade, o formato e a história. Os bloqueados continuam como "?" com a dica.
+- **Pronto para a Camada B:**
+  - texturas próprias entram trocando os ids em `PuffEffects` (`TEXTURES`);
+  - a ilustração de cada cartão entra no campo `image` do catálogo.
+
 ### Embarque e aquecimento no mirante (Fase 4, ajuste pós-4.5)
 
 - **Entrar e sair são livres.** Passar pela porta coloca na fila, com o aviso "✅ Você está na fila!" e um som, e voltar pela porta tira da fila ("Você saiu da fila").

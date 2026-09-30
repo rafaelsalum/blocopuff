@@ -2,15 +2,23 @@
 
 -- Painel PUFFDEX (Fase 4.1): grade com todos os Puffs da coleção (os
 -- bloqueados aparecem como "?" com a raridade e a dica de como conseguir),
--- detalhe do Puff escolhido com prévia das cores e o botão EQUIPAR. Só
--- visual: equipar é um pedido ao servidor, que confere se o jogador tem.
+-- detalhe do Puff escolhido com a prévia animada do efeito (PuffPreview),
+-- a história e o botão EQUIPAR. Os cartões ganham acabamento por raridade e
+-- comemoram quando um Puff novo chega (PuffCardFx). Só visual: equipar é um
+-- pedido ao servidor, que confere se o jogador tem.
 
+local Debris = game:GetService("Debris")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
+local SoundService = game:GetService("SoundService")
 local TweenService = game:GetService("TweenService")
 
 local PuffCatalog = require(ReplicatedStorage.Shared.config.PuffCatalog)
 local ProfileTypes = require(ReplicatedStorage.Shared.types.ProfileTypes)
 local PuffTypes = require(ReplicatedStorage.Shared.types.PuffTypes)
+local PuffEffects = require(ReplicatedStorage.Shared.modules.PuffEffects)
+local PuffCardFx = require(script.Parent.PuffCardFx)
+local PuffPreview = require(script.Parent.PuffPreview)
 local ResponsiveScale = require(script.Parent.ResponsiveScale)
 local UiKit = require(script.Parent.UiKit)
 local UiTheme = require(script.Parent.UiTheme)
@@ -39,6 +47,8 @@ type Card = {
 	stroke: UIStroke,
 	equipped: TextLabel,
 	newTag: TextLabel,
+	effectIcon: TextLabel,
+	fx: PuffCardFx.CardFxHandle,
 }
 
 local GUI_NAME = "BlocoPuffPuffdex"
@@ -46,6 +56,10 @@ local PANEL_SIZE = Vector2.new(620, 440)
 local DETAIL_WIDTH = 210
 local CARD_SIZE = Vector2.new(86, 96)
 local LOCKED_COLOR = Color3.fromRGB(40, 32, 66)
+local UNLOCK_SOUND = "rbxasset://sounds/electronicpingshort.wav"
+-- Intervalo entre as comemorações quando chegam vários Puffs novos.
+local CELEBRATE_STAGGER = 0.25
+local CARD_FX_INTERVAL = 1 / 30
 
 local ORIGIN_LABELS: { [PuffOrigin]: string } = {
 	Starter = "Inicial",
@@ -168,23 +182,18 @@ function PuffdexView.new(playerGui: PlayerGui, onEquip: (id: string) -> (), onOp
 	detail.Parent = card
 	UiTheme.addCorner(detail, 14)
 
-	local detailOrb, detailGradient = createOrb(detail, 76, 4)
-	detailOrb.Position = UDim2.new(0.5, 0, 0, 14)
-
-	local trailBar = Instance.new("Frame")
-	trailBar.Name = "TrailPreview"
-	trailBar.AnchorPoint = Vector2.new(0.5, 0)
-	trailBar.Position = UDim2.new(0.5, 0, 0, 98)
-	trailBar.Size = UDim2.new(1, -40, 0, 8)
-	trailBar.BackgroundColor3 = UiTheme.Colors.White
-	trailBar.ZIndex = 4
-	trailBar.Parent = detail
-	UiTheme.addCorner(trailBar, 999)
-	local trailGradient = UiTheme.addGradient(trailBar, LOCKED_COLOR, LOCKED_COLOR, 0)
-	trailGradient.Transparency = NumberSequence.new(0, 0.7)
+	local previewHolder = Instance.new("Frame")
+	previewHolder.Name = "PreviewHolder"
+	previewHolder.AnchorPoint = Vector2.new(0.5, 0)
+	previewHolder.Position = UDim2.new(0.5, 0, 0, 10)
+	previewHolder.Size = UDim2.new(1, -20, 0, 90)
+	previewHolder.BackgroundTransparency = 1
+	previewHolder.ZIndex = 4
+	previewHolder.Parent = detail
+	local preview = PuffPreview.new(previewHolder, 4)
 
 	local detailName = UiTheme.createLabel(detail, "Name", "", UiTheme.Fonts.Display, 20, UiTheme.Colors.Ink)
-	detailName.Position = UDim2.fromOffset(10, 114)
+	detailName.Position = UDim2.fromOffset(10, 104)
 	detailName.Size = UDim2.new(1, -20, 0, 26)
 	detailName.TextScaled = true
 	detailName.ZIndex = 4
@@ -192,19 +201,30 @@ function PuffdexView.new(playerGui: PlayerGui, onEquip: (id: string) -> (), onOp
 	UiTheme.addTextOutline(detailName, 1.5)
 
 	local detailRarity = UiTheme.createLabel(detail, "Rarity", "", UiTheme.Fonts.BodyBold, 13, UiTheme.Colors.Ink)
-	detailRarity.Position = UDim2.fromOffset(10, 140)
-	detailRarity.Size = UDim2.new(1, -20, 0, 18)
+	detailRarity.Position = UDim2.fromOffset(10, 131)
+	detailRarity.Size = UDim2.new(1, -20, 0, 17)
+	detailRarity.TextScaled = true
 	detailRarity.ZIndex = 4
+	UiTheme.addTextConstraint(detailRarity, 10, 13)
+
+	local detailLore = UiTheme.createLabel(detail, "Lore", "", UiTheme.Fonts.Body, 12, UiTheme.Colors.Ink)
+	detailLore.Position = UDim2.fromOffset(12, 148)
+	detailLore.Size = UDim2.new(1, -24, 0, 32)
+	detailLore.TextWrapped = true
+	detailLore.TextScaled = true
+	detailLore.ZIndex = 4
+	UiTheme.addTextConstraint(detailLore, 9, 12)
 
 	local detailInfo = UiTheme.createLabel(detail, "Info", "", UiTheme.Fonts.Body, 12, UiTheme.Colors.InkSoft)
-	detailInfo.Position = UDim2.fromOffset(12, 162)
-	detailInfo.Size = UDim2.new(1, -24, 0, 50)
+	detailInfo.Position = UDim2.fromOffset(12, 184)
+	detailInfo.Size = UDim2.new(1, -24, 0, 46)
+	detailInfo.TextTruncate = Enum.TextTruncate.AtEnd
 	detailInfo.TextYAlignment = Enum.TextYAlignment.Top
 	detailInfo.ZIndex = 4
 
 	local progressTrack = Instance.new("Frame")
 	progressTrack.Name = "UnlockTrack"
-	progressTrack.Position = UDim2.fromOffset(16, 214)
+	progressTrack.Position = UDim2.fromOffset(16, 234)
 	progressTrack.Size = UDim2.new(1, -32, 0, 10)
 	progressTrack.BackgroundColor3 = UiTheme.Colors.Track
 	progressTrack.ZIndex = 4
@@ -230,7 +250,7 @@ function PuffdexView.new(playerGui: PlayerGui, onEquip: (id: string) -> (), onOp
 		zIndex = 5,
 	})
 
-	local footer = UiTheme.createLabel(card, "Footer", "Puffs só mudam as cores do disparo. Não dão vantagem.", UiTheme.Fonts.Body, 12, UiTheme.Colors.InkSoft)
+	local footer = UiTheme.createLabel(card, "Footer", "Puffs só mudam o visual do disparo. Não dão vantagem.", UiTheme.Fonts.Body, 12, UiTheme.Colors.InkSoft)
 	footer.Position = UDim2.new(0, 20, 1, -32)
 	footer.Size = UDim2.new(1, -40, 0, 20)
 	footer.TextXAlignment = Enum.TextXAlignment.Left
@@ -291,6 +311,15 @@ function PuffdexView.new(playerGui: PlayerGui, onEquip: (id: string) -> (), onOp
 		newTag.Visible = false
 		UiTheme.addCorner(newTag, 6)
 
+		local effectIcon = UiTheme.createLabel(button, "Effect", PuffEffects.info(definition.style.effect).icon, UiTheme.Fonts.Display, 14, UiTheme.Colors.Ink)
+		effectIcon.AnchorPoint = Vector2.new(0.5, 0)
+		effectIcon.Position = UDim2.new(0.5, 20, 0, 34)
+		effectIcon.Size = UDim2.fromOffset(20, 20)
+		effectIcon.ZIndex = 7
+		effectIcon.Visible = false
+
+		local fx = PuffCardFx.decorate(button, stroke, definition.rarity, rarityInfo.color, 6)
+
 		button.Activated:Connect(function()
 			UiKit.playClick()
 			selectedId = definition.id
@@ -308,6 +337,8 @@ function PuffdexView.new(playerGui: PlayerGui, onEquip: (id: string) -> (), onOp
 			stroke = stroke,
 			equipped = equipped,
 			newTag = newTag,
+			effectIcon = effectIcon,
+			fx = fx,
 		}
 	end
 
@@ -324,6 +355,8 @@ function PuffdexView.new(playerGui: PlayerGui, onEquip: (id: string) -> (), onOp
 			item.name.Text = if has then definition.name else "???"
 			item.equipped.Visible = has and definition.id == equippedId
 			item.newTag.Visible = has and newIds[definition.id] == true
+			item.effectIcon.Visible = has
+			item.fx.setOwned(has)
 			item.stroke.Thickness = if definition.id == selectedId then 3.5 else 2
 			item.button.BackgroundColor3 = if definition.id == selectedId then UiTheme.Colors.SurfaceSoft else UiTheme.Colors.Surface
 		end
@@ -338,12 +371,11 @@ function PuffdexView.new(playerGui: PlayerGui, onEquip: (id: string) -> (), onOp
 		local rarityInfo = PuffCatalog.rarity(definition.rarity)
 		local ownedPuff = owned[definition.id]
 		local has = ownedPuff ~= nil
-		paintOrb(detailGradient, definition, has)
-		trailGradient.Color = if has
-			then ColorSequence.new(definition.style.trailStart, definition.style.trailEnd)
-			else ColorSequence.new(LOCKED_COLOR, LOCKED_COLOR)
+		preview.setPuff(definition, has)
 		detailName.Text = if has then definition.name else "???"
-		detailRarity.Text = rarityInfo.label
+		local effectInfo = PuffEffects.info(definition.style.effect)
+		detailRarity.Text = if has then `{rarityInfo.label} · {effectInfo.icon} {effectInfo.label}` else rarityInfo.label
+		detailLore.Text = if has then `“{definition.lore}”` else "Um Puff misterioso…"
 		detailRarity.TextColor3 = rarityInfo.color
 
 		local current, target = PuffCatalog.progress(definition, stats, level)
@@ -387,12 +419,82 @@ function PuffdexView.new(playerGui: PlayerGui, onEquip: (id: string) -> (), onOp
 		onEquip(definition.id)
 	end)
 
+	-- Animações (prévia e cartões) só com o painel aberto.
+	local animation: RBXScriptConnection? = nil
+	local function startAnimation()
+		if animation ~= nil then
+			return
+		end
+		local cardClock = 0
+		animation = RunService.RenderStepped:Connect(function(deltaTime: number)
+			preview.step(deltaTime)
+			-- Bordas e reflexos dos cartões a ~30 quadros por segundo bastam.
+			cardClock += deltaTime
+			if cardClock < CARD_FX_INTERVAL then
+				return
+			end
+			for _, item in pairs(cards) do
+				item.fx.step(cardClock)
+			end
+			cardClock = 0
+		end)
+	end
+	local function stopAnimation()
+		local connection = animation
+		if connection ~= nil then
+			connection:Disconnect()
+			animation = nil
+		end
+	end
+
+	local function playUnlockSound(pitch: number)
+		local sound = Instance.new("Sound")
+		sound.SoundId = UNLOCK_SOUND
+		sound.PlaybackSpeed = pitch
+		sound.Volume = 0.6
+		sound.Parent = SoundService
+		sound.Ended:Once(function()
+			sound:Destroy()
+		end)
+		Debris:AddItem(sound, 3)
+		sound:Play()
+	end
+
+	-- Puffs novos comemoram ao abrir o painel (um de cada vez).
+	-- Só marca como comemorado quando a comemoração acontece de fato (se o
+	-- painel fechar antes, fica para a próxima abertura).
+	local celebrated: { [string]: boolean } = {}
+	local scheduled: { [string]: boolean } = {}
+	local nextSlot = 0
+	local function celebrateNew()
+		for _, definition in ipairs(PuffCatalog.all()) do
+			local id = definition.id
+			local item = cards[id]
+			if newIds[id] and not celebrated[id] and not scheduled[id] and owned[id] ~= nil and item ~= nil then
+				scheduled[id] = true
+				local now = os.clock()
+				local slot = math.max(now + 0.2, nextSlot)
+				nextSlot = slot + CELEBRATE_STAGGER
+				task.delay(slot - now, function()
+					scheduled[id] = nil
+					if screenGui.Enabled and screenGui.Parent ~= nil then
+						celebrated[id] = true
+						item.fx.celebrate()
+						playUnlockSound(1.2 + (PuffCatalog.rarity(definition.rarity).order * 0.1))
+					end
+				end)
+			end
+		end
+	end
+
 	local handle = {} :: PuffdexViewHandle
 
 	handle.open = function()
 		renderCards()
 		renderDetail()
 		screenGui.Enabled = true
+		startAnimation()
+		celebrateNew()
 		pop.Scale = 0.9
 		TweenService:Create(pop, TweenInfo.new(0.25, Enum.EasingStyle.Back), { Scale = 1 }):Play()
 		onOpened()
@@ -400,6 +502,7 @@ function PuffdexView.new(playerGui: PlayerGui, onEquip: (id: string) -> (), onOp
 
 	handle.close = function()
 		screenGui.Enabled = false
+		stopAnimation()
 	end
 
 	handle.isOpen = function(): boolean
@@ -422,6 +525,7 @@ function PuffdexView.new(playerGui: PlayerGui, onEquip: (id: string) -> (), onOp
 		if screenGui.Enabled then
 			renderCards()
 			renderDetail()
+			celebrateNew()
 		end
 	end
 
@@ -435,10 +539,13 @@ function PuffdexView.new(playerGui: PlayerGui, onEquip: (id: string) -> (), onOp
 		if screenGui.Enabled then
 			renderCards()
 			renderDetail()
+			celebrateNew()
 		end
 	end
 
 	handle.destroy = function()
+		stopAnimation()
+		preview.destroy()
 		responsive.destroy()
 		screenGui:Destroy()
 	end

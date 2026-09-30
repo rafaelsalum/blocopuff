@@ -20,6 +20,7 @@ local TweenService = game:GetService("TweenService")
 local MansionConfig = require(ReplicatedStorage.Shared.config.MansionConfig)
 local PuffCatalog = require(ReplicatedStorage.Shared.config.PuffCatalog)
 local MansionLayout = require(ReplicatedStorage.Shared.modules.MansionLayout)
+local PuffEffects = require(ReplicatedStorage.Shared.modules.PuffEffects)
 local BaraoModel = require(script.Parent.BaraoModel)
 local TelemetryService = require(script.Parent.TelemetryService)
 
@@ -35,6 +36,8 @@ local PET_COOLDOWN = 2
 -- Vitrine: Puffs por fileira e distância entre pedestais.
 local SHOWCASE_PER_ROW = 11
 local SHOWCASE_SPACING = 9.4
+-- Fração da quantidade de partículas do disparo usada na vitrine.
+local SHOWCASE_EFFECT_RATE = 0.25
 
 local LobbyStationsService = {}
 
@@ -205,6 +208,8 @@ local function buildPedestal(parent: Instance, index: number, definition: PuffDe
 	local center = position + Vector3.new(0, 3.55, 0)
 	local cloud = part(parent, `Puff{index}`, Vector3.new(1.3, 1.3, 1.3), CFrame.new(center), style.trailStart, Enum.Material.SmoothPlastic, Enum.PartType.Ball)
 	cloud.CanCollide = false
+	-- O efeito do Puff de verdade (partículas), bem mais calmo que no disparo.
+	PuffEffects.attach(cloud, style, SHOWCASE_EFFECT_RATE)
 	for side, offset in ipairs({ Vector3.new(-0.55, -0.25, 0.1), Vector3.new(0.55, -0.2, -0.1) }) do
 		local puffball = part(parent, `Puff{index}Side{side}`, Vector3.new(0.85, 0.85, 0.85), CFrame.new(center + offset), style.trailEnd, Enum.Material.SmoothPlastic, Enum.PartType.Ball)
 		puffball.CanCollide = false
@@ -223,7 +228,7 @@ local function buildPedestal(parent: Instance, index: number, definition: PuffDe
 	text.Size = UDim2.fromScale(1, 1)
 	text.BackgroundTransparency = 1
 	text.Font = Enum.Font.GothamBold
-	text.Text = `{definition.name} · {rarity.label}`
+	text.Text = `{PuffEffects.info(style.effect).icon} {definition.name} · {rarity.label}`
 	text.TextColor3 = rarity.color
 	text.TextScaled = true
 	text.TextStrokeTransparency = 0.2

@@ -17,6 +17,7 @@ local PuffTypes = require(ReplicatedStorage.Shared.types.PuffTypes)
 type PuffDefinition = PuffTypes.PuffDefinition
 type PuffRarity = PuffTypes.PuffRarity
 type PuffStyle = PuffTypes.PuffStyle
+type PuffEffect = PuffTypes.PuffEffect
 
 export type RarityInfo = {
 	label: string,
@@ -37,8 +38,8 @@ local RARITIES: { [PuffRarity]: RarityInfo } = {
 	Legendary = { label = "Lendário", color = Color3.fromRGB(255, 209, 102), order = 4 },
 }
 
-local function style(trailStart: Color3, trailEnd: Color3, glow: Color3, spark: Color3): PuffStyle
-	return table.freeze({ trailStart = trailStart, trailEnd = trailEnd, glow = glow, spark = spark })
+local function style(trailStart: Color3, trailEnd: Color3, glow: Color3, spark: Color3, effect: PuffEffect): PuffStyle
+	return table.freeze({ trailStart = trailStart, trailEnd = trailEnd, glow = glow, spark = spark, effect = effect })
 end
 
 local rgb = Color3.fromRGB
@@ -51,7 +52,8 @@ local ENTRIES: { PuffDefinition } = {
 		origin = "Starter",
 		unlock = { kind = "Starter" },
 		hint = "Todo mundo começa com ele",
-		style = style(rgb(255, 230, 148), rgb(194, 168, 255), rgb(255, 230, 148), rgb(255, 230, 148)),
+		lore = "O primeiro sopro de todo Puffador.",
+		style = style(rgb(255, 230, 148), rgb(194, 168, 255), rgb(255, 230, 148), rgb(255, 230, 148), "Soft"),
 		tradable = false,
 	},
 	{
@@ -61,7 +63,8 @@ local ENTRIES: { PuffDefinition } = {
 		origin = "Level",
 		unlock = { kind = "Level", target = 3 },
 		hint = "Chegue ao nível 3",
-		style = style(rgb(255, 170, 214), rgb(150, 210, 255), rgb(255, 190, 225), rgb(255, 170, 214)),
+		lore = "Doce, fofinho e cheio de brilho.",
+		style = style(rgb(255, 170, 214), rgb(150, 210, 255), rgb(255, 190, 225), rgb(255, 170, 214), "Sparkle"),
 		tradable = false,
 	},
 	{
@@ -71,7 +74,8 @@ local ENTRIES: { PuffDefinition } = {
 		origin = "Feat",
 		unlock = { kind = "Stat", stat = "matches", target = 5 },
 		hint = "Jogue 5 partidas",
-		style = style(rgb(170, 255, 214), rgb(79, 214, 160), rgb(150, 255, 200), rgb(120, 240, 190)),
+		lore = "Refresca até o Barão.",
+		style = style(rgb(170, 255, 214), rgb(79, 214, 160), rgb(150, 255, 200), rgb(120, 240, 190), "Bubbles"),
 		tradable = false,
 	},
 	{
@@ -81,7 +85,8 @@ local ENTRIES: { PuffDefinition } = {
 		origin = "Feat",
 		unlock = { kind = "Stat", stat = "blocksDestroyed", target = 150 },
 		hint = "Derrube 150 blocos",
-		style = style(rgb(255, 200, 160), rgb(255, 140, 110), rgb(255, 180, 140), rgb(255, 170, 120)),
+		lore = "Cheirinho de fruta no ar.",
+		style = style(rgb(255, 200, 160), rgb(255, 140, 110), rgb(255, 180, 140), rgb(255, 170, 120), "Cloud"),
 		tradable = false,
 	},
 	{
@@ -91,7 +96,8 @@ local ENTRIES: { PuffDefinition } = {
 		origin = "Level",
 		unlock = { kind = "Level", target = 10 },
 		hint = "Chegue ao nível 10",
-		style = style(rgb(230, 250, 255), rgb(110, 200, 255), rgb(170, 230, 255), rgb(200, 245, 255)),
+		lore = "Deixa um rastro de neve por onde passa.",
+		style = style(rgb(230, 250, 255), rgb(110, 200, 255), rgb(170, 230, 255), rgb(200, 245, 255), "Flakes"),
 		tradable = false,
 	},
 	{
@@ -101,7 +107,8 @@ local ENTRIES: { PuffDefinition } = {
 		origin = "Feat",
 		unlock = { kind = "Stat", stat = "knockouts", target = 15 },
 		hint = "Derrube 15 jogadores",
-		style = style(rgb(255, 255, 140), rgb(90, 170, 255), rgb(255, 250, 120), rgb(255, 255, 160)),
+		lore = "Nunca vai em linha reta.",
+		style = style(rgb(255, 255, 140), rgb(90, 170, 255), rgb(255, 250, 120), rgb(255, 255, 160), "Zigzag"),
 		tradable = false,
 	},
 	{
@@ -111,7 +118,8 @@ local ENTRIES: { PuffDefinition } = {
 		origin = "Feat",
 		unlock = { kind = "Stat", stat = "blocksBuilt", target = 10 },
 		hint = "Reconstrua 10 blocos com o Puffador do Cofre",
-		style = style(rgb(255, 170, 110), rgb(200, 90, 70), rgb(255, 150, 100), rgb(255, 190, 130)),
+		lore = "Nasceu da poeira do cofre.",
+		style = style(rgb(255, 170, 110), rgb(200, 90, 70), rgb(255, 150, 100), rgb(255, 190, 130), "Cloud"),
 		tradable = false,
 	},
 	{
@@ -121,7 +129,8 @@ local ENTRIES: { PuffDefinition } = {
 		origin = "Feat",
 		unlock = { kind = "Stat", stat = "secretsFound", target = 3 },
 		hint = "Descubra 3 passagens secretas",
-		style = style(rgb(200, 255, 240), rgb(120, 110, 200), rgb(170, 240, 230), rgb(190, 255, 245)),
+		lore = "Passa girando, bem de mansinho.",
+		style = style(rgb(200, 255, 240), rgb(120, 110, 200), rgb(170, 240, 230), rgb(190, 255, 245), "Spiral"),
 		tradable = false,
 	},
 	{
@@ -131,7 +140,8 @@ local ENTRIES: { PuffDefinition } = {
 		origin = "Feat",
 		unlock = { kind = "Stat", stat = "top3", target = 20 },
 		hint = "Fique no Top 3 em 20 partidas",
-		style = style(rgb(255, 223, 0), rgb(0, 156, 59), rgb(255, 230, 60), rgb(80, 150, 255)),
+		lore = "Cada disparo é uma festa.",
+		style = style(rgb(255, 223, 0), rgb(0, 156, 59), rgb(255, 230, 60), rgb(80, 150, 255), "Confetti"),
 		tradable = false,
 	},
 	{
@@ -141,7 +151,8 @@ local ENTRIES: { PuffDefinition } = {
 		origin = "Level",
 		unlock = { kind = "Level", target = 25 },
 		hint = "Chegue ao nível 25",
-		style = style(rgb(255, 150, 240), rgb(90, 70, 220), rgb(200, 140, 255), rgb(150, 220, 255)),
+		lore = "Carrega um pedacinho do céu.",
+		style = style(rgb(255, 150, 240), rgb(90, 70, 220), rgb(200, 140, 255), rgb(150, 220, 255), "Spiral"),
 		tradable = false,
 	},
 	{
@@ -151,7 +162,8 @@ local ENTRIES: { PuffDefinition } = {
 		origin = "Feat",
 		unlock = { kind = "Stat", stat = "vaultsConquered", target = 3 },
 		hint = "Conquiste o prêmio do cofre 3 vezes",
-		style = style(rgb(255, 225, 120), rgb(150, 110, 40), rgb(255, 210, 90), rgb(255, 240, 170)),
+		lore = "Brilha como moeda nova.",
+		style = style(rgb(255, 225, 120), rgb(150, 110, 40), rgb(255, 210, 90), rgb(255, 240, 170), "Sparkle"),
 		tradable = false,
 	},
 	{
@@ -161,7 +173,8 @@ local ENTRIES: { PuffDefinition } = {
 		origin = "Feat",
 		unlock = { kind = "Stat", stat = "baraoEscapes", target = 25 },
 		hint = "Fuja do Barão 25 vezes",
-		style = style(rgb(255, 200, 120), rgb(160, 90, 40), rgb(255, 170, 90), rgb(255, 120, 90)),
+		lore = "O Barão aprovou. Com muito cuidado.",
+		style = style(rgb(255, 200, 120), rgb(160, 90, 40), rgb(255, 170, 90), rgb(255, 120, 90), "Flames"),
 		tradable = false,
 	},
 	{
@@ -171,7 +184,8 @@ local ENTRIES: { PuffDefinition } = {
 		origin = "Feat",
 		unlock = { kind = "Stat", stat = "wins", target = 25 },
 		hint = "Vença 25 partidas",
-		style = style(rgb(255, 245, 190), rgb(214, 150, 40), rgb(255, 215, 110), rgb(255, 250, 200)),
+		lore = "Só para quem vence de verdade.",
+		style = style(rgb(255, 245, 190), rgb(214, 150, 40), rgb(255, 215, 110), rgb(255, 250, 200), "Sparkle"),
 		tradable = false,
 	},
 	{
@@ -181,7 +195,8 @@ local ENTRIES: { PuffDefinition } = {
 		origin = "Feat",
 		unlock = { kind = "Stat", stat = "comebacks", target = 10 },
 		hint = "Dê a Volta por Cima 10 vezes",
-		style = style(rgb(255, 240, 150), rgb(255, 80, 60), rgb(255, 160, 80), rgb(255, 200, 90)),
+		lore = "Sempre volta, mais forte.",
+		style = style(rgb(255, 240, 150), rgb(255, 80, 60), rgb(255, 160, 80), rgb(255, 200, 90), "Flames"),
 		tradable = false,
 	},
 	-- Exclusivos da Puff Machine (4.2): só saem girando a máquina.
@@ -192,7 +207,8 @@ local ENTRIES: { PuffDefinition } = {
 		origin = "Machine",
 		unlock = { kind = "Machine" },
 		hint = "Sai na Puff Machine",
-		style = style(rgb(255, 160, 200), rgb(255, 110, 170), rgb(255, 150, 200), rgb(255, 200, 225)),
+		lore = "Estoura bolhas no caminho.",
+		style = style(rgb(255, 160, 200), rgb(255, 110, 170), rgb(255, 150, 200), rgb(255, 200, 225), "Bubbles"),
 		tradable = false,
 	},
 	{
@@ -202,7 +218,8 @@ local ENTRIES: { PuffDefinition } = {
 		origin = "Machine",
 		unlock = { kind = "Machine" },
 		hint = "Sai na Puff Machine",
-		style = style(rgb(230, 255, 130), rgb(140, 220, 60), rgb(210, 255, 110), rgb(240, 255, 170)),
+		lore = "Azedinho e cheio de energia.",
+		style = style(rgb(230, 255, 130), rgb(140, 220, 60), rgb(210, 255, 110), rgb(240, 255, 170), "Sparkle"),
 		tradable = false,
 	},
 	{
@@ -212,7 +229,8 @@ local ENTRIES: { PuffDefinition } = {
 		origin = "Machine",
 		unlock = { kind = "Machine" },
 		hint = "Sai na Puff Machine",
-		style = style(rgb(245, 248, 255), rgb(170, 190, 230), rgb(220, 230, 255), rgb(235, 240, 255)),
+		lore = "Leve como um travesseiro.",
+		style = style(rgb(245, 248, 255), rgb(170, 190, 230), rgb(220, 230, 255), rgb(235, 240, 255), "Cloud"),
 		tradable = false,
 	},
 	{
@@ -222,7 +240,8 @@ local ENTRIES: { PuffDefinition } = {
 		origin = "Machine",
 		unlock = { kind = "Machine" },
 		hint = "Sai na Puff Machine",
-		style = style(rgb(120, 240, 255), rgb(30, 110, 220), rgb(90, 200, 255), rgb(160, 245, 255)),
+		lore = "Trouxe o mar para a arena.",
+		style = style(rgb(120, 240, 255), rgb(30, 110, 220), rgb(90, 200, 255), rgb(160, 245, 255), "Bubbles"),
 		tradable = false,
 	},
 	{
@@ -232,7 +251,8 @@ local ENTRIES: { PuffDefinition } = {
 		origin = "Machine",
 		unlock = { kind = "Machine" },
 		hint = "Sai na Puff Machine",
-		style = style(rgb(255, 120, 120), rgb(120, 140, 255), rgb(255, 220, 120), rgb(140, 255, 170)),
+		lore = "Todas as cores de uma vez.",
+		style = style(rgb(255, 120, 120), rgb(120, 140, 255), rgb(255, 220, 120), rgb(140, 255, 170), "Rainbow"),
 		tradable = false,
 	},
 	{
@@ -242,7 +262,8 @@ local ENTRIES: { PuffDefinition } = {
 		origin = "Machine",
 		unlock = { kind = "Machine" },
 		hint = "Sai na Puff Machine",
-		style = style(rgb(80, 255, 230), rgb(255, 60, 220), rgb(120, 255, 240), rgb(255, 120, 240)),
+		lore = "Pisca mais que letreiro.",
+		style = style(rgb(80, 255, 230), rgb(255, 60, 220), rgb(120, 255, 240), rgb(255, 120, 240), "Zigzag"),
 		tradable = false,
 	},
 	{
@@ -252,7 +273,8 @@ local ENTRIES: { PuffDefinition } = {
 		origin = "Machine",
 		unlock = { kind = "Machine" },
 		hint = "Sai na Puff Machine",
-		style = style(rgb(140, 255, 190), rgb(150, 90, 255), rgb(150, 255, 210), rgb(200, 170, 255)),
+		lore = "Dança como luz no céu do polo.",
+		style = style(rgb(140, 255, 190), rgb(150, 90, 255), rgb(150, 255, 210), rgb(200, 170, 255), "Rainbow"),
 		tradable = false,
 	},
 	{
@@ -262,7 +284,8 @@ local ENTRIES: { PuffDefinition } = {
 		origin = "Machine",
 		unlock = { kind = "Machine" },
 		hint = "Sai na Puff Machine",
-		style = style(rgb(255, 255, 235), rgb(255, 150, 60), rgb(255, 230, 160), rgb(255, 250, 210)),
+		lore = "Risca a arena de ponta a ponta.",
+		style = style(rgb(255, 255, 235), rgb(255, 150, 60), rgb(255, 230, 160), rgb(255, 250, 210), "Flames"),
 		tradable = false,
 	},
 }

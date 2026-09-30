@@ -19,6 +19,7 @@ local GameConfig = require(ReplicatedStorage.Shared.config.GameConfig)
 local PuffCatalog = require(ReplicatedStorage.Shared.config.PuffCatalog)
 local PuffTypes = require(ReplicatedStorage.Shared.types.PuffTypes)
 local PuffadorConstants = require(ReplicatedStorage.Shared.modules.PuffadorConstants)
+local PuffEffects = require(ReplicatedStorage.Shared.modules.PuffEffects)
 local ArenaService = require(script.Parent.ArenaService)
 
 type BlockDestructionContext = ArenaService.BlockDestructionContext
@@ -37,6 +38,9 @@ local SERVICE_NAME = "ProjectileService"
 local IMPACT_EFFECT_LIFETIME = 0.35
 local IMPACT_EFFECT_START_SIZE = 0.4
 local IMPACT_EFFECT_END_SIZE = 2.2
+-- Partículas do efeito do Puff na explosão do impacto.
+local IMPACT_BURST_AMOUNT = 10
+local IMPACT_BURST_LIFETIME = 1.2
 
 type ProjectileRecord = {
 	part: BasePart,
@@ -88,9 +92,15 @@ local function removeProjectileAt(index: number)
 	end
 end
 
-local function createImpactEffect(position: Vector3, normal: Vector3, sparkColor: Color3)
-	if projectileContainer == nil then
+local function createImpactEffect(position: Vector3, normal: Vector3, style: PuffStyle)
+	local container = projectileContainer
+	if container == nil then
 		return
+	end
+	local sparkColor = style.spark
+	local burst = PuffEffects.burst(container, position + (normal * 0.2), style, IMPACT_BURST_AMOUNT)
+	if burst ~= nil then
+		Debris:AddItem(burst, IMPACT_BURST_LIFETIME)
 	end
 
 	local effect = Instance.new("Part")
@@ -199,7 +209,7 @@ local function updateProjectiles(deltaTime: number)
 					for _, handler in pairs(surfaceHitHandlers) do
 						task.spawn(handler, record.ownerPlayer, hitInstance, raycastResult.Position)
 					end
-					createImpactEffect(raycastResult.Position, raycastResult.Normal, record.style.spark)
+					createImpactEffect(raycastResult.Position, raycastResult.Normal, record.style)
 					return false
 				end
 				local destroyedBlock = ArenaService.tryDestroyBlock(hitInstance, context)
@@ -219,7 +229,7 @@ local function updateProjectiles(deltaTime: number)
 				else
 					notifyHit(record, hitInstance, raycastResult.Position)
 				end
-				createImpactEffect(raycastResult.Position, raycastResult.Normal, record.style.spark)
+				createImpactEffect(raycastResult.Position, raycastResult.Normal, record.style)
 				return false
 			end
 
@@ -235,7 +245,9 @@ local function updateProjectiles(deltaTime: number)
 			record.distanceTraveled = newDistance
 			record.logicPosition = previousPosition + displacement
 			local convergence = math.clamp(1 - (newDistance / config.ProjectileConvergeDistance), 0, 1)
-			record.part.Position = record.logicPosition + (record.visualOffset * convergence)
+			-- Espiral/zigue-zague do Puff: só o projétil visual se desvia.
+			local motion = PuffEffects.motionOffset(record.style, record.direction, newDistance)
+			record.part.Position = record.logicPosition + (record.visualOffset * convergence) + motion
 			return true
 		end)
 
@@ -331,18 +343,17 @@ function ProjectileService.spawn(
 	trail.Name = "PuffTrail"
 	trail.Attachment0 = trailFront
 	trail.Attachment1 = trailBack
-	trail.Color = ColorSequence.new({
-		ColorSequenceKeypoint.new(0, puffStyle.trailStart),
-		ColorSequenceKeypoint.new(1, puffStyle.trailEnd),
-	})
+	trail.Color = PuffEffects.trailColor(puffStyle)
 	trail.Transparency = NumberSequence.new({
 		NumberSequenceKeypoint.new(0, 0.05),
 		NumberSequenceKeypoint.new(1, 1),
 	})
-	trail.Lifetime = 0.18
+	trail.Lifetime = PuffEffects.trailLifetime(puffStyle)
 	trail.LightEmission = 0.75
 	trail.FaceCamera = true
 	trail.Parent = part
+
+	PuffEffects.attach(part, puffStyle, 1)
 
 	local glow = Instance.new("PointLight")
 	glow.Name = "Glow"

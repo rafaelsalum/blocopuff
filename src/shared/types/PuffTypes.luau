@@ -22,13 +22,19 @@ export type PuffUnlockRule = {
 	target: number?,
 }
 
--- Cores do disparo. O projétil em si continua do mesmo tamanho e cor (branco
--- bem visível); o Puff muda só o rastro, o brilho e as faíscas do impacto.
+-- Formato do efeito do Puff (partículas e movimento do rastro), ver
+-- PuffEffects. Só visual.
+export type PuffEffect = "Soft" | "Sparkle" | "Bubbles" | "Cloud" | "Flakes" | "Zigzag" | "Spiral" | "Confetti" | "Flames" | "Rainbow"
+
+-- Cores e efeito do disparo. O projétil em si continua do mesmo tamanho e
+-- cor (branco bem visível); o Puff muda o rastro, o brilho, as partículas e
+-- as faíscas do impacto. Tamanho, velocidade e acerto são iguais para todos.
 export type PuffStyle = {
 	trailStart: Color3,
 	trailEnd: Color3,
 	glow: Color3,
 	spark: Color3,
+	effect: PuffEffect,
 }
 
 export type PuffDefinition = {
@@ -39,6 +45,10 @@ export type PuffDefinition = {
 	unlock: PuffUnlockRule,
 	-- Frase curta de como conseguir (para crianças: sem textos longos).
 	hint: string,
+	-- Uma linha de "história" do Puff, curta e divertida.
+	lore: string,
+	-- Ilustração do cartão (rbxassetid://…), quando existir (Camada B).
+	image: string?,
 	style: PuffStyle,
 	-- Preparação para trading futuro (desligado).
 	tradable: boolean,
