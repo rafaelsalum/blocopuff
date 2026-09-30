@@ -342,6 +342,21 @@ Escopo em `docs/FASE_2_SEGREDOS_COFRE_BARAO.md`.
   - depois sai pela portinhola do outro corredor, na ponta longe de quem está lá, latindo;
   - desiste se alguém entra no corredor dele ou se o outro esvazia;
   - substitui o teletransporte invisível de antes.
+- **Visual da capa** (`BaraoModel`):
+  - cabeça grande e quadrada, focinho e bochechas claros, mancha clara na testa;
+  - olhos grandes com brilho, orelhas grandes caídas, sorriso aberto com a língua de fora;
+  - camisa verde com listras amarelas, mangas amarelas e a bandeira do Brasil nas costas (vista de cima, na câmera) e nos dois lados;
+  - rabo peludo de ponta clara.
+- **Andar natural** (`BaraoAnimator`):
+  - a passada acompanha a velocidade, então as patas não patinam; a pata que vai à frente levanta do chão;
+  - trote com as patas em diagonal; galope com o corpo balançando como cavalinho;
+  - vira aos poucos e inclina nas curvas; a cabeça compensa o balanço;
+  - orelhas e língua chacoalham com mola; o rabo abana de lado.
+- **Carinho no Jardim:**
+  - o aviso "Fazer carinho" fica na frente da caminha, sem tapar o Barão;
+  - no carinho ele acorda, late baixinho, pula dando uma volta, solta corações 💜 e senta abanando o rabo olhando para você;
+  - o cliente espera todas as peças chegarem do servidor antes de animar (antes, podia começar sem elas e não mexer nada);
+  - cada animação roda protegida: um erro aparece uma vez na saída e não para as outras.
 - **Latido de verdade:** o latido é o áudio `rbxassetid://124017572768108` (~3 s, em `GameConfig.Barao.BarkSoundIds`), tocado inteiro e com o tom um pouco variado (`BarkPitch`). Um latido não começa enquanto o anterior toca: o Barão só faz a animação de latir.
 - **Território:** placas "🐾 TERRITÓRIO DO BARÃO" e pegadas no chão de cada patamar.
 

@@ -36,6 +36,8 @@ local PET_COOLDOWN = 2
 -- Barão do Jardim: tamanho, caminha e quanto tempo fica feliz no carinho.
 local FRIENDLY_BARAO_SCALE = 1.15
 local FRIENDLY_BED_SIZE = 6.5
+local FRIENDLY_PROMPT_GAP = 1.5
+local FRIENDLY_PROMPT_HEIGHT = 1
 local FRIENDLY_BARAO_TAG = "BaraoFriendly"
 local PET_ATTRIBUTE = "BaraoPet"
 -- Vitrine: Puffs por fileira e distância entre pedestais.
@@ -149,6 +151,7 @@ local function buildFriendlyBarao(parent: Instance, base: Vector3)
 	local restCFrame = CFrame.new(base + Vector3.new(0, 0.6, 0)) * CFrame.Angles(0, math.pi / 2, 0)
 	barao:PivotTo(restCFrame)
 	barao:SetAttribute(PET_ATTRIBUTE, 0)
+	barao:SetAttribute(BaraoModel.RestAttribute, restCFrame)
 	barao.Parent = parent
 	CollectionService:AddTag(barao, FRIENDLY_BARAO_TAG)
 	local body = barao:FindFirstChild("Body")
@@ -171,7 +174,21 @@ local function buildFriendlyBarao(parent: Instance, base: Vector3)
 	zzz.TextScaled = true
 	zzz.Parent = sleep
 
-	local proximity = prompt(body, "Barao", "Fazer carinho", "Barão")
+	-- O aviso de carinho fica na frente da caminha, baixo, para não tapar
+	-- o Barão (ele olha para −X).
+	local anchor = part(
+		parent,
+		"BaraoPromptAnchor",
+		Vector3.new(1, 1, 1),
+		CFrame.new(base + Vector3.new(-((FRIENDLY_BED_SIZE / 2) + FRIENDLY_PROMPT_GAP), FRIENDLY_PROMPT_HEIGHT, 0)),
+		Color3.new(1, 1, 1)
+	)
+	anchor.Transparency = 1
+	anchor.CanCollide = false
+	anchor.CanQuery = false
+	anchor.CanTouch = false
+	anchor.CastShadow = false
+	local proximity = prompt(anchor, "Barao", "Fazer carinho", "Barão")
 	local happy = false
 	proximity.Triggered:Connect(function(player: Player)
 		local clock = os.clock()

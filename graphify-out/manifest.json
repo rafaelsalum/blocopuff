@@ -650,8 +650,8 @@
     "semantic_hash": ""
   },
   "src/server/services/LobbyStationsService.luau": {
-    "mtime": 1790735811.0127656,
-    "ast_hash": "e73f5a28050fc5033d56a9a93202aa31",
+    "mtime": 1790738850.6659515,
+    "ast_hash": "9ef6295f7195c45ff6b506afebb9d452",
     "semantic_hash": ""
   },
   "src/server/services/TrainingService.luau": {
@@ -735,18 +735,18 @@
     "semantic_hash": ""
   },
   "src/client/controllers/BaraoVisualController.luau": {
-    "mtime": 1790735811.0126033,
-    "ast_hash": "d4b9c51f26616f9b848a7c6497980968",
+    "mtime": 1790738881.0582743,
+    "ast_hash": "dbbcf99c3646b020ff5888a0adf3f87f",
     "semantic_hash": ""
   },
   "src/client/effects/BaraoAnimator.luau": {
-    "mtime": 1790735795.6627991,
-    "ast_hash": "0961cce077292f40edfa307f9d11960a",
+    "mtime": 1790738881.0585437,
+    "ast_hash": "83461e4e44d1d1e26e61b4b51a5fc7c8",
     "semantic_hash": ""
   },
   "src/shared/modules/BaraoModel.luau": {
-    "mtime": 1790735811.012474,
-    "ast_hash": "682bb41564f80cdd50f1292403d5e8dd",
+    "mtime": 1790738850.665494,
+    "ast_hash": "e62d1a2b83305a0143b096c6802f67cb",
     "semantic_hash": ""
   }
 }
