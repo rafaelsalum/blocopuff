@@ -342,6 +342,23 @@ Cada Puff agora tem um **formato de efeito** e uma **frase de história**, além
   - texturas próprias entram trocando os ids em `PuffEffects` (`TEXTURES`);
   - a ilustração de cada cartão entra no campo `image` do catálogo.
 
+### Disparos desenhados no cliente (Fase 4, ajuste pós-4.5)
+
+Os efeitos dos Puffs agora aparecem nos disparos de verdade. Antes o servidor movia uma bolinha e o Roblox só a enviava umas 20 vezes por segundo: a 220 studs/s a espiral sumia e as partículas quase não apareciam.
+
+- **Servidor (`ProjectileService`):**
+  - só decide: o raio da mira anda, acerta blocos, personagens e alvos, igual antes;
+  - não cria mais peças; avisa os clientes pelo remote `PuffShots` (`Fired` na saída, `Ended` com a distância e o ponto do impacto, `Clear` no fim da rodada).
+- **Cliente (`PuffShotController` + `effects/PuffShotRenderer`):**
+  - desenha cada disparo a cada quadro, com o miolo, o rastro, as partículas do Puff, a espiral/zigue-zague do formato e a explosão no impacto;
+  - o disparo do próprio jogador aparece na hora do clique e é ligado ao do servidor quando a confirmação chega.
+- **Desempenho:**
+  - peças reaproveitadas (pool por Puff), nada é criado a cada quadro, um raio por disparo por quadro;
+  - detalhe pela distância da câmera: perto tem tudo e luz, no meio metade das partículas, longe só o rastro, muito longe nem desenha;
+  - no máximo 14 disparos com partículas ao mesmo tempo, e metade delas no celular ou com os gráficos em 1 a 3;
+  - o servidor ficou mais leve: nada de peças, rastros e partículas replicados por disparo.
+- **Justiça:** o acerto continua 100% do servidor; o desenho só acompanha.
+
 ### Embarque e aquecimento no mirante (Fase 4, ajuste pós-4.5)
 
 - **Entrar e sair são livres.** Passar pela porta coloca na fila, com o aviso "✅ Você está na fila!" e um som, e voltar pela porta tira da fila ("Você saiu da fila").

@@ -10,8 +10,8 @@
     "semantic_hash": ""
   },
   "src/client/controllers/PuffadorController.luau": {
-    "mtime": 1790550916.0395079,
-    "ast_hash": "fa03f50dca237fa470adc79f841ee5e7",
+    "mtime": 1790733849.2595942,
+    "ast_hash": "865c7b3152f6cd68ed95c4076fa0883f",
     "semantic_hash": ""
   },
   "src/client/controllers/SpectatorController.luau": {
@@ -20,8 +20,8 @@
     "semantic_hash": ""
   },
   "src/client/init.client.luau": {
-    "mtime": 1790567724.5358398,
-    "ast_hash": "a8563223713a29da4a4a36e42d29e186",
+    "mtime": 1790733860.0537925,
+    "ast_hash": "9b700e3647202163caf480120bb04102",
     "semantic_hash": ""
   },
   "src/client/ui/CrosshairView.luau": {
@@ -65,13 +65,13 @@
     "semantic_hash": ""
   },
   "src/server/services/ProjectileService.luau": {
-    "mtime": 1790732493.2842972,
-    "ast_hash": "fe20bc8438982ec3e07c56e3997937cf",
+    "mtime": 1790733718.8989458,
+    "ast_hash": "fffa0a4f625c061f0dc880aa8e32e0a8",
     "semantic_hash": ""
   },
   "src/server/services/PuffadorService.luau": {
-    "mtime": 1790564576.478745,
-    "ast_hash": "91f5a0de9ff32be064b1487244df9024",
+    "mtime": 1790733725.6127076,
+    "ast_hash": "b14ac47edfbceeedb02b7cc363ca4ec9",
     "semantic_hash": ""
   },
   "src/server/services/ReplicatedStateService.luau": {
@@ -90,8 +90,8 @@
     "semantic_hash": ""
   },
   "src/shared/modules/PuffadorConstants.luau": {
-    "mtime": 1790567537.1663997,
-    "ast_hash": "7fc55da1af000af92becbd87e28f6960",
+    "mtime": 1790733718.8994637,
+    "ast_hash": "1838fd1fee144785e8e1a528badae2ac",
     "semantic_hash": ""
   },
   "src/shared/modules/RoundMessages.luau": {
@@ -125,8 +125,8 @@
     "semantic_hash": ""
   },
   "README.md": {
-    "mtime": 1790732642.0687754,
-    "ast_hash": "8c0d770d2d58dd5ac77ee50546243b6a",
+    "mtime": 1790733879.3309205,
+    "ast_hash": "d5de58a224fbe8836e442e4b3c269ed1",
     "semantic_hash": ""
   },
   "src/client/controllers/CombatCameraController.luau": {
@@ -725,8 +725,18 @@
     "semantic_hash": ""
   },
   "src/shared/modules/PuffEffects.luau": {
-    "mtime": 1790732897.3406157,
-    "ast_hash": "52186b60dafc3fa80d58c59a6f4b1a9b",
+    "mtime": 1790733659.7772336,
+    "ast_hash": "5221c8378e30f402b6c73bee5729b05d",
+    "semantic_hash": ""
+  },
+  "src/client/controllers/PuffShotController.luau": {
+    "mtime": 1790734032.4262972,
+    "ast_hash": "ece6bb6570c3d4584383f4c89c96fa64",
+    "semantic_hash": ""
+  },
+  "src/client/effects/PuffShotRenderer.luau": {
+    "mtime": 1790734032.4261317,
+    "ast_hash": "a868684c0d06d110aae5d2f11adb49fb",
     "semantic_hash": ""
   }
 }

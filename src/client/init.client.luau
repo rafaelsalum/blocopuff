@@ -2,6 +2,7 @@
 
 local HudController = require(script.controllers.HudController)
 local PuffadorController = require(script.controllers.PuffadorController)
+local PuffShotController = require(script.controllers.PuffShotController)
 local SpectatorController = require(script.controllers.SpectatorController)
 local AdminController = require(script.controllers.AdminController)
 local BlockCollapseController = require(script.controllers.BlockCollapseController)
@@ -39,6 +40,14 @@ local puffadorOk, puffadorErr = pcall(function()
 end)
 if not puffadorOk then
 	warn(string.format("[BlocoPuff] Failed to start Puffador controller: %s", tostring(puffadorErr)))
+end
+
+-- Desenho dos disparos (de todos os jogadores) com os efeitos dos Puffs.
+local shotsOk, shotsErr = pcall(function()
+	PuffShotController.start()
+end)
+if not shotsOk then
+	warn(string.format("[BlocoPuff] Failed to start Puff shot controller: %s", tostring(shotsErr)))
 end
 
 local spectatorOk, spectatorErr = pcall(function()

@@ -33,6 +33,7 @@ export type PuffadorConstantsModule = {
 	PartyRemoteName: string,
 	ReactionRemoteName: string,
 	MatchQueueRemoteName: string,
+	PuffShotsRemoteName: string,
 
 	OwnerUserIdAttribute: string,
 	RoundIdAttribute: string,
@@ -70,6 +71,8 @@ local PuffadorConstants: PuffadorConstantsModule = {
 	PartyRemoteName = "Party",
 	ReactionRemoteName = "Reaction",
 	MatchQueueRemoteName = "MatchQueue",
+	-- Servidor → clientes: disparos para desenhar (ProjectileService).
+	PuffShotsRemoteName = "PuffShots",
 
 	OwnerUserIdAttribute = "OwnerUserId",
 	RoundIdAttribute = StateAttributeNames.RoundId,

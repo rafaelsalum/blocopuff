@@ -19,6 +19,7 @@ local ArenaConstants = require(ReplicatedStorage.Shared.modules.ArenaConstants)
 local PuffadorConstants = require(ReplicatedStorage.Shared.modules.PuffadorConstants)
 local CombatCameraController = require(script.Parent.CombatCameraController)
 local BuildModeController = require(script.Parent.BuildModeController)
+local PuffShotController = require(script.Parent.PuffShotController)
 local CrosshairView = require(script.Parent.Parent.ui.CrosshairView)
 local ControlHintView = require(script.Parent.Parent.ui.ControlHintView)
 local FireButtonView = require(script.Parent.Parent.ui.FireButtonView)
@@ -195,14 +196,21 @@ local function playToolSound(tool: Tool, soundName: string)
 	sound:Play()
 end
 
-local function playMuzzleFlash(tool: Tool)
+local function getMuzzlePosition(tool: Tool): Vector3?
 	local handle = tool:FindFirstChild(PuffadorConstants.HandleName)
 	if handle == nil or not handle:IsA("BasePart") then
-		return
+		return nil
 	end
-
 	local muzzle = handle:FindFirstChild(PuffadorConstants.MuzzleAttachmentName)
 	if muzzle == nil or not muzzle:IsA("Attachment") then
+		return nil
+	end
+	return muzzle.WorldPosition
+end
+
+local function playMuzzleFlash(tool: Tool)
+	local muzzlePosition = getMuzzlePosition(tool)
+	if muzzlePosition == nil then
 		return
 	end
 
@@ -210,7 +218,7 @@ local function playMuzzleFlash(tool: Tool)
 	flash.Name = "LocalPuffFlash"
 	flash.Shape = Enum.PartType.Ball
 	flash.Size = Vector3.new(1.25, 1.25, 1.25)
-	flash.Position = muzzle.WorldPosition
+	flash.Position = muzzlePosition
 	flash.Anchored = true
 	flash.CanCollide = false
 	flash.CanTouch = false
@@ -276,6 +284,9 @@ local function onToolActivated()
 	end
 	playLocalShotFeedback(tool)
 	remote:FireServer(aimTarget, aimOrigin)
+	-- Desenha o disparo na hora; o servidor confirma e decide o acerto.
+	local muzzle = getMuzzlePosition(tool)
+	PuffShotController.predict(muzzle or aimOrigin, aimOrigin, aimTarget, PuffadorConstants.ProjectileColor)
 end
 
 local function stopFiring()

@@ -98,12 +98,14 @@ local LAYERS: { [PuffEffect]: { Layer } } = {
 }
 
 -- Espiral: raio (studs) e voltas por stud; zigue-zague: amplitude e período.
-local SPIRAL_RADIUS = 0.45
-local SPIRAL_TURNS_PER_STUD = 0.2
-local ZIGZAG_AMPLITUDE = 0.6
-local ZIGZAG_PERIOD = 3
+-- Calibrados para o disparo real (220 studs/s, ~3,7 studs por quadro a
+-- 60 fps): uma volta a cada ~22 studs ainda aparece como espiral.
+local SPIRAL_RADIUS = 1.1
+local SPIRAL_TURNS_PER_STUD = 0.045
+local ZIGZAG_AMPLITUDE = 1.2
+local ZIGZAG_PERIOD = 14
 -- O desvio cresce nos primeiros studs, para o disparo sair do cano.
-local MOTION_RAMP = 4
+local MOTION_RAMP = 8
 
 local PuffEffects = {}
 
@@ -146,17 +148,30 @@ function PuffEffects.trailLifetime(style: PuffStyle): number
 	return 0.18
 end
 
+local function scaleSequence(sequence: NumberSequence, factor: number): NumberSequence
+	if factor == 1 then
+		return sequence
+	end
+	local points: { NumberSequenceKeypoint } = {}
+	for _, point in ipairs(sequence.Keypoints) do
+		table.insert(points, NumberSequenceKeypoint.new(point.Time, point.Value * factor, point.Envelope * factor))
+	end
+	return NumberSequence.new(points)
+end
+
 -- Cria os emissores do efeito em `part`. `rateScale` reduz a quantidade
--- (vitrine) ou zera (a explosão define a própria taxa).
-function PuffEffects.attach(part: BasePart, style: PuffStyle, rateScale: number): { ParticleEmitter }
+-- (vitrine), aumenta (disparo, que passa voando) ou zera (explosão com
+-- :Emit, feita no cliente). `sizeScale` aumenta as partículas do disparo.
+function PuffEffects.attach(part: BasePart, style: PuffStyle, rateScale: number, sizeScale: number?): { ParticleEmitter }
 	local emitters: { ParticleEmitter } = {}
+	local grow = sizeScale or 1
 	for index, definition in ipairs(LAYERS[style.effect] or {}) do
 		local emitter = Instance.new("ParticleEmitter")
 		emitter.Name = `PuffEffect{index}`
 		emitter.Texture = definition.texture
 		emitter.Rate = definition.rate * rateScale
 		emitter.Lifetime = definition.lifetime
-		emitter.Size = definition.size
+		emitter.Size = scaleSequence(definition.size, grow)
 		emitter.Transparency = definition.transparency
 		emitter.Speed = definition.speed
 		emitter.SpreadAngle = Vector2.new(definition.spread, definition.spread)
@@ -171,40 +186,6 @@ function PuffEffects.attach(part: BasePart, style: PuffStyle, rateScale: number)
 		table.insert(emitters, emitter)
 	end
 	return emitters
-end
-
--- Explosão de partículas do efeito num ponto (impacto). Some sozinha.
--- Em vez de :Emit (que no servidor pode acontecer antes de o emissor chegar
--- ao cliente), o emissor fica ligado por um instante com a taxa equivalente.
-local BURST_SECONDS = 0.12
-
-function PuffEffects.burst(parent: Instance, position: Vector3, style: PuffStyle, amount: number): BasePart?
-	if #(LAYERS[style.effect] or {}) == 0 then
-		return nil
-	end
-	local anchor = Instance.new("Part")
-	anchor.Name = "PuffBurst"
-	anchor.Anchored = true
-	anchor.CanCollide = false
-	anchor.CanQuery = false
-	anchor.CanTouch = false
-	anchor.Transparency = 1
-	anchor.Size = Vector3.new(0.2, 0.2, 0.2)
-	anchor.Position = position
-	anchor.Parent = parent
-	local emitters = PuffEffects.attach(anchor, style, 0)
-	for _, emitter in ipairs(emitters) do
-		emitter.Speed = NumberRange.new(emitter.Speed.Min + 2, emitter.Speed.Max + 4)
-		emitter.Rate = amount / BURST_SECONDS
-	end
-	task.delay(BURST_SECONDS, function()
-		for _, emitter in ipairs(emitters) do
-			if emitter.Parent ~= nil then
-				emitter.Enabled = false
-			end
-		end
-	end)
-	return anchor
 end
 
 -- Desvio do projétil visual em relação à linha da mira, conforme o

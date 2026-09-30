@@ -11,7 +11,6 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Workspace = game:GetService("Workspace")
 
 local GameConfig = require(ReplicatedStorage.Shared.config.GameConfig)
-local PuffCatalog = require(ReplicatedStorage.Shared.config.PuffCatalog)
 local StateAttributeNames = require(ReplicatedStorage.Shared.types.StateAttributeNames)
 local PuffadorConstants = require(ReplicatedStorage.Shared.modules.PuffadorConstants)
 local ProjectileService = require(script.Parent.ProjectileService)
@@ -395,10 +394,11 @@ local function onRequestPuff(player: Player, rawAimTarget: unknown, rawAimOrigin
 	lastFireClock[player] = now
 
 	local direction = aimDelta.Unit
-	local puffStyle = PuffCatalog.styleFor(player:GetAttribute(StateAttributeNames.PlayerEquippedPuff))
+	local equippedPuff = player:GetAttribute(StateAttributeNames.PlayerEquippedPuff)
+	local puffId = if typeof(equippedPuff) == "string" then equippedPuff else nil
 	if isTrainee then
 		-- Só alvos de treino: nada de bloco, empurrão, estatística ou telemetria de tiro.
-		ProjectileService.spawn(player, origin, aimOrigin, direction, 0, nil, 1, PuffadorModel.getProjectileColor("Standard"), puffStyle, true)
+		ProjectileService.spawn(player, origin, aimOrigin, direction, 0, nil, 1, PuffadorModel.getProjectileColor("Standard"), puffId, true)
 		return
 	end
 	local isSuper = superCharges[player] ~= nil
@@ -412,7 +412,7 @@ local function onRequestPuff(player: Player, rawAimTarget: unknown, rawAimOrigin
 		sendFeedback(player, "Hit")
 		TelemetryService.blocksDestroyed(player, 1, not hitSomeBlock)
 		hitSomeBlock = true
-	end, power, PuffadorModel.getProjectileColor(variant), puffStyle)
+	end, power, PuffadorModel.getProjectileColor(variant), puffId)
 	if isSuper then
 		consumeSuperCharge(player)
 	end
@@ -440,10 +440,9 @@ function PuffadorService.start(worldRoot: Model)
 		return
 	end
 
-	ProjectileService.start(worldRoot)
-
 	local folder = ensureRemotesContainer()
 	remotesFolder = folder
+	ProjectileService.start(worldRoot, folder)
 
 	local remote = Instance.new("RemoteEvent")
 	remote.Name = PuffadorConstants.RequestPuffRemoteName
