@@ -217,7 +217,7 @@ local function playMuzzleFlash(tool: Tool)
 	local flash = Instance.new("Part")
 	flash.Name = "LocalPuffFlash"
 	flash.Shape = Enum.PartType.Ball
-	flash.Size = Vector3.new(1.25, 1.25, 1.25)
+	flash.Size = Vector3.new(0.9, 0.9, 0.9)
 	flash.Position = muzzlePosition
 	flash.Anchored = true
 	flash.CanCollide = false
@@ -236,7 +236,7 @@ local function playMuzzleFlash(tool: Tool)
 	light.Parent = flash
 
 	TweenService:Create(flash, TweenInfo.new(MUZZLE_FLASH_LIFETIME, Enum.EasingStyle.Quad), {
-		Size = Vector3.new(2.4, 2.4, 2.4),
+		Size = Vector3.new(1.8, 1.8, 1.8),
 		Transparency = 1,
 	}):Play()
 	TweenService:Create(light, TweenInfo.new(MUZZLE_FLASH_LIFETIME), { Brightness = 0 }):Play()

@@ -109,6 +109,15 @@ Monetização focada em:
 - bundles;
 - cosméticos sazonais.
 
+#### 8.1 Skins do Puffador (anotado em 29/09/2026, para implementar na Fase 5)
+
+A raridade continua nos **disparos** (Puffs e seus efeitos). A skin muda só o visual do Puffador na mão:
+- cores, materiais e detalhes do modelo. Hoje as cores vêm das paletas `Standard`/`Super` em `PuffadorModel`, e a skin pode entrar como uma paleta nova ou peças extras;
+- **mesmo tamanho** (`HELD_SCALE`) e mesma posição da boca do cano (attachment `Muzzle`): nada que tape a mira ou mude de onde o tiro sai;
+- sem efeito em alcance, cadência, tamanho do projétil ou acerto (regra anti-pay-to-win abaixo);
+- o Puffador do Cofre (Super) continua reconhecível na partida, com skin ou sem;
+- vitrine no Casarão e prévia na loja, e o jogador escolhe a skin equipada no perfil (salva junto com o Puff equipado).
+
 ### 9. Regra anti-pay-to-win
 
 Proibido vender:

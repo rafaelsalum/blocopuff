@@ -320,6 +320,10 @@ Escopo em `docs/FASE_2_SEGREDOS_COFRE_BARAO.md`.
 - **Ajustes:** ficam em `GameConfig.Barao` e `GameConfig.Toca`. Os sons atuais são provisórios, embutidos no Roblox; troque `BarkSoundIds`, `FunnySoundIds` e `FootstepSoundId` por áudios da Creator Store (`rbxassetid://...`).
 - **Código:** `BaraoService` (comportamento), `BaraoModel`, `TocaService`, `CorridorBuilder` (nichos) e `BuildingLayout.getTocas` / `isInsideToca` / `getCorridorFloorY`. No cliente, `BaraoController` mostra os avisos.
 
+### Puffador menor (Fase 4, ajuste pós-4.5)
+
+O Puffador na mão ficou 28% menor (`HELD_SCALE = 0.72` em `PuffadorModel`) para não tapar a mira. A boca do cano, a empunhadura e o brilho do Super acompanham a escala, e o disparo sai da boca como antes. O tamanho do projétil, o alcance e o acerto não mudam. O prêmio do Cofre, que é só exposição, continua em tamanho cheio. As skins do Puffador ficaram anotadas para a Fase 5 (`docs/FASE_5_LIVEOPS_TEMPORADAS_MONETIZACAO.md`, item 8.1).
+
 ### Puffdex empolgante — Camada A (Fase 4, ajuste pós-4.5)
 
 Cada Puff agora tem um **formato de efeito** e uma **frase de história**, além das cores (`effect` em `PuffStyle` e `lore` em `PuffDefinition`).

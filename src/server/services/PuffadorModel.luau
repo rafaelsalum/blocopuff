@@ -50,12 +50,19 @@ local BODY_Y = 0.85
 local BODY_DIAMETER = 0.95
 local ALONG_Z = CFrame.Angles(0, math.rad(90), 0)
 local VERTICAL = CFrame.Angles(0, 0, math.rad(90))
+-- Tamanho na mão (1 = o desenho original). Menor para não tapar a mira;
+-- o prêmio do Cofre, que é só exposição, usa o tamanho cheio.
+local HELD_SCALE = 0.72
 
 local PuffadorModel = {}
+
+-- Tamanho cheio, para exposição (prêmio do Cofre).
+PuffadorModel.DisplayScale = 1
 
 type Builder = {
 	handle: Part,
 	parent: Tool,
+	scale: number,
 }
 
 local function addPart(
@@ -72,8 +79,8 @@ local function addPart(
 	if shape ~= nil then
 		part.Shape = shape
 	end
-	part.Size = size
-	part.CFrame = builder.handle.CFrame * cframe
+	part.Size = size * builder.scale
+	part.CFrame = builder.handle.CFrame * CFrame.new(cframe.Position * builder.scale) * cframe.Rotation
 	part.Color = color
 	part.Material = material
 	part.TopSurface = Enum.SurfaceType.Smooth
@@ -177,10 +184,10 @@ local function buildMuzzle(builder: Builder, palette: Palette, variant: Variant)
 	return -2.9
 end
 
-local function addSuperEffects(cloud: Part, palette: Palette)
+local function addSuperEffects(cloud: Part, palette: Palette, scale: number)
 	local light = Instance.new("PointLight")
 	light.Color = palette.body
-	light.Range = 7
+	light.Range = 7 * scale
 	light.Brightness = 0.9
 	light.Shadows = false
 	light.Parent = cloud
@@ -190,7 +197,7 @@ local function addSuperEffects(cloud: Part, palette: Palette)
 	sparkles.Texture = "rbxasset://textures/particles/sparkles_main.dds"
 	sparkles.Color = ColorSequence.new(palette.body, palette.glow)
 	sparkles.LightEmission = 1
-	sparkles.Size = NumberSequence.new({ NumberSequenceKeypoint.new(0, 0.25), NumberSequenceKeypoint.new(1, 0) })
+	sparkles.Size = NumberSequence.new({ NumberSequenceKeypoint.new(0, 0.25 * scale), NumberSequenceKeypoint.new(1, 0) })
 	sparkles.Transparency = NumberSequence.new(0.2)
 	sparkles.Lifetime = NumberRange.new(0.4, 0.8)
 	sparkles.Rate = 10
@@ -199,21 +206,23 @@ local function addSuperEffects(cloud: Part, palette: Palette)
 	sparkles.Parent = cloud
 end
 
-function PuffadorModel.build(variant: Variant, owner: string): Tool
+-- `scale` muda o tamanho do modelo inteiro (padrão: o tamanho na mão).
+function PuffadorModel.build(variant: Variant, owner: string, scale: number?): Tool
 	local palette = PALETTES[variant]
+	local size = scale or HELD_SCALE
 
 	local tool = Instance.new("Tool")
 	tool.Name = PuffadorConstants.ToolName
 	tool.RequiresHandle = true
 	tool.CanBeDropped = false
 	tool.ToolTip = if variant == "Super" then "Puffador do Cofre" else "Puffador"
-	tool.Grip = CFrame.new(0, -0.1, 0)
+	tool.Grip = CFrame.new(0, -0.1 * size, 0)
 	tool:SetAttribute("GeneratedBy", owner)
 	tool:SetAttribute("Variant", variant)
 
 	local handle = Instance.new("Part")
 	handle.Name = PuffadorConstants.HandleName
-	handle.Size = Vector3.new(0.5, 1.25, 0.62)
+	handle.Size = Vector3.new(0.5, 1.25, 0.62) * size
 	handle.CFrame = CFrame.new()
 	handle.Color = palette.grip
 	handle.Material = Enum.Material.SmoothPlastic
@@ -226,19 +235,19 @@ function PuffadorModel.build(variant: Variant, owner: string): Tool
 	handle.Massless = true
 	handle.Parent = tool
 
-	local builder: Builder = { handle = handle, parent = tool }
+	local builder: Builder = { handle = handle, parent = tool, scale = size }
 	createSounds(handle, variant)
 	buildGrip(builder, palette)
 	buildBody(builder, palette)
 	local cloud = buildTank(builder, palette, variant)
 	local muzzleZ = buildMuzzle(builder, palette, variant)
 	if variant == "Super" then
-		addSuperEffects(cloud, palette)
+		addSuperEffects(cloud, palette, size)
 	end
 
 	local muzzle = Instance.new("Attachment")
 	muzzle.Name = PuffadorConstants.MuzzleAttachmentName
-	muzzle.CFrame = CFrame.new(0, BODY_Y, muzzleZ)
+	muzzle.CFrame = CFrame.new(0, BODY_Y * size, muzzleZ * size)
 	muzzle.Parent = handle
 
 	-- Um Puffador largado no chão não deve permanecer ali: removemos qualquer

@@ -10,8 +10,8 @@
     "semantic_hash": ""
   },
   "src/client/controllers/PuffadorController.luau": {
-    "mtime": 1790733849.2595942,
-    "ast_hash": "865c7b3152f6cd68ed95c4076fa0883f",
+    "mtime": 1790734431.5014298,
+    "ast_hash": "ea97c3c8e7184a3fecd11840154a1790",
     "semantic_hash": ""
   },
   "src/client/controllers/SpectatorController.luau": {
@@ -125,8 +125,8 @@
     "semantic_hash": ""
   },
   "README.md": {
-    "mtime": 1790733879.3309205,
-    "ast_hash": "d5de58a224fbe8836e442e4b3c269ed1",
+    "mtime": 1790734377.7223437,
+    "ast_hash": "f7304d722b373ab2fdf5689930fa50ef",
     "semantic_hash": ""
   },
   "src/client/controllers/CombatCameraController.luau": {
@@ -250,8 +250,8 @@
     "semantic_hash": ""
   },
   "src/server/services/PuffadorModel.luau": {
-    "mtime": 1790550687.1493435,
-    "ast_hash": "2185ee5296453f419381b0676906cef4",
+    "mtime": 1790734431.5011284,
+    "ast_hash": "b015eb46c43ed553a8bcae185ffab620",
     "semantic_hash": ""
   },
   "src/server/services/SecretRoomBuilder.luau": {
@@ -260,8 +260,8 @@
     "semantic_hash": ""
   },
   "src/server/services/VaultProps.luau": {
-    "mtime": 1790550687.1514764,
-    "ast_hash": "f60cd0a18e055831cc6d87d6a2b5b117",
+    "mtime": 1790734431.5012875,
+    "ast_hash": "49e1db80aa5cd96ace2585a3a7dae238",
     "semantic_hash": ""
   },
   "src/server/services/VaultService.luau": {
@@ -290,8 +290,8 @@
     "semantic_hash": ""
   },
   "docs/FASE_5_LIVEOPS_TEMPORADAS_MONETIZACAO.md": {
-    "mtime": 1790548130.0568552,
-    "ast_hash": "40807db50b4a03c76c866640874bc97a",
+    "mtime": 1790734377.722095,
+    "ast_hash": "7a5f272fc69840c82ed6d309c4bf1fcf",
     "semantic_hash": ""
   },
   "docs/GAME_DESIGN.md": {

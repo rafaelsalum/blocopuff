@@ -227,7 +227,7 @@ end
 
 -- Puffador do Cofre girando sobre o pedestal, com o prompt para pegá-lo.
 function VaultProps.createPrize(parent: Instance, door: SecretDoor, building: BuildingConfig): (Model, ProximityPrompt, Part)
-	local tool = PuffadorModel.build("Super", "VaultService")
+	local tool = PuffadorModel.build("Super", "VaultService", PuffadorModel.DisplayScale)
 	local prize = Instance.new("Model")
 	prize.Name = "SuperPuffadorPrize"
 	local handle = tool:FindFirstChild("Handle") :: Part
