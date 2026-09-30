@@ -740,13 +740,13 @@
     "semantic_hash": ""
   },
   "src/client/effects/BaraoAnimator.luau": {
-    "mtime": 1790741982.91776,
-    "ast_hash": "4eca15426464dc96aee12fe5843a7ce6",
+    "mtime": 1790742250.0418406,
+    "ast_hash": "546b7702f70ae94cf2eb55300e35a591",
     "semantic_hash": ""
   },
   "src/shared/modules/BaraoModel.luau": {
-    "mtime": 1790741960.2006378,
-    "ast_hash": "8d3398350eb8e9a5edb8f5dec78add4c",
+    "mtime": 1790742258.1227908,
+    "ast_hash": "1fca87330c79e1913f29c4a725d10138",
     "semantic_hash": ""
   },
   "docs/BARAO_MODELO_3D.html": {
@@ -975,8 +975,8 @@
     "semantic_hash": ""
   },
   "src/shared/modules/BaraoBlocks.luau": {
-    "mtime": 1790741927.188664,
-    "ast_hash": "af565a208e3b0d0d4b472fc3d7bac96c",
+    "mtime": 1790742250.041975,
+    "ast_hash": "689661e1e070c4879bcf290ed7786362",
     "semantic_hash": ""
   }
 }

@@ -255,7 +255,18 @@ function PuffdexView.new(playerGui: PlayerGui, onEquip: (id: string) -> (), onOp
 	footer.Size = UDim2.new(1, -40, 0, 20)
 	footer.TextXAlignment = Enum.TextXAlignment.Left
 	footer.ZIndex = 3
+	local FOOTER_TEXT = footer.Text
 
+	-- Enquanto o perfil não chega, nada de coleção vazia: a grade fica
+	-- escondida e o aviso diz que os Puffs estão guardados.
+	local loadingLabel = UiTheme.createLabel(card, "Loading", "⏳ Carregando sua coleção…\nSeus Puffs estão guardados.", UiTheme.Fonts.Display, 20, UiTheme.Colors.Ink)
+	loadingLabel.Position = grid.Position
+	loadingLabel.Size = grid.Size
+	loadingLabel.TextWrapped = true
+	loadingLabel.ZIndex = 4
+	UiTheme.addTextOutline(loadingLabel, 1.5)
+
+	local loaded = false
 	local owned: { [string]: OwnedPuff } = {}
 	local equippedId = PuffCatalog.DefaultId
 	local stats: { [string]: number } = {}
@@ -343,6 +354,12 @@ function PuffdexView.new(playerGui: PlayerGui, onEquip: (id: string) -> (), onOp
 	end
 
 	renderCards = function()
+		grid.Visible = loaded
+		loadingLabel.Visible = not loaded
+		if not loaded then
+			progressLabel.Text = string.format("… / %d", #PuffCatalog.all())
+			return
+		end
 		local count = 0
 		for _, definition in ipairs(PuffCatalog.all()) do
 			local item = cards[definition.id]
@@ -364,6 +381,10 @@ function PuffdexView.new(playerGui: PlayerGui, onEquip: (id: string) -> (), onOp
 	end
 
 	renderDetail = function()
+		detail.Visible = loaded
+		if not loaded then
+			return
+		end
 		local definition = PuffCatalog.get(selectedId)
 		if definition == nil then
 			return
@@ -510,6 +531,8 @@ function PuffdexView.new(playerGui: PlayerGui, onEquip: (id: string) -> (), onOp
 	end
 
 	handle.setProfile = function(snapshot: ProfileSnapshot)
+		loaded = true
+		footer.Text = if snapshot.saved then FOOTER_TEXT else "⚠ Esta sessão não está salvando o progresso."
 		local nextOwned: { [string]: OwnedPuff } = {}
 		for _, item in ipairs(snapshot.puffs) do
 			nextOwned[item.id] = item

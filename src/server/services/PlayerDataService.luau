@@ -23,6 +23,14 @@
 --   * Puffdex: os Puffs merecidos (nível e façanhas) são concedidos pelo
 --     servidor ao carregar e depois de cada rodada. O inventário é indexado
 --     pelo id do Puff: nada duplica ao reconectar.
+--   * Nada que o jogador conquistou some (Puffs, conquistas, XP, tickets
+--     ganhos): toda gravação passa pelo ProfileGuard, que devolve o que o
+--     perfil gravado tinha a mais. Uma cópia de segurança (outro DataStore,
+--     que só soma) é juntada ao perfil a cada carregamento.
+--   * Perfil preso em outro servidor ou DataStore fora do ar: o jogo
+--     continua tentando carregar enquanto o jogador estiver aqui (as
+--     rodadas ficam guardadas) e nunca mostra um perfil vazio no lugar do
+--     dele. Só o Studio sem acesso às APIs usa um perfil temporário.
 
 local DataStoreService = game:GetService("DataStoreService")
 local HttpService = game:GetService("HttpService")
@@ -36,6 +44,7 @@ local ProfileTypes = require(ReplicatedStorage.Shared.types.ProfileTypes)
 local StateAttributeNames = require(ReplicatedStorage.Shared.types.StateAttributeNames)
 local ProfileConfig = require(script.Parent.Parent.config.ProfileConfig)
 local ProfileSchema = require(script.Parent.Parent.data.ProfileSchema)
+local ProfileGuard = require(script.Parent.Parent.data.ProfileGuard)
 local DataStoreErrors = require(script.Parent.Parent.data.DataStoreErrors)
 local PuffInventory = require(script.Parent.Parent.data.PuffInventory)
 local RewardRules = require(script.Parent.Parent.data.RewardRules)
@@ -85,6 +94,8 @@ type Entry = {
 	saving: boolean,
 	released: boolean,
 	lastSavedAt: number,
+	-- Última atualização da cópia de segurança (os.clock).
+	lastBackupAt: number,
 	-- Subiu de nível na última rodada (telemetria de replay após level-up).
 	leveledUpLastRound: boolean,
 }
@@ -105,12 +116,24 @@ local MAX_ROUND_KEY_LENGTH = 80
 -- Sem mudanças, o salvamento automático só renova a trava depois deste tempo.
 local LOCK_REFRESH_INTERVAL = 300
 local AUTOSAVE_STAGGER = 0.5
+-- Liberação ao sair: novas tentativas se o DataStore falhar.
+local RELEASE_RETRY_DELAY = 2
+local RELEASE_RETRY_MAX_DELAY = 15
+local RELEASE_RETRY_WINDOW = 90
+-- Espalha as novas tentativas de carregar (depois de uma queda do
+-- DataStore, nem todos os servidores tentam no mesmo instante).
+local LOAD_RETRY_JITTER = 5
+-- A cada tantas tentativas sem carregar, avisa de novo no log.
+local LOAD_WARN_EVERY = 15
 -- Teto de XP por rodada (defesa extra além dos limites do XpCalculator).
 local MAX_ROUND_XP = 400
 
 local PlayerDataService = {}
 
 local store: DataStore? = nil
+local backupStore: DataStore? = nil
+-- Servidor fechando: para de tentar carregar perfis.
+local closing = false
 local entries: { [Player]: Entry } = {}
 local loading: { [Player]: boolean } = {}
 local snapshotRemote: RemoteEvent? = nil
@@ -210,6 +233,96 @@ local function withRetries<T>(label: string, callback: () -> T): (boolean, T?)
 	end
 	warn(string.format("[BlocoPuff] Profile %s failed: %s", label, tostring(lastError)))
 	return false, nil
+end
+
+-- O guarda precisou devolver algo ao perfil: nunca deveria acontecer em
+-- uso normal, então fica no log e na telemetria.
+local function reportGuard(player: Player?, key: string, source: string, anomalies: { string })
+	local detail = table.concat(anomalies, ",")
+	warn(string.format("[BlocoPuff] Profile %s restored from %s: %s", key, source, detail))
+	if player ~= nil then
+		TelemetryService.lobbyEvent(player, "ProfileGuard", #anomalies, source, string.sub(detail, 1, 50))
+	end
+end
+
+local function isNewerFormat(data: unknown): boolean
+	if typeof(data) ~= "table" then
+		return false
+	end
+	local version = (data :: { [string]: any }).version
+	return typeof(version) == "number" and version > ProfileSchema.CurrentVersion
+end
+
+-- Perfil a partir do formato gravado, com a trava de `session`.
+local function rebuild(data: { [string]: any }, session: ProfileSchema.Session?): Profile
+	local profile = ProfileSchema.fromStored(data, now())
+	profile.session = session
+	return profile
+end
+
+-- O formato gravado como este servidor o entende (limpo por fromStored).
+local function normalize(data: unknown): { [string]: any }?
+	if typeof(data) ~= "table" then
+		return nil
+	end
+	return ProfileSchema.toStored((ProfileSchema.fromStored(data, now())))
+end
+
+-- Cópia sem a carteira de tickets (para a cópia de segurança de uma sessão
+-- que perdeu a trava: os itens valem, o saldo pode estar velho).
+local function withoutWallet(data: { [string]: any }): { [string]: any }
+	local copy = table.clone(data)
+	for _, field in ipairs(ProfileGuard.WalletFields) do
+		copy[field] = nil
+	end
+	return copy
+end
+
+-- Junta a cópia de segurança ao perfil recém-carregado: o que o principal
+-- tiver perdido (dados corrompidos, bug) volta da cópia. Devolve o perfil
+-- (o mesmo, se nada mudou) e se ele mudou.
+local function healFromBackup(player: Player, key: string, profile: Profile): (Profile, boolean)
+	local backup = backupStore
+	if backup == nil then
+		return profile, false
+	end
+	local ok, data = withRetries(`backup read {key}`, function()
+		return backup:GetAsync(key)
+	end)
+	if not ok then
+		warn(string.format("[BlocoPuff] Profile backup %s could not be read; loading without it", key))
+		return profile, false
+	end
+	if typeof(data) ~= "table" or isNewerFormat(data) then
+		return profile, false
+	end
+	local merged, anomalies = ProfileGuard.mergeForSave(normalize(data), ProfileSchema.toStored(profile))
+	if #anomalies == 0 then
+		return profile, false
+	end
+	reportGuard(player, key, "backup", anomalies)
+	return rebuild(merged, profile.session), true
+end
+
+-- Atualiza a cópia de segurança com o que acabou de ser gravado. A cópia
+-- só soma (o guarda nunca deixa nada sair dela).
+local function writeBackup(key: string, written: { [string]: any })
+	local backup = backupStore
+	if backup == nil then
+		return
+	end
+	local copy = table.clone(written)
+	copy.session = nil
+	withRetries(`backup {key}`, function()
+		backup:UpdateAsync(key, function(old: any)
+			if isNewerFormat(old) then
+				return nil
+			end
+			local merged = ProfileGuard.mergeForSave(old, copy)
+			return merged
+		end)
+		return true
+	end)
 end
 
 -- Concede os Puffs que o perfil já merece e ainda não tem (nível e
@@ -332,10 +445,20 @@ local function tryLoad(key: string, lockId: string): (LoadOutcome, Profile?)
 				loaded = nil
 				return nil
 			end
-			profile.session = { jobId = lockId, lockedAt = now() }
+			local lock = { jobId = lockId, lockedAt = now() }
+			local toStore = ProfileSchema.toStored(profile)
+			if typeof(stored) == "table" then
+				-- A limpeza do formato (fromStored) pode descartar dados; o que
+				-- está gravado continua (ProfileGuard) e a memória recebe o que
+				-- a limpeza tinha tirado (a junção já está na versão atual).
+				toStore = ProfileGuard.mergeForSave(stored, toStore)
+				profile = rebuild(toStore, nil)
+			end
+			toStore.session = lock
+			profile.session = lock
 			outcome = "Loaded"
 			loaded = profile
-			return ProfileSchema.toStored(profile)
+			return toStore
 		end)
 		return true
 	end)
@@ -346,34 +469,65 @@ local function tryLoad(key: string, lockId: string): (LoadOutcome, Profile?)
 end
 
 -- Grava o perfil em memória, se este servidor ainda for o dono da trava.
--- `release` libera a trava (jogador saindo ou servidor fechando).
-local function save(entry: Entry, release: boolean)
+-- `release` libera a trava (jogador saindo ou servidor fechando). Devolve
+-- falso só quando o DataStore falhou (vale tentar de novo).
+local function save(entry: Entry, release: boolean): boolean
 	local dataStore = store
 	if dataStore == nil or not entry.canSave or entry.released then
-		return
+		return true
 	end
 	-- Uma gravação por vez por jogador; a próxima espera a anterior.
 	while entry.saving do
 		task.wait(0.1)
 	end
 	if entry.released or not entry.canSave then
-		return
+		return true
 	end
 	entry.saving = true
 	entry.dirty = false
 	local timestamp = now()
 	local profile = entry.profile
+	local outgoing = ProfileSchema.toStored(profile)
 	local lostLock = false
+	local newer = false
+	local alreadyReleased = false
+	local written: { [string]: any }? = nil
+	local anomalies: { string } = {}
 	local ok = withRetries(`save {entry.key}`, function()
 		dataStore:UpdateAsync(entry.key, function(stored: any)
+			lostLock = false
+			newer = false
+			alreadyReleased = false
+			written = nil
+			anomalies = {}
 			local session = ProfileSchema.storedSession(stored)
-			if session ~= nil and session.jobId ~= entry.lockId then
-				lostLock = true
+			if session == nil or session.jobId ~= entry.lockId then
+				-- Esta liberação já foi gravada (resposta perdida e nova
+				-- tentativa) ou outro servidor assumiu, mesmo que já tenha
+				-- liberado depois.
+				alreadyReleased = session == nil
+					and release
+					and typeof(stored) == "table"
+					and stored.releasedBy == entry.lockId
+				lostLock = not alreadyReleased
 				return nil
 			end
-			local toStore = ProfileSchema.toStored(profile)
+			if isNewerFormat(stored) then
+				-- Gravado por uma versão mais nova do jogo: não mexe.
+				newer = true
+				return nil
+			end
+			-- Nada do que está gravado pode sumir (ver ProfileGuard). O que
+			-- conta como correção é comparado com o gravado já limpo pelo
+			-- formato: dados que a limpeza sempre descarta continuam gravados,
+			-- mas não viram alerta a cada gravação.
+			local toStore = ProfileGuard.mergeForSave(stored, outgoing)
+			local _, found = ProfileGuard.mergeForSave(normalize(stored), outgoing)
 			toStore.updatedAt = timestamp
 			toStore.session = if release then nil else { jobId = entry.lockId, lockedAt = timestamp }
+			toStore.releasedBy = if release then entry.lockId else nil
+			written = toStore
+			anomalies = found
 			return toStore
 		end)
 		return true
@@ -382,16 +536,74 @@ local function save(entry: Entry, release: boolean)
 	entry.lastSavedAt = os.clock()
 	if not ok then
 		entry.dirty = true
-		return
+		return false
 	end
-	if lostLock then
-		-- Outro servidor assumiu o perfil (esta sessão ficou para trás).
+	if alreadyReleased then
+		entry.released = true
+		return true
+	end
+	if lostLock or newer then
+		-- Outro servidor assumiu o perfil (esta sessão ficou para trás) ou
+		-- uma versão mais nova do jogo gravou por cima. O que o jogador
+		-- ganhou aqui vai para a cópia de segurança (sem a carteira, que o
+		-- outro servidor pode ter gastado) e volta no próximo carregamento.
 		entry.canSave = false
 		warn(string.format("[BlocoPuff] Profile %s is owned by another server; stopped saving here", entry.key))
-		return
+		TelemetryService.lobbyEvent(entry.player, "ProfileLockLost", 1, if newer then "Newer" else "Lock")
+		writeBackup(entry.key, withoutWallet(ProfileSchema.toStored(entry.profile)))
+		return true
+	end
+	local saved = written
+	if saved ~= nil and #anomalies > 0 then
+		reportGuard(entry.player, entry.key, "save", anomalies)
+		if not release then
+			-- A memória também recebe de volta o que faltava (junto com o que
+			-- mudou durante a gravação).
+			local combined = ProfileGuard.mergeForSave(saved, ProfileSchema.toStored(entry.profile))
+			entry.profile = rebuild(combined, entry.profile.session)
+			entry.dirty = true
+			publish(entry)
+		end
 	end
 	if release then
 		entry.released = true
+	end
+	if saved ~= nil then
+		if release then
+			-- Ao sair, a cópia é gravada antes de terminar (o servidor pode
+			-- estar fechando).
+			entry.lastBackupAt = os.clock()
+			writeBackup(entry.key, saved)
+		elseif os.clock() - entry.lastBackupAt >= ProfileConfig.BackupInterval then
+			entry.lastBackupAt = os.clock()
+			task.spawn(writeBackup, entry.key, saved)
+		end
+	end
+	return true
+end
+
+-- Libera o perfil de quem saiu. Se o DataStore falhar, tenta de novo por
+-- um tempo; se não der, guarda o progresso na cópia de segurança (que volta
+-- no próximo carregamento).
+local function releaseWithRetries(entry: Entry)
+	local delay = RELEASE_RETRY_DELAY
+	local deadline = os.clock() + RELEASE_RETRY_WINDOW
+	while not save(entry, true) do
+		if closing or os.clock() >= deadline then
+			warn(string.format("[BlocoPuff] Profile %s release failed; progress kept in the backup", entry.key))
+			writeBackup(entry.key, ProfileSchema.toStored(entry.profile))
+			return
+		end
+		task.wait(delay)
+		delay = math.min(delay * 2, RELEASE_RETRY_MAX_DELAY)
+	end
+end
+
+-- Espera `seconds`, mas volta antes se o jogador sair ou o servidor fechar.
+local function waitWhilePresent(player: Player, seconds: number)
+	local deadline = os.clock() + seconds
+	while os.clock() < deadline and player.Parent ~= nil and not closing do
+		task.wait(0.5)
 	end
 end
 
@@ -400,26 +612,46 @@ local function load(player: Player)
 		return
 	end
 	loading[player] = true
+	local healedOnLoad = false
 	local key = keyFor(player)
 	local lockId = `{SESSION_ID}:{HttpService:GenerateGUID(false)}`
 	local outcome: LoadOutcome = "Error"
 	local profile: Profile? = nil
-	if store ~= nil then
-		for attempt = 1, ProfileConfig.LoadLockedRetries do
-			outcome, profile = tryLoad(key, lockId)
-			if outcome ~= "Locked" or player.Parent == nil then
-				break
-			end
-			if attempt < ProfileConfig.LoadLockedRetries then
-				task.wait(ProfileConfig.LoadRetryDelay)
-			end
+	local attempt = 0
+	-- Preso em outro servidor ou DataStore com erro: o perfil existe (ou
+	-- pode existir), então continua tentando enquanto o jogador estiver
+	-- aqui. Um perfil vazio no lugar do dele pareceria que tudo sumiu.
+	while store ~= nil and not studioDenied and not closing and player.Parent ~= nil do
+		attempt += 1
+		outcome, profile = tryLoad(key, lockId)
+		if outcome == "Loaded" or outcome == "Future" or studioDenied then
+			break
+		end
+		if attempt == ProfileConfig.LoadLockedRetries or attempt % LOAD_WARN_EVERY == 0 then
+			warn(string.format("[BlocoPuff] Profile for %s still not loaded after %d tries (%s); retrying", player.Name, attempt, outcome))
+			TelemetryService.lobbyEvent(player, "ProfileLoadDelayed", attempt, outcome)
+		end
+		if attempt < ProfileConfig.LoadLockedRetries then
+			waitWhilePresent(player, ProfileConfig.LoadRetryDelay)
+		else
+			waitWhilePresent(player, ProfileConfig.LoadRetryMaxDelay + (math.random() * LOAD_RETRY_JITTER))
 		end
 	end
+	if outcome == "Loaded" and profile ~= nil and player.Parent ~= nil then
+		local healed, changed = healFromBackup(player, key, profile)
+		profile = healed
+		healedOnLoad = changed
+	end
 	loading[player] = nil
+	if outcome ~= "Loaded" and outcome ~= "Future" and not studioDenied and store ~= nil then
+		-- Saiu ou o servidor está fechando antes de carregar: nada a gravar.
+		pendingRounds[player] = nil
+		return
+	end
 	if player.Parent == nil then
 		-- Saiu enquanto carregava: libera a trava que acabou de pegar.
 		if outcome == "Loaded" and profile ~= nil then
-			save({
+			releaseWithRetries({
 				player = player,
 				key = key,
 				lockId = lockId,
@@ -429,8 +661,9 @@ local function load(player: Player)
 				saving = false,
 				released = false,
 				lastSavedAt = os.clock(),
+				lastBackupAt = -math.huge,
 				leveledUpLastRound = false,
-			}, true)
+			})
 		end
 		pendingRounds[player] = nil
 		return
@@ -438,6 +671,8 @@ local function load(player: Player)
 
 	local canSave = outcome == "Loaded"
 	if not canSave then
+		-- Só Studio sem acesso às APIs (perfil temporário) ou versão mais nova
+		-- do jogo (perfil real, só leitura).
 		warn(string.format("[BlocoPuff] Profile for %s not saved this session (%s)", player.Name, outcome))
 	end
 	local entry: Entry = {
@@ -450,6 +685,7 @@ local function load(player: Player)
 		saving = false,
 		released = false,
 		lastSavedAt = os.clock(),
+		lastBackupAt = -math.huge,
 		leveledUpLastRound = false,
 	}
 	entries[player] = entry
@@ -464,6 +700,9 @@ local function load(player: Player)
 	-- Retorno diário e desafios de hoje.
 	local dailyReward = refreshDay(entry)
 	publish(entry, nil, { newPuffs = newPuffs, dailyReward = dailyReward })
+	if healedOnLoad then
+		entry.dirty = true
+	end
 	if entry.dirty then
 		task.spawn(save, entry, false)
 	end
@@ -478,15 +717,16 @@ local function load(player: Player)
 end
 
 local function unload(player: Player)
-	loading[player] = nil
+	-- `loading` fica: o próprio carregamento termina, vê que o jogador saiu
+	-- e libera a trava (e o fechamento do servidor espera por ele).
 	lastRequest[player] = nil
-	pendingRounds[player] = nil
 	local entry = entries[player]
 	if entry == nil then
 		return
 	end
+	pendingRounds[player] = nil
 	entries[player] = nil
-	save(entry, true)
+	releaseWithRetries(entry)
 end
 
 -- Soma a rodada ao perfil de um jogador presente. `roundKey` identifica a
@@ -497,6 +737,11 @@ function PlayerDataService.applyRound(player: Player, roundKey: string, delta: R
 		if loading[player] then
 			-- Perfil ainda carregando: guarda a rodada para somar ao carregar.
 			local queue = pendingRounds[player] or {}
+			if #queue >= ProfileConfig.MaxPendingRounds then
+				local dropped = table.remove(queue, 1)
+				warn(string.format("[BlocoPuff] Round %s dropped for %s: too many rounds while the profile loads", dropped.roundKey, player.Name))
+				TelemetryService.lobbyEvent(player, "ProfileRoundDropped", #queue)
+			end
 			table.insert(queue, { roundKey = roundKey, delta = delta, xp = roundXp })
 			pendingRounds[player] = queue
 			return true
@@ -662,6 +907,7 @@ local function autosaveLoop()
 end
 
 local function saveAllOnClose()
+	closing = true
 	local deadline = os.clock() + BIND_TO_CLOSE_TIMEOUT
 	-- Espera carregamentos em andamento terminarem (para liberar a trava).
 	while next(loading) ~= nil and os.clock() < deadline - 10 do
@@ -672,7 +918,10 @@ local function saveAllOnClose()
 		entries[player] = nil
 		pending += 1
 		task.spawn(function()
-			save(entry, true)
+			-- Sem tempo para novas tentativas: se falhar, a cópia guarda.
+			if not save(entry, true) then
+				writeBackup(entry.key, ProfileSchema.toStored(entry.profile))
+			end
 			pending -= 1
 		end)
 	end
@@ -694,6 +943,14 @@ function PlayerDataService.start(remotesFolder: Folder?)
 		store = result
 	else
 		warn(string.format("[BlocoPuff] Profiles will not be saved: %s", tostring(result)))
+	end
+	local backupOk, backupResult = pcall(function()
+		return DataStoreService:GetDataStore(ProfileConfig.BackupStoreName)
+	end)
+	if backupOk then
+		backupStore = backupResult
+	else
+		warn(string.format("[BlocoPuff] Profile backups disabled: %s", tostring(backupResult)))
 	end
 
 	if remotesFolder ~= nil then

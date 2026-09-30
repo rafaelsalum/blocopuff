@@ -695,7 +695,7 @@ Escopo em `docs/FASE_3_PROGRESSAO_COMPETICAO.md`.
 - **Quem calcula:** tudo é calculado pelo servidor no fim da rodada, a partir do resultado (`RoundService.commitProfiles`). O cliente nunca envia estatística nem XP. Quem sai no meio da rodada não recebe a rodada. Se o perfil ainda estiver carregando no fim da rodada, a rodada fica guardada e é somada quando ele carregar.
 - **Sem duplicação:** cada rodada tem uma chave única (servidor + rodada + início). O perfil guarda as últimas 10 chaves aplicadas, então a mesma rodada nunca é somada duas vezes, nem ao reconectar.
 - **Trava de sessão:** só um servidor por vez salva o perfil de um jogador. Ao entrar, o servidor grava no perfil uma trava única: JobId mais um identificador do carregamento, para que sair e voltar rápido no mesmo servidor não confunda as sessões. O salvamento automático grava quem mudou e renova as travas, um jogador por vez; ao sair, o servidor salva e libera a trava.
-  - **Troca de servidor:** se outro servidor ainda segura o perfil, o novo tenta de novo por até 30 s. Se não conseguir, o jogador joga com um perfil que não é salvo nesta sessão (`saved = false` na cópia do cliente).
+  - **Troca de servidor:** se outro servidor ainda segura o perfil, o novo continua tentando enquanto o jogador estiver lá: a cada 5 s por 30 s e depois a cada 20 s (evento de telemetria `ProfileLoadDelayed`). O jogador nunca recebe um perfil vazio no lugar do dele. Enquanto isso, a Puffdex mostra "Carregando sua coleção…" e as rodadas jogadas ficam guardadas (até 20) para somar quando o perfil carregar.
   - **Trava abandonada:** uma trava sem renovação há 10 min, de um servidor que caiu, é assumida pelo próximo.
   - **Fechamento do servidor:** `BindToClose` espera os carregamentos em andamento e salva todos os perfis.
 - **Valores impossíveis:** cada soma de rodada é limitada ao máximo possível (por exemplo, derrubadas ≤ jogadores − 1, blocos ≤ total da arena). Um corte gera aviso no log do servidor e o evento de telemetria `ProfileAnomaly`.
@@ -703,10 +703,18 @@ Escopo em `docs/FASE_3_PROGRESSAO_COMPETICAO.md`.
 - **Procedimento para dados inválidos** (correção administrativa):
   1. Confirme o problema pelo log (`Profile anomaly for ...`) ou pela telemetria `ProfileAnomaly`.
   2. Peça ao jogador para sair de todos os servidores; sem isso, a trava de sessão sobrescreve a correção.
-  3. No Creator Hub (Data Stores Manager) ou via Open Cloud, abra `BlocoPuffProfiles_v1` / `u_<UserId>` e corrija só os campos de `stats` (inteiros ≥ 0). Não mexa em `session` nem em `appliedRounds`.
+  3. No Creator Hub (Data Stores Manager) ou via Open Cloud, abra `BlocoPuffProfiles_v1` / `u_<UserId>` e corrija só os campos de `stats` (inteiros ≥ 0). Não mexa em `session` nem em `appliedRounds`. Para **diminuir** um valor (dado explorado), corrija também a cópia de segurança `BlocoPuffProfiles_backup_v1` / `u_<UserId>`: a cópia só soma e devolveria o valor antigo no próximo carregamento.
   4. Se `session` estiver preso a um servidor que não existe mais, apague só `session` ou espere 10 min.
   5. Registre a correção (quem, quando, o quê e por quê) fora do jogo.
-- **Studio:** para salvar de verdade, ative "Enable Studio Access to API Services". Sem isso, o perfil funciona só na memória e o log avisa.
+- **Studio:** para salvar de verdade, ative "Enable Studio Access to API Services". Sem isso, o perfil funciona só na memória e o log avisa. É o único caso de perfil temporário.
+- **Nada some** (`data/ProfileGuard`): toda gravação junta o que está salvo com o que vai ser salvo, e o que o jogador conquistou nunca diminui.
+  - Puffs e a quantidade de cada um, conquistas secretas, estatísticas, XP, nível e prestígio (o XP só cai quando o prestígio sobe).
+  - Tickets: gastar é normal, mas o total ganho nunca cai. Se cair, a carteira salva volta.
+  - Se o guarda precisar devolver algo, isso fica no log (`Profile ... restored from ...`) e na telemetria `ProfileGuard`, e o jogador recebe de volta na hora. Em uso normal isso nunca acontece.
+  - Uma gravação feita por uma versão mais nova do jogo nunca é sobrescrita por uma mais velha.
+  - Testes: `lune run tests/ProfileGuard.spec`.
+- **Cópia de segurança** (DataStore `BlocoPuffProfiles_backup_v1`, mesma chave): atualizada a cada 10 min e ao sair, e só soma. A cada carregamento, o que o perfil principal tiver perdido volta da cópia.
+- **Recuperação:** `tools/profile-recovery` lista as versões do perfil de um jogador (o Roblox guarda 30 dias), com data e quantos Puffs cada uma tem, e restaura a escolhida sem perder nada do atual. Veja o README da pasta.
 - **Código:** `PlayerDataService`, `ProfileSchema`, `RoundStatsService`, `config/ProfileConfig` e `ProfileTypes`. No cliente, `ProfileController`, que recebe a cópia, pede de novo ao iniciar e avisa as telas.
 
 ### Alertas, Momentos Puff e telemetria dos segredos (Fase 2, entrega 2.4)
