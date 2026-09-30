@@ -1,0 +1,350 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Modelo 3D do Barão</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&family=Figtree:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: uma coluna de leitura (ficha técnica), com tabelas e o diagrama rolando dentro de si no celular. */
+:root {
+  --bg: #f6f2fb;
+  --surface: #ffffff;
+  --ink: #241a3a;
+  --muted: #66597f;
+  --line: #ddd3ec;
+  --accent: #b8860b;
+  --lilac: #7b5cd6;
+  --lilac-soft: #ece6fb;
+  --dog: #c6783a;
+  --dog-dark: #803c20;
+  --cream: #ecc492;
+  --shirt: #00943e;
+  --flag-yellow: #ffd400;
+  --display: "Fredoka", "Trebuchet MS", system-ui, sans-serif;
+  --body: "Figtree", "Segoe UI", system-ui, sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #17112a;
+    --surface: #221a3b;
+    --ink: #f1ecfb;
+    --muted: #b3a8cc;
+    --line: #3a2f5a;
+    --accent: #ffcc60;
+    --lilac: #b9a2ff;
+    --lilac-soft: #2d2350;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #17112a;
+  --surface: #221a3b;
+  --ink: #f1ecfb;
+  --muted: #b3a8cc;
+  --line: #3a2f5a;
+  --accent: #ffcc60;
+  --lilac: #b9a2ff;
+  --lilac-soft: #2d2350;
+  color-scheme: dark;
+}
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--body);
+  font-size: 16px;
+  line-height: 1.6;
+}
+.page {
+  max-width: 820px;
+  margin: 0 auto;
+  padding-inline: 20px;
+  padding-block: 40px 72px;
+  display: grid;
+  gap: 44px;
+}
+h1, h2, h3 {
+  font-family: var(--display);
+  font-weight: 600;
+  line-height: 1.2;
+  text-wrap: balance;
+  margin: 0;
+}
+h1 { font-size: clamp(2rem, 6vw, 2.9rem); }
+h2 { font-size: 1.5rem; }
+h3 { font-size: 1.1rem; }
+p { margin: 0; max-width: 65ch; }
+section { display: grid; gap: 16px; min-width: 0; }
+.eyebrow {
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--lilac);
+}
+header { display: grid; gap: 12px; }
+.lede { color: var(--muted); font-size: 1.08rem; }
+code, .mono { font-family: var(--mono); font-size: 0.9em; }
+code {
+  background: var(--lilac-soft);
+  padding: 1px 6px;
+  border-radius: 5px;
+}
+
+.facts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 1px;
+  background: var(--line);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  overflow: hidden;
+}
+.fact {
+  background: var(--surface);
+  padding: 14px 16px;
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+.fact dt { font-size: 0.8rem; color: var(--muted); }
+.fact dd { margin: 0; font-weight: 600; }
+
+.figure {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 12px;
+  overflow-x: auto;
+}
+.figure svg { display: block; width: 100%; min-width: 520px; height: auto; }
+.figure figcaption { font-size: 0.85rem; color: var(--muted); padding: 8px 4px 0; }
+figure { margin: 0; }
+
+.table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); }
+table { border-collapse: collapse; width: 100%; min-width: 560px; font-size: 0.95rem; }
+th, td { text-align: left; padding: 10px 14px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font-size: 0.8rem; color: var(--muted); font-weight: 600; letter-spacing: 0.03em; }
+tr:last-child td { border-bottom: 0; }
+td.coord { font-family: var(--mono); font-size: 0.85rem; white-space: nowrap; font-variant-numeric: tabular-nums; }
+td .name { font-family: var(--mono); font-weight: 500; color: var(--lilac); }
+
+ul.plain { margin: 0; padding-left: 1.2em; display: grid; gap: 6px; max-width: 65ch; }
+
+.swatches { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; }
+.swatch { display: grid; grid-template-columns: 40px 1fr; gap: 10px; align-items: center; }
+.chip { width: 40px; height: 40px; border-radius: 10px; border: 1px solid var(--line); }
+.swatch span { display: grid; line-height: 1.3; }
+.swatch small { font-family: var(--mono); color: var(--muted); }
+
+ol.steps { margin: 0; padding: 0; list-style: none; counter-reset: step; display: grid; gap: 12px; }
+ol.steps li {
+  counter-increment: step;
+  display: grid;
+  grid-template-columns: 34px 1fr;
+  gap: 12px;
+  align-items: start;
+}
+ol.steps li::before {
+  content: counter(step);
+  font-family: var(--display);
+  font-weight: 600;
+  width: 34px; height: 34px;
+  border-radius: 50%;
+  display: grid; place-items: center;
+  background: var(--lilac-soft);
+  color: var(--lilac);
+}
+
+.checklist { display: grid; gap: 8px; }
+.checklist label { display: grid; grid-template-columns: 22px 1fr; gap: 10px; align-items: start; cursor: pointer; }
+.checklist input { width: 18px; height: 18px; margin-top: 4px; accent-color: var(--lilac); }
+.checklist input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.note {
+  border-left: 3px solid var(--accent);
+  padding: 4px 0 4px 14px;
+  color: var(--muted);
+  max-width: 65ch;
+}
+</style>
+
+</head>
+<body>
+<main class="page">
+  <header>
+    <div class="eyebrow">BlocoPuff · ficha técnica para modelagem</div>
+    <h1>Modelo 3D do Barão</h1>
+    <p class="lede">O Barão é o vira-lata caramelo com a camisa da seleção que guarda os corredores secretos. O modelo novo substitui a versão feita de blocos e precisa encaixar na animação que o jogo já tem: trote, galope, farejar, dormir, sentar e o carinho no Jardim. A referência visual é a capa do jogo.</p>
+  </header>
+
+  <section aria-labelledby="resumo">
+    <h2 id="resumo">Resumo</h2>
+    <dl class="facts">
+      <div class="fact"><dt>Arquivo</dt><dd>FBX ou .glb + PNGs</dd></div>
+      <div class="fact"><dt>Entrega final</dt><dd>.rbxm salvo no Studio</dd></div>
+      <div class="fact"><dt>Altura (tamanho 1)</dt><dd>≈ 3,5 unidades</dd></div>
+      <div class="fact"><dt>Peças separadas</dt><dd>10 + 2 olhos</dd></div>
+      <div class="fact"><dt>Triângulos</dt><dd>até 5.000 no total</dd></div>
+      <div class="fact"><dt>Textura</dt><dd>1 atlas 1024 × 1024</dd></div>
+    </dl>
+  </section>
+
+  <section aria-labelledby="orientacao">
+    <h2 id="orientacao">Orientação e tamanho</h2>
+    <ul class="plain">
+      <li>Y para cima e o focinho apontando para <strong>−Z</strong>.</li>
+      <li>Origem geral no chão (y = 0), no centro entre as quatro patas.</li>
+      <li>Cerca de 3,5 unidades de altura até o topo da cabeça e 5 de comprimento, do focinho à ponta do rabo. No jogo ele é ampliado para cerca de 4,7 studs, então o tamanho exato é ajustado depois; o importante são as proporções.</li>
+      <li>Proporção da capa: cabeça grande, perto de 45% da altura, e patas curtas.</li>
+    </ul>
+    <figure class="figure">
+      <svg viewBox="0 0 560 290" role="img" aria-labelledby="diagram-title">
+        <title id="diagram-title">Vista lateral do Barão com os pontos de articulação de cada peça</title>
+        <line style="stroke:var(--muted)" x1="20" y1="252" x2="540" y2="252" stroke-width="1.5"/>
+        <text style="fill:var(--muted);font-family:var(--mono)" x="24" y="272" font-size="11">chão · y = 0</text>
+        <!-- patas -->
+        <rect style="fill:var(--dog)" x="167" y="183" width="28" height="69" rx="4"/>
+        <rect style="fill:var(--dog)" x="269" y="183" width="28" height="69" rx="4"/>
+        <rect style="fill:var(--flag-yellow)" x="165" y="176" width="32" height="10"/>
+        <!-- corpo e camisa -->
+        <rect style="fill:var(--dog)" x="166" y="116" width="138" height="77" rx="8"/>
+        <rect style="fill:var(--shirt)" x="166" y="116" width="105" height="78" rx="8"/>
+        <rect style="fill:var(--flag-yellow)" x="166" y="130" width="105" height="8"/>
+        <rect style="fill:var(--flag-yellow)" x="166" y="166" width="105" height="8"/>
+        <!-- rabo -->
+        <circle style="fill:var(--dog)" cx="310" cy="133" r="13"/>
+        <circle style="fill:var(--dog)" cx="323" cy="110" r="16"/>
+        <circle style="fill:var(--cream)" cx="327" cy="87" r="15"/>
+        <!-- cabeça -->
+        <rect style="fill:var(--dog)" x="100" y="40" width="90" height="91" rx="10"/>
+        <rect style="fill:var(--cream)" x="76" y="89" width="30" height="31" rx="6"/>
+        <rect style="fill:var(--ink)" x="64" y="91" width="14" height="18" rx="4"/>
+        <circle style="fill:var(--ink)" cx="106" cy="74" r="10"/>
+        <!-- orelha -->
+        <rect style="fill:var(--dog-dark)" x="120" y="40" width="51" height="84" rx="10"/>
+        <!-- articulações -->
+        <g style="fill:var(--ink);font-family:var(--mono)" font-size="11">
+          <g style="fill:var(--accent);stroke:var(--surface)" stroke-width="2">
+            <circle cx="232" cy="159" r="6"/>
+            <circle cx="172" cy="120" r="6"/>
+            <circle cx="145" cy="45" r="6"/>
+            <circle cx="75" cy="120" r="6"/>
+            <circle cx="301" cy="141" r="6"/>
+            <circle cx="181" cy="183" r="6"/>
+            <circle cx="283" cy="183" r="6"/>
+          </g>
+          <text x="238" y="163">Body</text>
+          <text x="180" y="112">Head (pescoço)</text>
+          <text x="153" y="34">EarL / EarR</text>
+          <text x="30" y="142">Tongue</text>
+          <text x="352" y="146">Tail (base do rabo)</text>
+          <line style="stroke:var(--muted)" x1="307" y1="141" x2="348" y2="143" stroke-width="1"/>
+          <text x="150" y="222">LegF (ombro)</text>
+          <text x="302" y="222">LegB (quadril)</text>
+        </g>
+        <g style="fill:var(--lilac);font-family:var(--mono)" font-size="11">
+          <line style="stroke:var(--lilac)" x1="470" y1="210" x2="420" y2="210" stroke-width="2" marker-end="url(#arrow)"/>
+          <text x="422" y="232">−Z · frente</text>
+          <line style="stroke:var(--lilac)" x1="470" y1="210" x2="470" y2="160" stroke-width="2" marker-end="url(#arrow)"/>
+          <text x="478" y="166">+Y</text>
+        </g>
+        <defs>
+          <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path style="fill:var(--lilac)" d="M0,0 L10,5 L0,10 z"/>
+          </marker>
+        </defs>
+      </svg>
+      <figcaption>Vista lateral no tamanho 1. Os pontos dourados são as articulações: cada peça gira em volta do seu ponto.</figcaption>
+    </figure>
+  </section>
+
+  <section aria-labelledby="pecas">
+    <h2 id="pecas">Peças e articulações</h2>
+    <p>Cada peça é um objeto separado, com exatamente estes nomes, e a origem (pivô) de cada uma fica na articulação. As coordenadas são as do modelo atual, no tamanho 1; o seu modelo pode ter outras. Eu leio as coordenadas reais do arquivo e ajusto a animação.</p>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Nome</th><th>O que inclui</th><th>Articulação</th><th>Referência (x, y, z)</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><span class="name">Body</span></td><td>Tronco, barriga e a camisa com a bandeira</td><td>Centro do tronco</td><td class="coord">0, 1.55, 0</td></tr>
+          <tr><td><span class="name">Head</span></td><td>Cabeça, rosto, focinho, nariz e boca aberta</td><td>Pescoço, na base da cabeça</td><td class="coord">0, 2.20, −1.00</td></tr>
+          <tr><td><span class="name">EarL</span> / <span class="name">EarR</span></td><td>Orelhas esquerda e direita</td><td>Topo da orelha, onde prende na cabeça</td><td class="coord">∓0.86, 3.45, −1.45</td></tr>
+          <tr><td><span class="name">Tongue</span></td><td>Língua</td><td>Raiz da língua, dentro da boca</td><td class="coord">0, 2.20, −2.62</td></tr>
+          <tr><td><span class="name">Tail</span></td><td>Rabo inteiro</td><td>Base do rabo</td><td class="coord">0, 1.85, 1.15</td></tr>
+          <tr><td><span class="name">LegFL</span> / <span class="name">LegFR</span></td><td>Patas da frente, com a manga amarela</td><td>Ombro, no topo da pata</td><td class="coord">∓0.50, 1.15, −0.85</td></tr>
+          <tr><td><span class="name">LegBL</span> / <span class="name">LegBR</span></td><td>Patas de trás</td><td>Quadril, no topo da pata</td><td class="coord">∓0.50, 1.15, 0.85</td></tr>
+          <tr><td><span class="name">Eye</span> (2 peças)</td><td>Olhos, separados porque ficam vermelhos quando o Barão está bravo</td><td>Centro do olho</td><td class="coord">∓0.42, 2.96, −2.22</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="note">L é o lado esquerdo do Barão (x negativo) e R o direito (x positivo). F são as patas da frente e B as de trás.</p>
+    <h3>Opcionais, que entram na animação se vierem</h3>
+    <ul class="plain">
+      <li><code>Jaw</code>: queixo separado, com pivô na dobradiça da boca. Serve para ele abrir a boca ao latir.</li>
+      <li><code>EyelidL</code> / <code>EyelidR</code>: pálpebras, para ele piscar.</li>
+    </ul>
+  </section>
+
+  <section aria-labelledby="pose">
+    <h2 id="pose">Pose neutra</h2>
+    <ul class="plain">
+      <li>Em pé, com as quatro patas retas para baixo.</li>
+      <li>Orelhas caídas, pendendo da articulação, com uma folguinha da cabeça para poderem balançar sem atravessar.</li>
+      <li>Boca aberta sorrindo e a língua um pouco para fora, como na capa.</li>
+      <li>Rabo para cima e um pouco para trás.</li>
+      <li>O topo de cada pata entra um pouco no corpo, arredondado, para não abrir buraco quando a pata gira.</li>
+    </ul>
+  </section>
+
+  <section aria-labelledby="leveza">
+    <h2 id="leveza">Polígonos e texturas</h2>
+    <ul class="plain">
+      <li>Até 5.000 triângulos no total, com a cabeça até cerca de 2.000. O jogo roda em celular.</li>
+      <li>Formas arredondadas e chanfradas, como na capa. Sem pelo em geometria (fios ou camadas transparentes pesam e dão erro de desenho): o pelo vai pintado na textura.</li>
+      <li>Um único atlas de 1024 × 1024 para todas as peças: cor em PNG (sRGB) e, se quiser, normal map e roughness (PBR).</li>
+      <li>Sem luz nem sombra pintada, porque a iluminação vem do jogo. Sem transparência.</li>
+      <li>A bandeira do Brasil vai pintada na camisa, nas costas e nos dois lados. A das costas é a mais importante: a câmera fica atrás e acima do jogador, e é o que ele mais vê. O brilho dos olhos também pode ser pintado.</li>
+    </ul>
+    <h3>Cores de referência</h3>
+    <div class="swatches">
+      <div class="swatch"><div class="chip" style="background:#C6783A"></div><span>Caramelo<small>#C6783A</small></span></div>
+      <div class="swatch"><div class="chip" style="background:#803C20"></div><span>Orelhas<small>#803C20</small></span></div>
+      <div class="swatch"><div class="chip" style="background:#ECC492"></div><span>Rosto claro<small>#ECC492</small></span></div>
+      <div class="swatch"><div class="chip" style="background:#00943E"></div><span>Verde da camisa<small>#00943E</small></span></div>
+      <div class="swatch"><div class="chip" style="background:#FFD400"></div><span>Amarelo<small>#FFD400</small></span></div>
+      <div class="swatch"><div class="chip" style="background:#002776"></div><span>Azul da bandeira<small>#002776</small></span></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="entrega">
+    <h2 id="entrega">Como entregar</h2>
+    <p>Um script do Roblox não consegue criar a malha 3D do zero, então o modelo precisa entrar pelo Roblox Studio.</p>
+    <ol class="steps">
+      <li><span>Modele seguindo esta ficha e exporte em FBX (ou .glb), com as texturas em PNG.</span></li>
+      <li><span>No Roblox Studio, importe pelo <strong>3D Importer</strong> usando a conta ou o grupo dono do jogo.</span></li>
+      <li><span>Salve o resultado como arquivo <code>.rbxm</code> (clique direito no modelo → <em>Save to File</em>).</span></li>
+      <li><span>Envie o <code>.rbxm</code> junto com prints de frente, de lado e de cima.</span></li>
+      <li><span>O modelo entra no projeto no lugar dos blocos, com a animação ajustada às medidas reais. O Barão do Jardim e o da arena passam a usar o modelo novo.</span></li>
+    </ol>
+  </section>
+
+  <section aria-labelledby="checklist">
+    <h2 id="checklist">Checklist antes de enviar</h2>
+    <div class="checklist">
+      <label for="c1"><input type="checkbox" id="c1"><span>Nomes das peças exatamente como na tabela.</span></label>
+      <label for="c2"><input type="checkbox" id="c2"><span>Pivô de cada peça na articulação.</span></label>
+      <label for="c3"><input type="checkbox" id="c3"><span>Focinho para −Z e origem geral no chão.</span></label>
+      <label for="c4"><input type="checkbox" id="c4"><span>Até 5.000 triângulos, sem transparência.</span></label>
+      <label for="c5"><input type="checkbox" id="c5"><span>Atlas de textura de 1024 × 1024.</span></label>
+      <label for="c6"><input type="checkbox" id="c6"><span>Importado no Studio com a conta ou o grupo do jogo e salvo como <code>.rbxm</code>.</span></label>
+    </div>
+  </section>
+</main>
+</body>
+</html>

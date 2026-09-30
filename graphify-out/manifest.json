@@ -125,8 +125,8 @@
     "semantic_hash": ""
   },
   "README.md": {
-    "mtime": 1790736519.3790889,
-    "ast_hash": "4d57960b3f305e0e4ead4d7433c130ef",
+    "mtime": 1790739758.065836,
+    "ast_hash": "2fdb0bc91ef6af41fc424bf73032dd75",
     "semantic_hash": ""
   },
   "src/client/controllers/CombatCameraController.luau": {
@@ -747,6 +747,11 @@
   "src/shared/modules/BaraoModel.luau": {
     "mtime": 1790738850.665494,
     "ast_hash": "e62d1a2b83305a0143b096c6802f67cb",
+    "semantic_hash": ""
+  },
+  "docs/BARAO_MODELO_3D.html": {
+    "mtime": 1790739758.065394,
+    "ast_hash": "604b85a05d5fd629a83ca9a0b15fd303",
     "semantic_hash": ""
   }
 }

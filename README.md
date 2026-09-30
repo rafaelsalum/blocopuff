@@ -357,6 +357,7 @@ Escopo em `docs/FASE_2_SEGREDOS_COFRE_BARAO.md`.
   - no carinho ele acorda, late baixinho, pula dando uma volta, solta corações 💜 e senta abanando o rabo olhando para você;
   - o cliente espera todas as peças chegarem do servidor antes de animar (antes, podia começar sem elas e não mexer nada);
   - cada animação roda protegida: um erro aparece uma vez na saída e não para as outras.
+- **Modelo 3D (próximo passo):** a ficha técnica para modelar o Barão em 3D (peças, articulações, orientação, limites, texturas e entrega em `.rbxm`) está em `docs/BARAO_MODELO_3D.html`.
 - **Latido de verdade:** o latido é o áudio `rbxassetid://124017572768108` (~3 s, em `GameConfig.Barao.BarkSoundIds`), tocado inteiro e com o tom um pouco variado (`BarkPitch`). Um latido não começa enquanto o anterior toca: o Barão só faz a animação de latir.
 - **Território:** placas "🐾 TERRITÓRIO DO BARÃO" e pegadas no chão de cada patamar.
 

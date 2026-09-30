@@ -1,7 +1,7 @@
 # Graph Report - blocopuff  (2026-09-30)
 
 ## Corpus Check
-- 149 files · ~145,305 words
+- 149 files · ~147,330 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
@@ -10,7 +10,7 @@
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `f9e62bee`
+- Built from commit: `b7c5f800`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -19,6 +19,7 @@
 - PuffadorService.luau
 - ArenaService.luau
 - SpectatorController.luau
+- RoundStatsService.luau
 - PuffadorController.luau
 - ReplicatedStateService.luau
 - BlocoPuff — Game Design Document
@@ -70,7 +71,6 @@
 - openStation
 - BlocoPuff!
 - Instruções para agentes
-- RoundStatsService.luau
 - Toolchain local
 - MatchQueueController.luau
 - ProgressionController.luau
@@ -125,6 +125,10 @@ Nodes (40): cellKey(), ArenaService.beginRound(), ArenaService.collapseBlock(), 
 ### Community 3 - "SpectatorController.luau"
 Cohesion: 0.33
 Nodes (8): getActiveParticipantList(), getHumanoid(), isActiveParticipant(), isPartyMate(), readBooleanAttribute(), readNumberAttribute(), resetCameraToOwnCharacter(), targetLabel()
+
+### Community 4 - "RoundStatsService.luau"
+Cohesion: 0.15
+Nodes (20): participantMultiplier(), XpCalculator.compute(), pickHighlight(), readCount(), resolveTies(), RoundResultBuilder.build(), commitProfiles(), publishResult() (+12 more)
 
 ### Community 5 - "PuffadorController.luau"
 Cohesion: 0.11
@@ -301,10 +305,6 @@ Nodes (8): BlocoPuff!, Build local, Estrutura, Grafo de conhecimento (graphify),
 ### Community 79 - "Instruções para agentes"
 Cohesion: 0.18
 Nodes (8): Arquitetura, Escopo e compatibilidade, graphify, Instruções para agentes, Linguagem e comunicação, Segurança e dependências, Validação e entrega, graphify
-
-### Community 80 - "RoundStatsService.luau"
-Cohesion: 0.15
-Nodes (20): participantMultiplier(), XpCalculator.compute(), pickHighlight(), readCount(), resolveTies(), RoundResultBuilder.build(), commitProfiles(), publishResult() (+12 more)
 
 ### Community 81 - "Toolchain local"
 Cohesion: 0.50
