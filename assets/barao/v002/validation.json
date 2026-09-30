@@ -1,0 +1,173 @@
+{
+  "revision": "v002",
+  "checks": "passed",
+  "triangles": 4884,
+  "pieces": 12,
+  "atlas": {
+    "size": [
+      1024,
+      1024
+    ],
+    "mode": "RGB",
+    "colorSpace": "sRGB",
+    "embeddedAndExternalMatch": true
+  },
+  "bounds": {
+    "min": [
+      -1.5460375118255616,
+      2.3841857821338408e-08,
+      -2.7699999809265137
+    ],
+    "max": [
+      1.5460375118255616,
+      3.4999999523162844,
+      2.051535153388977
+    ],
+    "size": [
+      3.092075023651123,
+      3.4999999284744265,
+      4.821535134315491
+    ]
+  },
+  "parts": [
+    {
+      "name": "Body",
+      "side": null,
+      "triangles": 844,
+      "pivot": [
+        0.0,
+        1.55,
+        0.0
+      ]
+    },
+    {
+      "name": "Head",
+      "side": null,
+      "triangles": 1736,
+      "pivot": [
+        0.0,
+        2.2,
+        -1.0
+      ]
+    },
+    {
+      "name": "EarL",
+      "side": null,
+      "triangles": 256,
+      "pivot": [
+        -0.83,
+        3.35,
+        -1.3
+      ]
+    },
+    {
+      "name": "Eye",
+      "side": "L",
+      "triangles": 224,
+      "pivot": [
+        -0.43,
+        2.96,
+        -2.205
+      ]
+    },
+    {
+      "name": "LegFL",
+      "side": null,
+      "triangles": 288,
+      "pivot": [
+        -0.5,
+        1.15,
+        -0.85
+      ]
+    },
+    {
+      "name": "LegBL",
+      "side": null,
+      "triangles": 192,
+      "pivot": [
+        -0.5,
+        1.15,
+        0.85
+      ]
+    },
+    {
+      "name": "EarR",
+      "side": null,
+      "triangles": 256,
+      "pivot": [
+        0.83,
+        3.35,
+        -1.3
+      ]
+    },
+    {
+      "name": "Eye",
+      "side": "R",
+      "triangles": 224,
+      "pivot": [
+        0.43,
+        2.96,
+        -2.205
+      ]
+    },
+    {
+      "name": "LegFR",
+      "side": null,
+      "triangles": 288,
+      "pivot": [
+        0.5,
+        1.15,
+        -0.85
+      ]
+    },
+    {
+      "name": "LegBR",
+      "side": null,
+      "triangles": 192,
+      "pivot": [
+        0.5,
+        1.15,
+        0.85
+      ]
+    },
+    {
+      "name": "Tongue",
+      "side": null,
+      "triangles": 168,
+      "pivot": [
+        0.0,
+        2.27,
+        -2.43
+      ]
+    },
+    {
+      "name": "Tail",
+      "side": null,
+      "triangles": 216,
+      "pivot": [
+        0.0,
+        1.85,
+        1.15
+      ]
+    }
+  ],
+  "sha256": {
+    "barao.glb": "eb40f53a70ada6ddb2c6768402c43cecacd54512a5ce25e524b6236af1f61691",
+    "textures/barao_basecolor.png": "49a1de05d62a15dcdcec1a0c00330f3195be6dcb3359adf1ec780f872499b5e1",
+    "textures/barao_normal.png": "b722c8ca1b83aff1a7cc928911ffa4c34b03550af8069f51d0ff5c1c54deae96",
+    "textures/barao_orm.png": "c3651f97324a28eefc198a07031b15d8bacb50bd83f06d1eb1a7560e90648679",
+    "textures/barao_roughness.png": "88891c4a1dd6347b72aa9b02f08a44911ff1d8982d6a35801feadeb87d6deb9f"
+  },
+  "pbrMaps": [
+    "basecolor (sRGB)",
+    "normal (linear)",
+    "roughness (linear)",
+    "ORM (linear; G=roughness, B=metallic)"
+  ],
+  "scope": "Local structural and numeric validation; not an official glTF validator or a Roblox import test",
+  "visualReference": "reference/cover.png",
+  "notVerified": [
+    "Roblox Studio import",
+    "animation integration"
+  ]
+}

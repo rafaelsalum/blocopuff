@@ -1,0 +1,131 @@
+{
+  "root": [
+    0,
+    0,
+    0
+  ],
+  "up": "+Y",
+  "forward": "-Z",
+  "parts": [
+    {
+      "node": 1,
+      "name": "Body",
+      "side": null,
+      "pivot": [
+        0.0,
+        1.55,
+        0.0
+      ]
+    },
+    {
+      "node": 2,
+      "name": "Head",
+      "side": null,
+      "pivot": [
+        0.0,
+        2.2,
+        -1.0
+      ]
+    },
+    {
+      "node": 3,
+      "name": "Tongue",
+      "side": null,
+      "pivot": [
+        0.0,
+        2.2,
+        -2.62
+      ]
+    },
+    {
+      "node": 4,
+      "name": "EarL",
+      "side": null,
+      "pivot": [
+        -0.86,
+        3.45,
+        -1.45
+      ]
+    },
+    {
+      "node": 5,
+      "name": "Eye",
+      "side": "L",
+      "pivot": [
+        -0.42,
+        2.96,
+        -2.22
+      ]
+    },
+    {
+      "node": 6,
+      "name": "LegFL",
+      "side": null,
+      "pivot": [
+        -0.5,
+        1.15,
+        -0.85
+      ]
+    },
+    {
+      "node": 7,
+      "name": "LegBL",
+      "side": null,
+      "pivot": [
+        -0.5,
+        1.15,
+        0.85
+      ]
+    },
+    {
+      "node": 8,
+      "name": "EarR",
+      "side": null,
+      "pivot": [
+        0.86,
+        3.45,
+        -1.45
+      ]
+    },
+    {
+      "node": 9,
+      "name": "Eye",
+      "side": "R",
+      "pivot": [
+        0.42,
+        2.96,
+        -2.22
+      ]
+    },
+    {
+      "node": 10,
+      "name": "LegFR",
+      "side": null,
+      "pivot": [
+        0.5,
+        1.15,
+        -0.85
+      ]
+    },
+    {
+      "node": 11,
+      "name": "LegBR",
+      "side": null,
+      "pivot": [
+        0.5,
+        1.15,
+        0.85
+      ]
+    },
+    {
+      "node": 12,
+      "name": "Tail",
+      "side": null,
+      "pivot": [
+        0.0,
+        1.85,
+        1.15
+      ]
+    }
+  ]
+}
