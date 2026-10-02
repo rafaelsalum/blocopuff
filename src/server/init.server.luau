@@ -40,6 +40,8 @@ local AdminService = require(script.services.AdminService)
 local PhotoModeService = require(script.services.PhotoModeService)
 local CombatantRegistry = require(script.services.CombatantRegistry)
 local BotFillService = require(script.services.BotFillService)
+local MatchTestControls = require(script.services.MatchTestControls)
+local ReferralService = require(script.services.ReferralService)
 
 local WORLD_NAME = "BlocoPuffWorld"
 local GENERATED_BY_ATTRIBUTE = "GeneratedBy"
@@ -163,6 +165,14 @@ print("[BlocoPuff] Puff moments and secrets telemetry ready")
 PlayerDataService.start(PuffadorService.getRemotesFolder())
 print("[BlocoPuff] Player profiles ready")
 
+-- Convite com recompensa (prêmio para quem convidou e para o amigo).
+local referralOk, referralFailure = pcall(function()
+	ReferralService.start(PuffadorService.getRemotesFolder())
+end)
+if not referralOk then
+	warn(string.format("[BlocoPuff] Referral rewards disabled: %s", tostring(referralFailure)))
+end
+
 -- Puffdex: equipar Puffs (os desbloqueios vêm do perfil).
 PuffdexService.start(PuffadorService.getRemotesFolder())
 PuffMachineService.start(PuffadorService.getRemotesFolder())
@@ -221,6 +231,9 @@ end
 
 RoundService.start()
 print("[BlocoPuff] Round cycle started")
+
+-- Comandos de teste da partida no painel admin (só administradores).
+MatchTestControls.start()
 
 -- Só ativo no Studio: cenas para capas e thumbnails da loja.
 PhotoModeService.start()

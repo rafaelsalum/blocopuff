@@ -59,13 +59,15 @@ end
 -- `onRanking`: abre o painel RANKING (botão 🏆 ao lado do cartão).
 -- `onPuffdex`: abre o PUFFDEX (botão ✨). `onMachine`: abre a PUFF MACHINE (🎰).
 -- `onChallenges`: abre os DESAFIOS (📋). `onParty`: abre a PARTY (👥).
+-- `onInvite`: convida amigos com recompensa (💌).
 function ProfileCardView.new(
 	playerGui: PlayerGui,
 	onRanking: () -> (),
 	onPuffdex: () -> (),
 	onMachine: () -> (),
 	onChallenges: () -> (),
-	onParty: () -> ()
+	onParty: () -> (),
+	onInvite: () -> ()
 ): ProfileCardViewHandle
 	local screenGui = UiTheme.createScreenGui(GUI_NAME, playerGui, 12)
 
@@ -151,6 +153,7 @@ function ProfileCardView.new(
 		{ name = "MachineButton", text = "🎰", variant = "Gold", action = onMachine },
 		{ name = "ChallengesButton", text = "📋", variant = "Success", action = onChallenges },
 		{ name = "PartyButton", text = "👥", variant = "Primary", action = onParty },
+		{ name = "InviteButton", text = "💌", variant = "Success", action = onInvite },
 	}
 	local buttonWidth = (CARD_SIZE.X - SHORTCUT_GAP * (#shortcuts - 1)) / #shortcuts
 	local buttons: { [string]: UiKit.ButtonHandle } = {}

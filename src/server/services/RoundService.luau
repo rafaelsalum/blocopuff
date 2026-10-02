@@ -109,6 +109,15 @@ local eliminationPositions: { [Combatant]: number } = {}
 -- Momento de cada eliminação: quedas no mesmo instante viram empate.
 local eliminationTimes: { [Combatant]: number } = {}
 local resultRemote: RemoteEvent? = nil
+-- Comandos de teste do painel admin (MatchTestControls).
+-- Início forçado vale até este os.clock() (pedido na espera aguarda a
+-- contagem começar, mas não fica valendo para sempre).
+local forceStartUntil = 0
+local skipToChaosRequested = false
+local endRoundRequested = false
+-- Contagem que sobra ao forçar o início.
+local FORCED_COUNTDOWN = 3
+local FORCE_START_WINDOW = 30
 
 -- Quantos estão na fila da partida (no mirante, com as Parties, mais os
 -- bots RoboPuff que vieram completar).
@@ -504,6 +513,10 @@ local function runCountdown(timings: RoundTimings): boolean
 			return false
 		end
 
+		if os.clock() < forceStartUntil then
+			forceStartUntil = 0
+			remaining = math.min(remaining, FORCED_COUNTDOWN + 1)
+		end
 		remaining -= 1
 		-- Nos últimos segundos o mirante fecha as portas (embarque).
 		MatchQueueService.setCountdown(remaining)
@@ -604,6 +617,16 @@ local function runActive(timings: RoundTimings)
 	local chaosDuration = FinalChaosService.getDuration(timings.RoundDuration)
 
 	while isRunning do
+		if endRoundRequested then
+			endRoundRequested = false
+			winner = nil
+			break
+		end
+		if skipToChaosRequested then
+			skipToChaosRequested = false
+			remaining = math.min(remaining, chaosDuration)
+		end
+
 		-- Todos os humanos saíram e só sobraram bots: não há por que seguir.
 		if #participantOrder > 0 and #participantPlayers() == 0 then
 			winner = nil
@@ -784,6 +807,9 @@ end
 
 local function runEnding(timings: RoundTimings)
 	setState(RoundTypes.Ending)
+	forceStartUntil = 0
+	skipToChaosRequested = false
+	endRoundRequested = false
 	BotBrainService.endRound()
 	EliminationService.endRound()
 	FinalChaosService.stop()
@@ -958,6 +984,33 @@ end
 -- Jogadores reais da rodada em andamento (sem bots).
 function RoundService.getParticipants(): { Player }
 	return participantPlayers()
+end
+
+-- Comandos de teste (painel admin). Devolvem se foram aceitos.
+-- Encurta a contagem (ou a próxima, se ainda esperando gente).
+function RoundService.requestForceStart(): boolean
+	if currentState == RoundTypes.Active or currentState == RoundTypes.Ending then
+		return false
+	end
+	forceStartUntil = os.clock() + FORCE_START_WINDOW
+	return true
+end
+
+function RoundService.requestSkipToFinalChaos(): boolean
+	if currentState ~= RoundTypes.Active or FinalChaosService.isRunning() then
+		return false
+	end
+	skipToChaosRequested = true
+	return true
+end
+
+-- Termina a partida em andamento sem vencedor.
+function RoundService.requestEndRound(): boolean
+	if currentState ~= RoundTypes.Active then
+		return false
+	end
+	endRoundRequested = true
+	return true
 end
 
 -- Exposto para ser passado como callback tipado ao EliminationService.start,

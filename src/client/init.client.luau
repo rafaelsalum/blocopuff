@@ -27,6 +27,7 @@ local PartyController = require(script.controllers.PartyController)
 local ReactionController = require(script.controllers.ReactionController)
 local LobbyStationsController = require(script.controllers.LobbyStationsController)
 local MatchQueueController = require(script.controllers.MatchQueueController)
+local InviteController = require(script.controllers.InviteController)
 
 print("[BlocoPuff] Client initialized")
 
@@ -219,4 +220,12 @@ local progressionOk, progressionErr = pcall(function()
 end)
 if not progressionOk then
 	warn(string.format("[BlocoPuff] Failed to start progression controller: %s", tostring(progressionErr)))
+end
+
+-- Convite com recompensa (botão 💌 e avisos de prêmio).
+local inviteOk, inviteErr = pcall(function()
+	InviteController.start()
+end)
+if not inviteOk then
+	warn(string.format("[BlocoPuff] Failed to start invite controller: %s", tostring(inviteErr)))
 end

@@ -163,6 +163,12 @@ function AdminController.start()
 				message = message,
 			})
 		end,
+		onTest = function(action: string, option: string?)
+			sendRequest({
+				action = action,
+				option = option,
+			})
+		end,
 		onModerate = function(action: string, targetUserIdText: string, reason: string)
 			local targetUserId = tonumber(targetUserIdText)
 			if targetUserId == nil then

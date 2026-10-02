@@ -5,11 +5,16 @@
 
 export type AdminAction = "Announce" | "Kick" | "Ban" | "Unban"
 
+-- Ações de teste da partida (MatchTestControls), também só para admins.
+export type MatchTestAction = "ForceStart" | "SkipToChaos" | "EndRound" | "BotsOn" | "BotsOff" | "BotLevel"
+
 export type AdminRequest = {
 	action: string,
 	targetUserId: number?,
 	message: string?,
 	reason: string?,
+	-- Parâmetro curto de uma ação de teste (ex.: nível dos bots).
+	option: string?,
 }
 
 export type AdminResponse = {
@@ -33,6 +38,9 @@ local AdminConstants = table.freeze({
 	BanStoreName = "BlocoPuffAdminBansV1",
 	MaximumAnnouncementLength = 180,
 	MaximumReasonLength = 120,
+	MaximumOptionLength = 16,
+	-- Níveis aceitos em "BotLevel" ("Auto" = escolha normal).
+	BotLevelOptions = table.freeze({ "Auto", "Easy", "Normal", "Hard" }),
 })
 
 return AdminConstants

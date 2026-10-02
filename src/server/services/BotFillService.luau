@@ -55,10 +55,14 @@ local fillWaited = 0
 -- pode demorar): contam como já chegando, para não montar a mais.
 local building = 0
 
+-- Painel admin: liga ou desliga os bots neste servidor (nil = config).
+local enabledOverride: boolean? = nil
+
 local function fillConfig(): BotFillRules.FillConfig
 	local base = BotConfig.Fill
+	local enabled = enabledOverride
 	return {
-		Enabled = base.Enabled,
+		Enabled = if enabled ~= nil then enabled else base.Enabled,
 		TargetCombatants = base.TargetCombatants,
 		MaxBots = base.MaxBots,
 		WaitSeconds = if RunService:IsStudio() then BotConfig.StudioWaitSeconds else base.WaitSeconds,
@@ -257,6 +261,24 @@ function BotFillService.endRound()
 		destroyBot(bot)
 	end
 	table.clear(inRound)
+end
+
+-- Comandos de teste (painel admin).
+function BotFillService.setEnabled(enabled: boolean)
+	enabledOverride = enabled
+	if not enabled then
+		spawnGeneration += 1
+		sendAway(#pool)
+	end
+end
+
+function BotFillService.isEnabled(): boolean
+	return fillConfig().Enabled
+end
+
+-- Os bots vêm já, sem a espera inicial.
+function BotFillService.rush()
+	warmUntil = os.clock() + BotConfig.WarmSeconds
 end
 
 function BotFillService.start(worldRoot: Model)

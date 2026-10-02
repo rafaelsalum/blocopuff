@@ -47,6 +47,8 @@ local playerRemovingConnection: RBXScriptConnection? = nil
 local announcementSubscription: RBXScriptConnection? = nil
 local moderationSubscription: RBXScriptConnection? = nil
 local lastActionAt: { [Player]: number } = {}
+-- Ações registradas por outros serviços (comandos de teste da partida).
+local extraActions: { [string]: (player: Player, request: AdminRequest) -> AdminResponse } = {}
 local lastAnnouncementAt: { [Player]: number } = {}
 local deliveredAnnouncements: { [string]: boolean } = {}
 
@@ -398,6 +400,19 @@ local function onAdminRequest(player: Player, rawRequest: unknown): AdminRespons
 	elseif request.action == "Unban" then
 		return handleUnban(player, request)
 	end
+	local extra = extraActions[request.action]
+	if extra ~= nil then
+		if request.option ~= nil and (type(request.option) ~= "string" or #request.option > AdminConstants.MaximumOptionLength) then
+			return response(false, "Opção inválida.")
+		end
+		local ok, result = pcall(extra, player, request)
+		if not ok then
+			warn(string.format("[BlocoPuff][Admin] Action %s failed: %s", request.action, tostring(result)))
+			return response(false, "A ação falhou no servidor.")
+		end
+		print(string.format("[BlocoPuff][Admin] moderator=%d action=%s option=%s", player.UserId, request.action, tostring(request.option)))
+		return result
+	end
 
 	return response(false, "Ação administrativa não reconhecida.")
 end
@@ -456,6 +471,17 @@ local function subscribeToTopics()
 	else
 		warn(string.format("[BlocoPuff][Admin] Moderation subscription unavailable: %s", tostring(moderationResult)))
 	end
+end
+
+-- Registra uma ação extra do painel (só administradores chegam a ela, com
+-- a mesma limitação de frequência das demais).
+function AdminService.registerAction(action: string, handler: (player: Player, request: AdminRequest) -> AdminResponse)
+	extraActions[action] = handler
+end
+
+-- Resposta padrão para as ações registradas.
+function AdminService.reply(ok: boolean, message: string): AdminResponse
+	return response(ok, message)
 end
 
 function AdminService.start()

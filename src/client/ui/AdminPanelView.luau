@@ -23,7 +23,31 @@ export type PlayerEntry = {
 export type AdminPanelCallbacks = {
 	onAnnounce: (message: string) -> (),
 	onModerate: (action: string, targetUserIdText: string, reason: string) -> (),
+	-- Comandos de teste da partida (MatchTestControls no servidor).
+	onTest: (action: string, option: string?) -> (),
 }
+
+-- Botões da seção de testes, em fileiras.
+type TestButton = { name: string, text: string, variant: UiKit.ButtonVariant, action: string, option: string? }
+local TEST_ROWS: { { TestButton } } = {
+	{
+		{ name = "ForceStartButton", text = "▶ COMEÇAR JÁ", variant = "Success", action = "ForceStart" },
+		{ name = "ChaosButton", text = "🌪 CAOS FINAL", variant = "Warning", action = "SkipToChaos" },
+		{ name = "EndRoundButton", text = "⏹ ENCERRAR", variant = "Danger", action = "EndRound" },
+	},
+	{
+		{ name = "BotsOnButton", text = "🤖 BOTS LIGADOS", variant = "Primary", action = "BotsOn" },
+		{ name = "BotsOffButton", text = "🚫 BOTS DESLIGADOS", variant = "Warning", action = "BotsOff" },
+	},
+	{
+		{ name = "LevelAutoButton", text = "AUTO", variant = "Gold", action = "BotLevel", option = "Auto" },
+		{ name = "LevelEasyButton", text = "FÁCIL", variant = "Success", action = "BotLevel", option = "Easy" },
+		{ name = "LevelNormalButton", text = "NORMAL", variant = "Primary", action = "BotLevel", option = "Normal" },
+		{ name = "LevelHardButton", text = "ESPERTO", variant = "Danger", action = "BotLevel", option = "Hard" },
+	},
+}
+local TEST_ROW_HEIGHT = 48
+local TEST_ROW_GAP = 8
 
 export type AdminPanelViewHandle = {
 	setPlayers: (players: { PlayerEntry }) -> (),
@@ -238,6 +262,44 @@ function AdminPanelView.new(playerGui: PlayerGui, callbacks: AdminPanelCallbacks
 	contentPadding.PaddingLeft = UDim.new(0, 4)
 	contentPadding.Parent = content
 
+	-- Seção: testes da partida (só neste servidor).
+	local testHeight = 52 + (#TEST_ROWS * (TEST_ROW_HEIGHT + TEST_ROW_GAP)) + 22
+	local testSection = createSection(content, "TestSection", "TESTES DA PARTIDA", "🧪", UiTheme.Colors.Green, testHeight, 0)
+	local testCaption = UiTheme.createLabel(testSection, "Caption", "Só neste servidor • nível dos bots vale da próxima partida", UiTheme.Fonts.Body, 12, UiTheme.Colors.InkSoft)
+	testCaption.Position = UDim2.fromOffset(15, testHeight - 26)
+	testCaption.Size = UDim2.new(1, -30, 0, 18)
+	testCaption.TextXAlignment = Enum.TextXAlignment.Left
+	testCaption.ZIndex = 13
+	local testButtons: { { button: ButtonHandle, spec: TestButton } } = {}
+	for rowIndex, row in ipairs(TEST_ROWS) do
+		local rowFrame = Instance.new("Frame")
+		rowFrame.Name = `TestRow{rowIndex}`
+		rowFrame.Position = UDim2.fromOffset(14, 52 + ((rowIndex - 1) * (TEST_ROW_HEIGHT + TEST_ROW_GAP)))
+		rowFrame.Size = UDim2.new(1, -28, 0, TEST_ROW_HEIGHT)
+		rowFrame.BackgroundTransparency = 1
+		rowFrame.ZIndex = 13
+		rowFrame.Parent = testSection
+		local rowLayout = Instance.new("UIListLayout")
+		rowLayout.FillDirection = Enum.FillDirection.Horizontal
+		rowLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+		rowLayout.Padding = UDim.new(0, 8)
+		rowLayout.SortOrder = Enum.SortOrder.LayoutOrder
+		rowLayout.Parent = rowFrame
+		for index, spec in ipairs(row) do
+			local button = UiKit.createButton(rowFrame, {
+				name = spec.name,
+				text = spec.text,
+				variant = spec.variant,
+				size = UDim2.new(1 / #row, -(8 * (#row - 1)) / #row, 1, 0),
+				textSize = 13,
+				layoutOrder = index,
+				selectionOrder = 102 + (rowIndex * 4) + index,
+				zIndex = 13,
+			})
+			table.insert(testButtons, { button = button, spec = spec })
+		end
+	end
+
 	-- Seção: aviso para o jogo.
 	local announcementSection = createSection(content, "AnnouncementSection", "AVISO PARA O JOGO", "📣", UiTheme.Colors.Blue, 200, 1)
 
@@ -378,6 +440,9 @@ function AdminPanelView.new(playerGui: PlayerGui, callbacks: AdminPanelCallbacks
 	-- Ação aguardando resposta, para limpar o campo certo quando der certo.
 	local pendingAction: string? = nil
 	local actionButtons = { announceButton, kickButton, banButton, unbanButton }
+	for _, entry in ipairs(testButtons) do
+		table.insert(actionButtons, entry.button)
+	end
 	local entryStrokes: { [number]: UIStroke } = {}
 
 	local function isGamepadInput(inputType: Enum.UserInputType): boolean
@@ -461,6 +526,14 @@ function AdminPanelView.new(playerGui: PlayerGui, callbacks: AdminPanelCallbacks
 			pendingAction = action
 			callbacks.onModerate(action, targetBox.Text, reasonBox.Text)
 		end
+	end
+	for _, entry in ipairs(testButtons) do
+		table.insert(connections, entry.button.button.Activated:Connect(function()
+			if not busy then
+				pendingAction = entry.spec.action
+				callbacks.onTest(entry.spec.action, entry.spec.option)
+			end
+		end))
 	end
 	table.insert(connections, kickButton.button.Activated:Connect(function()
 		moderate("Kick")
@@ -557,7 +630,7 @@ function AdminPanelView.new(playerGui: PlayerGui, callbacks: AdminPanelCallbacks
 		if ok then
 			if pendingAction == "Announce" then
 				announcementBox.Text = ""
-			elseif pendingAction ~= nil then
+			elseif pendingAction == "Kick" or pendingAction == "Ban" or pendingAction == "Unban" then
 				reasonBox.Text = ""
 			end
 		end

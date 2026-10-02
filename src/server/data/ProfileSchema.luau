@@ -56,6 +56,14 @@ export type Profile = {
 	-- Campos opcionais lidos com padrão: não exigem nova versão.
 	botTicketDay: number,
 	botTickets: number,
+	-- Convite com recompensa (5B): quem convidou (UserId, 0 se ninguém), se
+	-- o prêmio de convidado já saiu (0/1), amigos convidados que já renderam
+	-- prêmio e quantos no dia `referralDay`. Opcionais, sem versão.
+	referredBy: number,
+	referralPaid: number,
+	referralFriends: { number },
+	referralDay: number,
+	referralDayCount: number,
 	appliedRounds: { string },
 	createdAt: number,
 	updatedAt: number,
@@ -112,11 +120,32 @@ function ProfileSchema.default(now: number): Profile
 		secrets = {},
 		botTicketDay = 0,
 		botTickets = 0,
+		referredBy = 0,
+		referralPaid = 0,
+		referralFriends = {},
+		referralDay = 0,
+		referralDayCount = 0,
 		appliedRounds = {},
 		createdAt = now,
 		updatedAt = now,
 		session = nil,
 	}
+end
+
+-- Lista de UserIds (amigos convidados), sem repetir e com tamanho limitado.
+local MAX_ID_LIST = 64
+local function readIdList(value: unknown): { number }
+	local list: { number } = {}
+	if typeof(value) ~= "table" then
+		return list
+	end
+	for _, id in ipairs(value :: { unknown }) do
+		local clean = cleanNumber(id, 0)
+		if clean > 0 and table.find(list, clean) == nil and #list < MAX_ID_LIST then
+			table.insert(list, clean)
+		end
+	end
+	return list
 end
 
 -- Passos de migração: MIGRATIONS[n] recebe dados na versão n e devolve na n+1.
@@ -272,6 +301,11 @@ function ProfileSchema.fromStored(raw: unknown, now: number): (Profile, boolean)
 		secrets = readSecrets(data.secrets, now),
 		botTicketDay = cleanNumber(data.botTicketDay, 0),
 		botTickets = cleanNumber(data.botTickets, 0),
+		referredBy = cleanNumber(data.referredBy, 0),
+		referralPaid = math.min(cleanNumber(data.referralPaid, 0), 1),
+		referralFriends = readIdList(data.referralFriends),
+		referralDay = cleanNumber(data.referralDay, 0),
+		referralDayCount = cleanNumber(data.referralDayCount, 0),
 		appliedRounds = readAppliedRounds(data.appliedRounds),
 		createdAt = cleanNumber(data.createdAt, now),
 		updatedAt = cleanNumber(data.updatedAt, now),
@@ -373,6 +407,11 @@ function ProfileSchema.toStored(profile: Profile): { [string]: any }
 		secrets = table.clone(profile.secrets),
 		botTicketDay = profile.botTicketDay,
 		botTickets = profile.botTickets,
+		referredBy = profile.referredBy,
+		referralPaid = profile.referralPaid,
+		referralFriends = table.clone(profile.referralFriends),
+		referralDay = profile.referralDay,
+		referralDayCount = profile.referralDayCount,
 		appliedRounds = table.clone(profile.appliedRounds),
 		createdAt = profile.createdAt,
 		updatedAt = profile.updatedAt,

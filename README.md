@@ -213,6 +213,30 @@ Escopo em `docs/FASE_5B_BOTS_PUFF.md`. Ninguém joga sozinho: bots completam a p
 - **Fora do escopo por enquanto:** os bots não entram nos corredores secretos (Barão, Tocas), não abrem o cofre e não constroem.
 - **Testes:** `lune run tests/BotFillRules.spec`, `tests/BotGrid.spec`, `tests/BotLevelRules.spec` e `tests/BotRewardRules.spec`.
 
+### Comandos de teste da partida (painel admin)
+
+Seção **TESTES DA PARTIDA** no painel admin. Vale só para o servidor atual e só para admins.
+
+- **▶ COMEÇAR JÁ:** a contagem cai para 3 s assim que houver gente na fila, e os bots chegam na hora se faltar gente. O pedido vale por 30 s.
+- **🌪 CAOS FINAL:** durante a partida, pula direto para o Caos Final.
+- **⏹ ENCERRAR:** termina a partida em andamento sem vencedor.
+- **🤖 BOTS LIGADOS / 🚫 BOTS DESLIGADOS:** liga ou desliga os bots RoboPuff neste servidor. Ao desligar, os bots do mirante vão embora.
+- **Nível dos bots:** AUTO, FÁCIL, NORMAL ou ESPERTO, a partir da próxima partida.
+- Código em `services/MatchTestControls` (registrado com `AdminService.registerAction`).
+
+### Convite com recompensa (Fase 5B)
+
+- **Botão 💌** no cartão de perfil (`InviteController`): abre o convite do próprio Roblox. O `LaunchData` leva o UserId de quem convidou.
+- **Quem chega a convite:** o servidor (`ReferralService`) lê `GetJoinData().ReferredByPlayerId`, preenchido pelo próprio Roblox. O `LaunchData` não vale, porque qualquer um monta esse link. Só fica registrado no perfil de quem nunca jogou, e nunca é trocado.
+- **Prêmio do amigo:** 5 tickets ao terminar a primeira partida inteira, uma vez só.
+- **Prêmio de quem convidou:** 5 tickets por amigo, uma vez por amigo, até 3 amigos por dia e 20 no total. Amigos além do limite do dia não rendem.
+- **Quem convidou está em outro servidor ou fora do jogo:** o amigo entra numa lista no DataStore `BlocoPuffReferralsV1`, e um aviso pelo MessagingService chama o servidor certo. Se quem convidou estiver fora, recebe ao entrar.
+- **Perfil:** campos `referredBy`, `referralPaid`, `referralFriends`, `referralDay` e `referralDayCount`. São opcionais e não exigem nova versão.
+- **Configuração:** valores em `config/ReferralConfig`; regras em `data/ReferralRules`.
+- **Telemetria:** `InviteSent`, `InviteUnavailable`, `ReferralJoined`, `ReferralInviteePaid`, `ReferralInviterPaid` e `TicketsEarned` com contexto `Referral`.
+- **Testar de verdade:** só com o jogo publicado. O Roblox só preenche quem convidou em convites reais, e o Studio pode não ter acesso ao DataStore e ao MessagingService. Os banners de recompensa da página do convite são configurados no Creator Hub (Engagement > Referral Rewards), com o jogo publicado há pelo menos 1 dia.
+- **Testes:** `lune run tests/ReferralRules.spec`.
+
 ### Tapete Puxado (Fase 5, entrega 5.3)
 
 - **Onde:** dois tapetes no térreo (`traps/RugTrap`), um em cada metade, montados sobre os blocos e puxados para o centro, onde costuma ter buraco. Posição, tamanho e cor ficam em `TrapConfig.Rug.Rugs`, em células da grade.

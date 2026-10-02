@@ -60,6 +60,8 @@ local LEAD_TIME = 0.12
 local BotBrainService = {}
 
 local brains: { Brain } = {}
+-- Painel admin: todos os bots num nível fixo (nil = BotLevelRules).
+local levelOverride: BotConfig.LevelName? = nil
 local running = false
 local generation = 0
 local random = Random.new()
@@ -310,7 +312,7 @@ function BotBrainService.beginRound(bots: { Combatant }, humans: { Player })
 	local levels = BotLevelRules.choose(#bots, humanInfo(humans), BotConfig.LevelRules)
 	local now = os.clock()
 	for index, bot in ipairs(bots) do
-		local levelName: BotConfig.LevelName = levels[index] or "Easy"
+		local levelName: BotConfig.LevelName = levelOverride or levels[index] or "Easy"
 		local level = BotConfig.Levels[levelName]
 		local _, humanoid = aliveRoot(bot)
 		if humanoid ~= nil then
@@ -342,6 +344,11 @@ function BotBrainService.beginRound(bots: { Combatant }, humans: { Player })
 			task.wait(BotConfig.Brain.TickSeconds)
 		end
 	end)
+end
+
+-- Comando de teste: nível fixo para os próximos bots (nil volta ao normal).
+function BotBrainService.setLevelOverride(level: BotConfig.LevelName?)
+	levelOverride = level
 end
 
 function BotBrainService.endRound()
