@@ -287,7 +287,7 @@ local function buildChallengeBoard(parent: Instance, base: Vector3)
 	prompt(board, "Challenges", "Ver", "Desafios")
 end
 
--- Loja: só a banca, fechada ("em breve"). Preparação para a Fase 5.
+-- Loja: só a banca, fechada ("em breve"). Preparação para a Fase 6.
 -- `facing` (±1) diz para que lado de X fica o balcão.
 local function buildShop(parent: Instance, base: Vector3, facing: number)
 	local counter = part(parent, "ShopCounter", Vector3.new(2.4, 2.6, 5.6), CFrame.new(base + Vector3.new(0, 1.3, 0)), Color3.fromRGB(150, 108, 66), Enum.Material.Wood)

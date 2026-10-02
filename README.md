@@ -184,6 +184,14 @@ Arquivos `.rbxl` e `.rbxlx` são artefatos locais e não fazem parte da fonte pr
 
 ## Estado atual
 
+### Próximas fases
+
+- **Fase 5 — Partida Viva: o Casarão reage** (`docs/FASE_5_PARTIDA_VIVA_CASARAO_REAGE.md`): armadilhas acionadas por disparo que premiam quem joga de longe.
+  - Em cima: Janela Ventania, Pombos e Chuva.
+  - Embaixo: Tapete Puxado, Lustre Despencando e Lareira de Fuligem.
+  - Tempestade no Caos Final.
+- **Fase 6 — LiveOps, Temporadas & Monetização** (`docs/FASE_6_LIVEOPS_TEMPORADAS_MONETIZACAO.md`), que antes era a Fase 5. Inclui as skins do Puffador.
+
 ### Painel administrativo seguro
 
 O projeto possui um painel administrativo próprio, inspirado no fluxo do AdminPanel+, mas implementado integralmente nos arquivos do Rojo. O pacote original da Toolbox não é executado nem incluído no jogo. O acesso inicial pertence somente ao User ID `4328593410`, configurado em `src/server/config/AdminConfig.luau`; qualquer administrador adicional deve ser incluído explicitamente nesse arquivo.
@@ -367,7 +375,7 @@ Escopo em `docs/FASE_2_SEGREDOS_COFRE_BARAO.md`.
 
 ### Puffador menor (Fase 4, ajuste pós-4.5)
 
-O Puffador na mão ficou 28% menor (`HELD_SCALE = 0.72` em `PuffadorModel`) para não tapar a mira. A boca do cano, a empunhadura e o brilho do Super acompanham a escala, e o disparo sai da boca como antes. O tamanho do projétil, o alcance e o acerto não mudam. O prêmio do Cofre, que é só exposição, continua em tamanho cheio. As skins do Puffador ficaram anotadas para a Fase 5 (`docs/FASE_5_LIVEOPS_TEMPORADAS_MONETIZACAO.md`, item 8.1).
+O Puffador na mão ficou 28% menor (`HELD_SCALE = 0.72` em `PuffadorModel`) para não tapar a mira. A boca do cano, a empunhadura e o brilho do Super acompanham a escala, e o disparo sai da boca como antes. O tamanho do projétil, o alcance e o acerto não mudam. O prêmio do Cofre, que é só exposição, continua em tamanho cheio. As skins do Puffador ficaram anotadas para a Fase 6 (`docs/FASE_6_LIVEOPS_TEMPORADAS_MONETIZACAO.md`, item 8.1).
 
 ### Puffdex empolgante — Camada A (Fase 4, ajuste pós-4.5)
 
@@ -492,7 +500,7 @@ A galeria (20 × 90 studs) ganhou estações físicas. Cada uma tem um Proximity
 - **Lado do vidro:**
   - **vitrine de Puffs** (exibição de cosméticos): um Puff de cada raridade em pedestais, com nome e raridade; o prompt abre o Puffdex;
   - **quadro de desafios**, que abre os desafios do dia;
-  - **loja "em breve"**, só a banca fechada. O prompt avisa que nada é vendido por enquanto (preparação para a Fase 5).
+  - **loja "em breve"**, só a banca fechada. O prompt avisa que nada é vendido por enquanto (preparação para a Fase 6).
 - **Ponta sul, área de treino** (`TrainingService`): quem passa da faixa verde e não está competindo recebe um Puffador de treino e pratica a mira em quatro alvos (três fixos e um que desliza).
   - Acertar dá o mesmo retorno visual de sempre (+1 e combo).
   - Os disparos de treino só acertam alvos: não quebram bloco, não empurram ninguém e não contam estatística nem XP (`training` no `ProjectileService`, `setTraining` no `PuffadorService`).

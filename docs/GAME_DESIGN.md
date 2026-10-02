@@ -89,6 +89,8 @@ Nos últimos ~30 segundos:
 
 A forma exata de degradação da arena deve ser validada em playtest.
 
+Hoje, blocos aleatórios piscam em vermelho e caem, cada vez em maior número. A Fase 5 acrescenta a **Tempestade**: as janelas do andar de cima estouram sozinhas, uma por vez, e os lustres do térreo caem em sequência, sempre com aviso (ver `docs/FASE_5_PARTIDA_VIVA_CASARAO_REAGE.md`).
+
 ---
 
 ## 5. Arena
@@ -110,6 +112,16 @@ O mapa deve permitir:
 - destruição progressiva sem tornar a partida incompreensível.
 
 O layout deve evitar áreas excessivamente abertas ou distâncias que reduzam interação.
+
+### O Casarão reage (armadilhas)
+
+Objetos do Casarão viram armadilhas acionadas por disparo e premiam quem joga de longe: o efeito completo só acontece a partir de uma distância mínima, sempre com aviso antes, e quem acionou nunca é afetado. Quedas causadas por uma armadilha contam como derrubada de quem atirou.
+
+- **Andar de cima, o clima:** janelas com Ventania (rajada que empurra e solta os blocos junto da parede), Pombos e Chuva escorregadia.
+- **Andar de baixo, a casa:** Tapete Puxado, Lustre Despencando (abre um buraco no chão) e Lareira de Fuligem (espirro).
+- No andar de baixo, sair da arena elimina, então lá as armadilhas criam o perigo (um buraco, um escorregão), mas nunca jogam ninguém direto para fora.
+
+Escopo, regras e números iniciais em `docs/FASE_5_PARTIDA_VIVA_CASARAO_REAGE.md`.
 
 ---
 

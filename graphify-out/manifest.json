@@ -125,8 +125,8 @@
     "semantic_hash": ""
   },
   "README.md": {
-    "mtime": 1790742120.7397373,
-    "ast_hash": "a540b3ffba7bcab50b6362fd7874da66",
+    "mtime": 1790743176.8924367,
+    "ast_hash": "f03dc9abd87073724b6fef57f76ac690",
     "semantic_hash": ""
   },
   "src/client/controllers/CombatCameraController.luau": {
@@ -435,8 +435,8 @@
     "semantic_hash": ""
   },
   "src/server/config/ProfileConfig.luau": {
-    "mtime": 1790553136.019231,
-    "ast_hash": "da1db389a741bea2e82ebb9d314a5d2c",
+    "mtime": 1790742986.8355482,
+    "ast_hash": "e8366022cf6262dbafefe30e28eace7e",
     "semantic_hash": ""
   },
   "src/server/data/ProfileSchema.luau": {
@@ -445,8 +445,8 @@
     "semantic_hash": ""
   },
   "src/server/services/PlayerDataService.luau": {
-    "mtime": 1790564734.314505,
-    "ast_hash": "6144b2704e15cf22e9ad00864f555e80",
+    "mtime": 1790743434.1508977,
+    "ast_hash": "b8918dbdf831b5f35885fcd1433b8e3f",
     "semantic_hash": ""
   },
   "src/server/services/RoundStatsService.luau": {
@@ -520,8 +520,8 @@
     "semantic_hash": ""
   },
   "src/client/ui/PuffdexView.luau": {
-    "mtime": 1790732908.992602,
-    "ast_hash": "eafa9c61608df675791eee69a6c63965",
+    "mtime": 1790743434.1511726,
+    "ast_hash": "1e55e80f93d8689cd52a328031ddb919",
     "semantic_hash": ""
   },
   "src/server/data/PuffInventory.luau": {
@@ -977,6 +977,26 @@
   "src/shared/modules/BaraoBlocks.luau": {
     "mtime": 1790742250.041975,
     "ast_hash": "689661e1e070c4879bcf290ed7786362",
+    "semantic_hash": ""
+  },
+  "src/server/data/ProfileGuard.luau": {
+    "mtime": 1790743434.1507223,
+    "ast_hash": "38aca9512f1182e63acee9c40a881a35",
+    "semantic_hash": ""
+  },
+  "tests/ProfileGuard.spec.luau": {
+    "mtime": 1790743477.1052628,
+    "ast_hash": "d40f8fdb7c77b89d63faebcfb8a8803a",
+    "semantic_hash": ""
+  },
+  "tools/profile-recovery/recovery.luau": {
+    "mtime": 1790743466.501506,
+    "ast_hash": "6f9dd66fa23fe8e0e0ab15e6d574b8e4",
+    "semantic_hash": ""
+  },
+  "tools/profile-recovery/README.md": {
+    "mtime": 1790743466.5016415,
+    "ast_hash": "641faaf11b93ea8164e8c00c48607743",
     "semantic_hash": ""
   }
 }

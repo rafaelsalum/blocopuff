@@ -1,7 +1,7 @@
-# Fase 5 — LiveOps, Temporadas & Monetização
+# Fase 6 — LiveOps, Temporadas & Monetização
 
 **Entrega:** transformar BlocoPuff em produto vivo, atualizável e sustentável.  
-**Dependência:** core, persistência, coleção e social estáveis.
+**Dependência:** core, persistência, coleção, social e a partida viva da Fase 5 estáveis.
 
 ---
 
@@ -109,7 +109,7 @@ Monetização focada em:
 - bundles;
 - cosméticos sazonais.
 
-#### 8.1 Skins do Puffador (anotado em 29/09/2026, para implementar na Fase 5)
+#### 8.1 Skins do Puffador (anotado em 29/09/2026, para implementar na Fase 6)
 
 A raridade continua nos **disparos** (Puffs e seus efeitos). A skin muda só o visual do Puffador na mão:
 - cores, materiais e detalhes do modelo. Hoje as cores vêm das paletas `Standard`/`Super` em `PuffadorModel`, e a skin pode entrar como uma paleta nova ou peças extras;
@@ -255,7 +255,7 @@ Monetização:
 
 ---
 
-## Pós-Fase 5
+## Pós-Fase 6
 
 A partir daqui, o roadmap deve ser orientado por dados e feedback.
 

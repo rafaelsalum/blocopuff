@@ -169,7 +169,7 @@ local function createLegend(parent: Instance, center: Vector3)
 	name.TextXAlignment = Enum.TextXAlignment.Left
 	local detail = textLabel(gui, "", Enum.Font.GothamBold, GOLD, UDim2.fromScale(0.36, 0.56), UDim2.fromScale(0.6, 0.14))
 	detail.TextXAlignment = Enum.TextXAlignment.Left
-	-- Espaço reservado para o ranking sazonal (Fase 5).
+	-- Espaço reservado para o ranking sazonal (Fase 6).
 	textLabel(gui, "Ranking da temporada: em breve", Enum.Font.GothamMedium, INK_SOFT, UDim2.fromScale(0.1, 0.87), UDim2.fromScale(0.8, 0.1))
 	legendView = { avatar = avatar, name = name, detail = detail }
 end
