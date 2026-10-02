@@ -38,6 +38,8 @@ local BuildingService = require(script.services.BuildingService)
 local MansionService = require(script.services.MansionService)
 local AdminService = require(script.services.AdminService)
 local PhotoModeService = require(script.services.PhotoModeService)
+local CombatantRegistry = require(script.services.CombatantRegistry)
+local BotFillService = require(script.services.BotFillService)
 
 local WORLD_NAME = "BlocoPuffWorld"
 local GENERATED_BY_ATTRIBUTE = "GeneratedBy"
@@ -125,7 +127,7 @@ print("[BlocoPuff] Elimination zone armed")
 VaultService.start(world)
 VaultService.setOpenedListener(function(player)
 	BaraoService.enrage()
-	RoundStatsService.vaultOpened(player)
+	RoundStatsService.vaultOpened(CombatantRegistry.forPlayer(player))
 end)
 BuildModeService.start()
 print("[BlocoPuff] Baron's vault and build mode ready")
@@ -138,7 +140,7 @@ BaraoService.setEventListener(function(kind, player, detail)
 	SecretAchievementService.baraoEvent(kind, player, detail)
 	if kind == "Escape" then
 		PuffMomentService.record(player, "BaraoEscape", detail)
-		RoundStatsService.baraoEscape(player)
+		RoundStatsService.baraoEscape(CombatantRegistry.forPlayer(player))
 	end
 end)
 TocaService.setEventListener(CorridorTelemetryService.tocaEvent)
@@ -146,11 +148,11 @@ SecretPassageService.setRevealListener(function(floor, player)
 	CorridorTelemetryService.passageRevealed(player, floor)
 	SecretAchievementService.passageRevealed(player, floor)
 	PuffMomentService.record(player, "SecretDiscovery", `Floor{floor}`)
-	RoundStatsService.secretFound(player)
+	RoundStatsService.secretFound(CombatantRegistry.forPlayer(player))
 end)
 VaultService.setPrizeListener(function(player)
 	PuffMomentService.record(player, "VaultConquered")
-	RoundStatsService.vaultConquered(player)
+	RoundStatsService.vaultConquered(CombatantRegistry.forPlayer(player))
 end)
 CorridorTelemetryService.setEntryListener(function(player, floor)
 	SecretAchievementService.corridorEntered(player, SecretPassageService.isRevealed(floor))
@@ -202,6 +204,11 @@ print("[BlocoPuff] Party and spectator reactions ready")
 -- conta e escala quem está nela.
 MatchQueueService.start(world, PuffadorService.getRemotesFolder())
 print("[BlocoPuff] Match queue ready")
+
+-- Bots RoboPuff que completam a partida (Fase 5B). Depois da fila, que
+-- eles leem para saber quantos humanos estão esperando.
+BotFillService.start(world)
+print("[BlocoPuff] RoboPuff bots ready")
 
 -- Aquecimento no mirante (balões e trampolins). Opcional: uma falha aqui
 -- não impede a fila nem as partidas.

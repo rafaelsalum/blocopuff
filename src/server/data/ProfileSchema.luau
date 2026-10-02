@@ -52,6 +52,10 @@ export type Profile = {
 	challenges: Challenges,
 	challengesCompleted: number,
 	secrets: { [string]: number },
+	-- Tickets de partidas só com bots já dados no dia `botTicketDay` (5B).
+	-- Campos opcionais lidos com padrão: não exigem nova versão.
+	botTicketDay: number,
+	botTickets: number,
 	appliedRounds: { string },
 	createdAt: number,
 	updatedAt: number,
@@ -106,6 +110,8 @@ function ProfileSchema.default(now: number): Profile
 		challenges = { day = 0, list = {} },
 		challengesCompleted = 0,
 		secrets = {},
+		botTicketDay = 0,
+		botTickets = 0,
 		appliedRounds = {},
 		createdAt = now,
 		updatedAt = now,
@@ -264,6 +270,8 @@ function ProfileSchema.fromStored(raw: unknown, now: number): (Profile, boolean)
 		challenges = DailyRules.readChallenges(data.challenges),
 		challengesCompleted = cleanNumber(data.challengesCompleted, 0),
 		secrets = readSecrets(data.secrets, now),
+		botTicketDay = cleanNumber(data.botTicketDay, 0),
+		botTickets = cleanNumber(data.botTickets, 0),
 		appliedRounds = readAppliedRounds(data.appliedRounds),
 		createdAt = cleanNumber(data.createdAt, now),
 		updatedAt = cleanNumber(data.updatedAt, now),
@@ -287,6 +295,7 @@ local function roundLimits(): { [string]: number }
 		secretsFound = arena.FloorCount,
 		blocksBuilt = GameConfig.SecretRoom.BuildCharges,
 		comebacks = 1,
+		botWins = 1,
 	}
 end
 
@@ -362,6 +371,8 @@ function ProfileSchema.toStored(profile: Profile): { [string]: any }
 		challenges = DailyRules.toStoredChallenges(profile.challenges),
 		challengesCompleted = profile.challengesCompleted,
 		secrets = table.clone(profile.secrets),
+		botTicketDay = profile.botTicketDay,
+		botTickets = profile.botTickets,
 		appliedRounds = table.clone(profile.appliedRounds),
 		createdAt = profile.createdAt,
 		updatedAt = profile.updatedAt,

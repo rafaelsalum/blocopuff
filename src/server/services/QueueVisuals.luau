@@ -13,13 +13,17 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Workspace = game:GetService("Workspace")
 
+local BotConfig = require(ReplicatedStorage.Shared.config.BotConfig)
 local GameConfig = require(ReplicatedStorage.Shared.config.GameConfig)
 local MansionConfig = require(ReplicatedStorage.Shared.config.MansionConfig)
 local BuildingLayout = require(ReplicatedStorage.Shared.modules.BuildingLayout)
 local MansionLayout = require(ReplicatedStorage.Shared.modules.MansionLayout)
 
 export type BoardState = {
+	-- Jogadores + bots.
 	count: number,
+	-- Bots RoboPuff (aparecem depois dos jogadores, com o ícone de bot).
+	bots: number,
 	minimum: number,
 	maximum: number,
 	-- Segundos até a partida (nil fora da contagem).
@@ -210,6 +214,14 @@ local function buildBoard(folder: Instance, name: string, cframe: CFrame): Board
 		local corner = Instance.new("UICorner")
 		corner.CornerRadius = UDim.new(1, 0)
 		corner.Parent = avatar
+		local botIcon = Instance.new("TextLabel")
+		botIcon.Name = "BotIcon"
+		botIcon.Size = UDim2.fromScale(1, 1)
+		botIcon.BackgroundTransparency = 1
+		botIcon.Text = BotConfig.Body.Tag
+		botIcon.TextScaled = true
+		botIcon.Visible = false
+		botIcon.Parent = avatar
 		table.insert(avatars, avatar)
 	end
 	local warmup = label(gui, "Warmup", "", Enum.Font.GothamBold, INK, UDim2.fromScale(0.03, 0.84), UDim2.fromScale(0.94, 0.12))
@@ -236,11 +248,15 @@ local function render(board: Board, state: BoardState)
 	board.status.Text = statusText(state)
 	board.status.TextColor3 = if state.gatesClosed then GOLD else GREEN
 	board.warmup.Text = state.warmup
+	local humans = #state.userIds
 	for index, avatar in ipairs(board.avatars) do
 		local userId = state.userIds[index]
-		avatar.Visible = userId ~= nil
-		if userId ~= nil then
-			avatar.Image = `rbxthumb://type=AvatarHeadShot&id={userId}&w=150&h=150`
+		local isBot = userId == nil and index <= humans + state.bots
+		avatar.Visible = userId ~= nil or isBot
+		avatar.Image = if userId ~= nil then `rbxthumb://type=AvatarHeadShot&id={userId}&w=150&h=150` else ""
+		local botIcon = avatar:FindFirstChild("BotIcon")
+		if botIcon ~= nil and botIcon:IsA("TextLabel") then
+			botIcon.Visible = isBot
 		end
 	end
 end

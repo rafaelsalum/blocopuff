@@ -38,6 +38,10 @@ export type StateAttributeNames = {
 	-- Na fila da partida (no mirante ou com alguém da Party lá), escrito
 	-- pelo MatchQueueService.
 	PlayerInMatchQueue: string,
+	-- No Model do corpo de um bot RoboPuff (Fase 5B): id negativo dele. O
+	-- corpo também leva a tag BotTag (CollectionService).
+	BotId: string,
+	BotTag: string,
 }
 
 local StateAttributeNames: StateAttributeNames = {
@@ -70,6 +74,8 @@ local StateAttributeNames: StateAttributeNames = {
 	PlayerEquippedPuff = "EquippedPuff",
 	PlayerPartyId = "PartyId",
 	PlayerInMatchQueue = "InMatchQueue",
+	BotId = "BotId",
+	BotTag = "RoboPuff",
 }
 
 return table.freeze(StateAttributeNames)

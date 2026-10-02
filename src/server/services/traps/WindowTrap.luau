@@ -11,7 +11,6 @@
 -- empurrões); o TrapVisualController desenha trincas, cortinas, confete de
 -- vidro e vento a partir dos atributos.
 
-local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local ArenaConstants = require(ReplicatedStorage.Shared.modules.ArenaConstants)
@@ -21,6 +20,9 @@ local TrapConfig = require(ReplicatedStorage.Shared.config.TrapConfig)
 local TrapConstants = require(ReplicatedStorage.Shared.modules.TrapConstants)
 local ArenaService = require(script.Parent.Parent.ArenaService)
 local KnockbackService = require(script.Parent.Parent.KnockbackService)
+local CombatantRegistry = require(script.Parent.Parent.CombatantRegistry)
+
+type Combatant = CombatantRegistry.Combatant
 
 local CONFIG = TrapConfig.Window
 local MULLION_NAMES = { "MullionV", "MullionH" }
@@ -116,10 +118,12 @@ local function frameOf(glass: BasePart): Frame?
 	}
 end
 
-local function rootOf(player: Player): BasePart?
-	local character = player.Character
-	local root = if character ~= nil then character:FindFirstChild("HumanoidRootPart") else nil
-	return if root ~= nil and root:IsA("BasePart") then root else nil
+-- Corpo de quem pode ser atingido (participante vivo que não é o atirador).
+local function targetRoot(combatant: Combatant, shooter: Combatant): BasePart?
+	if combatant == shooter or not KnockbackService.isActiveParticipant(combatant) then
+		return nil
+	end
+	return CombatantRegistry.getRoot(combatant)
 end
 
 -- Força da rajada em `position` (múltiplo do empurrão do disparo; 0 = fora
@@ -143,18 +147,18 @@ local function gustAt(frame: Frame, position: Vector3): (number, number)
 	return strength, lateral / halfWidth
 end
 
-local function pushPlayers(frame: Frame, shooter: Player): number
+local function pushPlayers(frame: Frame, shooter: Combatant): number
 	local knockback = GameConfig.Knockback
 	local affected = 0
-	for _, player in ipairs(Players:GetPlayers()) do
-		local root = if player ~= shooter and KnockbackService.isActiveParticipant(player) then rootOf(player) else nil
+	for _, combatant in ipairs(CombatantRegistry.all()) do
+		local root = targetRoot(combatant, shooter)
 		if root ~= nil then
 			local strength, side = gustAt(frame, root.Position)
 			if strength > 0 then
 				local direction = (frame.inward + (frame.along * side * CONFIG.Spread)).Unit
 				local velocity = (direction * knockback.HorizontalSpeed * strength)
 					+ Vector3.new(0, knockback.VerticalSpeed * strength * CONFIG.LiftFactor, 0)
-				if KnockbackService.push(shooter, player, velocity) then
+				if KnockbackService.push(shooter, combatant, velocity) then
 					affected += 1
 				end
 			end
@@ -190,7 +194,7 @@ end
 
 -- Os blocos piscam e caem; quem estiver em cima na hora cai por causa do
 -- atirador.
-local function dropBlocks(blocks: { Part }, shooter: Player, isCurrent: () -> boolean)
+local function dropBlocks(blocks: { Part }, shooter: Combatant, isCurrent: () -> boolean)
 	if #blocks == 0 then
 		return
 	end
@@ -205,14 +209,14 @@ local function dropBlocks(blocks: { Part }, shooter: Player, isCurrent: () -> bo
 			return
 		end
 		-- Quem está em cima de cada bloco, antes de ele cair.
-		local standing: { [Part]: { Player } } = {}
-		for _, player in ipairs(Players:GetPlayers()) do
-			local root = if player ~= shooter and KnockbackService.isActiveParticipant(player) then rootOf(player) else nil
+		local standing: { [Part]: { Combatant } } = {}
+		for _, combatant in ipairs(CombatantRegistry.all()) do
+			local root = targetRoot(combatant, shooter)
 			if root ~= nil then
 				for _, block in ipairs(blocks) do
 					if isStandingOn(block, root.Position) then
 						local list = standing[block] or {}
-						table.insert(list, player)
+						table.insert(list, combatant)
 						standing[block] = list
 						break
 					end
@@ -222,8 +226,8 @@ local function dropBlocks(blocks: { Part }, shooter: Player, isCurrent: () -> bo
 		for _, block in ipairs(blocks) do
 			-- Só leva o crédito quem estava em cima de um bloco que caiu mesmo.
 			if ArenaService.collapseBlock(block) then
-				for _, player in ipairs(standing[block] or {}) do
-					KnockbackService.markAttacker(player, shooter)
+				for _, victim in ipairs(standing[block] or {}) do
+					KnockbackService.markAttacker(victim, shooter)
 				end
 			end
 		end
@@ -231,7 +235,7 @@ local function dropBlocks(blocks: { Part }, shooter: Player, isCurrent: () -> bo
 end
 
 -- Efeito ao fim do aviso. Devolve quantos jogadores a rajada empurrou.
-function WindowTrap.trigger(glass: BasePart, shooter: Player, isCurrent: () -> boolean): number
+function WindowTrap.trigger(glass: BasePart, shooter: Combatant, isCurrent: () -> boolean): number
 	setBroken(glass, true)
 	task.delay(CONFIG.RechargeTime * (1 - CONFIG.BoardedFraction), function()
 		if isCurrent() then

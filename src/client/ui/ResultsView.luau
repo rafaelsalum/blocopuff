@@ -9,6 +9,7 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TweenService = game:GetService("TweenService")
 
+local BotConfig = require(ReplicatedStorage.Shared.config.BotConfig)
 local LevelCurve = require(ReplicatedStorage.Shared.modules.LevelCurve)
 local ProfileTypes = require(ReplicatedStorage.Shared.types.ProfileTypes)
 local ResultTypes = require(ReplicatedStorage.Shared.types.ResultTypes)
@@ -330,6 +331,25 @@ function ResultsView.new(playerGui: PlayerGui, onClose: () -> ()): ResultsViewHa
 
 	local function loadAvatar(image: ImageLabel, userId: number, token: number)
 		image.Image = ""
+		-- Bot RoboPuff (id negativo): sem foto, só o ícone de bot.
+		local botIcon = image:FindFirstChild("BotIcon")
+		if botIcon == nil then
+			local label = Instance.new("TextLabel")
+			label.Name = "BotIcon"
+			label.Size = UDim2.fromScale(1, 1)
+			label.BackgroundTransparency = 1
+			label.Text = BotConfig.Body.Tag
+			label.TextScaled = true
+			label.ZIndex = image.ZIndex + 1
+			label.Parent = image
+			botIcon = label
+		end
+		if botIcon ~= nil and botIcon:IsA("TextLabel") then
+			botIcon.Visible = userId < 0
+		end
+		if userId < 0 then
+			return
+		end
 		task.spawn(function()
 			local ok, content = pcall(function()
 				return Players:GetUserThumbnailAsync(userId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size100x100)

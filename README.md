@@ -184,6 +184,35 @@ Arquivos `.rbxl` e `.rbxlx` são artefatos locais e não fazem parte da fonte pr
 
 ## Estado atual
 
+### Bots RoboPuff (Fase 5B)
+
+Escopo em `docs/FASE_5B_BOTS_PUFF.md`. Ninguém joga sozinho: bots completam a partida quando falta gente.
+
+- **Identidade de combatente** (`CombatantRegistry`): a rodada, o empurrão, os projéteis, a queda, as armadilhas e o resultado tratam jogador e bot do mesmo jeito (`Combatant`, com id negativo para bot). O que é só de jogador (perfil, telemetria, remotes) usa `combatant.player`. Com zero bots, o jogo se comporta como antes.
+- **Chegada** (`BotFillService`, regras em `data/BotFillRules`):
+  - quando há de 1 a 3 humanos no mirante, depois de 12 s (3 s no Studio) chegam bots até a partida ter 4 combatentes, no máximo 3 bots;
+  - quem chega ocupa a vaga de um bot, e sem humanos na fila os bots vão embora. Nunca há partida só de bots;
+  - depois de uma partida com bots, eles voltam ao mirante sem a espera por 45 s;
+  - o painel do mirante mostra os bots com 🤖, e a fila recebe o aviso "RoboPuffs chegando!". O aviso de "chame um amigo" só aparece sem bots.
+- **Corpo** (`bots/BotBody`): avatar R15 do servidor nas cores de Puff, com antena, nome `🤖 <nome>`, Puffador na mão e animações padrão tocadas pelo servidor. A física é do servidor.
+- **O bot sofre o jogo:** o empurrão é aplicado no servidor com a mesma física do cliente (`shared/modules/CharacterImpulse`). O bot cai, usa a Segunda Chance, sofre armadilhas, pode vencer e aparece no espectador e no resultado (ícone 🤖).
+- **Cérebro** (`BotBrainService`, `bots/BotArenaView`, `data/BotGrid`):
+  - **Andar:** vai até blocos inteiros e seguros alcançáveis em linha reta e pula buracos de um bloco.
+  - **Fugir:** nos níveis Normal e Esperto, sai de blocos piscando e da área de armadilhas em aviso.
+  - **Atirar:** atira em quem está à vista, depois do tempo de reação e com erro de mira, no corpo ou no chão embaixo do alvo. Às vezes aciona uma armadilha pronta com alguém perto.
+  - **Nível** (`data/BotLevelRules`): com algum novato na partida (menos de 3 partidas), todos são Fáceis; até o nível 5, Fácil e Normal; acima disso, Normal e Esperto.
+  - Os números ficam em `config/BotConfig`.
+- **Recompensas** (`data/BotRewardRules`):
+  - **Derrubadas:** derrubar bot vale metade do XP e não conta no perfil (ranking, Puffdex, desafio "Derrube 3").
+  - **Vitória e top 3:** só contam no perfil com pelo menos 2 humanos na partida. A vitória sem outro humano vira `botWins` ("Vitórias contra RoboPuffs" no perfil).
+  - **Tickets sem outro humano:** os tickets da rodada (participação, torcida e vitória) somam no máximo 6 por dia. Os de subir de nível ficam de fora. O contador fica em `botTicketDay`/`botTickets` no perfil, campos opcionais que não exigem nova versão.
+  - **XP:** usa o multiplicador dos humanos, com piso de 0,8.
+  - **Novatos:** nas 3 primeiras partidas, XP e tickets são cheios.
+- **Telemetria:** `RoundStarted`, `RoundFinished` e `RoundWon` levam o contexto `Bots{n}`. Eventos novos: `BotFillStarted` (segundos de espera) e `BotReplacedByHuman`.
+- **Robustez:** se todos os humanos saem, a rodada termina na hora. Um bot cujo corpo some é eliminado. Falhas ao montar o avatar esperam 5 s antes de nova tentativa.
+- **Fora do escopo por enquanto:** os bots não entram nos corredores secretos (Barão, Tocas), não abrem o cofre e não constroem.
+- **Testes:** `lune run tests/BotFillRules.spec`, `tests/BotGrid.spec`, `tests/BotLevelRules.spec` e `tests/BotRewardRules.spec`.
+
 ### Tapete Puxado (Fase 5, entrega 5.3)
 
 - **Onde:** dois tapetes no térreo (`traps/RugTrap`), um em cada metade, montados sobre os blocos e puxados para o centro, onde costuma ter buraco. Posição, tamanho e cor ficam em `TrapConfig.Rug.Rugs`, em células da grade.

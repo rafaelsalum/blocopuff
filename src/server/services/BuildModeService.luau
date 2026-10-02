@@ -23,6 +23,7 @@ local ArenaService = require(script.Parent.ArenaService)
 local PuffadorService = require(script.Parent.PuffadorService)
 local TelemetryService = require(script.Parent.TelemetryService)
 local RoundStatsService = require(script.Parent.RoundStatsService)
+local CombatantRegistry = require(script.Parent.CombatantRegistry)
 
 type Cell = BuildTargeting.Cell
 
@@ -59,9 +60,10 @@ end
 local function isOccupied(cell: Cell): boolean
 	local size = GameConfig.Arena.BlockSize
 	local characters: { Instance } = {}
-	for _, player in ipairs(Players:GetPlayers()) do
-		if player.Character ~= nil then
-			table.insert(characters, player.Character)
+	for _, combatant in ipairs(CombatantRegistry.all()) do
+		local character = CombatantRegistry.getCharacter(combatant)
+		if character ~= nil then
+			table.insert(characters, character)
 		end
 	end
 	if #characters == 0 then
@@ -148,7 +150,7 @@ local function onRequestBuild(player: Player, rawAimTarget: unknown, rawAimOrigi
 	PuffadorService.sendFeedback(player, "BuildDone", cell.floor)
 	playBuildSound(cell.center)
 	TelemetryService.blockBuilt(player, cell.floor)
-	RoundStatsService.blockBuilt(player)
+	RoundStatsService.blockBuilt(CombatantRegistry.forPlayer(player))
 end
 
 function BuildModeService.start()

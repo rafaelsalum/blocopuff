@@ -25,7 +25,7 @@ Hoje a partida só começa com `GameConfig.MinimumPlayers = 2` no mirante, e que
 
 1. **Bot completa, não substitui.** Só entra para chegar no tamanho mínimo divertido. Com humanos suficientes, não há bots.
 2. **Bot é visível como bot.** O visual é próprio de RoboPuff (sem avatar de jogador), com a etiqueta 🤖 no nome, no placar e no resultado. O público é infantil: não fingir que é gente.
-3. **Mesmas regras do jogo.** O bot cai, usa a Segunda Chance, é empurrado, sofre armadilha, é perseguido pelo Barão e pode vencer. Não trapaceia e não enxerga nada que o jogador não veja.
+3. **Mesmas regras do jogo.** O bot cai, usa a Segunda Chance, é empurrado, sofre armadilha e pode vencer. Não trapaceia e não enxerga nada que o jogador não veja.
 4. **Bot completa a partida, mas não dá recompensa.** Jogar com bots rende menos que jogar com humanos, e nunca conta para ranking nem para as estatísticas que desbloqueiam Puffs.
 5. **Primeira vitória é sagrada.** Nas primeiras partidas da vida do jogador, os bots jogam no modo fácil, para que uma criança consiga a primeira vitória cedo.
 6. **Servidor decide.** O bot é um NPC do servidor (rede do servidor). O cliente só desenha.
@@ -47,12 +47,13 @@ Regras (todas em `config/BotConfig`, ajustáveis pelo playtest):
 | XP por derrubada de bot | — | metade (`BotKnockoutXpFactor = 0.5`) |
 | Estatística `knockouts` (perfil, ranking, Puffdex, desafio "Derrube 3") | conta | **só derrubadas de humanos** |
 | Estatísticas `wins` / `top3` (perfil, ranking, Puffdex) | conta | **só com ≥ 2 humanos na partida** |
-| Ticket de vitória | sim | sim, até `BotWinTicketsPerDay = 3` vitórias com bots por dia |
+| Tickets da rodada (participação, torcida, vitória) sem outro humano | sim | até `SoloBotTicketsPerDay = 6` por dia (subir de nível fica de fora) |
+| Ticket de top 3 | sim | só com ≥ 2 humanos |
 | Desafio diário "Vença uma partida" | conta | conta (já tem limite diário) |
 | Conquistas secretas | conta | conta só para o humano, e nunca para um bot vencedor |
 | Primeiras `BeginnerMatches = 3` partidas | — | recompensa cheia + bots no modo fácil |
 
-Uma estatística nova no perfil, `botWins`, guarda as vitórias contra bots para mostrar ao jogador ("Vitórias contra RoboPuffs"), sem misturar com `wins`.
+Uma estatística nova no perfil, `botWins`, guarda as vitórias contra bots para mostrar ao jogador ("Vitórias contra RoboPuffs"), sem misturar com `wins`. O limite diário fica em dois campos opcionais do perfil (`botTicketDay`, `botTickets`), lidos com valor padrão e por isso sem nova versão do formato. O `ProfileGuard` já preserva estatísticas desconhecidas, então um servidor antigo não apaga `botWins` durante a atualização.
 
 ---
 
@@ -87,7 +88,8 @@ Hoje tudo é indexado por `Player` (`RoundService`, `KnockbackService`, `RoundSt
 - **Acerto:** `ProjectileService.notifyHit` resolve a vítima pelo `CombatantRegistry` (hoje usa `GetPlayerFromCharacter` e o bot vira parede).
 - **Empurrão:** para bot, o `KnockbackService` aplica no servidor o mesmo `LinearVelocity` que o `KnockbackController` aplica no cliente (mesmos `computeVelocity`, `Duration`, `Slide`). Vale também para Barão, Toca e armadilhas.
 - **Queda e eliminação:** o `EliminationService` monitora o HRP de cada combatente. A Segunda Chance teleporta o bot no servidor.
-- **Armadilhas, Barão e Toca:** trocar as varreduras `Players:GetPlayers()` por `CombatantRegistry.active()` em `WindowTrap`, `RugTrap`, `BaraoService.readIntruders`, `TocaService`, `VaultService` (expulsão) e `BuildModeService` (não construir em cima de bot). O atributo `BaraoTarget` aceita id negativo, e o `BaraoVisualController` resolve o bot pelo `BotId`.
+- **Armadilhas e construção:** trocar as varreduras `Players:GetPlayers()` por `CombatantRegistry.all()` em `WindowTrap`, `RugTrap` e `BuildModeService` (não construir em cima de bot).
+- **Barão, Tocas e cofre:** ficam só para jogadores nesta fase, porque os bots não entram nos corredores secretos nem no cofre (ver 5B.4).
 - **Espectador:** o `SpectatorController` lista também os modelos com `BotId` vivos. Com 1 humano eliminado, ele assiste os bots até o fim (e ganha o ticket de espectador).
 - **Resultado:** `ResultsView` mostra o ícone de RoboPuff e a etiqueta 🤖 para id negativo.
 
@@ -109,8 +111,8 @@ Laço no servidor a cada `BotBrain.TickSeconds = 0.2`, no máximo 3 bots.
 ### 5B.5 Recompensas e anti-farm
 
 - `XpCalculator.compute` recebe `humanCount`, `botCount` e `botKnockouts`, e aplica a tabela de recompensas acima.
-- `commitProfiles` filtra o delta do perfil: `knockouts` só de humanos; `wins` e `top3` só com ≥ 2 humanos; `botWins` + contador diário de vitórias com bots no perfil (`ProfileSchema` + migração).
-- `RewardRules`: o ticket de vitória com bots respeita `BotWinTicketsPerDay`.
+- `commitProfiles` filtra o delta do perfil: `knockouts` só de humanos; `wins` e `top3` só com ≥ 2 humanos; `botWins` + contador diário de vitórias com bots no perfil (`ProfileSchema`, campos opcionais).
+- `PlayerDataService`: numa partida sem outro humano, os tickets da rodada respeitam `SoloBotTicketsPerDay`.
 - `DailyRules`: o desafio "Derrube 3 jogadores" usa só derrubadas de humanos.
 - `LeaderboardService` e Puffdex não mudam: leem as estatísticas já filtradas.
 
@@ -138,10 +140,10 @@ Módulos puros, com testes antes da implementação:
 - [ ] Um jogador sozinho no mirante começa a partida em até ~20 s.
 - [ ] Os bots saem quando chega gente, sem ficar bot com 4 ou mais humanos.
 - [ ] Os bots são claramente bots em todos os lugares (nome, placar, resultado, painel).
-- [ ] O bot é empurrado, cai, usa a Segunda Chance, sofre armadilhas e é perseguido pelo Barão.
+- [ ] O bot é empurrado, cai, usa a Segunda Chance e sofre armadilhas.
 - [ ] O tiro do bot quebra blocos, empurra e dá crédito de derrubada.
 - [ ] Derrubar bot não conta para ranking, Puffdex nem para o desafio "Derrube 3 jogadores".
-- [ ] Vitória com bots não conta em `wins` e respeita o limite diário de tickets.
+- [ ] Vitória sem outro humano não conta em `wins`, e os tickets dessas partidas respeitam o limite diário.
 - [ ] O novato vence pelo menos uma das 3 primeiras partidas na maioria dos testes.
 - [ ] O espectador consegue assistir os bots.
 - [ ] Servidor estável com 3 bots + Caos Final + armadilhas, inclusive em celular.
@@ -155,10 +157,10 @@ Módulos puros, com testes antes da implementação:
 3. Bot vencendo: resultado, placar e conquistas (ninguém ganha "Por um Fio").
 4. Empate entre humano e bot.
 5. Bot sendo empurrado para fora, usando a Segunda Chance e caindo de novo.
-6. Bot em cima do tapete puxado, na janela e perseguido pelo Barão.
+6. Bot em cima do tapete puxado e na frente da janela.
 7. Construção (BuildMode) perto de um bot.
 8. Humano eliminado assistindo os bots.
-9. Quarta vitória com bots no mesmo dia (sem ticket de vitória).
+9. Várias partidas só com bots no mesmo dia: os tickets param em 6 (fora os de subir de nível).
 10. Perfil e ranking depois de 5 partidas com bots.
 
 ---

@@ -21,6 +21,7 @@ local BuildingLayout = require(ReplicatedStorage.Shared.modules.BuildingLayout)
 local StateAttributeNames = require(ReplicatedStorage.Shared.types.StateAttributeNames)
 local MatchQueueService = require(script.Parent.MatchQueueService)
 local ProjectileService = require(script.Parent.ProjectileService)
+local CombatantRegistry = require(script.Parent.CombatantRegistry)
 local PuffadorService = require(script.Parent.PuffadorService)
 local TelemetryService = require(script.Parent.TelemetryService)
 
@@ -151,7 +152,12 @@ local function setActive(value: boolean)
 	end
 end
 
-local function onSurfaceHit(shooter: Player, instance: Instance, _position: Vector3)
+-- Só jogadores (bots não atiram aqui).
+local function onSurfaceHit(combatant: CombatantRegistry.Combatant, instance: Instance, _position: Vector3)
+	local shooter = combatant.player
+	if shooter == nil then
+		return
+	end
 	if instance:GetAttribute(BALLOON_ATTRIBUTE) ~= true or not instance:IsA("Part") or not warmers[shooter] then
 		return
 	end

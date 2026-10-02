@@ -23,10 +23,12 @@ local TrapConstants = require(ReplicatedStorage.Shared.modules.TrapConstants)
 local KnockbackService = require(script.Parent.KnockbackService)
 local ProjectileService = require(script.Parent.ProjectileService)
 local TelemetryService = require(script.Parent.TelemetryService)
+local CombatantRegistry = require(script.Parent.CombatantRegistry)
 local RugTrap = require(script.Parent.traps.RugTrap)
 local WindowTrap = require(script.Parent.traps.WindowTrap)
 
 type TrapState = TrapConstants.TrapState
+type Combatant = CombatantRegistry.Combatant
 
 -- O que cada tipo de armadilha precisa oferecer.
 type Behavior = {
@@ -34,7 +36,7 @@ type Behavior = {
 	-- Efeito ao fim do aviso; devolve quantos jogadores atingiu.
 	-- `isCurrent()` diz se a armadilha continua neste acionamento (a rodada
 	-- não acabou), para efeitos com atraso.
-	trigger: (part: BasePart, shooter: Player, isCurrent: () -> boolean) -> number,
+	trigger: (part: BasePart, shooter: Combatant, isCurrent: () -> boolean) -> number,
 	-- Volta a aparência de pronta.
 	restore: (part: BasePart) -> (),
 }
@@ -69,12 +71,12 @@ local started = false
 local connections: { RBXScriptConnection } = {}
 local trapsFolder: Folder? = nil
 
-local function setState(trap: Trap, state: TrapState, by: Player?)
+local function setState(trap: Trap, state: TrapState, by: Combatant?)
 	trap.state = state
 	local part = trap.part
 	part:SetAttribute(TrapConstants.StateAttribute, state)
 	part:SetAttribute(TrapConstants.StateAtAttribute, Workspace:GetServerTimeNow())
-	part:SetAttribute(TrapConstants.ByAttribute, if by ~= nil then by.UserId else 0)
+	part:SetAttribute(TrapConstants.ByAttribute, if by ~= nil then by.id else 0)
 	part:SetAttribute(TrapConstants.UsesAttribute, trap.uses)
 end
 
@@ -148,11 +150,19 @@ local function finishRecharge(trap: Trap, token: number)
 	end
 end
 
-local function fire(trap: Trap, shooter: Player, token: number)
+-- Telemetria só existe para jogadores.
+local function logEvent(shooter: Combatant, name: string, value: number, kind: string, id: string)
+	local player = shooter.player
+	if player ~= nil then
+		TelemetryService.event(player, name, value, kind, id)
+	end
+end
+
+local function fire(trap: Trap, shooter: Combatant, token: number)
 	if trap.token ~= token or not active then
 		return
 	end
-	if shooter.Parent == nil then
+	if not CombatantRegistry.isPresent(shooter) then
 		-- Quem atirou saiu do jogo durante o aviso: a armadilha não dispara
 		-- e não gasta o uso.
 		makeReady(trap)
@@ -167,11 +177,11 @@ local function fire(trap: Trap, shooter: Player, token: number)
 	if not ok then
 		warn(`[BlocoPuff] Trap {trap.kind} failed: {result}`)
 	end
-	TelemetryService.event(shooter, "TrapAffected", if ok then result else 0, trap.kind, trap.id)
+	logEvent(shooter, "TrapAffected", if ok then result else 0, trap.kind, trap.id)
 	task.delay(trap.behavior.rules.RechargeTime, finishRecharge, trap, token)
 end
 
-local function onSurfaceHit(shooter: Player, instance: Instance, _position: Vector3, distance: number)
+local function onSurfaceHit(shooter: Combatant, instance: Instance, _position: Vector3, distance: number)
 	if not active or not instance:IsA("BasePart") then
 		return
 	end
@@ -186,7 +196,7 @@ local function onSurfaceHit(shooter: Player, instance: Instance, _position: Vect
 	trap.token += 1
 	local token = trap.token
 	setState(trap, TrapConstants.Warning, shooter)
-	TelemetryService.event(shooter, "TrapTriggered", math.floor(distance), trap.kind, trap.id)
+	logEvent(shooter, "TrapTriggered", math.floor(distance), trap.kind, trap.id)
 	task.delay(trap.behavior.rules.WarningTime, fire, trap, shooter, token)
 end
 

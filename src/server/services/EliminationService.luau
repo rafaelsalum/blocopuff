@@ -6,7 +6,6 @@
 -- identifica a queda e delega a eliminação ao callback fornecido pelo
 -- RoundService, evitando uma dependência circular entre os dois serviços.
 
-local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 
@@ -14,9 +13,11 @@ local GameConfig = require(ReplicatedStorage.Shared.config.GameConfig)
 local StateAttributeNames = require(ReplicatedStorage.Shared.types.StateAttributeNames)
 local EliminationTypes = require(ReplicatedStorage.Shared.types.EliminationTypes)
 local ArenaService = require(script.Parent.ArenaService)
+local CombatantRegistry = require(script.Parent.CombatantRegistry)
 
 type EliminationReason = EliminationTypes.EliminationReason
-export type EliminateCallback = (player: Player, reason: EliminationReason) -> ()
+type Combatant = CombatantRegistry.Combatant
+export type EliminateCallback = (combatant: Combatant, reason: EliminationReason) -> ()
 
 local GENERATED_BY_ATTRIBUTE = "GeneratedBy"
 local SERVICE_NAME = "EliminationService"
@@ -32,7 +33,7 @@ local currentWorldRoot: Model? = nil
 local eliminateCallback: EliminateCallback? = nil
 local zoneVisual: Part? = nil
 
-local monitoredPlayers: { Player } = {}
+local monitored: { Combatant } = {}
 local currentRoundId = 0
 local monitoring = false
 
@@ -103,43 +104,44 @@ local function checkParticipants()
 		return
 	end
 
-	for _, player in ipairs(monitoredPlayers) do
+	for _, combatant in ipairs(monitored) do
 		local checkOk = pcall(function()
-			if player.Parent == nil then
+			if not CombatantRegistry.isPresent(combatant) then
+				-- O corpo de um bot sumiu (caiu do mapa, foi destruído): ele
+				-- está fora da partida. Jogador que saiu é tratado pelo
+				-- RoundService (PlayerRemoving).
+				if CombatantRegistry.isBot(combatant) and CombatantRegistry.getAttribute(combatant, ATTR_IS_ELIMINATED) == false then
+					callback(combatant, EliminationTypes.CharacterDied)
+				end
 				return
 			end
-			if player:GetAttribute(ATTR_IS_PARTICIPANT) ~= true then
+			if CombatantRegistry.getAttribute(combatant, ATTR_IS_PARTICIPANT) ~= true then
 				return
 			end
-			if player:GetAttribute(ATTR_PARTICIPATING_ROUND_ID) ~= currentRoundId then
+			if CombatantRegistry.getAttribute(combatant, ATTR_PARTICIPATING_ROUND_ID) ~= currentRoundId then
 				return
 			end
-			if player:GetAttribute(ATTR_IS_ELIMINATED) ~= false then
+			if CombatantRegistry.getAttribute(combatant, ATTR_IS_ELIMINATED) ~= false then
 				return
 			end
 
-			local character = player.Character
-			if character == nil then
-				return
-			end
-
-			local humanoid = character:FindFirstChildOfClass("Humanoid")
+			local humanoid = CombatantRegistry.getHumanoid(combatant)
 			if humanoid == nil or humanoid.Health <= 0 then
 				return
 			end
 
-			local rootPart = character:FindFirstChild("HumanoidRootPart")
-			if rootPart == nil or not rootPart:IsA("BasePart") then
+			local rootPart = CombatantRegistry.getRoot(combatant)
+			if rootPart == nil then
 				return
 			end
 
 			if rootPart.Position.Y < eliminationY then
-				callback(player, EliminationTypes.FellFromArena)
+				callback(combatant, EliminationTypes.FellFromArena)
 			end
 		end)
 
 		if not checkOk then
-			warn(string.format("[BlocoPuff] Error checking elimination zone for %s", player.Name))
+			warn(string.format("[BlocoPuff] Error checking elimination zone for %s", combatant.name))
 		end
 	end
 end
@@ -157,10 +159,10 @@ function EliminationService.start(worldRoot: Model, callback: EliminateCallback)
 	createVisualZoneIfNeeded()
 end
 
-function EliminationService.beginRound(participants: { Player }, roundId: number)
-	table.clear(monitoredPlayers)
-	for _, player in ipairs(participants) do
-		table.insert(monitoredPlayers, player)
+function EliminationService.beginRound(participants: { Combatant }, roundId: number)
+	table.clear(monitored)
+	for _, combatant in ipairs(participants) do
+		table.insert(monitored, combatant)
 	end
 	currentRoundId = roundId
 
@@ -172,7 +174,7 @@ end
 
 function EliminationService.endRound()
 	monitoring = false
-	table.clear(monitoredPlayers)
+	table.clear(monitored)
 	currentRoundId = 0
 end
 

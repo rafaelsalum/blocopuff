@@ -9,6 +9,9 @@ local ArenaConstants = require(ReplicatedStorage.Shared.modules.ArenaConstants)
 local BuildingLayout = require(ReplicatedStorage.Shared.modules.BuildingLayout)
 local StateAttributeNames = require(ReplicatedStorage.Shared.types.StateAttributeNames)
 local ReplicatedState = require(script.Parent.ReplicatedStateService)
+local CombatantRegistry = require(script.Parent.CombatantRegistry)
+
+type Combatant = CombatantRegistry.Combatant
 
 type ArenaConfig = GameConfig.ArenaConfig
 type WorldPalette = GameConfig.WorldPalette
@@ -18,8 +21,8 @@ type WorldPalette = GameConfig.WorldPalette
 export type BlockDestructionContext = {
 	position: Vector3,
 	normal: Vector3,
-	ownerPlayer: Player,
-	ownerUserId: number,
+	-- Quem atirou (jogador ou bot).
+	owner: Combatant,
 	roundId: number,
 	projectileId: number,
 }
@@ -404,15 +407,16 @@ function ArenaService.tryDestroyBlock(instance: Instance, context: BlockDestruct
 		return false
 	end
 
-	if context.ownerPlayer.Parent == nil then
+	local owner = context.owner
+	if not CombatantRegistry.isPresent(owner) then
 		return false
 	end
 
-	if context.ownerPlayer:GetAttribute(StateAttributeNames.PlayerParticipatingRoundId) ~= context.roundId then
+	if CombatantRegistry.getAttribute(owner, StateAttributeNames.PlayerParticipatingRoundId) ~= context.roundId then
 		return false
 	end
 
-	if context.ownerPlayer:GetAttribute(StateAttributeNames.PlayerIsEliminated) ~= false then
+	if CombatantRegistry.getAttribute(owner, StateAttributeNames.PlayerIsEliminated) ~= false then
 		return false
 	end
 

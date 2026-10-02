@@ -19,6 +19,7 @@ local PuffadorConstants = require(ReplicatedStorage.Shared.modules.PuffadorConst
 local StateAttributeNames = require(ReplicatedStorage.Shared.types.StateAttributeNames)
 local BuildingDecor = require(script.Parent.BuildingDecor)
 local ProjectileService = require(script.Parent.ProjectileService)
+local CombatantRegistry = require(script.Parent.CombatantRegistry)
 local MatchAudience = require(script.Parent.MatchAudience)
 
 type Corridor = BuildingLayout.Corridor
@@ -188,7 +189,12 @@ local function reveal(floor: number, discoverer: Player)
 	end
 end
 
-local function onSurfaceHit(shooter: Player, instance: Instance, _position: Vector3)
+-- Só jogadores (bots não atiram aqui).
+local function onSurfaceHit(combatant: CombatantRegistry.Combatant, instance: Instance, _position: Vector3)
+	local shooter = combatant.player
+	if shooter == nil then
+		return
+	end
 	if not isActiveParticipant(shooter) then
 		return
 	end

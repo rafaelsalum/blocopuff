@@ -16,7 +16,11 @@
 --
 -- Party (4.4): o primeiro alvo é alguém da própria Party ainda na partida
 -- (marcado com 👥). Trocar de alvo avisa o servidor só para telemetria.
+--
+-- Bots RoboPuff (5B) também podem ser assistidos: o alvo é o Player ou o
+-- Model do bot (tag BotTag), que guarda os mesmos atributos da rodada.
 
+local CollectionService = game:GetService("CollectionService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
@@ -47,7 +51,8 @@ local stateContainer: Instance? = nil
 local view: SpectatorViewHandle? = nil
 local connections: { RBXScriptConnection } = {}
 local playerConnections: { [Player]: { RBXScriptConnection } } = {}
-local currentTarget: Player? = nil
+-- Player ou Model de um bot RoboPuff.
+local currentTarget: Instance? = nil
 local spectating = false
 -- Verdadeiro enquanto a câmera segue o personagem de outro jogador. É o que
 -- decide se é preciso devolver a câmera, e não currentTarget: o alvo pode
@@ -87,27 +92,36 @@ local function readBooleanAttribute(instance: Instance, name: string): boolean
 	return false
 end
 
-local function isActiveParticipant(player: Player, roundId: number): boolean
-	if readBooleanAttribute(player, ATTR_IS_PARTICIPANT) ~= true then
+local function isActiveParticipant(target: Instance, roundId: number): boolean
+	if readBooleanAttribute(target, ATTR_IS_PARTICIPANT) ~= true then
 		return false
 	end
-	if readNumberAttribute(player, ATTR_PARTICIPATING_ROUND_ID) ~= roundId then
+	if readNumberAttribute(target, ATTR_PARTICIPATING_ROUND_ID) ~= roundId then
 		return false
 	end
-	if readBooleanAttribute(player, ATTR_IS_ELIMINATED) ~= false then
+	if readBooleanAttribute(target, ATTR_IS_ELIMINATED) ~= false then
 		return false
 	end
 
 	return true
 end
 
-local function getHumanoid(player: Player): Humanoid?
-	local character = player.Character
-	if character == nil then
+local function getHumanoid(target: Instance): Humanoid?
+	local character: Instance? = if target:IsA("Player") then target.Character else target
+	if character == nil or character.Parent == nil then
 		return nil
 	end
 
-	return character:FindFirstChildOfClass("Humanoid")
+	local humanoid = character:FindFirstChildOfClass("Humanoid")
+	return if humanoid ~= nil and humanoid.Health > 0 then humanoid else nil
+end
+
+-- Jogadores pelo UserId; bots (id negativo) depois deles.
+local function sortKey(target: Instance): number
+	if target:IsA("Player") then
+		return target.UserId
+	end
+	return math.huge - readNumberAttribute(target, StateAttributeNames.BotId)
 end
 
 -- Devolve a câmera ao próprio personagem. Se ele ainda não existir (está
@@ -128,33 +142,43 @@ local function resetCameraToOwnCharacter()
 	cameraOverridden = false
 end
 
--- Lista estável (ordenada por UserId) dos participantes ainda ativos,
--- usada tanto para escolher o primeiro alvo automaticamente quanto para
--- alternar manualmente entre eles em ordem previsível.
-local function getActiveParticipantList(roundId: number): { Player }
+-- Lista estável (jogadores por UserId, depois os bots) dos participantes
+-- ainda ativos, usada tanto para escolher o primeiro alvo automaticamente
+-- quanto para alternar manualmente entre eles em ordem previsível.
+local function getActiveParticipantList(roundId: number): { Instance }
 	local player = localPlayer
-	local list: { Player } = {}
+	local list: { Instance } = {}
 
-	for _, candidate in ipairs(Players:GetPlayers()) do
+	local candidates: { Instance } = Players:GetPlayers()
+	for _, bot in ipairs(CollectionService:GetTagged(StateAttributeNames.BotTag)) do
+		if bot:IsA("Model") then
+			table.insert(candidates, bot)
+		end
+	end
+	for _, candidate in ipairs(candidates) do
 		if candidate ~= player and isActiveParticipant(candidate, roundId) and getHumanoid(candidate) ~= nil then
 			table.insert(list, candidate)
 		end
 	end
 
 	table.sort(list, function(a, b)
-		return a.UserId < b.UserId
+		return sortKey(a) < sortKey(b)
 	end)
 
 	return list
 end
 
-local function isPartyMate(candidate: Player): boolean
+local function isPartyMate(candidate: Instance): boolean
 	local player = localPlayer
 	local partyId = if player ~= nil then player:GetAttribute(StateAttributeNames.PlayerPartyId) else nil
-	return typeof(partyId) == "string" and candidate:GetAttribute(StateAttributeNames.PlayerPartyId) == partyId
+	return candidate:IsA("Player") and typeof(partyId) == "string" and candidate:GetAttribute(StateAttributeNames.PlayerPartyId) == partyId
 end
 
-local function targetLabel(target: Player): string
+local function targetLabel(target: Instance): string
+	if not target:IsA("Player") then
+		local humanoid = getHumanoid(target)
+		return if humanoid ~= nil then humanoid.DisplayName else target.Name
+	end
 	return if isPartyMate(target) then `👥 {target.Name}` else target.Name
 end
 
@@ -283,8 +307,11 @@ local function onRenderStep()
 		return
 	end
 
+	-- Bots não disparam os sinais de Player: a eliminação deles é notada aqui.
 	local humanoid = getHumanoid(target)
-	if humanoid == nil then
+	local container = stateContainer
+	local stillActive = container == nil or isActiveParticipant(target, readNumberAttribute(container, ATTR_ROUND_ID))
+	if humanoid == nil or not stillActive then
 		refreshSpectator()
 		return
 	end

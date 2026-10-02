@@ -46,6 +46,8 @@ local devices: { [Player]: Device } = {}
 local lastDeviceReport: { [Player]: number } = {}
 local counters: { [Player]: Counters } = {}
 local roundStartClock = 0
+-- Bots RoboPuff na rodada em andamento.
+local roundBots = 0
 local roundActive = false
 local lastRoundParticipants: { [Player]: boolean } = {}
 local connections: { RBXScriptConnection } = {}
@@ -130,13 +132,17 @@ local function sampleFloors(token: number, participants: { Player })
 	end
 end
 
-function TelemetryService.roundStarted(participants: { Player })
+-- `participants` são os jogadores; `bots`, os RoboPuffs que completaram a
+-- partida (Fase 5B). O contexto `Bots{n}` separa as partidas com bots nas
+-- análises de retenção e vitória.
+function TelemetryService.roundStarted(participants: { Player }, bots: number?)
 	roundActive = true
 	roundStartClock = os.clock()
+	roundBots = bots or 0
 	table.clear(counters)
 	for _, player in ipairs(participants) do
 		counters[player] = { shots = 0, playerHits = 0, blockHits = 0, blocksDestroyed = 0, vaultShots = 0 }
-		log(player, "RoundStarted", #participants)
+		log(player, "RoundStarted", #participants + roundBots, `Bots{roundBots}`)
 		-- Rematch: jogou a rodada anterior e continuou para esta.
 		if lastRoundParticipants[player] then
 			log(player, "Rematch", 1)
@@ -251,9 +257,9 @@ function TelemetryService.roundFinished(outcomes: { [Player]: string })
 	local duration = elapsed()
 	for player, outcome in pairs(outcomes) do
 		local current = counters[player]
-		log(player, "RoundFinished", duration, outcome)
+		log(player, "RoundFinished", duration, outcome, `Bots{roundBots}`)
 		if outcome == "Win" then
-			log(player, "RoundWon", duration)
+			log(player, "RoundWon", duration, `Bots{roundBots}`)
 		end
 		if current ~= nil then
 			log(player, "RoundShots", current.shots)

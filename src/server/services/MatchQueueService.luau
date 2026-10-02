@@ -16,7 +16,8 @@
 --   "Join" → botão JOGAR: leva ao mirante (fora da partida, vivo, com o
 --            embarque aberto).
 -- Mensagens ao cliente: ("Lonely") → sozinho na fila há um tempo, sugere
--- chamar um amigo (uma vez por espera); ("GatesClosed") → para quem está na
+-- chamar um amigo (uma vez por espera, só sem bots); ("BotsArriving") → os
+-- bots RoboPuff chegaram para completar a partida; ("GatesClosed") → para quem está na
 -- fila quando o embarque fecha; ("BoardingClosed") → JOGAR recusado porque
 -- o embarque já fechou.
 --
@@ -62,6 +63,9 @@ local countdownRemaining: number? = nil
 local countdownStart: number? = nil
 local warmupLine = ""
 local lastBoardKey = ""
+-- Bots RoboPuff esperando no mirante (BotFillService): aparecem no painel,
+-- mas não estão em `queued` nem em `queuedCount` (que são só de jogadores).
+local botCount = 0
 
 local function isCompeting(player: Player): boolean
 	return player:GetAttribute(StateAttributeNames.PlayerIsParticipant) == true
@@ -84,7 +88,7 @@ end
 -- Sozinho no mirante por QueueConfig.LonelyHintSeconds: avisa uma vez.
 local function updateLonely(clock: number)
 	local only: Player? = nil
-	if open and queuedCount == 1 then
+	if open and queuedCount == 1 and botCount == 0 then
 		for player in pairs(queued) do
 			only = player
 		end
@@ -119,13 +123,14 @@ local function updateBoard()
 	end
 	table.sort(userIds)
 	local remaining = countdownRemaining
-	local key = `{queuedCount}|{tostring(remaining)}|{gatesClosed}|{table.concat(userIds, ",")}|{warmupLine}`
+	local key = `{queuedCount}|{botCount}|{tostring(remaining)}|{gatesClosed}|{table.concat(userIds, ",")}|{warmupLine}`
 	if key == lastBoardKey then
 		return
 	end
 	lastBoardKey = key
 	current.setBoard({
-		count = queuedCount,
+		count = queuedCount + botCount,
+		bots = botCount,
 		minimum = GameConfig.MinimumPlayers,
 		maximum = GameConfig.MaximumPlayers,
 		remaining = remaining,
@@ -194,9 +199,37 @@ local function onRequest(player: Player, action: unknown)
 	TelemetryService.lobbyEvent(player, "QueueJoinButton", 1)
 end
 
--- Quantos estão na fila (inclui membros de Party de quem está no mirante).
+-- Quantos jogadores estão na fila (inclui membros de Party de quem está no
+-- mirante). Os bots ficam de fora: o BotFillService conta os dele.
 function MatchQueueService.count(): number
 	return queuedCount
+end
+
+-- Bots RoboPuff esperando no mirante (só para o painel e o aviso de
+-- "sozinho").
+function MatchQueueService.setBotCount(count: number)
+	botCount = math.max(0, count)
+	updateBoard()
+end
+
+-- Jogadores na fila agora (telemetria dos bots).
+function MatchQueueService.queuedPlayers(): { Player }
+	local list: { Player } = {}
+	for player in pairs(queued) do
+		table.insert(list, player)
+	end
+	return list
+end
+
+-- Mensagem para todos os jogadores na fila.
+function MatchQueueService.notifyQueued(kind: string)
+	local currentRemote = remote
+	if currentRemote == nil then
+		return
+	end
+	for player in pairs(queued) do
+		currentRemote:FireClient(player, kind)
+	end
 end
 
 -- Está fisicamente no mirante (a Party é resolvida pela PartySelection).

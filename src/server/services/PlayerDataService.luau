@@ -52,6 +52,7 @@ local DailyRules = require(script.Parent.Parent.data.DailyRules)
 local SecretCatalog = require(ReplicatedStorage.Shared.config.SecretCatalog)
 local ProgressionConfig = require(ReplicatedStorage.Shared.config.ProgressionConfig)
 local LevelCurve = require(ReplicatedStorage.Shared.modules.LevelCurve)
+local BotConfig = require(ReplicatedStorage.Shared.config.BotConfig)
 local TelemetryService = require(script.Parent.TelemetryService)
 
 type Profile = ProfileSchema.Profile
@@ -78,6 +79,10 @@ export type RoundXp = {
 	won: boolean,
 	-- Eliminado que ficou assistindo até o fim (ticket de torcida).
 	stayedAsSpectator: boolean?,
+	-- Partida com bots RoboPuff (BotRewardRules): vitória e top 3 que rendem
+	-- ticket, e se os tickets da rodada entram no limite do dia (partida sem
+	-- outro humano).
+	tickets: { wins: number, top3: number, capped: boolean }?,
 }
 
 type Entry = {
@@ -405,7 +410,10 @@ local function progressChallenges(entry: Entry, delta: RoundDelta, gainedXp: num
 		return {}
 	end
 	local profile = entry.profile
-	local challenges, completed, tickets = DailyRules.applyRound(profile.challenges, delta :: any)
+	-- "Vença uma partida" também vale para vitória só contra bots.
+	local progress = table.clone(delta) :: any
+	progress.wins += delta.botWins
+	local challenges, completed, tickets = DailyRules.applyRound(profile.challenges, progress)
 	local updated = table.clone(profile)
 	updated.challenges = challenges
 	updated.challengesCompleted = profile.challengesCompleted + #completed
@@ -729,6 +737,47 @@ local function unload(player: Player)
 	releaseWithRetries(entry)
 end
 
+-- Tickets da rodada. Numa partida com bots, vitória e top 3 vêm de
+-- BotRewardRules; numa partida sem outro humano, os tickets da rodada (menos
+-- os de subir de nível) somam no máximo `SoloBotTicketsPerDay` por dia.
+-- Devolve também o contador do dia atualizado.
+local function roundTickets(profile: Profile, clean: RoundDelta, gained: number, levelsGained: number, roundXp: RoundXp): (number, { RewardRules.TicketLine }, number, number)
+	local override = roundXp.tickets
+	if override == nil then
+		local tickets, lines = RewardRules.ticketsForRound(clean, gained, levelsGained, roundXp.stayedAsSpectator)
+		return tickets, lines, profile.botTicketDay, profile.botTickets
+	end
+	local ticketDelta = table.clone(clean)
+	ticketDelta.wins = math.clamp(override.wins, 0, 1)
+	ticketDelta.top3 = math.clamp(override.top3, 0, 1)
+	local tickets, lines = RewardRules.ticketsForRound(ticketDelta, gained, levelsGained, roundXp.stayedAsSpectator)
+	local today = DailyRules.dayIndex(now())
+	local usedToday = if profile.botTicketDay == today then profile.botTickets else 0
+	if not override.capped then
+		return tickets, lines, today, usedToday
+	end
+	local levelUp = 0
+	for _, line in ipairs(lines) do
+		if line.source == "LevelUp" then
+			levelUp += line.tickets
+		end
+	end
+	local budget = math.max(0, BotConfig.Rewards.SoloBotTicketsPerDay - usedToday)
+	local granted = math.min(math.max(0, tickets - levelUp), budget)
+	local kept: { RewardRules.TicketLine } = {}
+	local remaining = granted
+	for _, line in ipairs(lines) do
+		if line.source == "LevelUp" then
+			table.insert(kept, line)
+		elseif remaining > 0 then
+			local amount = math.min(line.tickets, remaining)
+			remaining -= amount
+			table.insert(kept, { source = line.source, tickets = amount })
+		end
+	end
+	return math.min(tickets, granted + levelUp), kept, today, usedToday + granted
+end
+
 -- Soma a rodada ao perfil de um jogador presente. `roundKey` identifica a
 -- rodada de forma única (servidor + rodada): repetir a chave não soma de novo.
 function PlayerDataService.applyRound(player: Player, roundKey: string, delta: RoundDelta, roundXp: RoundXp): boolean
@@ -765,8 +814,10 @@ function PlayerDataService.applyRound(player: Player, roundKey: string, delta: R
 	local newXp = math.min(LevelCurve.maxXp(), profile.xp + gained)
 	local newLevel = LevelCurve.levelForXp(newXp)
 	local timestamp = now()
-	local tickets, ticketLines = RewardRules.ticketsForRound(clean, gained, newLevel - profile.level, roundXp.stayedAsSpectator)
+	local tickets, ticketLines, botTicketDay, botTickets = roundTickets(profile, clean, gained, newLevel - profile.level, roundXp)
 	local updated = ProfileSchema.withTickets(profile, tickets)
+	updated.botTicketDay = botTicketDay
+	updated.botTickets = botTickets
 	updated.stats = ProfileSchema.addStats(profile.stats, clean)
 	updated.appliedRounds = ProfileSchema.withAppliedRound(profile.appliedRounds, roundKey, ProfileConfig.AppliedRoundsKept)
 	updated.xp = newXp

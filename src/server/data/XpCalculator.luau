@@ -25,6 +25,13 @@ export type XpInput = {
 	comebacks: number,
 	blocksBuilt: number,
 	shots: number,
+	-- Partida com bots RoboPuff (BotRewardRules); ausentes = regra normal.
+	-- Derrubadas de bots, que valem `botKnockoutFactor` do XP de derrubada.
+	botKnockouts: number?,
+	botKnockoutFactor: number?,
+	-- Quantos contam para o multiplicador (os humanos) e o piso dele.
+	multiplierCount: number?,
+	minMultiplier: number?,
 }
 
 local XpCalculator = {}
@@ -38,7 +45,12 @@ end
 -- Linhas de XP (já com o multiplicador) e o total.
 function XpCalculator.compute(input: XpInput): ({ XpLine }, number)
 	local xp = ProgressionConfig.Xp
-	local active = not ProgressionConfig.RequireActivity or input.shots > 0 or input.blocksBuilt > 0 or input.knockouts > 0
+	local botKnockouts = math.max(0, input.botKnockouts or 0)
+	local active = not ProgressionConfig.RequireActivity
+		or input.shots > 0
+		or input.blocksBuilt > 0
+		or input.knockouts > 0
+		or botKnockouts > 0
 	local raw: { XpLine } = {}
 	local function add(source: string, amount: number)
 		if amount > 0 then
@@ -57,7 +69,10 @@ function XpCalculator.compute(input: XpInput): ({ XpLine }, number)
 	if input.won and active then
 		add("Win", xp.Win)
 	end
-	add("Knockouts", xp.PerKnockout * math.min(input.knockouts, xp.MaxKnockouts))
+	-- O teto de derrubadas vale para a soma; as de humanos entram primeiro.
+	local humanKnockouts = math.min(input.knockouts, xp.MaxKnockouts)
+	local cheapKnockouts = math.min(botKnockouts, xp.MaxKnockouts - humanKnockouts)
+	add("Knockouts", math.floor((xp.PerKnockout * humanKnockouts) + (xp.PerKnockout * (input.botKnockoutFactor or 1) * cheapKnockouts)))
 	add("Blocks", math.min(xp.MaxBlockXp, math.floor(input.blocksDestroyed / math.max(1, xp.BlocksPerXp))))
 	add("Secrets", xp.PerSecretFound * input.secretsFound)
 	add("VaultOpened", xp.VaultOpened * math.min(1, input.vaultsOpened))
@@ -66,7 +81,7 @@ function XpCalculator.compute(input: XpInput): ({ XpLine }, number)
 	add("Comeback", xp.Comeback * math.min(1, input.comebacks))
 	add("BlocksBuilt", xp.PerBlockBuilt * input.blocksBuilt)
 
-	local multiplier = participantMultiplier(input.participantCount)
+	local multiplier = math.max(participantMultiplier(input.multiplierCount or input.participantCount), input.minMultiplier or 0)
 	local lines: { XpLine } = {}
 	local total = 0
 	for _, line in ipairs(raw) do

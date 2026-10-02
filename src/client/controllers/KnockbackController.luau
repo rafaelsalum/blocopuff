@@ -8,12 +8,10 @@
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
-local GameConfig = require(ReplicatedStorage.Shared.config.GameConfig)
 local PuffadorConstants = require(ReplicatedStorage.Shared.modules.PuffadorConstants)
+local CharacterImpulse = require(ReplicatedStorage.Shared.modules.CharacterImpulse)
 
 local WAIT_TIMEOUT = 15
-local MAX_SPEED = 200
-local PUSH_NAME = "BlocoPuffKnockback"
 local MIN_SLIDE_DURATION = 0.05
 local MAX_SLIDE_DURATION = 1
 
@@ -44,99 +42,25 @@ local function getRoot(): (BasePart?, Humanoid?)
 	return root, humanoid
 end
 
--- Um LinearVelocity curto garante o empurrão mesmo com o Humanoid no chão
--- (ele anularia uma velocidade horizontal escrita diretamente). Ao terminar,
--- o personagem segue com o impulso e cai normalmente.
 local function applyKnockback(velocity: Vector3)
 	local root, humanoid = getRoot()
-	if root == nil or humanoid == nil then
-		return
+	if root ~= nil and humanoid ~= nil then
+		CharacterImpulse.knockback(root, humanoid, velocity)
 	end
-	if velocity.Magnitude > MAX_SPEED then
-		velocity = velocity.Unit * MAX_SPEED
-	end
-
-	local existing = root:FindFirstChild(PUSH_NAME)
-	if existing ~= nil then
-		existing:Destroy()
-	end
-
-	local attachment = Instance.new("Attachment")
-	attachment.Name = PUSH_NAME
-	attachment.Parent = root
-
-	local push = Instance.new("LinearVelocity")
-	push.Attachment0 = attachment
-	push.RelativeTo = Enum.ActuatorRelativeTo.World
-	push.VelocityConstraintMode = Enum.VelocityConstraintMode.Vector
-	push.VectorVelocity = velocity
-	push.MaxForce = math.huge
-	push.Parent = attachment
-
-	humanoid:ChangeState(Enum.HumanoidStateType.Freefall)
-	task.delay(GameConfig.Knockback.Duration, function()
-		if attachment.Parent ~= nil then
-			attachment:Destroy()
-		end
-	end)
 end
 
--- Escorregão (Tapete Puxado): segura só a velocidade horizontal por
--- `duration` segundos, sem mudar o estado do Humanoid. A vertical fica
--- livre, então quem passa por cima de um buraco cai.
 local function applySlide(velocity: Vector3, duration: number)
-	local root, humanoid = getRoot()
-	if root == nil or humanoid == nil then
-		return
+	local root = getRoot()
+	if root ~= nil then
+		CharacterImpulse.slide(root, velocity, duration)
 	end
-	local flat = Vector3.new(velocity.X, 0, velocity.Z)
-	if flat.Magnitude > MAX_SPEED then
-		flat = flat.Unit * MAX_SPEED
-	end
-
-	local existing = root:FindFirstChild(PUSH_NAME)
-	if existing ~= nil then
-		existing:Destroy()
-	end
-
-	local attachment = Instance.new("Attachment")
-	attachment.Name = PUSH_NAME
-	attachment.Parent = root
-
-	local slide = Instance.new("LinearVelocity")
-	slide.Attachment0 = attachment
-	slide.RelativeTo = Enum.ActuatorRelativeTo.World
-	slide.VelocityConstraintMode = Enum.VelocityConstraintMode.Plane
-	slide.PrimaryTangentAxis = Vector3.xAxis
-	slide.SecondaryTangentAxis = Vector3.zAxis
-	slide.PlaneVelocity = Vector2.new(flat.X, flat.Z)
-	slide.MaxForce = math.huge
-	slide.Parent = attachment
-
-	task.delay(duration, function()
-		if attachment.Parent ~= nil then
-			attachment:Destroy()
-		end
-	end)
 end
 
+-- Garante a posição do respawn caso o teleporte do servidor chegue depois.
 local function stopFalling(cframe: CFrame)
 	local root = getRoot()
-	if root == nil then
-		return
-	end
-	local existing = root:FindFirstChild(PUSH_NAME)
-	if existing ~= nil then
-		existing:Destroy()
-	end
-	root.AssemblyLinearVelocity = Vector3.zero
-	root.AssemblyAngularVelocity = Vector3.zero
-	-- Garante a posição do respawn caso o teleporte do servidor chegue depois.
-	if (root.Position - cframe.Position).Magnitude > 8 then
-		local character = root.Parent
-		if character ~= nil and character:IsA("Model") then
-			character:PivotTo(cframe)
-		end
+	if root ~= nil then
+		CharacterImpulse.stopFalling(root, cframe)
 	end
 end
 

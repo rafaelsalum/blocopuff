@@ -16,7 +16,6 @@
 -- embolado.
 
 local CollectionService = game:GetService("CollectionService")
-local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local ArenaConstants = require(ReplicatedStorage.Shared.modules.ArenaConstants)
@@ -25,6 +24,9 @@ local TrapConfig = require(ReplicatedStorage.Shared.config.TrapConfig)
 local TrapConstants = require(ReplicatedStorage.Shared.modules.TrapConstants)
 local ArenaService = require(script.Parent.Parent.ArenaService)
 local KnockbackService = require(script.Parent.Parent.KnockbackService)
+local CombatantRegistry = require(script.Parent.Parent.CombatantRegistry)
+
+type Combatant = CombatantRegistry.Combatant
 
 local CONFIG = TrapConfig.Rug
 local TILE_THICKNESS = 0.12
@@ -306,18 +308,17 @@ end
 
 -- Efeito ao fim do aviso: quem está em cima escorrega para o lado da
 -- franja. Devolve quantos escorregaram.
-function RugTrap.trigger(fringe: BasePart, shooter: Player, _isCurrent: () -> boolean): number
+function RugTrap.trigger(fringe: BasePart, shooter: Combatant, _isCurrent: () -> boolean): number
 	local rug = rugs[fringe]
 	if rug == nil then
 		return 0
 	end
 	local velocity = rug.pull * GameConfig.Knockback.HorizontalSpeed * CONFIG.SlideMultiplier
 	local affected = 0
-	for _, player in ipairs(Players:GetPlayers()) do
-		if player ~= shooter and KnockbackService.isActiveParticipant(player) then
-			local character = player.Character
-			local root = if character ~= nil then character:FindFirstChild("HumanoidRootPart") else nil
-			if root ~= nil and root:IsA("BasePart") and isOnRug(rug, root.Position) and KnockbackService.slide(shooter, player, velocity, CONFIG.SlideDuration) then
+	for _, combatant in ipairs(CombatantRegistry.all()) do
+		if combatant ~= shooter and KnockbackService.isActiveParticipant(combatant) then
+			local root = CombatantRegistry.getRoot(combatant)
+			if root ~= nil and isOnRug(rug, root.Position) and KnockbackService.slide(shooter, combatant, velocity, CONFIG.SlideDuration) then
 				affected += 1
 			end
 		end

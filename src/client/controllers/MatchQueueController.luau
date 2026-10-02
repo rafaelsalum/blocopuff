@@ -67,6 +67,8 @@ end
 local function onMessage(kind: unknown)
 	if kind == "Lonely" then
 		banner("queue-lonely", "👥", "CHAME UM AMIGO", "A partida começa com 2 no mirante. Convide pela Party!", "Info", "Low", 5)
+	elseif kind == "BotsArriving" then
+		banner("queue-bots", "🤖", "ROBOPUFFS CHEGANDO!", "Eles completam a partida. Chame um amigo para jogar junto!", "Info", "Normal", 4)
 	elseif kind == "GatesClosed" then
 		banner("queue-closed", "🔒", "EMBARQUE ENCERRADO!", "Portas fechadas: a partida vai começar", "Gold", "High", 3)
 	elseif kind == "BoardingClosed" then

@@ -21,6 +21,9 @@ export type ProfileStats = {
 	secretsFound: number,
 	blocksBuilt: number,
 	comebacks: number,
+	-- Vitórias em partidas sem outro humano, só contra bots RoboPuff (5B).
+	-- Não entram em `wins` (ranking, Puffdex).
+	botWins: number,
 }
 
 -- Desafio do dia (4.3): progresso e se já foi concluído (os tickets saem
@@ -111,6 +114,7 @@ local ProfileTypes = {
 		"secretsFound",
 		"blocksBuilt",
 		"comebacks",
+		"botWins",
 	}),
 }
 

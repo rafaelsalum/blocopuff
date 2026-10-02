@@ -5,6 +5,10 @@
 -- serviços da Fase 2 e lido pelo RoundService no fim da rodada para montar
 -- a soma do perfil.
 
+local CombatantRegistry = require(script.Parent.CombatantRegistry)
+
+type Combatant = CombatantRegistry.Combatant
+
 export type RoundCounters = {
 	vaultsOpened: number,
 	vaultsConquered: number,
@@ -13,62 +17,77 @@ export type RoundCounters = {
 	blocksBuilt: number,
 	comebacks: number,
 	shots: number,
+	-- Derrubadas de bots RoboPuff (valem menos XP e não contam no perfil).
+	botKnockouts: number,
 }
 
 local RoundStatsService = {}
 
 local active = false
-local counters: { [Player]: RoundCounters } = {}
+local counters: { [Combatant]: RoundCounters } = {}
 
 local function empty(): RoundCounters
-	return { vaultsOpened = 0, vaultsConquered = 0, baraoEscapes = 0, secretsFound = 0, blocksBuilt = 0, comebacks = 0, shots = 0 }
+	return {
+		vaultsOpened = 0,
+		vaultsConquered = 0,
+		baraoEscapes = 0,
+		secretsFound = 0,
+		blocksBuilt = 0,
+		comebacks = 0,
+		shots = 0,
+		botKnockouts = 0,
+	}
 end
 
-local function add(player: Player, key: string)
+local function add(combatant: Combatant, key: string)
 	if not active then
 		return
 	end
-	local current = counters[player]
+	local current = counters[combatant]
 	if current == nil then
 		current = empty()
-		counters[player] = current
+		counters[combatant] = current
 	end
 	local record = current :: any
 	record[key] += 1
 end
 
-function RoundStatsService.vaultOpened(player: Player)
-	add(player, "vaultsOpened")
+function RoundStatsService.vaultOpened(combatant: Combatant)
+	add(combatant, "vaultsOpened")
 end
 
-function RoundStatsService.vaultConquered(player: Player)
-	add(player, "vaultsConquered")
+function RoundStatsService.vaultConquered(combatant: Combatant)
+	add(combatant, "vaultsConquered")
 end
 
-function RoundStatsService.baraoEscape(player: Player)
-	add(player, "baraoEscapes")
+function RoundStatsService.baraoEscape(combatant: Combatant)
+	add(combatant, "baraoEscapes")
 end
 
-function RoundStatsService.secretFound(player: Player)
-	add(player, "secretsFound")
+function RoundStatsService.secretFound(combatant: Combatant)
+	add(combatant, "secretsFound")
 end
 
-function RoundStatsService.blockBuilt(player: Player)
-	add(player, "blocksBuilt")
+function RoundStatsService.blockBuilt(combatant: Combatant)
+	add(combatant, "blocksBuilt")
 end
 
 -- Puffs disparados (só para saber se o jogador participou de verdade).
-function RoundStatsService.shot(player: Player)
-	add(player, "shots")
+function RoundStatsService.shot(combatant: Combatant)
+	add(combatant, "shots")
 end
 
-function RoundStatsService.comeback(player: Player)
-	add(player, "comebacks")
+function RoundStatsService.comeback(combatant: Combatant)
+	add(combatant, "comebacks")
 end
 
--- Cópia dos contadores do jogador nesta rodada (zeros se não fez nada).
-function RoundStatsService.get(player: Player): RoundCounters
-	local current = counters[player]
+function RoundStatsService.botKnockout(combatant: Combatant)
+	add(combatant, "botKnockouts")
+end
+
+-- Cópia dos contadores do combatente nesta rodada (zeros se não fez nada).
+function RoundStatsService.get(combatant: Combatant): RoundCounters
+	local current = counters[combatant]
 	return if current ~= nil then table.clone(current) else empty()
 end
 

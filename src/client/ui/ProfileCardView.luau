@@ -28,7 +28,7 @@ export type ProfileCardViewHandle = {
 
 local GUI_NAME = "BlocoPuffProfileCard"
 local CARD_SIZE = Vector2.new(236, 66)
-local STATS_SIZE = Vector2.new(236, 212)
+local STATS_SIZE = Vector2.new(236, 234)
 local SHORTCUT_GAP = 4
 local SHORTCUT_HEIGHT = 44
 local SHORTCUT_Y = CARD_SIZE.Y + 6
@@ -45,6 +45,7 @@ local STAT_ROWS: { { key: string, label: string } } = {
 	{ key = "baraoEscapes", label = "Fugas do Barão" },
 	{ key = "secretsFound", label = "Passagens descobertas" },
 	{ key = "comebacks", label = "Voltas por Cima" },
+	{ key = "botWins", label = "Vitórias contra RoboPuffs" },
 }
 
 local ProfileCardView = {}

@@ -13,6 +13,7 @@
 --   * limite de disparos com partículas ao mesmo tempo e metade das
 --     partículas nos gráficos baixos (1 a 3).
 
+local CollectionService = game:GetService("CollectionService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
@@ -25,6 +26,7 @@ local PuffCatalog = require(ReplicatedStorage.Shared.config.PuffCatalog)
 local PuffTypes = require(ReplicatedStorage.Shared.types.PuffTypes)
 local PuffadorConstants = require(ReplicatedStorage.Shared.modules.PuffadorConstants)
 local PuffEffects = require(ReplicatedStorage.Shared.modules.PuffEffects)
+local StateAttributeNames = require(ReplicatedStorage.Shared.types.StateAttributeNames)
 
 type PuffStyle = PuffTypes.PuffStyle
 
@@ -106,6 +108,21 @@ local burstPool: { [string]: { Burst } } = {}
 local particleShots = 0
 local lowQuality = false
 local qualityClock = math.huge
+
+-- Corpo de quem atirou (jogador ou bot RoboPuff, de id negativo), para o
+-- desenho do tiro não bater no próprio atirador.
+local function findShooterCharacter(ownerUserId: number): Model?
+	if ownerUserId > 0 then
+		local owner = Players:GetPlayerByUserId(ownerUserId)
+		return if owner ~= nil then owner.Character else nil
+	end
+	for _, bot in ipairs(CollectionService:GetTagged(StateAttributeNames.BotTag)) do
+		if bot:IsA("Model") and bot:GetAttribute(StateAttributeNames.BotId) == ownerUserId then
+			return bot
+		end
+	end
+	return nil
+end
 
 local function getFolder(): Folder
 	local current = folder
@@ -436,9 +453,9 @@ function PuffShotRenderer.spawn(spec: ShotSpec, always: boolean): Shot?
 	visual.light.Enabled = far <= NEAR_DISTANCE and not lowQuality
 
 	local exclude: { Instance } = {}
-	local owner = Players:GetPlayerByUserId(spec.ownerUserId)
-	if owner ~= nil and owner.Character ~= nil then
-		table.insert(exclude, owner.Character)
+	local ownerCharacter = findShooterCharacter(spec.ownerUserId)
+	if ownerCharacter ~= nil then
+		table.insert(exclude, ownerCharacter)
 	end
 	local params = RaycastParams.new()
 	params.FilterType = Enum.RaycastFilterType.Exclude

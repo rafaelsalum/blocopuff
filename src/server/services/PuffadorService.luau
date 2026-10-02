@@ -17,6 +17,7 @@ local ProjectileService = require(script.Parent.ProjectileService)
 local PuffadorModel = require(script.Parent.PuffadorModel)
 local TelemetryService = require(script.Parent.TelemetryService)
 local RoundStatsService = require(script.Parent.RoundStatsService)
+local CombatantRegistry = require(script.Parent.CombatantRegistry)
 
 type Variant = PuffadorModel.Variant
 
@@ -42,6 +43,8 @@ local lastFireClock: { [Player]: number } = {}
 local superCharges: { [Player]: number } = {}
 -- Construções restantes do modo Construir do Puffador do Cofre.
 local buildCharges: { [Player]: number } = {}
+-- Último disparo de cada bot RoboPuff (cadência mínima, como o jogador).
+local botLastFire: { [CombatantRegistry.Combatant]: number } = {}
 
 local function isOwned(instance: Instance): boolean
 	return instance:GetAttribute(GENERATED_BY_ATTRIBUTE) == SERVICE_NAME
@@ -137,7 +140,7 @@ function PuffadorService.revokeFrom(player: Player)
 	end
 	superCharges[player] = nil
 	buildCharges[player] = nil
-	ProjectileService.clearForPlayer(player)
+	ProjectileService.clearFor(CombatantRegistry.forPlayer(player))
 end
 
 -- Troca o Puffador do jogador pelo Puffador do Cofre, com `charges` tiros
@@ -258,6 +261,7 @@ function PuffadorService.endRound()
 	table.clear(trainees)
 	table.clear(superCharges)
 	table.clear(buildCharges)
+	table.clear(botLastFire)
 	ProjectileService.clearAll()
 	currentRoundId = 0
 end
@@ -398,16 +402,17 @@ local function onRequestPuff(player: Player, rawAimTarget: unknown, rawAimOrigin
 	local puffId = if typeof(equippedPuff) == "string" then equippedPuff else nil
 	if isTrainee then
 		-- Só alvos de treino: nada de bloco, empurrão, estatística ou telemetria de tiro.
-		ProjectileService.spawn(player, origin, aimOrigin, direction, 0, nil, 1, PuffadorModel.getProjectileColor("Standard"), puffId, true)
+		ProjectileService.spawn(CombatantRegistry.forPlayer(player), origin, aimOrigin, direction, 0, nil, 1, PuffadorModel.getProjectileColor("Standard"), puffId, true)
 		return
 	end
 	local isSuper = superCharges[player] ~= nil
 	local variant: Variant = if isSuper then "Super" else "Standard"
 	local power = if isSuper then GameConfig.SecretRoom.SuperPower else 1
 	TelemetryService.shot(player, isSuper)
-	RoundStatsService.shot(player)
+	local shooter = CombatantRegistry.forPlayer(player)
+	RoundStatsService.shot(shooter)
 	local hitSomeBlock = false
-	ProjectileService.spawn(player, origin, aimOrigin, direction, currentRoundId, function()
+	ProjectileService.spawn(shooter, origin, aimOrigin, direction, currentRoundId, function()
 		incrementRoundBlocksDestroyed(player)
 		sendFeedback(player, "Hit")
 		TelemetryService.blocksDestroyed(player, 1, not hitSomeBlock)
@@ -416,6 +421,52 @@ local function onRequestPuff(player: Player, rawAimTarget: unknown, rawAimOrigin
 	if isSuper then
 		consumeSuperCharge(player)
 	end
+end
+
+-- Disparo de um bot RoboPuff (Fase 5B): mesmas regras de rodada, alcance
+-- e cadência mínima do jogador, saindo do cano do Puffador que ele segura.
+-- Sem remote, Puff equipado nem telemetria. Devolve se o tiro saiu.
+function PuffadorService.fireAsBot(bot: CombatantRegistry.Combatant, aimTarget: Vector3): boolean
+	if not acceptingRequests or not CombatantRegistry.isPresent(bot) or not isFiniteVector3(aimTarget) then
+		return false
+	end
+	if CombatantRegistry.getAttribute(bot, StateAttributeNames.PlayerIsParticipant) ~= true then
+		return false
+	end
+	if CombatantRegistry.getAttribute(bot, StateAttributeNames.PlayerParticipatingRoundId) ~= currentRoundId then
+		return false
+	end
+	if CombatantRegistry.getAttribute(bot, StateAttributeNames.PlayerIsEliminated) ~= false then
+		return false
+	end
+	local humanoid = CombatantRegistry.getHumanoid(bot)
+	local rootPart = CombatantRegistry.getRoot(bot)
+	local character = CombatantRegistry.getCharacter(bot)
+	if humanoid == nil or humanoid.Health <= 0 or rootPart == nil or character == nil then
+		return false
+	end
+	local tool = character:FindFirstChildOfClass("Tool")
+	if tool == nil then
+		return false
+	end
+
+	local now = os.clock()
+	local lastFire = botLastFire[bot]
+	if lastFire ~= nil and now - lastFire < GameConfig.Puffador.FireCooldown then
+		return false
+	end
+	local origin = computeOrigin(rootPart, tool)
+	local aimDelta = aimTarget - origin
+	if aimDelta.Magnitude < GameConfig.Puffador.MinimumAimDistance then
+		return false
+	end
+	botLastFire[bot] = now
+
+	RoundStatsService.shot(bot)
+	ProjectileService.spawn(bot, origin, origin, aimDelta.Unit, currentRoundId, function()
+		CombatantRegistry.setAttribute(bot, StateAttributeNames.PlayerRoundBlocksDestroyed, CombatantRegistry.readCount(bot, StateAttributeNames.PlayerRoundBlocksDestroyed) + 1)
+	end, 1, PuffadorModel.getProjectileColor("Standard"))
+	return true
 end
 
 local function ensureRemotesContainer(): Folder

@@ -9,7 +9,6 @@
 -- com o rastro e as partículas do Puff equipado. Não conhece regras de
 -- rodada, participantes ou o RemoteEvent de disparo.
 
-local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local Workspace = game:GetService("Workspace")
@@ -18,24 +17,26 @@ local GameConfig = require(ReplicatedStorage.Shared.config.GameConfig)
 local PuffCatalog = require(ReplicatedStorage.Shared.config.PuffCatalog)
 local PuffadorConstants = require(ReplicatedStorage.Shared.modules.PuffadorConstants)
 local ArenaService = require(script.Parent.ArenaService)
+local CombatantRegistry = require(script.Parent.CombatantRegistry)
 
 type BlockDestructionContext = ArenaService.BlockDestructionContext
+type Combatant = CombatantRegistry.Combatant
 
--- Chamado quando um projétil acerta o personagem de outro jogador. Quem
--- decide o efeito (empurrão, regra do cofre) são os serviços registrados.
-export type CharacterHitHandler = (shooter: Player, victim: Player, position: Vector3, direction: Vector3, power: number) -> ()
+-- Chamado quando um projétil acerta o personagem de outro combatente
+-- (jogador ou bot). Quem decide o efeito (empurrão, regra do cofre) são os
+-- serviços registrados.
+export type CharacterHitHandler = (shooter: Combatant, victim: Combatant, position: Vector3, direction: Vector3, power: number) -> ()
 -- Chamado quando o projétil acerta algo que não é bloco nem personagem
 -- (ex.: um quadro na parede). `distance` vai do cano, no instante do
 -- disparo (validado pelo servidor perto do personagem), até o impacto: não
 -- depende de onde o personagem está agora nem da câmera.
-export type SurfaceHitHandler = (shooter: Player, instance: Instance, position: Vector3, distance: number) -> ()
+export type SurfaceHitHandler = (shooter: Combatant, instance: Instance, position: Vector3, distance: number) -> ()
 
 local GENERATED_BY_ATTRIBUTE = "GeneratedBy"
 local SERVICE_NAME = "ProjectileService"
 
 type ProjectileRecord = {
-	ownerPlayer: Player,
-	ownerUserId: number,
+	owner: Combatant,
 	roundId: number,
 	projectileId: number,
 	direction: Vector3,
@@ -88,16 +89,16 @@ local function removeProjectileAt(index: number, distance: number?, impactPositi
 	broadcast("Ended", record.projectileId, distance or record.distanceTraveled, impactPosition, impactNormal)
 end
 
--- Avisa os handlers do que foi atingido: personagem de outro jogador ou,
--- se não for personagem, a superfície.
+-- Avisa os handlers do que foi atingido: personagem de outro combatente
+-- ou, se não for personagem, a superfície.
 local function notifyHit(record: ProjectileRecord, hitInstance: Instance, position: Vector3, distance: number)
 	local model = hitInstance:FindFirstAncestorOfClass("Model")
 	while model ~= nil do
-		local victim = Players:GetPlayerFromCharacter(model)
+		local victim = CombatantRegistry.fromCharacter(model)
 		if victim ~= nil then
-			if victim ~= record.ownerPlayer then
+			if victim ~= record.owner then
 				for _, handler in pairs(characterHitHandlers) do
-					task.spawn(handler, record.ownerPlayer, victim, position, record.direction, record.power)
+					task.spawn(handler, record.owner, victim, position, record.direction, record.power)
 				end
 			end
 			return
@@ -105,7 +106,7 @@ local function notifyHit(record: ProjectileRecord, hitInstance: Instance, positi
 		model = model:FindFirstAncestorOfClass("Model")
 	end
 	for _, handler in pairs(surfaceHitHandlers) do
-		task.spawn(handler, record.ownerPlayer, hitInstance, position, distance)
+		task.spawn(handler, record.owner, hitInstance, position, distance)
 	end
 end
 
@@ -135,8 +136,7 @@ local function updateProjectiles(deltaTime: number)
 				local context: BlockDestructionContext = {
 					position = raycastResult.Position,
 					normal = raycastResult.Normal,
-					ownerPlayer = record.ownerPlayer,
-					ownerUserId = record.ownerUserId,
+					owner = record.owner,
 					roundId = record.roundId,
 					projectileId = record.projectileId,
 				}
@@ -145,7 +145,7 @@ local function updateProjectiles(deltaTime: number)
 				local hitDistance = (raycastResult.Position - record.muzzle).Magnitude
 				if record.training then
 					for _, handler in pairs(surfaceHitHandlers) do
-						task.spawn(handler, record.ownerPlayer, hitInstance, raycastResult.Position, hitDistance)
+						task.spawn(handler, record.owner, hitInstance, raycastResult.Position, hitDistance)
 					end
 					return false
 				end
@@ -227,7 +227,7 @@ end
 -- equipado) e `color` só mudam o desenho no cliente: tamanho, velocidade,
 -- alcance e acerto são iguais para todos.
 function ProjectileService.spawn(
-	player: Player,
+	owner: Combatant,
 	origin: Vector3,
 	aimOrigin: Vector3,
 	direction: Vector3,
@@ -247,7 +247,7 @@ function ProjectileService.spawn(
 	local projectileId = nextProjectileSequence
 
 	local filterInstances: { Instance } = { container }
-	local character = player.Character
+	local character = CombatantRegistry.getCharacter(owner)
 	if character ~= nil then
 		table.insert(filterInstances, character)
 	end
@@ -258,8 +258,7 @@ function ProjectileService.spawn(
 	raycastParams.IgnoreWater = true
 
 	local record: ProjectileRecord = {
-		ownerPlayer = player,
-		ownerUserId = player.UserId,
+		owner = owner,
 		roundId = roundId,
 		projectileId = projectileId,
 		direction = direction,
@@ -278,7 +277,7 @@ function ProjectileService.spawn(
 	broadcast(
 		"Fired",
 		projectileId,
-		player.UserId,
+		owner.id,
 		origin,
 		aimOrigin,
 		direction,
@@ -306,10 +305,10 @@ function ProjectileService.clearAll()
 	broadcast("Clear")
 end
 
-function ProjectileService.clearForPlayer(player: Player)
+function ProjectileService.clearFor(owner: Combatant)
 	for index = #activeProjectiles, 1, -1 do
 		local record = activeProjectiles[index]
-		if record.ownerPlayer == player then
+		if record.owner == owner then
 			removeProjectileAt(index)
 		end
 	end
