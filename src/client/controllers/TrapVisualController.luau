@@ -11,6 +11,7 @@ local RunService = game:GetService("RunService")
 local Workspace = game:GetService("Workspace")
 
 local TrapConstants = require(ReplicatedStorage.Shared.modules.TrapConstants)
+local RugTrapFx = require(script.Parent.Parent.effects.RugTrapFx)
 local WindowTrapFx = require(script.Parent.Parent.effects.WindowTrapFx)
 
 type Handle = WindowTrapFx.Handle
@@ -37,8 +38,11 @@ local function track(instance: Instance)
 	if handles[instance] ~= nil or not instance:IsA("BasePart") then
 		return
 	end
-	if instance:GetAttribute(TrapConstants.KindAttribute) == TrapConstants.Window then
+	local kind = instance:GetAttribute(TrapConstants.KindAttribute)
+	if kind == TrapConstants.Window then
 		handles[instance] = WindowTrapFx.new(instance, getEffectsFolder())
+	elseif kind == TrapConstants.Rug then
+		handles[instance] = RugTrapFx.new(instance, getEffectsFolder())
 	end
 end
 

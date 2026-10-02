@@ -80,7 +80,7 @@ end
 -- regras do disparo: só participantes vivos, respeita a proteção da Segunda
 -- Chance e credita a derrubada a `attacker` (nil: ninguém leva o crédito).
 -- Devolve se o empurrão foi aplicado.
-function KnockbackService.push(attacker: Player?, victim: Player, velocity: Vector3): boolean
+local function deliver(attacker: Player?, victim: Player, kind: string, value: any): boolean
 	local send = sendToPlayer
 	if send == nil or not isActiveParticipant(victim) then
 		return false
@@ -93,8 +93,19 @@ function KnockbackService.push(attacker: Player?, victim: Player, velocity: Vect
 	if attacker ~= nil and attacker ~= victim then
 		lastHits[victim] = { attacker = attacker, clock = now }
 	end
-	send(victim, "Knockback", velocity)
+	send(victim, kind, value)
 	return true
+end
+
+function KnockbackService.push(attacker: Player?, victim: Player, velocity: Vector3): boolean
+	return deliver(attacker, victim, "Knockback", velocity)
+end
+
+-- Escorregão (Tapete Puxado): só na horizontal, por `duration` segundos, sem
+-- tirar o jogador do chão (a gravidade continua valendo). Mesmas regras de
+-- `push`.
+function KnockbackService.slide(attacker: Player?, victim: Player, velocity: Vector3, duration: number): boolean
+	return deliver(attacker, victim, "Slide", { velocity = Vector3.new(velocity.X, 0, velocity.Z), duration = duration })
 end
 
 -- Credita uma queda de `victim` a `attacker` sem empurrar (ex.: o chão

@@ -5,7 +5,7 @@
 -- só desenha a partir deles.
 
 export type TrapState = "Ready" | "Warning" | "Recharging" | "Spent"
-export type TrapKind = "Window"
+export type TrapKind = "Window" | "Rug"
 
 local TrapConstants = table.freeze({
 	Tag = "CasaraoTrap",
@@ -30,12 +30,18 @@ local TrapConstants = table.freeze({
 	WindowCurtainNames = table.freeze({ "CurtainL", "CurtainR" }),
 	WindowBoardPrefix = "Board",
 
+	-- Tapete: direção do puxão (no alvo, a franja) e, em cada pedaço do
+	-- tapete, a distância até a franja ao longo do puxão.
+	RugPullAttribute = "RugPull",
+	RugAlongAttribute = "RugAlong",
+
 	Ready = "Ready" :: TrapState,
 	Warning = "Warning" :: TrapState,
 	Recharging = "Recharging" :: TrapState,
 	Spent = "Spent" :: TrapState,
 
 	Window = "Window" :: TrapKind,
+	Rug = "Rug" :: TrapKind,
 })
 
 return TrapConstants

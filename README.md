@@ -184,6 +184,16 @@ Arquivos `.rbxl` e `.rbxlx` são artefatos locais e não fazem parte da fonte pr
 
 ## Estado atual
 
+### Tapete Puxado (Fase 5, entrega 5.3)
+
+- **Onde:** dois tapetes no térreo (`traps/RugTrap`), um em cada metade, montados sobre os blocos e puxados para o centro, onde costuma ter buraco. Posição, tamanho e cor ficam em `TrapConfig.Rug.Rugs`, em células da grade.
+- **Alvo:** a franja, numa das pontas. O tiro precisa vir de pelo menos 20 studs; mais perto, a franja e o tapete só tremem.
+- **Aviso (0,8 s):** uma onda corre pelo tapete, da franja para a outra ponta.
+- **Puxão:** todo mundo em cima do tapete escorrega para o lado da franja, cerca de 14 studs em 0,45 s, só na horizontal e sem pulo (quem passa por cima de um buraco cai). Quem atirou não escorrega, e quem cair num buraco no caminho conta como derrubada dele.
+- **Depois:** o tapete fica embolado junto da franja, com dobras e poeira, e se estica sozinho no fim da recarga (20 s). Cada tapete tem 4 usos por rodada.
+- **Nunca flutua:** o tapete é feito de um pedaço por bloco do piso. O pedaço some quando o bloco embaixo cai e volta quando ele é restaurado. A franja deixa de ser alvo se todos os blocos debaixo dela caírem.
+- **Cliente** (`effects/RugTrapFx`): a onda, o puxão e o tapete embolado são desenhados só no cliente e só enquanto há movimento. Parado, nada é redesenhado.
+
 ### Armadilhas do Casarão e Janela Ventania (Fase 5, entregas 5.1 e 5.2)
 
 Escopo em `docs/FASE_5_PARTIDA_VIVA_CASARAO_REAGE.md`.

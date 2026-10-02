@@ -123,7 +123,7 @@ Valores de partida para o playtest. Todos ficam em `config/TrapConfig`.
 | Janela Ventania | 25 studs | 0,7 s | cone de 30 studs, 50° | 1,2× → 0,4× o disparo | 25 s | 3 por janela |
 | Pombos | 25 studs | 0,7 s | faixa de 6 × 40 studs | 0,3× por esbarrão (até 3) | 25 s | 3 por janela |
 | Chuva | 25 studs | 0,7 s | 12 × 12 studs | tração baixa por 5 s | 25 s | 3 por janela |
-| Tapete Puxado | 20 studs | 0,8 s | o tapete | escorregão de cerca de 8 studs | 20 s | 4 por tapete |
+| Tapete Puxado | 20 studs | 0,8 s | o tapete | escorregão de cerca de 14 studs (0,45 s) | 20 s | 4 por tapete |
 | Lustre Despencando | 20 studs | 1,0 s | círculo de 7 studs | 1,0× para fora + buraco | — | 1 por lustre |
 | Lareira de Fuligem | 15 studs | 0,6 s | nuvem de 10 studs por 4 s | 0,35× por espirro | 18 s | 4 |
 

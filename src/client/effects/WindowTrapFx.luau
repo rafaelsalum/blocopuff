@@ -19,10 +19,11 @@ local BuildingLayout = require(ReplicatedStorage.Shared.modules.BuildingLayout)
 local GameConfig = require(ReplicatedStorage.Shared.config.GameConfig)
 local TrapConfig = require(ReplicatedStorage.Shared.config.TrapConfig)
 local TrapConstants = require(ReplicatedStorage.Shared.modules.TrapConstants)
+local TrapFxUtil = require(script.Parent.TrapFxUtil)
 
 local CONFIG = TrapConfig.Window
-local SPARKLE_TEXTURE = "rbxasset://textures/particles/sparkles_main.dds"
-local SMOKE_TEXTURE = "rbxasset://textures/particles/smoke_main.dds"
+local SPARKLE_TEXTURE = TrapFxUtil.SparkleTexture
+local SMOKE_TEXTURE = TrapFxUtil.SmokeTexture
 local GLASS_COLOR = Color3.fromRGB(190, 235, 255)
 local CRACK_COLOR = Color3.fromRGB(245, 250, 255)
 local CRACK_SHOW_TIME = 1.2
@@ -51,26 +52,6 @@ type Curtain = {
 
 local WindowTrapFx = {}
 
-local function newSound(parent: Instance, soundId: string, speed: number, volume: number): Sound
-	local sound = Instance.new("Sound")
-	sound.SoundId = soundId
-	sound.PlaybackSpeed = speed
-	sound.Volume = volume
-	sound.RollOffMaxDistance = 160
-	sound.Parent = parent
-	return sound
-end
-
-local function newEmitter(parent: Attachment, texture: string, color: Color3): ParticleEmitter
-	local emitter = Instance.new("ParticleEmitter")
-	emitter.Texture = texture
-	emitter.Color = ColorSequence.new(color)
-	emitter.Enabled = false
-	emitter.LightEmission = 0.4
-	emitter.Parent = parent
-	return emitter
-end
-
 function WindowTrapFx.new(glass: BasePart, effectsFolder: Folder): Handle
 	local model = glass.Parent
 	local restGlass = glass.CFrame
@@ -79,16 +60,7 @@ function WindowTrapFx.new(glass: BasePart, effectsFolder: Folder): Handle
 
 	-- Pontos de emissão: no vidro (brilho e confete) e no chão junto da
 	-- parede, virado para dentro (vento).
-	local anchor = Instance.new("Part")
-	anchor.Name = "WindowTrapFx"
-	anchor.Anchored = true
-	anchor.CanCollide = false
-	anchor.CanQuery = false
-	anchor.CanTouch = false
-	anchor.Transparency = 1
-	anchor.Size = Vector3.one
-	anchor.CFrame = CFrame.lookAt(glass.Position, glass.Position + inward)
-	anchor.Parent = effectsFolder
+	local anchor = TrapFxUtil.newAnchor(effectsFolder, "WindowTrapFx", CFrame.lookAt(glass.Position, glass.Position + inward))
 
 	local glassPoint = Instance.new("Attachment")
 	glassPoint.Parent = anchor
@@ -100,14 +72,9 @@ function WindowTrapFx.new(glass: BasePart, effectsFolder: Folder): Handle
 		floorPoint.WorldPosition = Vector3.new(glass.Position.X, floorY + FLOOR_STREAK_HEIGHT, glass.Position.Z) + (inward * 0.5)
 	end
 
-	local sparkle = newEmitter(glassPoint, SPARKLE_TEXTURE, GLASS_COLOR)
-	sparkle.Rate = 1.2
-	sparkle.Lifetime = NumberRange.new(0.8, 1.2)
-	sparkle.Size = NumberSequence.new(0.5, 0)
-	sparkle.Speed = NumberRange.new(0)
-	sparkle.SpreadAngle = Vector2.new(0, 0)
+	local sparkle = TrapFxUtil.newReadySparkle(glassPoint, GLASS_COLOR)
 
-	local shards = newEmitter(glassPoint, SPARKLE_TEXTURE, GLASS_COLOR)
+	local shards = TrapFxUtil.newEmitter(glassPoint, SPARKLE_TEXTURE, GLASS_COLOR)
 	shards.Lifetime = NumberRange.new(0.6, 1.1)
 	shards.Size = NumberSequence.new(0.45, 0.1)
 	shards.Speed = NumberRange.new(16, 30)
@@ -116,7 +83,7 @@ function WindowTrapFx.new(glass: BasePart, effectsFolder: Folder): Handle
 	shards.RotSpeed = NumberRange.new(-360, 360)
 	shards.EmissionDirection = Enum.NormalId.Front
 
-	local streaks = newEmitter(floorPoint, SMOKE_TEXTURE, Color3.new(1, 1, 1))
+	local streaks = TrapFxUtil.newEmitter(floorPoint, SMOKE_TEXTURE, Color3.new(1, 1, 1))
 	streaks.Rate = 26
 	streaks.Lifetime = NumberRange.new(0.7, 1)
 	streaks.Size = NumberSequence.new(0.6, 1.4)
@@ -125,7 +92,7 @@ function WindowTrapFx.new(glass: BasePart, effectsFolder: Folder): Handle
 	streaks.SpreadAngle = Vector2.new(CONFIG.ConeHalfAngle, 4)
 	streaks.EmissionDirection = Enum.NormalId.Front
 
-	local gust = newEmitter(glassPoint, SMOKE_TEXTURE, Color3.fromRGB(235, 245, 255))
+	local gust = TrapFxUtil.newEmitter(glassPoint, SMOKE_TEXTURE, Color3.fromRGB(235, 245, 255))
 	gust.Lifetime = NumberRange.new(0.5, 0.8)
 	gust.Size = NumberSequence.new(1.5, 5)
 	gust.Transparency = NumberSequence.new(0.45, 1)
@@ -133,9 +100,9 @@ function WindowTrapFx.new(glass: BasePart, effectsFolder: Folder): Handle
 	gust.SpreadAngle = Vector2.new(CONFIG.ConeHalfAngle, CONFIG.ConeHalfAngle * 0.6)
 	gust.EmissionDirection = Enum.NormalId.Front
 
-	local crackSound = newSound(anchor, CONFIG.CrackSoundId, 0.7, 0.8)
-	local shatterSound = newSound(anchor, CONFIG.ShatterSoundId, 1.7, 1)
-	local gustSound = newSound(anchor, CONFIG.GustSoundId, 0.6, 1)
+	local crackSound = TrapFxUtil.newSound(anchor, CONFIG.CrackSoundId, 0.7, 0.8)
+	local shatterSound = TrapFxUtil.newSound(anchor, CONFIG.ShatterSoundId, 1.7, 1)
+	local gustSound = TrapFxUtil.newSound(anchor, CONFIG.GustSoundId, 0.6, 1)
 
 	local curtains: { Curtain } = {}
 	if model ~= nil then

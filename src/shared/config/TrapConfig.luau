@@ -46,8 +46,37 @@ export type WindowConfig = TrapRules & {
 	GustSoundId: string,
 }
 
+-- Tapete Puxado (5.3): onde fica cada tapete do térreo, em células da grade
+-- da arena (linha = Z, coluna = X, a partir de 1), e para que lado ele é
+-- puxado (é o lado da franja, que é o alvo).
+export type RugPull = "+Column" | "-Column" | "+Row" | "-Row"
+export type RugLayout = {
+	row: number,
+	column: number,
+	rows: number,
+	columns: number,
+	pull: RugPull,
+	color: Color3,
+}
+
+export type RugConfig = TrapRules & {
+	-- Andar dos tapetes (1 = térreo).
+	Floor: number,
+	Rugs: { RugLayout },
+	-- Escorregão: velocidade (múltiplo do empurrão horizontal do disparo) e
+	-- quanto tempo dura. Só na horizontal, sem pulo.
+	SlideMultiplier: number,
+	SlideDuration: number,
+	-- Até que altura acima do tapete conta como "em cima" dele.
+	StandHeight: number,
+	FringeColor: Color3,
+	StretchSoundId: string,
+	PullSoundId: string,
+}
+
 export type TrapConfig = {
 	Window: WindowConfig,
+	Rug: RugConfig,
 }
 
 local Window: WindowConfig = table.freeze({
@@ -71,8 +100,44 @@ local Window: WindowConfig = table.freeze({
 	GustSoundId = "rbxasset://sounds/swoosh.wav",
 })
 
+local Rug: RugConfig = table.freeze({
+	MinDistance = 20,
+	WarningTime = 0.8,
+	RechargeTime = 20,
+	UsesPerRound = 4,
+	Floor = 1,
+	-- Um em cada metade do térreo, puxados para o centro (onde costuma ter
+	-- buraco).
+	Rugs = table.freeze({
+		table.freeze({
+			row = 3,
+			column = 3,
+			rows = 3,
+			columns = 4,
+			pull = "+Column" :: RugPull,
+			color = Color3.fromRGB(150, 40, 55),
+		}),
+		table.freeze({
+			row = 11,
+			column = 10,
+			rows = 3,
+			columns = 4,
+			pull = "-Column" :: RugPull,
+			color = Color3.fromRGB(40, 70, 140),
+		}),
+	}),
+	-- Cerca de 31 studs/s por 0,45 s: uns 14 studs (pouco mais de 2 blocos).
+	SlideMultiplier = 0.5,
+	SlideDuration = 0.45,
+	StandHeight = 6,
+	FringeColor = Color3.fromRGB(240, 226, 190),
+	StretchSoundId = "rbxasset://sounds/swoosh.wav",
+	PullSoundId = "rbxasset://sounds/swoosh.wav",
+})
+
 local TrapConfig: TrapConfig = table.freeze({
 	Window = Window,
+	Rug = Rug,
 })
 
 return TrapConfig

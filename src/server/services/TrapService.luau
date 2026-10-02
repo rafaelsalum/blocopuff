@@ -23,6 +23,7 @@ local TrapConstants = require(ReplicatedStorage.Shared.modules.TrapConstants)
 local KnockbackService = require(script.Parent.KnockbackService)
 local ProjectileService = require(script.Parent.ProjectileService)
 local TelemetryService = require(script.Parent.TelemetryService)
+local RugTrap = require(script.Parent.traps.RugTrap)
 local WindowTrap = require(script.Parent.traps.WindowTrap)
 
 type TrapState = TrapConstants.TrapState
@@ -53,9 +54,11 @@ type Trap = {
 }
 
 local HANDLER_KEY = "CasaraoTraps"
+local FOLDER_NAME = "CasaraoTraps"
 local CRACK_INTERVAL = 0.2
 local BEHAVIORS: { [string]: Behavior } = {
 	[TrapConstants.Window] = WindowTrap,
+	[TrapConstants.Rug] = RugTrap,
 }
 
 local TrapService = {}
@@ -64,6 +67,7 @@ local traps: { [BasePart]: Trap } = {}
 local active = false
 local started = false
 local connections: { RBXScriptConnection } = {}
+local trapsFolder: Folder? = nil
 
 local function setState(trap: Trap, state: TrapState, by: Player?)
 	trap.state = state
@@ -196,12 +200,19 @@ function TrapService.endRound()
 	resetAll()
 end
 
--- Registra as armadilhas montadas com o cenário (tag CasaraoTrap).
-function TrapService.start()
+-- Monta as armadilhas que não fazem parte do prédio (tapetes, depois da
+-- arena) e registra todas as que têm a tag CasaraoTrap (as janelas vêm do
+-- BuildingDecor).
+function TrapService.start(worldRoot: Instance)
 	if started then
 		return
 	end
 	started = true
+	local folder = Instance.new("Folder")
+	folder.Name = FOLDER_NAME
+	folder.Parent = worldRoot
+	trapsFolder = folder
+	RugTrap.build(folder)
 	for _, instance in ipairs(CollectionService:GetTagged(TrapConstants.Tag)) do
 		register(instance)
 	end
@@ -219,6 +230,11 @@ function TrapService.stop()
 	end
 	table.clear(connections)
 	table.clear(traps)
+	RugTrap.clear()
+	if trapsFolder ~= nil then
+		trapsFolder:Destroy()
+		trapsFolder = nil
+	end
 	started = false
 end
 

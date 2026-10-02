@@ -105,8 +105,9 @@ print("[BlocoPuff] Secret passages ready")
 KnockbackService.start(PuffadorService.sendFeedback)
 print("[BlocoPuff] Puffador knockback armed")
 
--- Precisa do prédio (janelas marcadas) e do empurrão.
-TrapService.start()
+-- Precisa do prédio (janelas marcadas), da arena (tapetes sobre os blocos)
+-- e do empurrão.
+TrapService.start(world)
 print("[BlocoPuff] Mansion traps ready")
 
 -- Precisam dos corredores já construídos (luzes das Tocas marcadas).

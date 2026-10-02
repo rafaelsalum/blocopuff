@@ -1,16 +1,16 @@
 # Graph Report - blocopuff  (2026-10-02)
 
 ## Corpus Check
-- 170 files · ~1,091,195 words
+- 176 files · ~1,095,972 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 1334 nodes · 2324 edges · 106 communities (96 shown, 10 thin omitted)
-- Extraction: 84% EXTRACTED · 16% INFERRED · 0% AMBIGUOUS · INFERRED: 381 edges (avg confidence: 0.8)
+- 1379 nodes · 2369 edges · 112 communities (102 shown, 10 thin omitted)
+- Extraction: 85% EXTRACTED · 15% INFERRED · 0% AMBIGUOUS · INFERRED: 352 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `01374ede`
+- Built from commit: `37a1b344`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -35,7 +35,7 @@
 - BaraoService.luau
 - Escopo
 - VaultService.luau
-- ProfileSchema.luau
+- TocaService.luau
 - PuffadorModel.luau
 - HallOfFameService.luau
 - Escopo
@@ -61,7 +61,7 @@
 - Part
 - ProfileGuard.luau
 - PhotoModeService.luau
-- TocaService.luau
+- MatchQueueService.luau
 - v002/source/build_model.py
 - ProfileController.luau
 - BaraoTensionController.luau
@@ -88,21 +88,25 @@
 - ReactionController.luau
 - Fase 5 — Partida Viva: o Casarão reage
 - LobbyStationsService.luau
-- EliminationService.luau
+- RoundStatsService.luau
 - ProgressionController.luau
 - 5. Arena
+- TrapVisualController.luau
+- CorridorBuilder.luau
+- RoundResultBuilder.luau
+- CrosshairView.new
 
 ## God Nodes (most connected - your core abstractions)
 1. `BlocoPuff — Game Design Document` - 36 edges
-2. `Estado atual` - 32 edges
+2. `Estado atual` - 33 edges
 3. `BuildingDecor.createPart()` - 28 edges
 4. `UiTheme.addCorner()` - 22 edges
-5. `beginRound()` - 20 edges
-6. `UiTheme.addTextOutline()` - 17 edges
-7. `UiTheme.createLabel()` - 17 edges
-8. `PuffMachineView.new()` - 16 edges
-9. `UiTheme.stylePanel()` - 16 edges
-10. `NotificationManager.notify()` - 14 edges
+5. `UiTheme.addTextOutline()` - 17 edges
+6. `UiTheme.createLabel()` - 17 edges
+7. `PuffMachineView.new()` - 16 edges
+8. `UiTheme.stylePanel()` - 16 edges
+9. `NotificationManager.notify()` - 14 edges
+10. `AdminPanelView.new()` - 14 edges
 
 ## Surprising Connections (you probably didn't know these)
 - `PuffdexView.new()` --calls--> `date()`  [INFERRED]
@@ -113,37 +117,37 @@
   src/client/controllers/SecretPassageController.luau → src/client/notifications/NotificationManager.luau
 - `banner()` --calls--> `NotificationManager.notify()`  [INFERRED]
   src/client/controllers/VaultController.luau → src/client/notifications/NotificationManager.luau
-- `RewardRules.ticketsForRound()` --calls--> `add()`  [INFERRED]
-  src/server/data/RewardRules.luau → src/server/services/RoundStatsService.luau
+- `grant()` --calls--> `ProfileSchema.withTickets()`  [INFERRED]
+  src/server/services/SecretAchievementService.luau → src/server/data/ProfileSchema.luau
 
 ## Import Cycles
 - None detected.
 
-## Communities (106 total, 10 thin omitted)
+## Communities (112 total, 10 thin omitted)
 
 ### Community 0 - "PuffShotRenderer.luau"
-Cohesion: 0.10
-Nodes (35): isVector3(), onFired(), onMessage(), PuffShotController.predict(), PuffShotController.start(), takePending(), acquireVisual(), buildBurst() (+27 more)
+Cohesion: 0.11
+Nodes (33): isVector3(), onFired(), onMessage(), PuffShotController.start(), takePending(), acquireVisual(), buildBurst(), buildVisual() (+25 more)
 
 ### Community 1 - "PuffadorService.luau"
-Cohesion: 0.10
-Nodes (25): findTarget(), getRoot(), isFiniteVector3(), isOccupied(), onRequestBuild(), playBuildSound(), buildPuffadorTool(), consumeSuperCharge() (+17 more)
+Cohesion: 0.06
+Nodes (45): findTarget(), getRoot(), isFiniteVector3(), isOccupied(), onRequestBuild(), playBuildSound(), broadcast(), isOwned() (+37 more)
 
 ### Community 2 - "ArenaService.luau"
-Cohesion: 0.09
-Nodes (31): cellKey(), ArenaService.beginRound(), ArenaService.collapseBlock(), ArenaService.create(), ArenaService.destroy(), ArenaService.endRound(), ArenaService.getIntactBlocks(), ArenaService.getNeighborBlock() (+23 more)
+Cohesion: 0.07
+Nodes (30): cellKey(), ArenaService.beginRound(), ArenaService.collapseBlock(), ArenaService.create(), ArenaService.destroy(), ArenaService.endRound(), ArenaService.getIntactBlocks(), ArenaService.getModel() (+22 more)
 
 ### Community 3 - "SpectatorController.luau"
 Cohesion: 0.33
 Nodes (8): getActiveParticipantList(), getHumanoid(), isActiveParticipant(), isPartyMate(), readBooleanAttribute(), readNumberAttribute(), resetCameraToOwnCharacter(), targetLabel()
 
 ### Community 4 - "SecretPassageService.luau"
-Cohesion: 0.09
-Nodes (34): MatchQueueService.isBoardingOpen(), MatchQueueService.isInZone(), MatchQueueService.setWarmupLine(), ProjectileService.setSurfaceHitHandler(), PuffadorService.isTraining(), PuffadorService.setTraining(), collectPaintings(), hideAll() (+26 more)
+Cohesion: 0.12
+Nodes (25): ProjectileService.setSurfaceHitHandler(), collectPaintings(), hideAll(), isActiveParticipant(), onSurfaceHit(), playSound(), reveal(), SecretPassageService.beginRound() (+17 more)
 
 ### Community 5 - "PuffadorController.luau"
 Cohesion: 0.11
-Nodes (35): CombatCameraController.addRecoil(), CombatCameraController.disable(), CombatCameraController.enable(), getCharacterParts(), getSafeShoulderOffset(), lockZoom(), onRenderStep(), restoreZoom() (+27 more)
+Nodes (32): CombatCameraController.addRecoil(), CombatCameraController.disable(), CombatCameraController.enable(), getCharacterParts(), getSafeShoulderOffset(), lockZoom(), onRenderStep(), restoreZoom() (+24 more)
 
 ### Community 6 - "ReplicatedStateService.luau"
 Cohesion: 0.26
@@ -159,11 +163,11 @@ Nodes (12): assignActiveSpawn(), destroyOwnedChild(), getActiveSpawn(), getHoriz
 
 ### Community 9 - "UiTheme.addCorner"
 Cohesion: 0.07
-Nodes (54): AdminPanelView.new(), constrainText(), createSection(), createTextBox(), AnnouncementView.new(), getToneColor(), BannerView.new(), createBanner() (+46 more)
+Nodes (55): PuffadorController.start(), AdminPanelView.new(), constrainText(), createSection(), createTextBox(), AnnouncementView.new(), getToneColor(), BannerView.new() (+47 more)
 
 ### Community 17 - "Estado atual"
 Cohesion: 0.06
-Nodes (32): Alertas, Momentos Puff e telemetria dos segredos (Fase 2, entrega 2.4), Artes da loja, Barão e Tocas Seguras (Fase 2, entrega 2.2), Barão maior, animado e com túnel entre os corredores (Fase 4, ajuste pós-4.5), Controles e mira (Fase 1, entrega 1.5), Corredores secretos e quadros (Fase 2, entrega 2.1), Desafios, retorno diário e conquistas secretas (Fase 4, entrega 4.3), Disparos desenhados no cliente (Fase 4, ajuste pós-4.5) (+24 more)
+Nodes (33): Alertas, Momentos Puff e telemetria dos segredos (Fase 2, entrega 2.4), Armadilhas do Casarão e Janela Ventania (Fase 5, entregas 5.1 e 5.2), Artes da loja, Barão e Tocas Seguras (Fase 2, entrega 2.2), Barão maior, animado e com túnel entre os corredores (Fase 4, ajuste pós-4.5), Controles e mira (Fase 1, entrega 1.5), Corredores secretos e quadros (Fase 2, entrega 2.1), Desafios, retorno diário e conquistas secretas (Fase 4, entrega 4.3) (+25 more)
 
 ### Community 18 - "WorldVisualService.luau"
 Cohesion: 0.60
@@ -182,8 +186,8 @@ Cohesion: 0.35
 Nodes (9): BlockCollapseController.start(), clearWarning(), createFragment(), emitDust(), getEffectsFolder(), playCollapse(), showWarning(), unwatchBlock() (+1 more)
 
 ### Community 25 - "BuildingDecor.createPart"
-Cohesion: 0.07
-Nodes (58): addPointLight(), BuildingDecor.createChandelier(), BuildingDecor.createPart(), BuildingDecor.createPlant(), BuildingDecor.createSideTable(), BuildingDecor.createSofa(), BuildingDecor.decorateStory(), BuildingDecor.wallCFrame() (+50 more)
+Cohesion: 0.08
+Nodes (49): addPointLight(), BuildingDecor.createChandelier(), BuildingDecor.createPart(), BuildingDecor.createPlant(), BuildingDecor.createSideTable(), BuildingDecor.createSofa(), BuildingDecor.decorateStory(), BuildingDecor.wallCFrame() (+41 more)
 
 ### Community 28 - "BaraoService.luau"
 Cohesion: 0.16
@@ -197,9 +201,9 @@ Nodes (20): 10. Espectador social, 11. Trading — preparação, não ativação
 Cohesion: 0.09
 Nodes (44): buildLights(), buildLockers(), buildPaneling(), buildPedestal(), buildShell(), buildVaultDisk(), decor(), SecretRoomBuilder.build() (+36 more)
 
-### Community 31 - "ProfileSchema.luau"
-Cohesion: 0.10
-Nodes (25): DailyRules.assign(), DailyRules.dayIndex(), DailyRules.emptyDaily(), DailyRules.ensureToday(), DailyRules.nextResetAt(), DailyRules.readChallenges(), DailyRules.readDaily(), readCount() (+17 more)
+### Community 31 - "TocaService.luau"
+Cohesion: 0.08
+Nodes (42): DailyRules.assign(), DailyRules.dayIndex(), DailyRules.emptyDaily(), DailyRules.ensureToday(), DailyRules.nextResetAt(), DailyRules.readChallenges(), DailyRules.readDaily(), readCount() (+34 more)
 
 ### Community 32 - "PuffadorModel.luau"
 Cohesion: 0.50
@@ -277,9 +281,9 @@ Nodes (7): isTable(), mergePuffs(), mergeStats(), number(), numberOr(), profile(
 Cohesion: 0.24
 Nodes (16): ArenaService.getBlocks(), applyPose(), attachPuffador(), blockCenter(), buildDescription(), createDebris(), createPart(), createShot() (+8 more)
 
-### Community 59 - "TocaService.luau"
-Cohesion: 0.14
-Nodes (28): computeVelocity(), isActiveParticipant(), KnockbackService.beginRound(), KnockbackService.endRound(), KnockbackService.forget(), KnockbackService.getRecentAttacker(), KnockbackService.protect(), KnockbackService.start() (+20 more)
+### Community 59 - "MatchQueueService.luau"
+Cohesion: 0.11
+Nodes (33): isCompeting(), livingRoot(), MatchQueueService.isBoardingOpen(), MatchQueueService.isInZone(), MatchQueueService.refresh(), MatchQueueService.setCountdown(), MatchQueueService.setWarmupLine(), MatchQueueService.start() (+25 more)
 
 ### Community 60 - "v002/source/build_model.py"
 Cohesion: 0.15
@@ -326,8 +330,8 @@ Cohesion: 0.18
 Nodes (8): Arquitetura, Escopo e compatibilidade, graphify, Instruções para agentes, Linguagem e comunicação, Segurança e dependências, Validação e entrega, graphify
 
 ### Community 80 - "TelemetryService.luau"
-Cohesion: 0.06
-Nodes (39): participantMultiplier(), XpCalculator.compute(), closeVisit(), MatchAudience.fire(), MatchAudience.isInMatch(), MatchAudience.players(), PuffMomentService.beginRound(), PuffMomentService.record() (+31 more)
+Cohesion: 0.10
+Nodes (18): closeVisit(), MatchAudience.fire(), MatchAudience.isInMatch(), MatchAudience.players(), PuffMomentService.record(), elapsed(), getCounters(), getDevice() (+10 more)
 
 ### Community 81 - "Toolchain local"
 Cohesion: 0.50
@@ -338,8 +342,8 @@ Cohesion: 0.44
 Nodes (7): banner(), connectTrampoline(), MatchQueueController.start(), onMessage(), playSound(), watchCountdown(), watchQueue()
 
 ### Community 83 - "RoundService.luau"
-Cohesion: 0.07
-Nodes (54): FinalChaosService.begin(), FinalChaosService.getDuration(), FinalChaosService.isRunning(), pickRandom(), isCompeting(), livingRoot(), MatchQueueService.count(), MatchQueueService.refresh() (+46 more)
+Cohesion: 0.06
+Nodes (54): computeVelocity(), isActiveParticipant(), KnockbackService.beginRound(), KnockbackService.endRound(), KnockbackService.forget(), KnockbackService.getRecentAttacker(), KnockbackService.isActiveParticipant(), KnockbackService.markAttacker() (+46 more)
 
 ### Community 84 - "SecretPassageController.luau"
 Cohesion: 0.60
@@ -377,33 +381,49 @@ Nodes (18): 5.1 Base das armadilhas, 5.2 Janela Ventania (andar de cima), 5.3 Ta
 Cohesion: 0.50
 Nodes (12): buildChallengeBoard(), buildFriendlyBarao(), buildMachine(), buildPartyPost(), buildPedestal(), buildPuffdexLectern(), buildShop(), buildShowcase() (+4 more)
 
-### Community 103 - "EliminationService.luau"
-Cohesion: 0.29
-Nodes (10): ArenaService.getModel(), checkParticipants(), createVisualZoneIfNeeded(), destroyOwnedVisual(), EliminationService.beginRound(), EliminationService.endRound(), EliminationService.start(), EliminationService.stop() (+2 more)
+### Community 103 - "RoundStatsService.luau"
+Cohesion: 0.21
+Nodes (12): participantMultiplier(), XpCalculator.compute(), add(), empty(), RoundStatsService.baraoEscape(), RoundStatsService.blockBuilt(), RoundStatsService.comeback(), RoundStatsService.get() (+4 more)
 
 ### Community 104 - "ProgressionController.luau"
 Cohesion: 0.50
 Nodes (4): announce(), playLevelUp(), ProgressionController.start(), onProfile()
 
+### Community 106 - "TrapVisualController.luau"
+Cohesion: 0.31
+Nodes (8): getEffectsFolder(), step(), track(), TrapVisualController.start(), untrack(), newEmitter(), newSound(), WindowTrapFx.new()
+
+### Community 107 - "CorridorBuilder.luau"
+Cohesion: 0.51
+Nodes (9): addLamp(), buildBaraoDoor(), buildOuterWall(), buildTerritory(), buildToca(), CorridorBuilder.build(), decor(), solid() (+1 more)
+
+### Community 108 - "RoundResultBuilder.luau"
+Cohesion: 0.70
+Nodes (4): pickHighlight(), readCount(), resolveTies(), RoundResultBuilder.build()
+
+### Community 109 - "CrosshairView.new"
+Cohesion: 1.00
+Nodes (3): addCorner(), createHitLine(), CrosshairView.new()
+
 ## Knowledge Gaps
-- **211 isolated node(s):** `Stack`, `Estrutura`, `Grafo de conhecimento (graphify)`, `Pré-requisitos`, `Instalação inicial no macOS` (+206 more)
+- **212 isolated node(s):** `Stack`, `Estrutura`, `Grafo de conhecimento (graphify)`, `Pré-requisitos`, `Instalação inicial no macOS` (+207 more)
   These have ≤1 connection - possible missing edges or undocumented components.
 - **10 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `PuffCatalog.get()` connect `ProfileController.luau` to `PuffShotRenderer.luau`, `UiTheme.addCorner`, `ArenaService.luau`?**
-  _High betweenness centrality (0.106) - this node is a cross-community bridge._
-- **Why does `TelemetryService.lobbyEvent()` connect `ProfileController.luau` to `TelemetryService.luau`, `RoundService.luau`, `SecretPassageService.luau`?**
-  _High betweenness centrality (0.078) - this node is a cross-community bridge._
-- **Why does `beginRound()` connect `RoundService.luau` to `ArenaService.luau`, `SecretPassageService.luau`, `EliminationService.luau`, `TelemetryService.luau`, `TocaService.luau`, `VaultService.luau`?**
-  _High betweenness centrality (0.062) - this node is a cross-community bridge._
+- **Why does `TelemetryService.lobbyEvent()` connect `ProfileController.luau` to `TelemetryService.luau`, `PuffadorService.luau`, `MatchQueueService.luau`?**
+  _High betweenness centrality (0.096) - this node is a cross-community bridge._
+- **Why does `grant()` connect `ProfileController.luau` to `TocaService.luau`?**
+  _High betweenness centrality (0.092) - this node is a cross-community bridge._
+- **Why does `PuffCatalog.get()` connect `ProfileController.luau` to `PuffShotRenderer.luau`, `UiTheme.addCorner`?**
+  _High betweenness centrality (0.081) - this node is a cross-community bridge._
 - **Are the 17 inferred relationships involving `BuildingDecor.createPart()` (e.g. with `createSolid()` and `decor()`) actually correct?**
   _`BuildingDecor.createPart()` has 17 INFERRED edges - model-reasoned connections that need verification._
 - **Are the 19 inferred relationships involving `UiTheme.addCorner()` (e.g. with `AdminPanelView.new()` and `createSection()`) actually correct?**
   _`UiTheme.addCorner()` has 19 INFERRED edges - model-reasoned connections that need verification._
-- **Are the 13 inferred relationships involving `beginRound()` (e.g. with `ArenaService.beginRound()` and `EliminationService.beginRound()`) actually correct?**
-  _`beginRound()` has 13 INFERRED edges - model-reasoned connections that need verification._
+- **Are the 16 inferred relationships involving `UiTheme.addTextOutline()` (e.g. with `AdminPanelView.new()` and `createSection()`) actually correct?**
+  _`UiTheme.addTextOutline()` has 16 INFERRED edges - model-reasoned connections that need verification._
 - **What connects `Stack`, `Estrutura`, `Grafo de conhecimento (graphify)` to the rest of the system?**
-  _211 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _212 weakly-connected nodes found - possible documentation gaps or missing edges._
