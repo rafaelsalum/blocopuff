@@ -184,6 +184,24 @@ Arquivos `.rbxl` e `.rbxlx` são artefatos locais e não fazem parte da fonte pr
 
 ## Estado atual
 
+### Armadilhas do Casarão e Janela Ventania (Fase 5, entregas 5.1 e 5.2)
+
+Escopo em `docs/FASE_5_PARTIDA_VIVA_CASARAO_REAGE.md`.
+
+- **Base das armadilhas** (`TrapService`): objetos do cenário com a tag `CasaraoTrap` que um disparo da partida aciona.
+  - Só participantes vivos acionam, e só durante a rodada.
+  - O efeito completo só sai com tiro a partir da distância mínima. Mais perto, a armadilha só trinca (estalo e rachaduras, sem consequência).
+  - Sempre há aviso antes do efeito (estado `Warning`). Depois vem a recarga (`Recharging`), e sem usos a armadilha fica gasta (`Spent`) até a próxima rodada. Tudo é restaurado no início e no fim de cada rodada.
+  - O empurrão passa pelo `KnockbackService.push`, com as mesmas regras do disparo: proteção da Segunda Chance e derrubada creditada a quem acionou. O atirador nunca é afetado pela própria armadilha.
+  - O estado vai em atributos da peça-alvo (`TrapConstants`), e o cliente (`TrapVisualController`) só desenha.
+  - Números em `config/TrapConfig`. Telemetria: `TrapTriggered` (distância do tiro) e `TrapAffected` (jogadores atingidos).
+- **Janela Ventania** (`traps/WindowTrap` no servidor, `effects/WindowTrapFx` no cliente): as janelas do andar de cima viraram alvo.
+  - **Pronta:** um brilho leve no vidro.
+  - **Aviso (0,7 s):** rachaduras, vidro tremendo, cortinas inflando e vento rasteiro no chão, no caminho da rajada.
+  - **Rajada:** confete de vidro e um vento num cone de 30 studs para dentro da arena. O empurrão vai de 1,2× o do disparo perto da janela a 0,4× no fim do cone. Os blocos encostados na parede, debaixo da janela, piscam e caem em 1 s, e quem estiver em cima cai por causa do atirador.
+  - **Depois:** a janela fica aberta, com as cortinas batendo, e é pregada com tábuas no fim da recarga (25 s). Cada janela tem 3 usos por rodada, e o tiro precisa vir de pelo menos 25 studs.
+  - **Sons provisórios** embutidos no Roblox: troque `CrackSoundId`, `ShatterSoundId` e `GustSoundId` em `TrapConfig` por áudios da Creator Store.
+
 ### Próximas fases
 
 - **Fase 5 — Partida Viva: o Casarão reage** (`docs/FASE_5_PARTIDA_VIVA_CASARAO_REAGE.md`): armadilhas acionadas por disparo que premiam quem joga de longe.

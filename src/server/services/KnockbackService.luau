@@ -71,6 +71,46 @@ local function onCharacterHit(shooter: Player, victim: Player, _position: Vector
 	send(victim, "Knockback", computeVelocity(direction, power))
 end
 
+-- Participante vivo da rodada em andamento.
+function KnockbackService.isActiveParticipant(player: Player): boolean
+	return isActiveParticipant(player)
+end
+
+-- Empurrão vindo de outra fonte (armadilhas do Casarão), com as mesmas
+-- regras do disparo: só participantes vivos, respeita a proteção da Segunda
+-- Chance e credita a derrubada a `attacker` (nil: ninguém leva o crédito).
+-- Devolve se o empurrão foi aplicado.
+function KnockbackService.push(attacker: Player?, victim: Player, velocity: Vector3): boolean
+	local send = sendToPlayer
+	if send == nil or not isActiveParticipant(victim) then
+		return false
+	end
+	local now = os.clock()
+	local immuneUntil = protectedUntil[victim]
+	if immuneUntil ~= nil and now < immuneUntil then
+		return false
+	end
+	if attacker ~= nil and attacker ~= victim then
+		lastHits[victim] = { attacker = attacker, clock = now }
+	end
+	send(victim, "Knockback", velocity)
+	return true
+end
+
+-- Credita uma queda de `victim` a `attacker` sem empurrar (ex.: o chão
+-- caiu debaixo dele por causa de uma armadilha).
+function KnockbackService.markAttacker(victim: Player, attacker: Player)
+	if attacker == victim or not isActiveParticipant(victim) then
+		return
+	end
+	local now = os.clock()
+	local immuneUntil = protectedUntil[victim]
+	if immuneUntil ~= nil and now < immuneUntil then
+		return
+	end
+	lastHits[victim] = { attacker = attacker, clock = now }
+end
+
 -- Quem empurrou `victim` por último, se foi há pouco tempo.
 function KnockbackService.getRecentAttacker(victim: Player): Player?
 	local hit = lastHits[victim]

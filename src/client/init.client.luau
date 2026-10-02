@@ -10,6 +10,7 @@ local BlockCollapseController = require(script.controllers.BlockCollapseControll
 local MusicController = require(script.controllers.MusicController)
 local VaultController = require(script.controllers.VaultController)
 local KnockbackController = require(script.controllers.KnockbackController)
+local TrapVisualController = require(script.controllers.TrapVisualController)
 local ResultsController = require(script.controllers.ResultsController)
 local TelemetryController = require(script.controllers.TelemetryController)
 local SecretPassageController = require(script.controllers.SecretPassageController)
@@ -99,6 +100,13 @@ local knockbackOk, knockbackErr = pcall(function()
 end)
 if not knockbackOk then
 	warn(string.format("[BlocoPuff] Failed to start knockback controller: %s", tostring(knockbackErr)))
+end
+
+local trapsOk, trapsErr = pcall(function()
+	TrapVisualController.start()
+end)
+if not trapsOk then
+	warn(string.format("[BlocoPuff] Failed to start mansion trap effects: %s", tostring(trapsErr)))
 end
 
 local resultsOk, resultsErr = pcall(function()

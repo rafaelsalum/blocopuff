@@ -25,8 +25,10 @@ type BlockDestructionContext = ArenaService.BlockDestructionContext
 -- decide o efeito (empurrão, regra do cofre) são os serviços registrados.
 export type CharacterHitHandler = (shooter: Player, victim: Player, position: Vector3, direction: Vector3, power: number) -> ()
 -- Chamado quando o projétil acerta algo que não é bloco nem personagem
--- (ex.: um quadro na parede).
-export type SurfaceHitHandler = (shooter: Player, instance: Instance, position: Vector3) -> ()
+-- (ex.: um quadro na parede). `distance` vai do cano, no instante do
+-- disparo (validado pelo servidor perto do personagem), até o impacto: não
+-- depende de onde o personagem está agora nem da câmera.
+export type SurfaceHitHandler = (shooter: Player, instance: Instance, position: Vector3, distance: number) -> ()
 
 local GENERATED_BY_ATTRIBUTE = "GeneratedBy"
 local SERVICE_NAME = "ProjectileService"
@@ -39,6 +41,8 @@ type ProjectileRecord = {
 	direction: Vector3,
 	-- Posição autoritativa, que percorre o raio da mira (câmera → alvo).
 	logicPosition: Vector3,
+	-- Cano no instante do disparo (distância do tiro para os handlers).
+	muzzle: Vector3,
 	raycastParams: RaycastParams,
 	spawnClock: number,
 	distanceTraveled: number,
@@ -86,7 +90,7 @@ end
 
 -- Avisa os handlers do que foi atingido: personagem de outro jogador ou,
 -- se não for personagem, a superfície.
-local function notifyHit(record: ProjectileRecord, hitInstance: Instance, position: Vector3)
+local function notifyHit(record: ProjectileRecord, hitInstance: Instance, position: Vector3, distance: number)
 	local model = hitInstance:FindFirstAncestorOfClass("Model")
 	while model ~= nil do
 		local victim = Players:GetPlayerFromCharacter(model)
@@ -101,7 +105,7 @@ local function notifyHit(record: ProjectileRecord, hitInstance: Instance, positi
 		model = model:FindFirstAncestorOfClass("Model")
 	end
 	for _, handler in pairs(surfaceHitHandlers) do
-		task.spawn(handler, record.ownerPlayer, hitInstance, position)
+		task.spawn(handler, record.ownerPlayer, hitInstance, position, distance)
 	end
 end
 
@@ -128,7 +132,6 @@ local function updateProjectiles(deltaTime: number)
 			if raycastResult ~= nil then
 				impactPosition = raycastResult.Position
 				impactNormal = raycastResult.Normal
-				impactDistance = record.distanceTraveled + (raycastResult.Position - previousPosition).Magnitude
 				local context: BlockDestructionContext = {
 					position = raycastResult.Position,
 					normal = raycastResult.Normal,
@@ -138,9 +141,11 @@ local function updateProjectiles(deltaTime: number)
 					projectileId = record.projectileId,
 				}
 				local hitInstance = raycastResult.Instance
+				impactDistance = record.distanceTraveled + (raycastResult.Position - previousPosition).Magnitude
+				local hitDistance = (raycastResult.Position - record.muzzle).Magnitude
 				if record.training then
 					for _, handler in pairs(surfaceHitHandlers) do
-						task.spawn(handler, record.ownerPlayer, hitInstance, raycastResult.Position)
+						task.spawn(handler, record.ownerPlayer, hitInstance, raycastResult.Position, hitDistance)
 					end
 					return false
 				end
@@ -159,7 +164,7 @@ local function updateProjectiles(deltaTime: number)
 						end
 					end
 				else
-					notifyHit(record, hitInstance, raycastResult.Position)
+					notifyHit(record, hitInstance, raycastResult.Position, hitDistance)
 				end
 				return false
 			end
@@ -259,6 +264,7 @@ function ProjectileService.spawn(
 		projectileId = projectileId,
 		direction = direction,
 		logicPosition = aimOrigin,
+		muzzle = origin,
 		raycastParams = raycastParams,
 		spawnClock = os.clock(),
 		distanceTraveled = 0,

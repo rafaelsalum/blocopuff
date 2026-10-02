@@ -12,6 +12,7 @@ local EliminationService = require(script.services.EliminationService)
 local RoundService = require(script.services.RoundService)
 local VaultService = require(script.services.VaultService)
 local KnockbackService = require(script.services.KnockbackService)
+local TrapService = require(script.services.TrapService)
 local TelemetryService = require(script.services.TelemetryService)
 local SecretPassageService = require(script.services.SecretPassageService)
 local TocaService = require(script.services.TocaService)
@@ -103,6 +104,10 @@ print("[BlocoPuff] Secret passages ready")
 
 KnockbackService.start(PuffadorService.sendFeedback)
 print("[BlocoPuff] Puffador knockback armed")
+
+-- Precisa do prédio (janelas marcadas) e do empurrão.
+TrapService.start()
+print("[BlocoPuff] Mansion traps ready")
 
 -- Precisam dos corredores já construídos (luzes das Tocas marcadas).
 TocaService.start(world, PuffadorService.sendFeedback)

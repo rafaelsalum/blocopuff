@@ -10,6 +10,7 @@ local CollectionService = game:GetService("CollectionService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local GameConfig = require(ReplicatedStorage.Shared.config.GameConfig)
+local TrapConstants = require(ReplicatedStorage.Shared.modules.TrapConstants)
 
 type BuildingConfig = GameConfig.BuildingConfig
 
@@ -66,6 +67,19 @@ local GAP_CLEARANCE = 6
 local PAINTING_TAG = "RevealPainting"
 local PAINTING_ID_ATTRIBUTE = "PaintingId"
 local PAINTING_FLOOR_ATTRIBUTE = "PaintingFloor"
+local CURTAIN_SIZE = Vector3.new(1.1, 7.4, 0.15)
+local CURTAIN_OFFSET = 3
+local CURTAIN_DEPTH = 0.7
+local CURTAIN_COLOR = Color3.fromRGB(150, 45, 60)
+local BOARD_SIZE = Vector3.new(5.4, 0.7, 0.2)
+local BOARD_DEPTH = 0.65
+-- Tábuas que pregam a janela quebrada (altura relativa ao centro e
+-- inclinação em graus).
+local BOARDS = {
+	{ y = 1.9, tilt = 6 },
+	{ y = 0, tilt = -8 },
+	{ y = -1.9, tilt = 4 },
+}
 
 local BuildingDecor = {}
 
@@ -270,47 +284,55 @@ local function createPainting(parent: Instance, segment: WallSegment, offset: nu
 	end
 end
 
-local function createWindow(parent: Instance, segment: WallSegment, offset: number, y: number, style: BuildingConfig)
-	BuildingDecor.createPart(
-		parent,
-		`{segment.name}WindowFrame`,
-		Vector3.new(5, 7, 0.3),
-		BuildingDecor.wallCFrame(segment, offset, y, 0.25),
-		style.TrimColor,
-		{ material = Enum.Material.Wood }
-	)
-	BuildingDecor.createPart(
-		parent,
-		`{segment.name}WindowGlass`,
+-- Janela do andar de cima da arena. Com `floorIndex`, o vidro vira a
+-- armadilha Janela Ventania (Fase 5): pode ser atingido por tiros e leva a
+-- tag e os atributos lidos pelo TrapService. As cortinas e as tábuas
+-- (escondidas até a janela ser pregada) ficam no mesmo Model do vidro.
+local function createWindow(parent: Instance, segment: WallSegment, offset: number, y: number, style: BuildingConfig, floorIndex: number?)
+	local window = Instance.new("Model")
+	window.Name = `{segment.name}Window`
+	window.Parent = parent
+	BuildingDecor.createPart(window, "Frame", Vector3.new(5, 7, 0.3), BuildingDecor.wallCFrame(segment, offset, y, 0.25), style.TrimColor, { material = Enum.Material.Wood })
+	local glass = BuildingDecor.createPart(
+		window,
+		TrapConstants.WindowGlassName,
 		Vector3.new(4.2, 6.2, 0.1),
 		BuildingDecor.wallCFrame(segment, offset, y, 0.45),
 		style.WindowColor,
 		{ material = Enum.Material.Glass }
 	)
-	BuildingDecor.createPart(
-		parent,
-		`{segment.name}WindowMullionV`,
-		Vector3.new(0.25, 6.2, 0.2),
-		BuildingDecor.wallCFrame(segment, offset, y, 0.55),
-		style.TrimColor,
-		{ material = Enum.Material.Wood }
-	)
-	BuildingDecor.createPart(
-		parent,
-		`{segment.name}WindowMullionH`,
-		Vector3.new(4.2, 0.25, 0.2),
-		BuildingDecor.wallCFrame(segment, offset, y + 0.6, 0.55),
-		style.TrimColor,
-		{ material = Enum.Material.Wood }
-	)
-	BuildingDecor.createPart(
-		parent,
-		`{segment.name}WindowSill`,
-		Vector3.new(5.6, 0.3, 0.8),
-		BuildingDecor.wallCFrame(segment, offset, y - 3.6, 0.4),
-		style.TrimColor,
-		{ material = Enum.Material.Wood }
-	)
+	BuildingDecor.createPart(window, "MullionV", Vector3.new(0.25, 6.2, 0.2), BuildingDecor.wallCFrame(segment, offset, y, 0.55), style.TrimColor, { material = Enum.Material.Wood })
+	BuildingDecor.createPart(window, "MullionH", Vector3.new(4.2, 0.25, 0.2), BuildingDecor.wallCFrame(segment, offset, y + 0.6, 0.55), style.TrimColor, { material = Enum.Material.Wood })
+	BuildingDecor.createPart(window, "Sill", Vector3.new(5.6, 0.3, 0.8), BuildingDecor.wallCFrame(segment, offset, y - 3.6, 0.4), style.TrimColor, { material = Enum.Material.Wood })
+	for index, side in ipairs({ -1, 1 }) do
+		BuildingDecor.createPart(
+			window,
+			TrapConstants.WindowCurtainNames[index],
+			CURTAIN_SIZE,
+			BuildingDecor.wallCFrame(segment, offset + (side * CURTAIN_OFFSET), y - 0.2, CURTAIN_DEPTH),
+			CURTAIN_COLOR,
+			{ material = Enum.Material.Fabric }
+		)
+	end
+	for index, board in ipairs(BOARDS) do
+		BuildingDecor.createPart(
+			window,
+			`{TrapConstants.WindowBoardPrefix}{index}`,
+			BOARD_SIZE,
+			BuildingDecor.wallCFrame(segment, offset, y + board.y, BOARD_DEPTH) * CFrame.Angles(0, 0, math.rad(board.tilt)),
+			style.TrimColor,
+			{ material = Enum.Material.WoodPlanks, transparency = 1 }
+		)
+	end
+	if floorIndex == nil then
+		return
+	end
+	glass.CanQuery = true
+	glass:SetAttribute(TrapConstants.KindAttribute, TrapConstants.Window)
+	glass:SetAttribute(TrapConstants.IdAttribute, `{segment.name}:{math.floor(offset * 10) / 10}`)
+	glass:SetAttribute(TrapConstants.FloorAttribute, floorIndex)
+	glass:SetAttribute(TrapConstants.InwardAttribute, segment.inward)
+	CollectionService:AddTag(glass, TrapConstants.Tag)
 end
 
 local function createDoor(parent: Instance, segment: WallSegment, offset: number, floorY: number, style: BuildingConfig)
@@ -455,7 +477,7 @@ function BuildingDecor.decorateStory(
 			end
 		elseif options.art and height > MIN_HEIGHT_FOR_ART then
 			if options.windows and index % 4 == 2 then
-				createWindow(parent, segment, offset, bottom + ART_HEIGHT, style)
+				createWindow(parent, segment, offset, bottom + ART_HEIGHT, style, options.paintingFloor)
 			else
 				createPainting(parent, segment, offset, bottom + ART_HEIGHT, style, rng, options.paintingFloor)
 			end

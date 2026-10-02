@@ -46,7 +46,7 @@ Sistema comum, reutilizado por todas as armadilhas:
 - **crédito:** a vítima fica marcada com quem acionou, e uma queda dentro de `Knockback.CreditWindow` conta como derrubada desse jogador, igual a um disparo direto;
 - **recarga e limite:** tempo de recarga e número máximo de usos por rodada para cada armadilha. Tudo é restaurado no início da rodada;
 - **efeitos no cliente:** um controlador desenha o aviso e o efeito a partir dos atributos e de um evento único por acionamento;
-- **configuração:** tudo em `GameConfig.Traps`.
+- **configuração:** tudo em `config/TrapConfig` (compartilhado).
 
 ### 5.2 Janela Ventania (andar de cima)
 
@@ -116,7 +116,7 @@ Soma-se ao Caos Final de hoje, em que blocos piscam em vermelho e caem:
 
 ## Números iniciais
 
-Valores de partida para o playtest. Todos ficam em `GameConfig.Traps`.
+Valores de partida para o playtest. Todos ficam em `config/TrapConfig`.
 
 | Armadilha | Distância mínima | Aviso | Área | Empurrão (perto → longe) | Recarga | Usos por rodada |
 |---|---|---|---|---|---|---|
