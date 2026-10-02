@@ -64,6 +64,11 @@ export type Profile = {
 	referralFriends: { number },
 	referralDay: number,
 	referralDayCount: number,
+	-- Funil da primeira sessão: passos já enviados (bits, ver
+	-- OnboardingRules) e tipo da primeira partida (0 nenhuma, 1 só humanos,
+	-- 2 com bots). Opcionais, sem versão.
+	onboardingSteps: number,
+	firstMatchKind: number,
 	appliedRounds: { string },
 	createdAt: number,
 	updatedAt: number,
@@ -78,6 +83,8 @@ export type RoundDelta = ProfileStats
 -- conquistas secretas (4.3).
 local CURRENT_VERSION = 5
 local MAX_STAT = 1e9
+-- Datas (os.time) e UserIds passam de 1e9: teto do maior inteiro exato.
+local MAX_EXACT = 2 ^ 53 - 1
 local MAX_ROUND_KEY_LENGTH = 80
 
 local ProfileSchema = {}
@@ -89,6 +96,14 @@ local function cleanNumber(value: unknown, fallback: number): number
 		return fallback
 	end
 	return math.clamp(math.floor(value), 0, MAX_STAT)
+end
+
+-- Data (os.time) ou UserId: mesma limpeza, sem o teto das estatísticas.
+local function cleanLarge(value: unknown, fallback: number): number
+	if typeof(value) ~= "number" or value ~= value or value == math.huge or value == -math.huge then
+		return fallback
+	end
+	return math.clamp(math.floor(value), 0, MAX_EXACT)
 end
 
 function ProfileSchema.emptyStats(): ProfileStats
@@ -125,6 +140,8 @@ function ProfileSchema.default(now: number): Profile
 		referralFriends = {},
 		referralDay = 0,
 		referralDayCount = 0,
+		onboardingSteps = 0,
+		firstMatchKind = 0,
 		appliedRounds = {},
 		createdAt = now,
 		updatedAt = now,
@@ -140,7 +157,7 @@ local function readIdList(value: unknown): { number }
 		return list
 	end
 	for _, id in ipairs(value :: { unknown }) do
-		local clean = cleanNumber(id, 0)
+		local clean = cleanLarge(id, 0)
 		if clean > 0 and table.find(list, clean) == nil and #list < MAX_ID_LIST then
 			table.insert(list, clean)
 		end
@@ -201,6 +218,32 @@ local function readSecrets(raw: unknown, now: number): { [string]: number }
 		end
 	end
 	return secrets
+end
+
+-- Datas gravadas antes da correção do teto ficaram presas em exatamente
+-- MAX_STAT (set/2001). Sem como saber a original, vale `now`.
+local function repairedTime(value: number, now: number): number
+	return if value == MAX_STAT then now else value
+end
+
+-- Para a criação do perfil, a data mais antiga que sobrou sem teto (Puffs
+-- e conquistas) chega perto da verdadeira (retenção D1/D7/D28).
+local function repairedCreatedAt(value: number, puffs: Inventory, secrets: { [string]: number }, now: number): number
+	if value ~= MAX_STAT then
+		return value
+	end
+	local earliest = now
+	for _, record in pairs(puffs) do
+		if record.obtainedAt > MAX_STAT and record.obtainedAt < earliest then
+			earliest = record.obtainedAt
+		end
+	end
+	for _, unlockedAt in pairs(secrets) do
+		if unlockedAt > MAX_STAT and unlockedAt < earliest then
+			earliest = unlockedAt
+		end
+	end
+	return earliest
 end
 
 local function readStats(raw: unknown): ProfileStats
@@ -281,13 +324,14 @@ function ProfileSchema.fromStored(raw: unknown, now: number): (Profile, boolean)
 	-- O nível sai sempre do XP (determinístico); o salvo é só informativo.
 	local xp = math.min(cleanNumber(data.xp, 0), LevelCurve.maxXp())
 	local puffs = PuffInventory.fromStored(data.puffs, now)
+	local secrets = readSecrets(data.secrets, now)
 	return {
 		version = CURRENT_VERSION,
 		stats = readStats(data.stats),
 		xp = xp,
 		level = LevelCurve.levelForXp(xp),
 		prestige = cleanNumber(data.prestige, 0),
-		levelReachedAt = cleanNumber(data.levelReachedAt, now),
+		levelReachedAt = repairedTime(cleanLarge(data.levelReachedAt, now), now),
 		puffs = puffs,
 		equippedPuff = PuffInventory.validEquipped(puffs, data.equippedPuff),
 		tickets = math.min(cleanNumber(data.tickets, 0), RewardConfig.MaxTickets),
@@ -298,17 +342,19 @@ function ProfileSchema.fromStored(raw: unknown, now: number): (Profile, boolean)
 		daily = DailyRules.readDaily(data.daily),
 		challenges = DailyRules.readChallenges(data.challenges),
 		challengesCompleted = cleanNumber(data.challengesCompleted, 0),
-		secrets = readSecrets(data.secrets, now),
+		secrets = secrets,
 		botTicketDay = cleanNumber(data.botTicketDay, 0),
 		botTickets = cleanNumber(data.botTickets, 0),
-		referredBy = cleanNumber(data.referredBy, 0),
+		referredBy = cleanLarge(data.referredBy, 0),
 		referralPaid = math.min(cleanNumber(data.referralPaid, 0), 1),
 		referralFriends = readIdList(data.referralFriends),
 		referralDay = cleanNumber(data.referralDay, 0),
 		referralDayCount = cleanNumber(data.referralDayCount, 0),
+		onboardingSteps = cleanNumber(data.onboardingSteps, 0),
+		firstMatchKind = math.min(cleanNumber(data.firstMatchKind, 0), 2),
 		appliedRounds = readAppliedRounds(data.appliedRounds),
-		createdAt = cleanNumber(data.createdAt, now),
-		updatedAt = cleanNumber(data.updatedAt, now),
+		createdAt = repairedCreatedAt(cleanLarge(data.createdAt, now), puffs, secrets, now),
+		updatedAt = repairedTime(cleanLarge(data.updatedAt, now), now),
 		session = readSession(data.session),
 	}, false
 end
@@ -412,6 +458,8 @@ function ProfileSchema.toStored(profile: Profile): { [string]: any }
 		referralFriends = table.clone(profile.referralFriends),
 		referralDay = profile.referralDay,
 		referralDayCount = profile.referralDayCount,
+		onboardingSteps = profile.onboardingSteps,
+		firstMatchKind = profile.firstMatchKind,
 		appliedRounds = table.clone(profile.appliedRounds),
 		createdAt = profile.createdAt,
 		updatedAt = profile.updatedAt,

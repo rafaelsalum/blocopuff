@@ -97,7 +97,9 @@ local Window: WindowConfig = table.freeze({
 	BoardedFraction = 0.3,
 	CrackSoundId = "rbxasset://sounds/clickfast.wav",
 	ShatterSoundId = "rbxasset://sounds/action_jump_land.mp3",
-	GustSoundId = "rbxasset://sounds/swoosh.wav",
+	-- Sons que vêm com o Roblox (o antigo swoosh.wav não carrega mais).
+	-- Para um "whoosh" de verdade, troque por um áudio do Creator Store.
+	GustSoundId = "rbxasset://sounds/action_get_up.mp3",
 })
 
 local Rug: RugConfig = table.freeze({
@@ -131,8 +133,8 @@ local Rug: RugConfig = table.freeze({
 	SlideDuration = 0.45,
 	StandHeight = 6,
 	FringeColor = Color3.fromRGB(240, 226, 190),
-	StretchSoundId = "rbxasset://sounds/swoosh.wav",
-	PullSoundId = "rbxasset://sounds/swoosh.wav",
+	StretchSoundId = "rbxasset://sounds/action_get_up.mp3",
+	PullSoundId = "rbxasset://sounds/action_get_up.mp3",
 })
 
 local TrapConfig: TrapConfig = table.freeze({

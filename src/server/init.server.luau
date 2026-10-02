@@ -42,6 +42,7 @@ local CombatantRegistry = require(script.services.CombatantRegistry)
 local BotFillService = require(script.services.BotFillService)
 local MatchTestControls = require(script.services.MatchTestControls)
 local ReferralService = require(script.services.ReferralService)
+local OnboardingService = require(script.services.OnboardingService)
 
 local WORLD_NAME = "BlocoPuffWorld"
 local GENERATED_BY_ATTRIBUTE = "GeneratedBy"
@@ -164,6 +165,14 @@ print("[BlocoPuff] Puff moments and secrets telemetry ready")
 -- Perfil persistente: carrega quem já está no servidor e quem entrar.
 PlayerDataService.start(PuffadorService.getRemotesFolder())
 print("[BlocoPuff] Player profiles ready")
+
+-- Funil da primeira sessão (Funil de Onboarding do Creator Dashboard).
+local onboardingOk, onboardingFailure = pcall(function()
+	OnboardingService.start()
+end)
+if not onboardingOk then
+	warn(string.format("[BlocoPuff] Onboarding funnel disabled: %s", tostring(onboardingFailure)))
+end
 
 -- Convite com recompensa (prêmio para quem convidou e para o amigo).
 local referralOk, referralFailure = pcall(function()

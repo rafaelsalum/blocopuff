@@ -16,6 +16,7 @@ local PuffadorConstants = require(ReplicatedStorage.Shared.modules.PuffadorConst
 local ProjectileService = require(script.Parent.ProjectileService)
 local PuffadorModel = require(script.Parent.PuffadorModel)
 local TelemetryService = require(script.Parent.TelemetryService)
+local OnboardingService = require(script.Parent.OnboardingService)
 local RoundStatsService = require(script.Parent.RoundStatsService)
 local CombatantRegistry = require(script.Parent.CombatantRegistry)
 
@@ -396,6 +397,8 @@ local function onRequestPuff(player: Player, rawAimTarget: unknown, rawAimOrigin
 	end
 
 	lastFireClock[player] = now
+	-- Funil da primeira sessão: o primeiro tiro vale em qualquer lugar.
+	OnboardingService.shot(player)
 
 	local direction = aimDelta.Unit
 	local equippedPuff = player:GetAttribute(StateAttributeNames.PlayerEquippedPuff)
@@ -416,6 +419,9 @@ local function onRequestPuff(player: Player, rawAimTarget: unknown, rawAimOrigin
 		incrementRoundBlocksDestroyed(player)
 		sendFeedback(player, "Hit")
 		TelemetryService.blocksDestroyed(player, 1, not hitSomeBlock)
+		if not hitSomeBlock then
+			OnboardingService.blockDown(player)
+		end
 		hitSomeBlock = true
 	end, power, PuffadorModel.getProjectileColor(variant), puffId)
 	if isSuper then

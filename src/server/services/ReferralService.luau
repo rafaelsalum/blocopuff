@@ -85,6 +85,8 @@ end
 -- nil: não deu para creditar agora (guardar para depois).
 local function grantInviter(inviter: Player, candidates: { number }): number?
 	local saveable = false
+	local before = 0
+	local balance = 0
 	local granted: { number } = {}
 	PlayerDataService.update(inviter, function(profile: Profile, canSave: boolean): (Profile?, any)
 		saveable = canSave
@@ -101,6 +103,8 @@ local function grantInviter(inviter: Player, candidates: { number }): number?
 		updated.referralDay = newState.day
 		updated.referralDayCount = newState.dayCount
 		updated.referralFriends = newState.friends
+		before = profile.tickets
+		balance = updated.tickets
 		return updated, nil
 	end, true)
 	if not saveable then
@@ -110,7 +114,7 @@ local function grantInviter(inviter: Player, candidates: { number }): number?
 		local tickets = #granted * ReferralConfig.InviterTickets
 		notify(inviter, "Inviter", tickets, #granted)
 		TelemetryService.lobbyEvent(inviter, "ReferralInviterPaid", #granted, `Total{#granted}`)
-		TelemetryService.lobbyEvent(inviter, "TicketsEarned", tickets, "Referral")
+		TelemetryService.ticketsEarned(inviter, before, balance, "Referral")
 	end
 	return #granted
 end
@@ -208,6 +212,8 @@ end
 
 local function payInvitee(player: Player)
 	local inviterId = 0
+	local before = 0
+	local balance = 0
 	local paid = PlayerDataService.update(player, function(profile: Profile, canSave: boolean): (Profile?, any)
 		if not canSave or profile.referredBy <= 0 or profile.referralPaid >= 1 or profile.stats.matches < 1 then
 			return nil, nil
@@ -215,6 +221,8 @@ local function payInvitee(player: Player)
 		inviterId = profile.referredBy
 		local updated = ProfileSchema.withTickets(profile, ReferralConfig.InviteeTickets)
 		updated.referralPaid = 1
+		before = profile.tickets
+		balance = updated.tickets
 		return updated, nil
 	end, true)
 	if not paid then
@@ -222,7 +230,7 @@ local function payInvitee(player: Player)
 	end
 	notify(player, "Invitee", ReferralConfig.InviteeTickets)
 	TelemetryService.lobbyEvent(player, "ReferralInviteePaid", ReferralConfig.InviteeTickets)
-	TelemetryService.lobbyEvent(player, "TicketsEarned", ReferralConfig.InviteeTickets, "Referral")
+	TelemetryService.ticketsEarned(player, before, balance, "Referral")
 	task.spawn(creditInviter, inviterId, player.UserId)
 end
 

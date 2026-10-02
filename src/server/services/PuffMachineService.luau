@@ -64,6 +64,8 @@ local function pull(player: Player): (MachineResult?, MachineFailure)
 	local picked: PuffTypes.PuffDefinition? = nil
 	local pulls = 0
 	local owned = 0
+	-- Saldo logo depois de pagar o giro (antes da devolução).
+	local afterCost = 0
 	PlayerDataService.update(player, function(profile: Profile, canSave: boolean): (Profile?, PlayerDataService.Events?)
 		if not canSave then
 			failure = "NotSaved"
@@ -80,6 +82,7 @@ local function pull(player: Player): (MachineResult?, MachineFailure)
 		end
 		local puffs, duplicate = PuffInventory.addPuff(profile.puffs, definition.id, "Machine", os.time())
 		local refund = if duplicate then RewardConfig.DuplicateRefund else 0
+		afterCost = profile.tickets - RewardConfig.MachineCost
 		local updated = table.clone(profile)
 		updated.puffs = puffs
 		updated.tickets = math.min(RewardConfig.MaxTickets, profile.tickets - RewardConfig.MachineCost + refund)
@@ -98,10 +101,11 @@ local function pull(player: Player): (MachineResult?, MachineFailure)
 	if result == nil or definition == nil then
 		return nil, failure
 	end
-	TelemetryService.lobbyEvent(player, "TicketsSpent", RewardConfig.MachineCost, "PuffMachine")
+	-- Saída do giro e, se repetido, a devolução (o saldo final já a inclui).
+	TelemetryService.ticketsSpent(player, RewardConfig.MachineCost, afterCost, "PuffMachine")
 	TelemetryService.lobbyEvent(player, "PuffMachinePull", pulls, definition.id, `{definition.rarity}:{if result.duplicate then "Duplicate" else "New"}`)
 	if result.duplicate then
-		TelemetryService.lobbyEvent(player, "TicketsEarned", result.refund, "DuplicateRefund")
+		TelemetryService.ticketsEarned(player, afterCost, result.tickets, "DuplicateRefund")
 	else
 		TelemetryService.lobbyEvent(player, "PuffUnlocked", owned, definition.id, `{definition.rarity}:Machine`)
 		TelemetryService.lobbyEvent(player, "PuffCollection", owned, `Of{#PuffCatalog.all()}`)

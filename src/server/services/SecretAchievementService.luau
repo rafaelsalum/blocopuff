@@ -47,11 +47,15 @@ local function grant(player: Player, secretId: string)
 	end
 	local owned = 0
 	local saved = false
+	local before = 0
+	local balance = 0
 	local granted = PlayerDataService.update(player, function(profile: Profile, canSave: boolean): (Profile?, PlayerDataService.Events?)
 		if profile.secrets[secretId] ~= nil then
 			return nil, nil
 		end
 		local updated = ProfileSchema.withTickets(profile, definition.tickets)
+		before = profile.tickets
+		balance = updated.tickets
 		local secrets = table.clone(profile.secrets)
 		secrets[secretId] = os.time()
 		updated.secrets = secrets
@@ -67,7 +71,7 @@ local function grant(player: Player, secretId: string)
 	end, true)
 	if granted and saved then
 		TelemetryService.lobbyEvent(player, "SecretAchievement", owned, secretId)
-		TelemetryService.lobbyEvent(player, "TicketsEarned", definition.tickets, "Secret")
+		TelemetryService.ticketsEarned(player, before, balance, "Secret")
 	end
 end
 

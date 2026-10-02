@@ -176,6 +176,62 @@ function TelemetryService.event(player: Player, eventName: string, value: number
 	log(player, eventName, if value ~= nil then value else elapsed(), context, detail)
 end
 
+-- Passo do Funil de Onboarding nativo do Creator Dashboard. Quem garante
+-- que cada passo vai uma vez só é o OnboardingService (perfil).
+function TelemetryService.onboardingStep(player: Player, step: number, stepName: string)
+	if not GameConfig.Telemetry.Enabled or player.Parent == nil then
+		return
+	end
+	if RunService:IsStudio() and GameConfig.Telemetry.PrintInStudio then
+		print(string.format("[BlocoPuff][Telemetry] %s Onboarding %d %s", player.Name, step, stepName))
+	end
+	local ok, failure = pcall(function()
+		AnalyticsService:LogOnboardingFunnelStepEvent(player, step, stepName, {
+			[Enum.AnalyticsCustomFieldKeys.CustomField01.Name] = getDevice(player),
+		})
+	end)
+	if not ok and not RunService:IsStudio() then
+		warn(string.format("[BlocoPuff] Onboarding step %s failed: %s", stepName, tostring(failure)))
+	end
+end
+
+-- Tipo de transação da economia nativa por origem dos tickets.
+local TICKET_TRANSACTION_TYPES: { [string]: string } = {
+	Daily = "TimedReward",
+	DuplicateRefund = "Shop",
+	PuffMachine = "Shop",
+}
+
+-- Tickets na economia nativa do Creator Dashboard (entradas e saídas, com
+-- o saldo depois da transação). `source` vira o item (SKU).
+local function logTickets(player: Player, flow: Enum.AnalyticsEconomyFlowType, amount: number, balance: number, source: string)
+	if not GameConfig.Telemetry.Enabled or player.Parent == nil or amount <= 0 then
+		return
+	end
+	local transactionType = TICKET_TRANSACTION_TYPES[source] or "Gameplay"
+	if RunService:IsStudio() and GameConfig.Telemetry.PrintInStudio then
+		print(string.format("[BlocoPuff][Telemetry] %s Tickets %s %d (%s) balance=%d", player.Name, flow.Name, amount, source, balance))
+	end
+	local ok, failure = pcall(function()
+		AnalyticsService:LogEconomyEvent(player, flow, "Tickets", amount, math.max(0, balance), transactionType, source, {
+			[Enum.AnalyticsCustomFieldKeys.CustomField01.Name] = getDevice(player),
+		})
+	end)
+	if not ok and not RunService:IsStudio() then
+		warn(string.format("[BlocoPuff] Economy event %s failed: %s", source, tostring(failure)))
+	end
+end
+
+-- Entrada de tickets pelo saldo antes e depois: com a carteira no teto,
+-- vale só o que de fato entrou (nada entrou: nenhum evento).
+function TelemetryService.ticketsEarned(player: Player, before: number, after: number, source: string)
+	logTickets(player, Enum.AnalyticsEconomyFlowType.Source, after - before, after, source)
+end
+
+function TelemetryService.ticketsSpent(player: Player, amount: number, balance: number, item: string)
+	logTickets(player, Enum.AnalyticsEconomyFlowType.Sink, amount, balance, item)
+end
+
 -- Evento fora da rodada (lobby: ranking, Hall da Fama, Puffdex).
 function TelemetryService.lobbyEvent(player: Player, eventName: string, value: number?, context: string?, detail: string?)
 	log(player, eventName, value, context, detail)

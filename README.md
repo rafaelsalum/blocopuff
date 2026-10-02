@@ -213,6 +213,25 @@ Escopo em `docs/FASE_5B_BOTS_PUFF.md`. Ninguém joga sozinho: bots completam a p
 - **Fora do escopo por enquanto:** os bots não entram nos corredores secretos (Barão, Tocas), não abrem o cofre e não constroem.
 - **Testes:** `lune run tests/BotFillRules.spec`, `tests/BotGrid.spec`, `tests/BotLevelRules.spec` e `tests/BotRewardRules.spec`.
 
+### Observabilidade (Creator Dashboard)
+
+Além dos eventos customizados (`TelemetryService`), o jogo usa dois relatórios nativos do Creator Dashboard e separa a retenção pelo tipo da primeira partida.
+
+- **Funil da primeira sessão** (Analytics > Funnels > Onboarding; `OnboardingService`, regras em `data/OnboardingRules`):
+  - Os passos são `Joined` → `FirstShot` → `QueueEntered` → `MatchStarted` → `FirstBlockDown` → `MatchFinished` → `SecondMatch` → `ReturnedAnotherDay` (24 h depois da criação do perfil).
+  - Cada passo vai uma vez na vida do jogador, só com o perfil salvo. Os passos ficam em `onboardingSteps`, um campo de bits opcional que não exige nova versão.
+  - Quem já tinha partidas antes do funil existir fica de fora.
+- **Economia de tickets** (Analytics > Economy): cada entrada e saída de tickets vai com o saldo final.
+  - Entradas: rodada (fonte da linha), desafio, retorno diário (`TimedReward`), conquista secreta, convite e devolução de repetido.
+  - Saída: giro da Puff Machine (`Shop`).
+  - Com a carteira no teto, conta só o que de fato entrou.
+  - Substitui os antigos eventos `TicketsEarned` e `TicketsSpent`.
+- **Retenção com bots x só humanos:**
+  - O perfil guarda o tipo da primeira partida em `firstMatchKind` (0 nenhuma, 1 só humanos, 2 com bots).
+  - O `SessionStart` leva esse tipo no detalhe (CustomField03 = `FirstBots`, `FirstHumans` ou `FirstNone`).
+  - Para comparar, filtre o evento `SessionStart` pela faixa `D1+` e quebre pelo CustomField03. A comparação vale a partir do D1.
+- **Testes:** `lune run tests/OnboardingRules.spec`.
+
 ### Comandos de teste da partida (painel admin)
 
 Seção **TESTES DA PARTIDA** no painel admin. Vale só para o servidor atual e só para admins.
@@ -233,7 +252,7 @@ Seção **TESTES DA PARTIDA** no painel admin. Vale só para o servidor atual e 
 - **Quem convidou está em outro servidor ou fora do jogo:** o amigo entra numa lista no DataStore `BlocoPuffReferralsV1`, e um aviso pelo MessagingService chama o servidor certo. Se quem convidou estiver fora, recebe ao entrar.
 - **Perfil:** campos `referredBy`, `referralPaid`, `referralFriends`, `referralDay` e `referralDayCount`. São opcionais e não exigem nova versão.
 - **Configuração:** valores em `config/ReferralConfig`; regras em `data/ReferralRules`.
-- **Telemetria:** `InviteSent`, `InviteUnavailable`, `ReferralJoined`, `ReferralInviteePaid`, `ReferralInviterPaid` e `TicketsEarned` com contexto `Referral`.
+- **Telemetria:** `InviteSent`, `InviteUnavailable`, `ReferralJoined`, `ReferralInviteePaid`, `ReferralInviterPaid` e a entrada de tickets `Referral` na economia nativa (ver Observabilidade).
 - **Testar de verdade:** só com o jogo publicado. O Roblox só preenche quem convidou em convites reais, e o Studio pode não ter acesso ao DataStore e ao MessagingService. Os banners de recompensa da página do convite são configurados no Creator Hub (Engagement > Referral Rewards), com o jogo publicado há pelo menos 1 dia.
 - **Testes:** `lune run tests/ReferralRules.spec`.
 
@@ -589,7 +608,7 @@ A galeria (20 × 90 studs) ganhou estações físicas. Cada uma tem um Proximity
 - **Ninguém nasce em cima das estações:** o `LobbyService` recebe as áreas reservadas e tira essas posições da lista de lugares da galeria.
 - **Celular:** poucas peças, nenhuma luz extra, placas com distância máxima e só um alvo animado pelo servidor.
 - Os atalhos do cartão de perfil continuam funcionando: as estações são um caminho a mais, físico.
-- **Telemetria:** `BaraoPet`, `TrainingSession` (acertos e duração) e `SessionStart` (dias desde a criação do perfil, com a faixa D0, D1+, D7+ ou D28+, para medir D1/D7/D28).
+- **Telemetria:** `BaraoPet`, `TrainingSession` (acertos e duração) e `SessionStart` (dias desde a criação do perfil, com a faixa D0, D1+, D7+ ou D28+, para medir D1/D7/D28, e o tipo da primeira partida no detalhe).
 - **Código:** `LobbyStationsService` e `TrainingService`. No cliente, `LobbyStationsController`.
 
 ### Party e espectador social (Fase 4, entrega 4.4)
@@ -609,7 +628,7 @@ A galeria (20 × 90 studs) ganhou estações físicas. Cada uma tem um Proximity
   - só quem não está competindo reage, e só quem não está competindo vê: nada aparece na tela de quem joga. A barra fica discreta no canto inferior direito;
   - **torcida:** o eliminado que fica assistindo até o fim da partida ganha +1 🎟 (só quem jogou a rodada de verdade, então não dá para ganhar parado no lobby).
 - **Cartão de perfil:** os atalhos agora ficam numa fileira embaixo do cartão (🏆 ✨ 🎰 📋 👥), para caber em celular. O 👥 mostra o tamanho da Party.
-- **Telemetria:** `PartyCreated`, `PartyInvite`, `PartyJoined`, `PartyLeft` (motivo), `PartyMatch` (Party jogando junta), `PartyReplay` (de novo na partida seguinte), `PartyDeferred` (sem vaga), `Reaction`, `SpectatorSwitch` e `TicketsEarned` com a fonte `Spectator`.
+- **Telemetria:** `PartyCreated`, `PartyInvite`, `PartyJoined`, `PartyLeft` (motivo), `PartyMatch` (Party jogando junta), `PartyReplay` (de novo na partida seguinte), `PartyDeferred` (sem vaga), `Reaction`, `SpectatorSwitch` e a entrada de tickets `Spectator` na economia nativa.
 - **Código:** `PartyService`, `data/PartySelection`, `ReactionService` e `SocialConfig`. No cliente, `PartyController`, `PartyView`, `PartyInviteView`, `ReactionController`, `ReactionView` e `SpectatorController`.
 
 ### Desafios, retorno diário e conquistas secretas (Fase 4, entrega 4.3)
@@ -635,7 +654,7 @@ A galeria (20 × 90 studs) ganhou estações físicas. Cada uma tem um Proximity
 - **Perfil v5:** passa a guardar `daily`, `challenges`, `challengesCompleted` e `secrets`. A migração v4 → v5 é automática.
 - **Arquitetura:** o `PlayerDataService` ganhou `update(player, updater, saveNow)`, uma atualização atômica genérica do perfil (o `updater` não pode pausar).
   - O equipar do Puffdex, o giro da Puff Machine e as conquistas secretas passaram a viver nos seus próprios serviços, usando essa função.
-- **Telemetria:** `ChallengeAssigned`, `ChallengeCompleted`, `ChallengesOpened`, `DailyReturn` (sequência e recorde), `SecretAchievement` e `TicketsEarned` com as fontes `Daily`, `Challenge` e `Secret`.
+- **Telemetria:** `ChallengeAssigned`, `ChallengeCompleted`, `ChallengesOpened`, `DailyReturn` (sequência e recorde), `SecretAchievement` e as entradas de tickets `Daily`, `Challenge` e `Secret` na economia nativa.
 - **Código:** `DailyConfig`, `SecretCatalog`, `data/DailyRules`, `SecretAchievementService` e `PlayerDataService`. No cliente, `ChallengesController` e `ChallengesView`.
 
 ### Tickets e Puff Machine (Fase 4, entrega 4.2)
@@ -657,7 +676,7 @@ A galeria (20 × 90 studs) ganhou estações físicas. Cada uma tem um Proximity
   - Só gira com o perfil sendo salvo, só no lobby e com intervalo mínimo entre giros (`RewardConfig`).
 - **Revelação:** a cápsula gira pelas cores dos Puffs até a resposta chegar (mínimo de 1,8 s) e revela o Puff com a raridade e "NOVO!" ou "repetido, +2 🎟". O botão VER NO PUFFDEX leva direto ao Puff.
 - **Perfil v4:** passa a guardar `tickets`, `ticketsEarned`, `ticketsSpent`, `machinePulls` e `machinePity`. A migração v3 → v4 é automática.
-- **Telemetria:** `TicketsEarned` (por fonte, inclusive a devolução de repetidos), `TicketsSpent`, `PuffMachineOpened`, `PuffMachinePull` (Puff, raridade, novo ou repetido) e `PuffUnlocked` com origem `Machine`.
+- **Telemetria:** entradas e saídas de tickets na economia nativa (inclusive a devolução de repetidos), `PuffMachineOpened`, `PuffMachinePull` (Puff, raridade, novo ou repetido) e `PuffUnlocked` com origem `Machine`.
 - **Código:** `RewardConfig`, `data/RewardRules`, `PuffMachineService` e `PlayerDataService.machinePull`. No cliente, `PuffMachineController` e `PuffMachineView`.
 
 ### Puffdex e primeira coleção (Fase 4, entrega 4.1)

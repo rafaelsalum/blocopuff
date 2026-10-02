@@ -49,10 +49,12 @@ local DataStoreErrors = require(script.Parent.Parent.data.DataStoreErrors)
 local PuffInventory = require(script.Parent.Parent.data.PuffInventory)
 local RewardRules = require(script.Parent.Parent.data.RewardRules)
 local DailyRules = require(script.Parent.Parent.data.DailyRules)
+local OnboardingRules = require(script.Parent.Parent.data.OnboardingRules)
 local SecretCatalog = require(ReplicatedStorage.Shared.config.SecretCatalog)
 local ProgressionConfig = require(ReplicatedStorage.Shared.config.ProgressionConfig)
 local LevelCurve = require(ReplicatedStorage.Shared.modules.LevelCurve)
 local BotConfig = require(ReplicatedStorage.Shared.config.BotConfig)
+local RewardConfig = require(ReplicatedStorage.Shared.config.RewardConfig)
 local TelemetryService = require(script.Parent.TelemetryService)
 
 type Profile = ProfileSchema.Profile
@@ -394,12 +396,13 @@ local function refreshDay(entry: Entry): DailyReward?
 	if reward == nil then
 		return nil
 	end
+	local ticketsBefore = entry.profile.tickets
 	addTickets(entry, reward.tickets)
 	if not entry.canSave then
 		return nil
 	end
 	TelemetryService.lobbyEvent(entry.player, "DailyReturn", reward.streak, `Tickets{reward.tickets}`, `Best{daily.best}`)
-	TelemetryService.lobbyEvent(entry.player, "TicketsEarned", reward.tickets, "Daily")
+	TelemetryService.ticketsEarned(entry.player, ticketsBefore, entry.profile.tickets, "Daily")
 	return reward
 end
 
@@ -419,12 +422,13 @@ local function progressChallenges(entry: Entry, delta: RoundDelta, gainedXp: num
 	updated.challengesCompleted = profile.challengesCompleted + #completed
 	entry.profile = updated
 	entry.dirty = true
+	local ticketsBefore = entry.profile.tickets
 	addTickets(entry, tickets)
 	for _, id in ipairs(completed) do
 		TelemetryService.lobbyEvent(entry.player, "ChallengeCompleted", entry.profile.challengesCompleted, id)
 	end
 	if tickets > 0 then
-		TelemetryService.lobbyEvent(entry.player, "TicketsEarned", tickets, "Challenge")
+		TelemetryService.ticketsEarned(entry.player, ticketsBefore, entry.profile.tickets, "Challenge")
 	end
 	return if entry.canSave then completed else {}
 end
@@ -702,7 +706,8 @@ local function load(player: Player)
 	if canSave then
 		local days = math.max(0, math.floor((now() - entry.profile.createdAt) / 86400))
 		local bucket = if days >= 28 then "D28+" elseif days >= 7 then "D7+" elseif days >= 1 then "D1+" else "D0"
-		TelemetryService.lobbyEvent(player, "SessionStart", days, bucket)
+		-- Tipo da primeira partida: retenção de quem começou com bots x só humanos.
+		TelemetryService.lobbyEvent(player, "SessionStart", days, bucket, OnboardingRules.firstMatchLabel(entry.profile.firstMatchKind))
 	end
 	local newPuffs = grantPuffs(entry)
 	-- Retorno diário e desafios de hoje.
@@ -818,6 +823,7 @@ function PlayerDataService.applyRound(player: Player, roundKey: string, delta: R
 	local updated = ProfileSchema.withTickets(profile, tickets)
 	updated.botTicketDay = botTicketDay
 	updated.botTickets = botTickets
+	updated.firstMatchKind = OnboardingRules.firstMatchKind(profile.firstMatchKind, profile.stats.matches, clean.matches, roundXp.tickets ~= nil)
 	updated.stats = ProfileSchema.addStats(profile.stats, clean)
 	updated.appliedRounds = ProfileSchema.withAppliedRound(profile.appliedRounds, roundKey, ProfileConfig.AppliedRoundsKept)
 	updated.xp = newXp
@@ -836,8 +842,12 @@ function PlayerDataService.applyRound(player: Player, roundKey: string, delta: R
 	if newLevel > profile.level then
 		TelemetryService.event(player, "LevelUp", timestamp - profile.levelReachedAt, `Level{newLevel}`, `From{profile.level}`)
 	end
+	-- Saldo depois de cada linha (o teto da carteira vale a cada soma).
+	local balance = profile.tickets
 	for _, line in ipairs(ticketLines) do
-		TelemetryService.lobbyEvent(player, "TicketsEarned", line.tickets, line.source)
+		local before = balance
+		balance = math.min(RewardConfig.MaxTickets, balance + line.tickets)
+		TelemetryService.ticketsEarned(player, before, balance, line.source)
 	end
 
 	-- Dia do jogo (pode ter virado com o jogador online) e desafios.

@@ -414,12 +414,12 @@ local Barao: BaraoConfig = table.freeze({
 	-- enquanto o anterior ainda toca; o tom varia um pouco para não repetir.
 	BarkSoundIds = table.freeze({ "rbxassetid://124017572768108" }),
 	BarkPitch = NumberRange.new(0.94, 1.08),
-	FunnySoundIds = table.freeze({ "rbxasset://sounds/oof.ogg", "rbxasset://sounds/ouch.ogg", "rbxasset://sounds/swoosh.wav" }),
+	FunnySoundIds = table.freeze({ "rbxasset://sounds/oof.ogg", "rbxasset://sounds/ouch.ogg" }),
 	FootstepSoundId = "rbxasset://sounds/action_footsteps_plastic.mp3",
 	-- Batida grave, sem direção, tocada só para quem está sendo perseguido.
 	TensionSoundId = "rbxasset://sounds/action_jump_land.mp3",
 	-- Portinhola do túnel batendo quando ele entra ou sai.
-	DoorSoundId = "rbxasset://sounds/swoosh.wav",
+	DoorSoundId = "rbxasset://sounds/action_jump_land.mp3",
 })
 
 -- Tocas Seguras: protegem do Barão (não do Puffador) por MaxStay segundos;

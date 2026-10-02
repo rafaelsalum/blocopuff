@@ -36,7 +36,7 @@ local SERVICE_NAME = "VaultService"
 local LOCKED_FEEDBACK_COOLDOWN = 1.5
 local HOLDER_GLOW = Color3.fromRGB(255, 200, 70)
 local SOUND_LOCKED = "rbxasset://sounds/clickfast.wav"
-local SOUND_OPEN = "rbxasset://sounds/swoosh.wav"
+local SOUND_OPEN = "rbxasset://sounds/action_get_up.mp3"
 local SPIN_SPEED = 1.6
 
 local VaultService = {}
