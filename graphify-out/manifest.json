@@ -1,7 +1,7 @@
 {
   "default.project.json": {
-    "mtime": 1790460591.7503128,
-    "ast_hash": "a2a6e75ebae5434acf926f2474e97fee",
+    "mtime": 1791034577.3932025,
+    "ast_hash": "d0f3f25dcbab52035edd7d07d5fb511b",
     "semantic_hash": ""
   },
   "src/client/controllers/HudController.luau": {
@@ -20,8 +20,8 @@
     "semantic_hash": ""
   },
   "src/client/init.client.luau": {
-    "mtime": 1791033245.6025434,
-    "ast_hash": "11d845965d15d03c184e6013ac7a3850",
+    "mtime": 1791034126.4187827,
+    "ast_hash": "ea30b0e9f00fcf035b404f2a2bfdfb9d",
     "semantic_hash": ""
   },
   "src/client/ui/CrosshairView.luau": {
@@ -45,8 +45,8 @@
     "semantic_hash": ""
   },
   "src/server/init.server.luau": {
-    "mtime": 1790962738.6574597,
-    "ast_hash": "6147baad8c42c24412e05e5ed7cccfc4",
+    "mtime": 1791034025.050334,
+    "ast_hash": "7fa9772d2c50414b02a9186b01677104",
     "semantic_hash": ""
   },
   "src/server/services/ArenaService.luau": {
@@ -90,8 +90,8 @@
     "semantic_hash": ""
   },
   "src/shared/modules/PuffadorConstants.luau": {
-    "mtime": 1790960273.8279688,
-    "ast_hash": "07659094cdaffd1c52afd10971aaf68c",
+    "mtime": 1791034025.051415,
+    "ast_hash": "ac3e7303e3d32e06c2658ccbaea8a7f4",
     "semantic_hash": ""
   },
   "src/shared/modules/RoundMessages.luau": {
@@ -110,8 +110,8 @@
     "semantic_hash": "35e80f4312710a8634558c8ff1d264b2"
   },
   "src/shared/types/StateAttributeNames.luau": {
-    "mtime": 1790953045.6536272,
-    "ast_hash": "3979ca301f502750501edb65f90ae1a6",
+    "mtime": 1791034025.0515807,
+    "ast_hash": "6f143b69543b3643450973258f8b22d5",
     "semantic_hash": ""
   },
   "AGENTS.md": {
@@ -125,8 +125,8 @@
     "semantic_hash": ""
   },
   "README.md": {
-    "mtime": 1790962886.4758327,
-    "ast_hash": "caa74ac947fedd3afde78dcac0a68fc8",
+    "mtime": 1791034142.0269797,
+    "ast_hash": "6fad70b36b95c0996e2aff89a8df58c6",
     "semantic_hash": ""
   },
   "src/client/controllers/CombatCameraController.luau": {
@@ -180,8 +180,8 @@
     "semantic_hash": ""
   },
   "src/client/ui/AdminPanelView.luau": {
-    "mtime": 1791033473.3310783,
-    "ast_hash": "c8da0837d6abc7f87fe8db4373160b73",
+    "mtime": 1791034577.3892567,
+    "ast_hash": "f38a4933858b48c8e8895f17dff7872e",
     "semantic_hash": ""
   },
   "src/server/config/AdminConfig.luau": {
@@ -350,8 +350,8 @@
     "semantic_hash": ""
   },
   "src/server/services/TelemetryService.luau": {
-    "mtime": 1790962866.9417026,
-    "ast_hash": "c3a95c746c10ebab53cab834dbd9d0c6",
+    "mtime": 1791034025.050916,
+    "ast_hash": "d97e60623489d035b1698e440ddf07eb",
     "semantic_hash": ""
   },
   "src/client/controllers/SecretPassageController.luau": {
@@ -1075,13 +1075,13 @@
     "semantic_hash": ""
   },
   "src/server/services/BotBrainService.luau": {
-    "mtime": 1790959988.2541952,
-    "ast_hash": "896d56c7369ac04432eba270ad70826c",
+    "mtime": 1791034126.4190311,
+    "ast_hash": "372810f9f778eb0e49753f6171c1e439",
     "semantic_hash": ""
   },
   "src/server/services/BotFillService.luau": {
-    "mtime": 1790959988.2537928,
-    "ast_hash": "f5cbeed220fcd48d2f3c8259b09d2ea2",
+    "mtime": 1791034025.0507457,
+    "ast_hash": "f00e8cce433b8c7dbd7399e951c0e86a",
     "semantic_hash": ""
   },
   "src/server/services/CombatantRegistry.luau": {
@@ -1100,13 +1100,13 @@
     "semantic_hash": ""
   },
   "src/shared/config/BotConfig.luau": {
-    "mtime": 1790953912.5666802,
-    "ast_hash": "ced21312515b545f8c171c390d15a178",
+    "mtime": 1791034025.0510743,
+    "ast_hash": "01e3d6fbc6b15da9bd7d431deaf155d1",
     "semantic_hash": ""
   },
   "src/shared/modules/CharacterImpulse.luau": {
-    "mtime": 1790952983.676196,
-    "ast_hash": "8a3ae22f66577af52156df5beab0e7e1",
+    "mtime": 1791034025.051266,
+    "ast_hash": "94257505026577b8c6f8fcced2d38bfe",
     "semantic_hash": ""
   },
   "tests/BotFillRules.spec.luau": {
@@ -1172,6 +1172,41 @@
   "tests/OnboardingRules.spec.luau": {
     "mtime": 1790962623.565836,
     "ast_hash": "1d84e3bbb52ba1f0509e3a44a55ef1ed",
+    "semantic_hash": ""
+  },
+  "src/client/controllers/DashController.luau": {
+    "mtime": 1791034126.418644,
+    "ast_hash": "5c481af8b82e4556825a2f8203f934eb",
+    "semantic_hash": ""
+  },
+  "src/client/effects/DashFx.luau": {
+    "mtime": 1791034025.0711215,
+    "ast_hash": "2ee6385145e3316b556f9baa9381eb3a",
+    "semantic_hash": ""
+  },
+  "src/client/ui/DashButtonView.luau": {
+    "mtime": 1791034025.071281,
+    "ast_hash": "b190eafc38979f86dbb14734a0cb43a1",
+    "semantic_hash": ""
+  },
+  "src/server/services/DashService.luau": {
+    "mtime": 1791034025.0714214,
+    "ast_hash": "5b8fd4612c9da394af5bade077853e71",
+    "semantic_hash": ""
+  },
+  "src/shared/config/DashConfig.luau": {
+    "mtime": 1791034126.418908,
+    "ast_hash": "833c7dd643df4f80d103c12908d641a4",
+    "semantic_hash": ""
+  },
+  "src/shared/modules/DashRules.luau": {
+    "mtime": 1791034025.0716438,
+    "ast_hash": "b595ceb6f3db054a7eed8df29a9aba2e",
+    "semantic_hash": ""
+  },
+  "tests/DashRules.spec.luau": {
+    "mtime": 1791034025.0717394,
+    "ast_hash": "19f6fc195ab0662a4f217e40043fa700",
     "semantic_hash": ""
   }
 }
