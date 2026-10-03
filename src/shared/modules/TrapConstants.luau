@@ -5,7 +5,7 @@
 -- só desenha a partir deles.
 
 export type TrapState = "Ready" | "Warning" | "Recharging" | "Spent"
-export type TrapKind = "Window" | "Rug" | "Chandelier"
+export type TrapKind = "Window" | "Rug" | "Chandelier" | "Fireplace"
 
 local TrapConstants = table.freeze({
 	Tag = "CasaraoTrap",
@@ -40,6 +40,13 @@ local TrapConstants = table.freeze({
 	ChandelierAnchorAttribute = "ChandelierAnchor",
 	ChandelierImpactAttribute = "ChandelierImpact",
 
+	-- Lareira: centro da nuvem de fuligem (no chão, em frente à boca).
+	FireplaceCloudAttribute = "FireplaceCloud",
+	-- Corpo de quem espirrou na fuligem: fica com a tag até o fim da rodada
+	-- (rosto sujo) e o atributo marca cada espirro (Workspace:GetServerTimeNow).
+	SootTag = "TrapSooty",
+	SneezeAtAttribute = "TrapSneezeAt",
+
 	Ready = "Ready" :: TrapState,
 	Warning = "Warning" :: TrapState,
 	Recharging = "Recharging" :: TrapState,
@@ -48,6 +55,7 @@ local TrapConstants = table.freeze({
 	Window = "Window" :: TrapKind,
 	Rug = "Rug" :: TrapKind,
 	Chandelier = "Chandelier" :: TrapKind,
+	Fireplace = "Fireplace" :: TrapKind,
 })
 
 return TrapConstants

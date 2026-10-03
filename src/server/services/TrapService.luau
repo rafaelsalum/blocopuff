@@ -29,6 +29,7 @@ local TelemetryService = require(script.Parent.TelemetryService)
 local CombatantRegistry = require(script.Parent.CombatantRegistry)
 local ArenaService = require(script.Parent.ArenaService)
 local ChandelierTrap = require(script.Parent.traps.ChandelierTrap)
+local FireplaceTrap = require(script.Parent.traps.FireplaceTrap)
 local RugTrap = require(script.Parent.traps.RugTrap)
 local WindowTrap = require(script.Parent.traps.WindowTrap)
 
@@ -48,6 +49,8 @@ type Behavior = {
 	-- A peça-alvo da armadilha presa a `block`, se houver (ela dispara
 	-- quando o bloco cai).
 	dependentOn: ((block: Part) -> BasePart?)?,
+	-- Limpa o que o tipo guarda por rodada (rostos sujos da lareira).
+	roundReset: (() -> ())?,
 }
 
 type Trap = {
@@ -74,6 +77,7 @@ local BEHAVIORS: { [string]: Behavior } = {
 	[TrapConstants.Window] = WindowTrap,
 	[TrapConstants.Rug] = RugTrap,
 	[TrapConstants.Chandelier] = ChandelierTrap,
+	[TrapConstants.Fireplace] = FireplaceTrap,
 }
 
 local TrapService = {}
@@ -109,6 +113,15 @@ local function resetAll()
 		trap.uses = trap.behavior.rules.UsesPerRound
 		trap.supportLost = false
 		makeReady(trap)
+	end
+	for kind, behavior in pairs(BEHAVIORS) do
+		local reset = behavior.roundReset
+		if reset ~= nil then
+			local ok, failure = pcall(reset)
+			if not ok then
+				warn(`[BlocoPuff] Trap {kind} round reset failed: {failure}`)
+			end
+		end
 	end
 end
 
@@ -272,8 +285,8 @@ function TrapService.refresh()
 	end
 end
 
--- Monta as armadilhas que não fazem parte do prédio (tapetes, depois da
--- arena) e registra todas as que têm a tag CasaraoTrap (as janelas vêm do
+-- Monta as armadilhas que não fazem parte do prédio (tapetes, lustres e
+-- lareira, depois da arena) e registra todas as que têm a tag CasaraoTrap (as janelas vêm do
 -- BuildingDecor).
 function TrapService.start(worldRoot: Instance)
 	if started then
@@ -286,6 +299,7 @@ function TrapService.start(worldRoot: Instance)
 	trapsFolder = folder
 	RugTrap.build(folder)
 	ChandelierTrap.build(folder)
+	FireplaceTrap.build(folder)
 	if not listeningToBlocks then
 		-- A arena não tem como remover o aviso; ele confere `active`.
 		listeningToBlocks = true
@@ -310,6 +324,7 @@ function TrapService.stop()
 	table.clear(traps)
 	RugTrap.clear()
 	ChandelierTrap.clear()
+	FireplaceTrap.clear()
 	if trapsFolder ~= nil then
 		trapsFolder:Destroy()
 		trapsFolder = nil

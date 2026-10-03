@@ -12,7 +12,9 @@ local Workspace = game:GetService("Workspace")
 
 local TrapConstants = require(ReplicatedStorage.Shared.modules.TrapConstants)
 local ChandelierTrapFx = require(script.Parent.Parent.effects.ChandelierTrapFx)
+local FireplaceTrapFx = require(script.Parent.Parent.effects.FireplaceTrapFx)
 local RugTrapFx = require(script.Parent.Parent.effects.RugTrapFx)
+local SootFx = require(script.Parent.Parent.effects.SootFx)
 local WindowTrapFx = require(script.Parent.Parent.effects.WindowTrapFx)
 
 type Handle = WindowTrapFx.Handle
@@ -46,6 +48,8 @@ local function track(instance: Instance)
 		handles[instance] = RugTrapFx.new(instance, getEffectsFolder())
 	elseif kind == TrapConstants.Chandelier then
 		handles[instance] = ChandelierTrapFx.new(instance, getEffectsFolder())
+	elseif kind == TrapConstants.Fireplace then
+		handles[instance] = FireplaceTrapFx.new(instance, getEffectsFolder())
 	end
 end
 
@@ -78,6 +82,7 @@ function TrapVisualController.start()
 		track(instance)
 	end
 	RunService.RenderStepped:Connect(step)
+	SootFx.start(getEffectsFolder())
 end
 
 return table.freeze(TrapVisualController)

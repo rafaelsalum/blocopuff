@@ -11,6 +11,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Workspace = game:GetService("Workspace")
 
 local GameConfig = require(ReplicatedStorage.Shared.config.GameConfig)
+local TrapConfig = require(ReplicatedStorage.Shared.config.TrapConfig)
 local BuildingLayout = require(ReplicatedStorage.Shared.modules.BuildingLayout)
 local BuildingDecor = require(script.Parent.BuildingDecor)
 local MansionConfig = require(ReplicatedStorage.Shared.config.MansionConfig)
@@ -316,6 +317,16 @@ local function getStoryGaps(arena: ArenaConfig, building: BuildingConfig, segmen
 	return gaps
 end
 
+-- Trechos de parede ocupados por armadilhas montadas à parte (a Lareira de
+-- Fuligem, montada pelo TrapService).
+local function getReservedSpots(segmentName: string, floorIndex: number): { BuildingDecor.ReservedSpot }?
+	local fireplace = TrapConfig.Fireplace
+	if segmentName == fireplace.Wall and floorIndex == fireplace.Floor and fireplace.Floor < GameConfig.Arena.FloorCount then
+		return { { offset = fireplace.Offset, width = fireplace.Width } }
+	end
+	return nil
+end
+
 -- Poço como porão de tijolos, um andar decorado por piso da arena e uma
 -- faixa de madeira na altura de cada laje, reforçando a ideia de prédio.
 local function decorateArenaWalls(parent: Instance, arena: ArenaConfig, building: BuildingConfig, segments: { WallSegment }, rng: Random)
@@ -357,6 +368,7 @@ local function decorateArenaWalls(parent: Instance, arena: ArenaConfig, building
 				windows = isTop and isOuterWall,
 				door = not isTop and isOuterWall,
 				gaps = getStoryGaps(arena, building, segment.name, floorIndex),
+				reserved = getReservedSpots(segment.name, floorIndex),
 				paintingFloor = floorIndex,
 				lampRange = if isTop then ARENA_LAMP_RANGE else LOWER_LAMP_RANGE,
 				lampBrightness = if isTop then ARENA_LAMP_BRIGHTNESS else LOWER_LAMP_BRIGHTNESS,

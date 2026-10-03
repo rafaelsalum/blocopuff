@@ -39,6 +39,14 @@ export type StoryOptions = {
 	-- Andar dos quadros deste trecho: quadros com andar podem ser atingidos
 	-- por tiros (um deles revela a passagem secreta do andar).
 	paintingFloor: number?,
+	-- Trechos ocupados por outra peça (a Lareira de Fuligem): nenhum
+	-- detalhe (porta, arandela, quadro) fica em cima deles.
+	reserved: { ReservedSpot }?,
+}
+
+export type ReservedSpot = {
+	offset: number,
+	width: number,
 }
 
 -- `frame`: vão com moldura visível (cofre). Sem moldura, o vão fica escondido
@@ -449,6 +457,12 @@ function BuildingDecor.decorateStory(
 		for _, gap in ipairs(gaps) do
 			local clearance = GAP_CLEARANCE + (gapWidth(gap) - DOOR_SIZE.X) / 2
 			if math.abs(offset - gap.offset) < clearance then
+				return true
+			end
+		end
+		for _, spot in ipairs(options.reserved or {}) do
+			local clearance = GAP_CLEARANCE + (spot.width - DOOR_SIZE.X) / 2
+			if math.abs(offset - spot.offset) < clearance then
 				return true
 			end
 		end

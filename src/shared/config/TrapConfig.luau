@@ -103,10 +103,41 @@ export type ChandelierConfig = TrapRules & {
 	CrashSoundId: string,
 }
 
+-- Lareira de Fuligem (5.5): fica numa parede externa do térreo, no lugar
+-- de um detalhe da decoração (a parede tem de ser "West", "North" ou
+-- "South"; o centro da oeste é o cofre).
+export type FireplaceWall = "West" | "North" | "South"
+
+export type FireplaceConfig = TrapRules & {
+	Floor: number,
+	Wall: FireplaceWall,
+	-- Posição ao longo da parede (studs a partir do centro dela) e largura
+	-- total da lareira (a decoração da parede deixa esse trecho livre).
+	Offset: number,
+	Width: number,
+	-- Nuvem de fuligem: centro a CloudOffset studs da parede, raio, altura
+	-- e quanto tempo fica.
+	CloudOffset: number,
+	CloudRadius: number,
+	CloudHeight: number,
+	CloudDuration: number,
+	-- Espirro: pulinho para longe do centro da nuvem (múltiplo do empurrão
+	-- do disparo), no máximo um a cada SneezeCooldown por jogador.
+	SneezeMultiplier: number,
+	SneezeLift: number,
+	SneezeCooldown: number,
+	-- Tela embaçada de quem espirrou (s).
+	BlurTime: number,
+	CoughSoundId: string,
+	PuffSoundId: string,
+	SneezeSoundId: string,
+}
+
 export type TrapConfig = {
 	Window: WindowConfig,
 	Rug: RugConfig,
 	Chandelier: ChandelierConfig,
+	Fireplace: FireplaceConfig,
 }
 
 local Window: WindowConfig = table.freeze({
@@ -191,10 +222,34 @@ local Chandelier: ChandelierConfig = table.freeze({
 	CrashSoundId = "rbxasset://sounds/action_jump_land.mp3",
 })
 
+local Fireplace: FireplaceConfig = table.freeze({
+	MinDistance = 15,
+	WarningTime = 0.6,
+	RechargeTime = 18,
+	UsesPerRound = 4,
+	Floor = 1,
+	-- No centro da parede sul, no lugar da porta falsa.
+	Wall = "South" :: FireplaceWall,
+	Offset = 0,
+	Width = 8.4,
+	CloudOffset = 4,
+	CloudRadius = 10,
+	CloudHeight = 8,
+	CloudDuration = 4,
+	SneezeMultiplier = 0.35,
+	SneezeLift = 0.5,
+	SneezeCooldown = 1.5,
+	BlurTime = 1.5,
+	CoughSoundId = "rbxasset://sounds/action_jump_land.mp3",
+	PuffSoundId = "rbxasset://sounds/action_get_up.mp3",
+	SneezeSoundId = "rbxasset://sounds/ouch.ogg",
+})
+
 local TrapConfig: TrapConfig = table.freeze({
 	Window = Window,
 	Rug = Rug,
 	Chandelier = Chandelier,
+	Fireplace = Fireplace,
 })
 
 return TrapConfig

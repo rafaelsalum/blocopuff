@@ -125,8 +125,8 @@
     "semantic_hash": ""
   },
   "README.md": {
-    "mtime": 1791046793.3014421,
-    "ast_hash": "a3846a8d143a00d6a1f20925781db0fc",
+    "mtime": 1791047979.9056854,
+    "ast_hash": "c402e04b6ef67add61985afe238b1ee8",
     "semantic_hash": ""
   },
   "src/client/controllers/CombatCameraController.luau": {
@@ -200,8 +200,8 @@
     "semantic_hash": ""
   },
   "src/server/services/BuildingService.luau": {
-    "mtime": 1790641589.5360644,
-    "ast_hash": "b7c61d72b28351ab77f936f1bb4361f9",
+    "mtime": 1791047969.235544,
+    "ast_hash": "d66929884ef1653f936c2f4de4bf9829",
     "semantic_hash": ""
   },
   "src/shared/modules/BuildingLayout.luau": {
@@ -210,8 +210,8 @@
     "semantic_hash": ""
   },
   "src/server/services/BuildingDecor.luau": {
-    "mtime": 1790911699.0759027,
-    "ast_hash": "e289dd5e3ac81e0cedeb6c8162c4807e",
+    "mtime": 1791047615.8488078,
+    "ast_hash": "24ca4d18de1eef25e3e99a3a9070fb49",
     "semantic_hash": ""
   },
   "src/client/controllers/BlockCollapseController.luau": {
@@ -1005,8 +1005,8 @@
     "semantic_hash": ""
   },
   "src/client/controllers/TrapVisualController.luau": {
-    "mtime": 1791046764.6327965,
-    "ast_hash": "9bb81ad36f721a61ee7339a14218d41a",
+    "mtime": 1791047748.0697742,
+    "ast_hash": "f7beb16ad5afb83574a7ff088df1d109",
     "semantic_hash": ""
   },
   "src/client/effects/WindowTrapFx.luau": {
@@ -1015,8 +1015,8 @@
     "semantic_hash": ""
   },
   "src/server/services/TrapService.luau": {
-    "mtime": 1791047101.5405395,
-    "ast_hash": "68e2aa32b704fbee54a9f13f26704446",
+    "mtime": 1791047683.542662,
+    "ast_hash": "8f1bb3d0d906d608bcd44e679abb7b6f",
     "semantic_hash": ""
   },
   "src/server/services/traps/WindowTrap.luau": {
@@ -1025,13 +1025,13 @@
     "semantic_hash": ""
   },
   "src/shared/config/TrapConfig.luau": {
-    "mtime": 1791046630.8794138,
-    "ast_hash": "c0b0eb825ebad7f389f2b5e85a2c79fa",
+    "mtime": 1791047627.48839,
+    "ast_hash": "fec5459ee40af5b374a35ac1439932aa",
     "semantic_hash": ""
   },
   "src/shared/modules/TrapConstants.luau": {
-    "mtime": 1791046630.8798578,
-    "ast_hash": "54cacfa5512d7fe50c6f7da018ecda93",
+    "mtime": 1791047615.8484137,
+    "ast_hash": "ba2266e518eb39ef6b4c6ec9f62e6c10",
     "semantic_hash": ""
   },
   "src/client/effects/RugTrapFx.luau": {
@@ -1227,6 +1227,21 @@
   "src/server/services/traps/TrapBlocks.luau": {
     "mtime": 1791046616.6953802,
     "ast_hash": "445e8001106a7c46624d3c7ecf6dff3a",
+    "semantic_hash": ""
+  },
+  "src/client/effects/FireplaceTrapFx.luau": {
+    "mtime": 1791047969.2358215,
+    "ast_hash": "26eb8d2d950edf42bba6c2890c33b163",
+    "semantic_hash": ""
+  },
+  "src/client/effects/SootFx.luau": {
+    "mtime": 1791047969.236098,
+    "ast_hash": "17074a3e78c26c63833180d3606da13e",
+    "semantic_hash": ""
+  },
+  "src/server/services/traps/FireplaceTrap.luau": {
+    "mtime": 1791047969.235283,
+    "ast_hash": "6b23602cd5c4af21716dc19715eef2fb",
     "semantic_hash": ""
   }
 }

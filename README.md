@@ -272,6 +272,19 @@ Seção **TESTES DA PARTIDA** no painel admin. Vale só para o servidor atual e 
 - **Testar de verdade:** só com o jogo publicado. O Roblox só preenche quem convidou em convites reais, e o Studio pode não ter acesso ao DataStore e ao MessagingService. Os banners de recompensa da página do convite são configurados no Creator Hub (Engagement > Referral Rewards), com o jogo publicado há pelo menos 1 dia.
 - **Testes:** `lune run tests/ReferralRules.spec`.
 
+### Lareira de Fuligem (Fase 5, entrega 5.5)
+
+- **Onde:** no centro da parede sul do térreo, no lugar da porta falsa (`traps/FireplaceTrap`). A parede, a posição e a largura ficam em `TrapConfig.Fireplace`. A decoração da parede deixa esse trecho livre (`StoryOptions.reserved`). Tem lareira de tijolos, consolo de madeira, chaminé até o teto, lenha e brasas acesas.
+- **Alvo:** a boca da lareira, com tiro de pelo menos 15 studs. De perto, ela só solta umas brasas e um fiapo de fumaça.
+- **Aviso (0,6 s):** a lareira tosse brasas e começa a sair fumaça.
+- **Nuvem de fuligem:** fica 4 s em frente à lareira, com 10 studs de raio, só do lado de dentro da parede (atrás dela passa o corredor secreto).
+  - Quem entra na nuvem espirra: aparece "ATCHIM!" sobre a cabeça, com um pulinho para longe do centro (0,35× o empurrão do disparo). Cada pessoa espirra no máximo uma vez a cada 1,5 s.
+  - Quem espirra fica com a tela levemente embaçada por 1,5 s, sem piscar, e com o rosto sujo de fuligem até o fim da rodada.
+  - Quem atirou nunca espirra, e quedas depois de um espirro contam como derrubada dele.
+- **Recarga:** 18 s, com as brasas apagadas. São 4 usos por rodada.
+- **Cliente:** `effects/FireplaceTrapFx` desenha as brasas, a fumaça e a nuvem. `effects/SootFx` desenha o rosto sujo, o "ATCHIM!" e a tela embaçada, a partir da tag `TrapSooty` e do atributo `TrapSneezeAt` no corpo, que o servidor limpa no começo e no fim da rodada.
+- **Telemetria:** `TrapAffected` conta só quem espirrou no primeiro instante da nuvem. A contagem completa de vítimas fica para a 5.8.
+
 ### Lustre Despencando (Fase 5, entrega 5.4)
 
 - **Onde:** dois lustres sobre o térreo (`traps/ChandelierTrap`), longe dos tapetes. Cada um fica pendurado embaixo de um bloco do andar de cima (o **bloco de apoio**), com florão no teto, corrente e o lustre uns 13 studs acima do chão, aceso. As posições ficam em `TrapConfig.Chandelier.Spots`, em células da grade.
