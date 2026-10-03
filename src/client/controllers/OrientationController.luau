@@ -3,8 +3,9 @@
 -- Celular: o Bloco Puff só se joga deitado. Em pé, a arena e os controles
 -- ficam apertados demais.
 --
---   * Pede LandscapeLeft ao Roblox (também em StarterGui, no projeto) e pede
---     de novo se algo mudar a orientação.
+--   * Pede LandscapeRight ao Roblox, o lado natural de tombar o celular
+--     (também em StarterGui, no projeto), e pede de novo se algo mudar a
+--     orientação.
 --   * Alguns aparelhos (relatado no fórum do Roblox em iPhones) ignoram o
 --     pedido. Por isso, sempre que a tela de um aparelho de toque estiver em
 --     pé (mais alta que larga), uma tela cheia "Gire o celular" cobre o jogo
@@ -18,7 +19,7 @@ local Workspace = game:GetService("Workspace")
 
 local UiTheme = require(script.Parent.Parent.ui.UiTheme)
 
-local REQUESTED = Enum.ScreenOrientation.LandscapeLeft
+local REQUESTED = Enum.ScreenOrientation.LandscapeRight
 local GUI_NAME = "BlocoPuffRotateDevice"
 local WAIT_TIMEOUT = 15
 

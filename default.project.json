@@ -20,7 +20,7 @@
     "StarterGui": {
       "$className": "StarterGui",
       "$properties": {
-        "ScreenOrientation": "LandscapeLeft"
+        "ScreenOrientation": "LandscapeRight"
       }
     },
     "ReplicatedStorage": {

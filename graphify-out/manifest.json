@@ -1,7 +1,7 @@
 {
   "default.project.json": {
-    "mtime": 1791034577.3932025,
-    "ast_hash": "d0f3f25dcbab52035edd7d07d5fb511b",
+    "mtime": 1791035403.8757575,
+    "ast_hash": "8918190a7fc9b7f6695701e51ba4081b",
     "semantic_hash": ""
   },
   "src/client/controllers/HudController.luau": {
@@ -20,8 +20,8 @@
     "semantic_hash": ""
   },
   "src/client/init.client.luau": {
-    "mtime": 1791034126.4187827,
-    "ast_hash": "ea30b0e9f00fcf035b404f2a2bfdfb9d",
+    "mtime": 1791035414.9833665,
+    "ast_hash": "8f901a58c9ed56846d2db28c301de19c",
     "semantic_hash": ""
   },
   "src/client/ui/CrosshairView.luau": {
@@ -1207,6 +1207,11 @@
   "tests/DashRules.spec.luau": {
     "mtime": 1791034025.0717394,
     "ast_hash": "19f6fc195ab0662a4f217e40043fa700",
+    "semantic_hash": ""
+  },
+  "src/client/controllers/OrientationController.luau": {
+    "mtime": 1791035403.6229837,
+    "ast_hash": "c8308d98f11fbd6750a349a6c6ff5f8a",
     "semantic_hash": ""
   }
 }
