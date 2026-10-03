@@ -312,7 +312,7 @@ Escopo em `docs/FASE_5_PARTIDA_VIVA_CASARAO_REAGE.md`.
 
 O projeto possui um painel administrativo próprio, inspirado no fluxo do AdminPanel+, mas implementado integralmente nos arquivos do Rojo. O pacote original da Toolbox não é executado nem incluído no jogo. O acesso inicial pertence somente ao User ID `4328593410`, configurado em `src/server/config/AdminConfig.luau`; qualquer administrador adicional deve ser incluído explicitamente nesse arquivo.
 
-O botão `PAINEL ADMIN` aparece apenas depois que o servidor confirma a autorização. Pelo painel é possível enviar avisos filtrados, expulsar jogadores do servidor atual e aplicar ou remover banimentos persistentes por User ID. Todas as solicitações passam por autenticação e validação no servidor, possuem limite de frequência e impedem ações contra contas administrativas protegidas. Avisos e banimentos são sincronizados entre servidores com `MessagingService`; os bans usam o DataStore `BlocoPuffAdminBansV1`.
+O botão do painel (🛡️ pequeno, na barra do topo ao lado dos botões do Roblox) aparece apenas depois que o servidor confirma a autorização. O painel cresce com a tela, até 1,6×, para facilitar o uso. Pelo painel é possível enviar avisos filtrados, expulsar jogadores do servidor atual e aplicar ou remover banimentos persistentes por User ID. Todas as solicitações passam por autenticação e validação no servidor, possuem limite de frequência e impedem ações contra contas administrativas protegidas. Avisos e banimentos são sincronizados entre servidores com `MessagingService`; os bans usam o DataStore `BlocoPuffAdminBansV1`.
 
 Para testar persistência e sincronização no Studio, a experiência precisa estar publicada e com **Enable Studio Access to API Services** habilitado. Sem esse acesso, o restante do jogo continua funcionando e o painel informa quando uma operação persistente ou global não está disponível. O atalho `F2` abre ou fecha o painel no computador; em toque e gamepad, use o botão visível e os controles selecionáveis da interface.
 
@@ -362,6 +362,11 @@ Direção de produto em `docs/GAME_DESIGN.md`; escopo da fase em `docs/FASE_1_CO
 - **Segurar para atirar:** o botão PUFF (toque), o clique do mouse e o gatilho direito (R2/RT) disparam continuamente enquanto estiverem segurados, respeitando a cadência (`GameConfig.Puffador.FireCooldown`, revalidada no servidor).
 - **Celular:** tocar na tela para girar a câmera não dispara mais; o disparo vem só do botão PUFF. O botão fica à esquerda e um pouco acima do botão de pulo nativo do Roblox e se reposiciona conforme o tamanho da tela.
 - **Controle:** R2/RT atira e o analógico direito gira a câmera (padrão do Roblox); a dica de controle mostra o comando certo para cada dispositivo.
+- **Impulso:** tecla F, botão B ou o botão » acima do pulo no celular (ver a seção Impulso).
+- **Tela deitada obrigatória no celular** (`OrientationController`):
+  - O jogo pede `LandscapeRight`, o lado natural de tombar o celular, no `StarterGui` (`default.project.json`) e no `PlayerGui` antes de carregar o resto. Pede de novo se algo mudar a orientação.
+  - Como alguns aparelhos ignoram o pedido, um aparelho de toque com a tela em pé recebe uma tela cheia "Gire o celular" que bloqueia o jogo até ser deitado.
+  - O Output registra a orientação pedida e a atual (`Screen orientation`).
 - **Assistência de mira:** não foi adicionada. O game design só a prevê se o playtest mostrar necessidade.
 
 ### Telemetria (Fase 1, entrega 1.4)

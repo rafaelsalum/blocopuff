@@ -1,7 +1,7 @@
 {
   "default.project.json": {
-    "mtime": 1791035403.8757575,
-    "ast_hash": "8918190a7fc9b7f6695701e51ba4081b",
+    "mtime": 1791035541.4198492,
+    "ast_hash": "7d952a0aaed33b1d100df25639799c4e",
     "semantic_hash": ""
   },
   "src/client/controllers/HudController.luau": {
@@ -1210,8 +1210,8 @@
     "semantic_hash": ""
   },
   "src/client/controllers/OrientationController.luau": {
-    "mtime": 1791035403.6229837,
-    "ast_hash": "c8308d98f11fbd6750a349a6c6ff5f8a",
+    "mtime": 1791035549.664603,
+    "ast_hash": "b1419d7d2ba0c2698069f04353366a20",
     "semantic_hash": ""
   }
 }

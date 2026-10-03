@@ -337,7 +337,26 @@ A referência de qualidade são shooters mobile com:
 - polegar direito para câmera/mira;
 - botão principal de Puff;
 - botão de pulo bem posicionado;
+- botão de impulso logo acima do pulo, no mesmo visual do botão nativo;
 - controles contextuais adicionais quando necessário.
+
+No celular o jogo é **sempre jogado deitado** (paisagem). Em pé, a arena e os controles ficam apertados demais. Se o aparelho for mantido em pé, o jogo pede para girá-lo e não deixa jogar.
+
+### Impulso
+
+Uma arrancada curta (cerca de 11 studs) para onde o jogador está andando; parado, para a frente. Serve para:
+
+- escapar de bloco piscando e de armadilha no último segundo;
+- atravessar buracos maiores que o pulo alcança, combinando pulo e impulso;
+- chegar perto ou fugir de quem está atirando.
+
+Regras:
+
+- um impulso a cada 3 s;
+- no ar, um por pulo (volta ao tocar o chão);
+- não funciona durante um empurrão nem no escorregão do tapete, então não serve para anular um empurrão no meio;
+- comandos: botão acima do pulo (celular), tecla F (computador), botão B (controle);
+- os RoboPuffs Normal e Esperto também usam, para sair do perigo.
 
 Isso é referência de **princípios de usabilidade**, não cópia de interface, assets ou identidade de terceiros.
 
