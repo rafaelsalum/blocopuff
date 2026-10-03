@@ -50,8 +50,8 @@
     "semantic_hash": ""
   },
   "src/server/services/ArenaService.luau": {
-    "mtime": 1790952318.7511172,
-    "ast_hash": "8857fc682ebac05d51ec4df2fe0b4bbe",
+    "mtime": 1791046586.7550461,
+    "ast_hash": "89823574142f92ba9a92733ceab7c409",
     "semantic_hash": ""
   },
   "src/server/services/EliminationService.luau": {
@@ -80,8 +80,8 @@
     "semantic_hash": ""
   },
   "src/server/services/RoundService.luau": {
-    "mtime": 1790960530.0465422,
-    "ast_hash": "0d32029a8fcd12abd6bb64938aaed3a6",
+    "mtime": 1791047017.996251,
+    "ast_hash": "aafff5d0bfae649c5b4c949d0f76aa52",
     "semantic_hash": ""
   },
   "src/shared/config/GameConfig.luau": {
@@ -125,8 +125,8 @@
     "semantic_hash": ""
   },
   "README.md": {
-    "mtime": 1791034142.0269797,
-    "ast_hash": "6fad70b36b95c0996e2aff89a8df58c6",
+    "mtime": 1791046793.3014421,
+    "ast_hash": "a3846a8d143a00d6a1f20925781db0fc",
     "semantic_hash": ""
   },
   "src/client/controllers/CombatCameraController.luau": {
@@ -235,8 +235,8 @@
     "semantic_hash": ""
   },
   "src/server/services/PhotoModeService.luau": {
-    "mtime": 1790518952.3708498,
-    "ast_hash": "8f36a4f153c31deecbf105fde99640d6",
+    "mtime": 1791047017.99945,
+    "ast_hash": "49a14759024240c40ff4c3c150904aa5",
     "semantic_hash": ""
   },
   "tools/store-art/editor-de-capas.html": {
@@ -290,8 +290,8 @@
     "semantic_hash": ""
   },
   "docs/GAME_DESIGN.md": {
-    "mtime": 1790911054.254051,
-    "ast_hash": "1272cc98d9d7882fc87e4ef46960f88a",
+    "mtime": 1791036445.2481155,
+    "ast_hash": "d121c82d9a952ee810dd857bbddbce8b",
     "semantic_hash": ""
   },
   "src/client/controllers/KnockbackController.luau": {
@@ -1005,8 +1005,8 @@
     "semantic_hash": ""
   },
   "src/client/controllers/TrapVisualController.luau": {
-    "mtime": 1790913140.1011887,
-    "ast_hash": "0ed526f39c4456329843dee6f953fae5",
+    "mtime": 1791046764.6327965,
+    "ast_hash": "9bb81ad36f721a61ee7339a14218d41a",
     "semantic_hash": ""
   },
   "src/client/effects/WindowTrapFx.luau": {
@@ -1015,23 +1015,23 @@
     "semantic_hash": ""
   },
   "src/server/services/TrapService.luau": {
-    "mtime": 1790952417.1136792,
-    "ast_hash": "0665b27cf49748a7ac6eadbb519b7e2f",
+    "mtime": 1791047101.5405395,
+    "ast_hash": "68e2aa32b704fbee54a9f13f26704446",
     "semantic_hash": ""
   },
   "src/server/services/traps/WindowTrap.luau": {
-    "mtime": 1790952407.861635,
-    "ast_hash": "abdc175eac0d49b9101e12da9008630f",
+    "mtime": 1791046616.6955473,
+    "ast_hash": "6c726dd1375057026d650fd1d6811c2c",
     "semantic_hash": ""
   },
   "src/shared/config/TrapConfig.luau": {
-    "mtime": 1790963883.8781161,
-    "ast_hash": "a38e4b97148ea717d1a6016161edab5c",
+    "mtime": 1791046630.8794138,
+    "ast_hash": "c0b0eb825ebad7f389f2b5e85a2c79fa",
     "semantic_hash": ""
   },
   "src/shared/modules/TrapConstants.luau": {
-    "mtime": 1790912985.5458753,
-    "ast_hash": "7c64c05c9f9fb6df78e2e487cf2a793d",
+    "mtime": 1791046630.8798578,
+    "ast_hash": "54cacfa5512d7fe50c6f7da018ecda93",
     "semantic_hash": ""
   },
   "src/client/effects/RugTrapFx.luau": {
@@ -1045,8 +1045,8 @@
     "semantic_hash": ""
   },
   "src/server/services/traps/RugTrap.luau": {
-    "mtime": 1790952407.8620212,
-    "ast_hash": "eca929aea99f6f4ccab5d4fbb844b824",
+    "mtime": 1791046616.6956518,
+    "ast_hash": "8d532bdcf9453611844e5843aea7c7c3",
     "semantic_hash": ""
   },
   "docs/FASE_5B_BOTS_PUFF.md": {
@@ -1212,6 +1212,21 @@
   "src/client/controllers/OrientationController.luau": {
     "mtime": 1791035549.664603,
     "ast_hash": "b1419d7d2ba0c2698069f04353366a20",
+    "semantic_hash": ""
+  },
+  "src/client/effects/ChandelierTrapFx.luau": {
+    "mtime": 1791047017.999667,
+    "ast_hash": "098f4a2ccfd7b58831dea24841d22361",
+    "semantic_hash": ""
+  },
+  "src/server/services/traps/ChandelierTrap.luau": {
+    "mtime": 1791046682.038561,
+    "ast_hash": "56afe6d8811b1d6ec8e32452dc7cfb33",
+    "semantic_hash": ""
+  },
+  "src/server/services/traps/TrapBlocks.luau": {
+    "mtime": 1791046616.6953802,
+    "ast_hash": "445e8001106a7c46624d3c7ecf6dff3a",
     "semantic_hash": ""
   }
 }

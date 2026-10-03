@@ -74,9 +74,39 @@ export type RugConfig = TrapRules & {
 	PullSoundId: string,
 }
 
+-- Lustre Despencando (5.4): cada lustre fica pendurado embaixo de um bloco
+-- do andar de cima (o bloco de apoio, na mesma linha e coluna da grade),
+-- sobre o térreo.
+export type ChandelierSpot = {
+	row: number,
+	column: number,
+}
+
+export type ChandelierConfig = TrapRules & {
+	-- Andar sobre o qual o lustre fica (o de apoio é o de cima).
+	Floor: number,
+	Spots: { ChandelierSpot },
+	-- Altura do corpo do lustre acima do chão do térreo e raio dele.
+	HangHeight: number,
+	Radius: number,
+	-- Parte final do aviso em que o lustre já está caindo (só desenho).
+	FallTime: number,
+	-- Empurrão do impacto para fora do círculo.
+	ImpactRadius: number,
+	ImpactMultiplier: number,
+	ImpactLift: number,
+	-- Blocos do chão que caem (centro a até HoleRadius do impacto; 6,5 é
+	-- uma cruz de 5 blocos) e quanto tempo piscam antes.
+	HoleRadius: number,
+	HoleDelay: number,
+	CreakSoundId: string,
+	CrashSoundId: string,
+}
+
 export type TrapConfig = {
 	Window: WindowConfig,
 	Rug: RugConfig,
+	Chandelier: ChandelierConfig,
 }
 
 local Window: WindowConfig = table.freeze({
@@ -137,9 +167,34 @@ local Rug: RugConfig = table.freeze({
 	PullSoundId = "rbxasset://sounds/action_get_up.mp3",
 })
 
+local Chandelier: ChandelierConfig = table.freeze({
+	MinDistance = 20,
+	WarningTime = 1,
+	-- Cai uma vez por rodada; a recarga só marca quando ele fica gasto.
+	RechargeTime = 1,
+	UsesPerRound = 1,
+	Floor = 1,
+	-- Longe dos tapetes, um em cada metade do térreo.
+	Spots = table.freeze({
+		table.freeze({ row = 6, column = 11 }),
+		table.freeze({ row = 10, column = 5 }),
+	}),
+	HangHeight = 13,
+	Radius = 1.8,
+	FallTime = 0.4,
+	ImpactRadius = 7,
+	ImpactMultiplier = 1,
+	ImpactLift = 0.6,
+	HoleRadius = 6.5,
+	HoleDelay = 0.6,
+	CreakSoundId = "rbxasset://sounds/clickfast.wav",
+	CrashSoundId = "rbxasset://sounds/action_jump_land.mp3",
+})
+
 local TrapConfig: TrapConfig = table.freeze({
 	Window = Window,
 	Rug = Rug,
+	Chandelier = Chandelier,
 })
 
 return TrapConfig

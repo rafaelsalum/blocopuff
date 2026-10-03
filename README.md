@@ -272,6 +272,18 @@ Seção **TESTES DA PARTIDA** no painel admin. Vale só para o servidor atual e 
 - **Testar de verdade:** só com o jogo publicado. O Roblox só preenche quem convidou em convites reais, e o Studio pode não ter acesso ao DataStore e ao MessagingService. Os banners de recompensa da página do convite são configurados no Creator Hub (Engagement > Referral Rewards), com o jogo publicado há pelo menos 1 dia.
 - **Testes:** `lune run tests/ReferralRules.spec`.
 
+### Lustre Despencando (Fase 5, entrega 5.4)
+
+- **Onde:** dois lustres sobre o térreo (`traps/ChandelierTrap`), longe dos tapetes. Cada um fica pendurado embaixo de um bloco do andar de cima (o **bloco de apoio**), com florão no teto, corrente e o lustre uns 13 studs acima do chão, aceso. As posições ficam em `TrapConfig.Chandelier.Spots`, em células da grade.
+- **Duas formas de derrubar, sempre com 1 s de aviso** (balanço, faíscas no florão e uma sombra que cresce no chão; no fim do aviso ele despenca):
+  - **De baixo:** um tiro na corrente ou no lustre, de pelo menos 20 studs. A caixa de acerto é um pouco maior que o lustre, para facilitar no celular. De perto, ele só balança e tilinta.
+  - **De cima:** destruir o bloco de apoio. Quem destruiu leva o crédito; se foi o desabamento do Caos Final, ninguém leva. A arena avisa quem derrubou cada bloco (`ArenaService.addDestroyedListener`), e o `TrapService` dispara a armadilha presa a ele.
+- **Impacto:** empurra para fora de um círculo de 7 studs quem estava embaixo. Em seguida, os blocos do chão bem embaixo (uma cruz de 5) piscam por 0,6 s e caem, abrindo um buraco. Os cacos dourados e os pedaços do lustre afundam junto. Quem atirou nunca é atingido, e quedas contam como derrubada dele.
+- **Sempre cai depois do aviso:** se o bloco de apoio cair durante o aviso de um tiro, o lustre cai mesmo que o atirador saia do jogo (sem crédito para ninguém).
+- **Uma vez por rodada:** o lustre volta assim que a arena restaura os blocos (fim da rodada e modo foto, via `TrapService.refresh`).
+- **Telemetria:** a derrubada pelo bloco de apoio é registrada como `TrapSupportLost`, separada do `TrapTriggered` (que guarda a distância do tiro).
+- **Código comum:** `traps/TrapBlocks` reúne o que a janela e o lustre fazem com os blocos e com quem está perto: blocos que piscam e caem, crédito de quem estava em cima e empurrão de impacto.
+
 ### Tapete Puxado (Fase 5, entrega 5.3)
 
 - **Onde:** dois tapetes no térreo (`traps/RugTrap`), um em cada metade, montados sobre os blocos e puxados para o centro, onde costuma ter buraco. Posição, tamanho e cor ficam em `TrapConfig.Rug.Rugs`, em células da grade.

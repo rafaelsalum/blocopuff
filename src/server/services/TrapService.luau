@@ -10,7 +10,10 @@
 --   * depois, recarga de `RechargeTime` e no máximo `UsesPerRound` usos por
 --     rodada (sem usos, fica gasta até a próxima rodada);
 --   * o empurrão e o crédito da derrubada passam pelo KnockbackService (o
---     atirador nunca é afetado pela própria armadilha).
+--     atirador nunca é afetado pela própria armadilha);
+--   * uma armadilha presa a um bloco (lustre) também dispara, com o mesmo
+--     aviso, quando esse bloco cai: o crédito vai para quem derrubou o
+--     bloco (ninguém, se foi o próprio jogo).
 -- Cada tipo (traps/*) faz o próprio efeito e a própria aparência. O estado
 -- vai em atributos da peça-alvo (TrapConstants) para os clientes desenharem.
 
@@ -24,6 +27,8 @@ local KnockbackService = require(script.Parent.KnockbackService)
 local ProjectileService = require(script.Parent.ProjectileService)
 local TelemetryService = require(script.Parent.TelemetryService)
 local CombatantRegistry = require(script.Parent.CombatantRegistry)
+local ArenaService = require(script.Parent.ArenaService)
+local ChandelierTrap = require(script.Parent.traps.ChandelierTrap)
 local RugTrap = require(script.Parent.traps.RugTrap)
 local WindowTrap = require(script.Parent.traps.WindowTrap)
 
@@ -33,12 +38,16 @@ type Combatant = CombatantRegistry.Combatant
 -- O que cada tipo de armadilha precisa oferecer.
 type Behavior = {
 	rules: TrapConfig.TrapRules,
-	-- Efeito ao fim do aviso; devolve quantos jogadores atingiu.
+	-- Efeito ao fim do aviso; devolve quantos jogadores atingiu. `shooter`
+	-- é nil quando ninguém acionou (bloco derrubado pelo próprio jogo).
 	-- `isCurrent()` diz se a armadilha continua neste acionamento (a rodada
 	-- não acabou), para efeitos com atraso.
-	trigger: (part: BasePart, shooter: Combatant, isCurrent: () -> boolean) -> number,
+	trigger: (part: BasePart, shooter: Combatant?, isCurrent: () -> boolean) -> number,
 	-- Volta a aparência de pronta.
 	restore: (part: BasePart) -> (),
+	-- A peça-alvo da armadilha presa a `block`, se houver (ela dispara
+	-- quando o bloco cai).
+	dependentOn: ((block: Part) -> BasePart?)?,
 }
 
 type Trap = {
@@ -51,6 +60,9 @@ type Trap = {
 	-- acionamento antigo param sozinhas.
 	token: number,
 	lastCrack: number,
+	-- O bloco que segura a armadilha caiu durante um aviso de tiro: ela tem
+	-- de cair mesmo que o atirador saia (não dá para pendurar de novo).
+	supportLost: boolean,
 	-- Identificador da armadilha no cenário (telemetria).
 	id: string,
 }
@@ -61,6 +73,7 @@ local CRACK_INTERVAL = 0.2
 local BEHAVIORS: { [string]: Behavior } = {
 	[TrapConstants.Window] = WindowTrap,
 	[TrapConstants.Rug] = RugTrap,
+	[TrapConstants.Chandelier] = ChandelierTrap,
 }
 
 local TrapService = {}
@@ -70,6 +83,7 @@ local active = false
 local started = false
 local connections: { RBXScriptConnection } = {}
 local trapsFolder: Folder? = nil
+local listeningToBlocks = false
 
 local function setState(trap: Trap, state: TrapState, by: Combatant?)
 	trap.state = state
@@ -93,6 +107,7 @@ local function resetAll()
 	for _, trap in pairs(traps) do
 		trap.token += 1
 		trap.uses = trap.behavior.rules.UsesPerRound
+		trap.supportLost = false
 		makeReady(trap)
 	end
 end
@@ -115,6 +130,7 @@ local function register(instance: Instance)
 		uses = behavior.rules.UsesPerRound,
 		token = 0,
 		lastCrack = 0,
+		supportLost = false,
 		id = tostring(instance:GetAttribute(TrapConstants.IdAttribute) or instance.Name),
 	}
 	traps[instance] = trap
@@ -151,22 +167,27 @@ local function finishRecharge(trap: Trap, token: number)
 end
 
 -- Telemetria só existe para jogadores.
-local function logEvent(shooter: Combatant, name: string, value: number, kind: string, id: string)
-	local player = shooter.player
+local function logEvent(shooter: Combatant?, name: string, value: number, kind: string, id: string)
+	local player = if shooter ~= nil then shooter.player else nil
 	if player ~= nil then
 		TelemetryService.event(player, name, value, kind, id)
 	end
 end
 
-local function fire(trap: Trap, shooter: Combatant, token: number)
+-- `forced`: disparada pela queda do bloco que a segura (não dá para voltar
+-- atrás, mesmo que quem derrubou tenha saído).
+local function fire(trap: Trap, shooter: Combatant?, token: number, forced: boolean)
 	if trap.token ~= token or not active then
 		return
 	end
-	if not CombatantRegistry.isPresent(shooter) then
-		-- Quem atirou saiu do jogo durante o aviso: a armadilha não dispara
-		-- e não gasta o uso.
-		makeReady(trap)
-		return
+	if shooter ~= nil and not CombatantRegistry.isPresent(shooter) then
+		if not forced and not trap.supportLost then
+			-- Quem atirou saiu do jogo durante o aviso: a armadilha não
+			-- dispara e não gasta o uso.
+			makeReady(trap)
+			return
+		end
+		shooter = nil
 	end
 	trap.uses -= 1
 	setState(trap, TrapConstants.Recharging, shooter)
@@ -181,6 +202,14 @@ local function fire(trap: Trap, shooter: Combatant, token: number)
 	task.delay(trap.behavior.rules.RechargeTime, finishRecharge, trap, token)
 end
 
+local function arm(trap: Trap, shooter: Combatant?, forced: boolean)
+	trap.supportLost = false
+	trap.token += 1
+	local token = trap.token
+	setState(trap, TrapConstants.Warning, shooter)
+	task.delay(trap.behavior.rules.WarningTime, fire, trap, shooter, token, forced)
+end
+
 local function onSurfaceHit(shooter: Combatant, instance: Instance, _position: Vector3, distance: number)
 	if not active or not instance:IsA("BasePart") then
 		return
@@ -193,11 +222,28 @@ local function onSurfaceHit(shooter: Combatant, instance: Instance, _position: V
 		crack(trap)
 		return
 	end
-	trap.token += 1
-	local token = trap.token
-	setState(trap, TrapConstants.Warning, shooter)
 	logEvent(shooter, "TrapTriggered", math.floor(distance), trap.kind, trap.id)
-	task.delay(trap.behavior.rules.WarningTime, fire, trap, shooter, token)
+	arm(trap, shooter, false)
+end
+
+-- Um bloco caiu: dispara a armadilha presa a ele (o lustre), se estiver
+-- pendurada.
+local function onBlockDestroyed(block: Part, by: Combatant?)
+	if not active then
+		return
+	end
+	for _, behavior in pairs(BEHAVIORS) do
+		local find = behavior.dependentOn
+		local part = if find ~= nil then find(block) else nil
+		local trap = if part ~= nil then traps[part] else nil
+		if trap ~= nil and trap.state == TrapConstants.Ready then
+			logEvent(by, "TrapSupportLost", 1, trap.kind, trap.id)
+			arm(trap, by, true)
+		elseif trap ~= nil and trap.state == TrapConstants.Warning then
+			-- Já está caindo por um tiro: o crédito continua com quem atirou.
+			trap.supportLost = true
+		end
+	end
 end
 
 function TrapService.beginRound()
@@ -208,6 +254,22 @@ end
 function TrapService.endRound()
 	active = false
 	resetAll()
+end
+
+-- Depois que a arena restaura os blocos fora da rodada (fim do intervalo,
+-- modo foto): as armadilhas presas a um bloco voltam a aparecer.
+function TrapService.refresh()
+	if active then
+		return
+	end
+	for _, trap in pairs(traps) do
+		if trap.state == TrapConstants.Ready then
+			local ok, failure = pcall(trap.behavior.restore, trap.part)
+			if not ok then
+				warn(`[BlocoPuff] Trap {trap.kind} restore failed: {failure}`)
+			end
+		end
+	end
 end
 
 -- Monta as armadilhas que não fazem parte do prédio (tapetes, depois da
@@ -223,6 +285,12 @@ function TrapService.start(worldRoot: Instance)
 	folder.Parent = worldRoot
 	trapsFolder = folder
 	RugTrap.build(folder)
+	ChandelierTrap.build(folder)
+	if not listeningToBlocks then
+		-- A arena não tem como remover o aviso; ele confere `active`.
+		listeningToBlocks = true
+		ArenaService.addDestroyedListener(onBlockDestroyed)
+	end
 	for _, instance in ipairs(CollectionService:GetTagged(TrapConstants.Tag)) do
 		register(instance)
 	end
@@ -241,6 +309,7 @@ function TrapService.stop()
 	table.clear(connections)
 	table.clear(traps)
 	RugTrap.clear()
+	ChandelierTrap.clear()
 	if trapsFolder ~= nil then
 		trapsFolder:Destroy()
 		trapsFolder = nil

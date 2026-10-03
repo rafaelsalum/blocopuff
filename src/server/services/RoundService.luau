@@ -883,6 +883,7 @@ local function runEnding(timings: RoundTimings)
 	-- Restaura depois que os jogadores já saíram da arena, evitando que um
 	-- bloco reapareça dentro de um personagem.
 	ArenaService.restoreAllBlocks()
+	TrapService.refresh()
 	for _, combatant in ipairs(participantOrder) do
 		resetParticipantAttributes(combatant)
 	end

@@ -21,14 +21,12 @@ local TrapConstants = require(ReplicatedStorage.Shared.modules.TrapConstants)
 local ArenaService = require(script.Parent.Parent.ArenaService)
 local KnockbackService = require(script.Parent.Parent.KnockbackService)
 local CombatantRegistry = require(script.Parent.Parent.CombatantRegistry)
+local TrapBlocks = require(script.Parent.TrapBlocks)
 
 type Combatant = CombatantRegistry.Combatant
 
 local CONFIG = TrapConfig.Window
 local MULLION_NAMES = { "MullionV", "MullionH" }
--- Folga ao conferir quem está em cima de um bloco que vai cair.
-local STANDING_MARGIN = 0.5
-local STANDING_HEIGHT = 6
 
 type Frame = {
 	-- Ponto no piso, junto da parede, bem embaixo da janela.
@@ -118,14 +116,6 @@ local function frameOf(glass: BasePart): Frame?
 	}
 end
 
--- Corpo de quem pode ser atingido (participante vivo que não é o atirador).
-local function targetRoot(combatant: Combatant, shooter: Combatant): BasePart?
-	if combatant == shooter or not KnockbackService.isActiveParticipant(combatant) then
-		return nil
-	end
-	return CombatantRegistry.getRoot(combatant)
-end
-
 -- Força da rajada em `position` (múltiplo do empurrão do disparo; 0 = fora
 -- do cone) e o lado em que a pessoa está (-1 a 1, para abrir o vento).
 local function gustAt(frame: Frame, position: Vector3): (number, number)
@@ -147,11 +137,11 @@ local function gustAt(frame: Frame, position: Vector3): (number, number)
 	return strength, lateral / halfWidth
 end
 
-local function pushPlayers(frame: Frame, shooter: Combatant): number
+local function pushPlayers(frame: Frame, shooter: Combatant?): number
 	local knockback = GameConfig.Knockback
 	local affected = 0
 	for _, combatant in ipairs(CombatantRegistry.all()) do
-		local root = targetRoot(combatant, shooter)
+		local root = TrapBlocks.targetRoot(combatant, shooter)
 		if root ~= nil then
 			local strength, side = gustAt(frame, root.Position)
 			if strength > 0 then
@@ -183,59 +173,8 @@ local function looseBlocks(frame: Frame): { Part }
 	return blocks
 end
 
-local function isStandingOn(block: Part, position: Vector3): boolean
-	local half = block.Size / 2
-	local offset = position - block.Position
-	return math.abs(offset.X) <= half.X + STANDING_MARGIN
-		and math.abs(offset.Z) <= half.Z + STANDING_MARGIN
-		and offset.Y > 0
-		and offset.Y < half.Y + STANDING_HEIGHT
-end
-
--- Os blocos piscam e caem; quem estiver em cima na hora cai por causa do
--- atirador.
-local function dropBlocks(blocks: { Part }, shooter: Combatant, isCurrent: () -> boolean)
-	if #blocks == 0 then
-		return
-	end
-	for _, block in ipairs(blocks) do
-		ArenaService.setCollapseWarning(block, true)
-	end
-	task.delay(CONFIG.LooseBlockDelay, function()
-		if not isCurrent() then
-			for _, block in ipairs(blocks) do
-				ArenaService.setCollapseWarning(block, false)
-			end
-			return
-		end
-		-- Quem está em cima de cada bloco, antes de ele cair.
-		local standing: { [Part]: { Combatant } } = {}
-		for _, combatant in ipairs(CombatantRegistry.all()) do
-			local root = targetRoot(combatant, shooter)
-			if root ~= nil then
-				for _, block in ipairs(blocks) do
-					if isStandingOn(block, root.Position) then
-						local list = standing[block] or {}
-						table.insert(list, combatant)
-						standing[block] = list
-						break
-					end
-				end
-			end
-		end
-		for _, block in ipairs(blocks) do
-			-- Só leva o crédito quem estava em cima de um bloco que caiu mesmo.
-			if ArenaService.collapseBlock(block) then
-				for _, victim in ipairs(standing[block] or {}) do
-					KnockbackService.markAttacker(victim, shooter)
-				end
-			end
-		end
-	end)
-end
-
 -- Efeito ao fim do aviso. Devolve quantos jogadores a rajada empurrou.
-function WindowTrap.trigger(glass: BasePart, shooter: Combatant, isCurrent: () -> boolean): number
+function WindowTrap.trigger(glass: BasePart, shooter: Combatant?, isCurrent: () -> boolean): number
 	setBroken(glass, true)
 	task.delay(CONFIG.RechargeTime * (1 - CONFIG.BoardedFraction), function()
 		if isCurrent() then
@@ -248,7 +187,7 @@ function WindowTrap.trigger(glass: BasePart, shooter: Combatant, isCurrent: () -
 		return 0
 	end
 	local affected = pushPlayers(frame, shooter)
-	dropBlocks(looseBlocks(frame), shooter, isCurrent)
+	TrapBlocks.drop(looseBlocks(frame), shooter, CONFIG.LooseBlockDelay, isCurrent)
 	return affected
 end
 

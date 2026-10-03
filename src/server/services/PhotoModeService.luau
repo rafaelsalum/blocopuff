@@ -18,6 +18,7 @@ local BuildingLayout = require(ReplicatedStorage.Shared.modules.BuildingLayout)
 local ArenaConstants = require(ReplicatedStorage.Shared.modules.ArenaConstants)
 local PuffadorConstants = require(ReplicatedStorage.Shared.modules.PuffadorConstants)
 local ArenaService = require(script.Parent.ArenaService)
+local TrapService = require(script.Parent.TrapService)
 local PuffadorModel = require(script.Parent.PuffadorModel)
 
 type Pose = "Aim" | "AimUp" | "Fall" | "Cheer" | "Idle"
@@ -341,6 +342,7 @@ function PhotoModeService.clear()
 		folder = nil
 	end
 	ArenaService.restoreAllBlocks()
+	TrapService.refresh()
 	local camera = Workspace.CurrentCamera
 	if camera ~= nil then
 		camera.CameraType = Enum.CameraType.Custom

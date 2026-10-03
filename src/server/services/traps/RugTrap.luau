@@ -308,7 +308,7 @@ end
 
 -- Efeito ao fim do aviso: quem está em cima escorrega para o lado da
 -- franja. Devolve quantos escorregaram.
-function RugTrap.trigger(fringe: BasePart, shooter: Combatant, _isCurrent: () -> boolean): number
+function RugTrap.trigger(fringe: BasePart, shooter: Combatant?, _isCurrent: () -> boolean): number
 	local rug = rugs[fringe]
 	if rug == nil then
 		return 0

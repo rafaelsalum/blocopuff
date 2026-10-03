@@ -5,7 +5,7 @@
 -- só desenha a partir deles.
 
 export type TrapState = "Ready" | "Warning" | "Recharging" | "Spent"
-export type TrapKind = "Window" | "Rug"
+export type TrapKind = "Window" | "Rug" | "Chandelier"
 
 local TrapConstants = table.freeze({
 	Tag = "CasaraoTrap",
@@ -35,6 +35,11 @@ local TrapConstants = table.freeze({
 	RugPullAttribute = "RugPull",
 	RugAlongAttribute = "RugAlong",
 
+	-- Lustre: ponto do teto onde a corrente se prende e ponto do chão onde
+	-- ele cai.
+	ChandelierAnchorAttribute = "ChandelierAnchor",
+	ChandelierImpactAttribute = "ChandelierImpact",
+
 	Ready = "Ready" :: TrapState,
 	Warning = "Warning" :: TrapState,
 	Recharging = "Recharging" :: TrapState,
@@ -42,6 +47,7 @@ local TrapConstants = table.freeze({
 
 	Window = "Window" :: TrapKind,
 	Rug = "Rug" :: TrapKind,
+	Chandelier = "Chandelier" :: TrapKind,
 })
 
 return TrapConstants

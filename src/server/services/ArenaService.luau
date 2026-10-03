@@ -382,6 +382,21 @@ local function findActiveBlockAt(floorIndex: number, row: number, column: number
 	return nil
 end
 
+-- Avisados quando um bloco cai. `by` é quem derrubou (nil: o próprio jogo,
+-- como o Caos Final). Usado pelas armadilhas presas a um bloco (lustre).
+export type DestroyedListener = (block: Part, by: Combatant?) -> ()
+local destroyedListeners: { DestroyedListener } = {}
+
+local function notifyDestroyed(block: Part, by: Combatant?)
+	for _, listener in ipairs(destroyedListeners) do
+		task.spawn(listener, block, by)
+	end
+end
+
+function ArenaService.addDestroyedListener(listener: DestroyedListener)
+	table.insert(destroyedListeners, listener)
+end
+
 local function markDestroyed(instance: Part, record: BlockRecord)
 	record.isDestroyed = true
 	remainingBlockCount -= 1
@@ -446,11 +461,13 @@ function ArenaService.tryDestroyBlock(instance: Instance, context: BlockDestruct
 	end
 
 	markDestroyed(instance, record)
+	notifyDestroyed(instance, owner)
 	return true
 end
 
--- Bloco derrubado pelo próprio jogo (Caos Final), sem depender de um tiro.
-function ArenaService.collapseBlock(instance: Instance): boolean
+-- Bloco derrubado sem tiro direto: pelo próprio jogo (Caos Final) ou por
+-- uma armadilha, que informa quem a acionou em `by`.
+function ArenaService.collapseBlock(instance: Instance, by: Combatant?): boolean
 	if not destructionEnabled or not instance:IsA("Part") then
 		return false
 	end
@@ -459,6 +476,7 @@ function ArenaService.collapseBlock(instance: Instance): boolean
 		return false
 	end
 	markDestroyed(instance, record)
+	notifyDestroyed(instance, by)
 	return true
 end
 

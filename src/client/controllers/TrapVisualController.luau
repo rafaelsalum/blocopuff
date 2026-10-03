@@ -11,6 +11,7 @@ local RunService = game:GetService("RunService")
 local Workspace = game:GetService("Workspace")
 
 local TrapConstants = require(ReplicatedStorage.Shared.modules.TrapConstants)
+local ChandelierTrapFx = require(script.Parent.Parent.effects.ChandelierTrapFx)
 local RugTrapFx = require(script.Parent.Parent.effects.RugTrapFx)
 local WindowTrapFx = require(script.Parent.Parent.effects.WindowTrapFx)
 
@@ -43,6 +44,8 @@ local function track(instance: Instance)
 		handles[instance] = WindowTrapFx.new(instance, getEffectsFolder())
 	elseif kind == TrapConstants.Rug then
 		handles[instance] = RugTrapFx.new(instance, getEffectsFolder())
+	elseif kind == TrapConstants.Chandelier then
+		handles[instance] = ChandelierTrapFx.new(instance, getEffectsFolder())
 	end
 end
 
