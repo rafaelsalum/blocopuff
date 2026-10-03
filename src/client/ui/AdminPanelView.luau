@@ -59,8 +59,14 @@ export type AdminPanelViewHandle = {
 
 local GUI_NAME = "BlocoPuffAdminPanel"
 local TOPBAR_GUI_NAME = "BlocoPuffAdminTopbar"
-local PANEL_WIDTH = 660
-local PANEL_HEIGHT = 610
+-- Tamanho de desenho do painel. Em telas maiores ele cresce inteiro
+-- (texto e botões juntos) até MAX_FIT_SCALE; em telas menores encolhe a
+-- área e o conteúdo rola.
+local PANEL_WIDTH = 720
+local PANEL_HEIGHT = 620
+local PANEL_MIN_SIZE = 300
+local MAX_FIT_SCALE = 1.6
+local SCREEN_MARGIN = Vector2.new(16, 20)
 local HEADER_HEIGHT = 76
 local ANNOUNCEMENT_LIMIT = 180
 local REASON_LIMIT = 120
@@ -180,17 +186,30 @@ function AdminPanelView.new(playerGui: PlayerGui, callbacks: AdminPanelCallbacks
 	panel.Name = "Panel"
 	panel.AnchorPoint = Vector2.new(0.5, 0.5)
 	panel.Position = UDim2.fromScale(0.5, 0.5)
-	panel.Size = UDim2.new(1, -32, 1, -56)
+	panel.Size = UDim2.fromOffset(PANEL_WIDTH, PANEL_HEIGHT)
 	panel.ZIndex = 11
 	panel.Parent = overlay
 	UiTheme.stylePanel(panel, { accent = UiTheme.Colors.Brand, radius = 22, transparency = 0 })
 	local panelScale = Instance.new("UIScale")
 	panelScale.Parent = panel
 
-	local sizeConstraint = Instance.new("UISizeConstraint")
-	sizeConstraint.MinSize = Vector2.new(300, 300)
-	sizeConstraint.MaxSize = Vector2.new(PANEL_WIDTH, PANEL_HEIGHT)
-	sizeConstraint.Parent = panel
+	-- Ocupa a tela quase toda: escala para cima em telas grandes, área
+	-- menor (com rolagem) em telas pequenas.
+	local fitScale = 1
+	local function fitToScreen()
+		local area = screenGui.AbsoluteSize
+		if area.X <= 0 or area.Y <= 0 then
+			return
+		end
+		local room = area - (SCREEN_MARGIN * 2)
+		fitScale = math.clamp(math.min(room.X / PANEL_WIDTH, room.Y / PANEL_HEIGHT), 1, MAX_FIT_SCALE)
+		local width = math.clamp(room.X / fitScale, PANEL_MIN_SIZE, PANEL_WIDTH)
+		local height = math.clamp(room.Y / fitScale, PANEL_MIN_SIZE, PANEL_HEIGHT)
+		panel.Size = UDim2.fromOffset(math.floor(width), math.floor(height))
+		panelScale.Scale = fitScale
+	end
+	screenGui:GetPropertyChangedSignal("AbsoluteSize"):Connect(fitToScreen)
+	fitToScreen()
 
 	-- Cabeçalho com faixa em gradiente da marca e logotipo.
 	local header = Instance.new("Frame")
@@ -486,8 +505,9 @@ function AdminPanelView.new(playerGui: PlayerGui, callbacks: AdminPanelCallbacks
 		overlay.Visible = visible
 		openButton.root.Visible = not visible
 		if visible then
-			panelScale.Scale = 0.88
-			TweenService:Create(panelScale, TweenInfo.new(0.24, Enum.EasingStyle.Back, Enum.EasingDirection.Out), { Scale = 1 }):Play()
+			fitToScreen()
+			panelScale.Scale = fitScale * 0.88
+			TweenService:Create(panelScale, TweenInfo.new(0.24, Enum.EasingStyle.Back, Enum.EasingDirection.Out), { Scale = fitScale }):Play()
 			updateSelection(true)
 		else
 			announcementBox:ReleaseFocus()

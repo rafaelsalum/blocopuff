@@ -1,8 +1,8 @@
 --!strict
 
 -- Física dos empurrões num personagem: o empurrão do Puffador (e das
--- armadilhas), o escorregão do Tapete Puxado e a parada da queda na Segunda
--- Chance. Quem chama é quem simula o personagem: o cliente para o próprio
+-- armadilhas), o escorregão do Tapete Puxado, o impulso e a parada da queda
+-- na Segunda Chance. Quem chama é quem simula o personagem: o cliente para o próprio
 -- personagem (KnockbackController) e o servidor para os bots RoboPuff
 -- (KnockbackService). Os valores já chegam validados.
 
@@ -74,6 +74,25 @@ function CharacterImpulse.slide(root: BasePart, velocity: Vector3, duration: num
 	slide.Parent = attachment
 
 	removeAfter(attachment, duration)
+end
+
+-- Sendo empurrado ou escorregando agora (o impulso não serve para fugir
+-- de um empurrão no meio).
+function CharacterImpulse.isBeingPushed(root: BasePart): boolean
+	return root:FindFirstChild(PUSH_NAME) ~= nil
+end
+
+-- Impulso: arrancada horizontal na direção `direction` por `duration`
+-- segundos. No ar, a queda para no início da arrancada (ela não afunda).
+-- Um empurrão que chegar no meio substitui o impulso.
+function CharacterImpulse.dash(root: BasePart, direction: Vector3, speed: number, duration: number)
+	local flat = Vector3.new(direction.X, 0, direction.Z)
+	if flat.Magnitude < 1e-3 then
+		return
+	end
+	local current = root.AssemblyLinearVelocity
+	root.AssemblyLinearVelocity = Vector3.new(current.X, math.max(current.Y, 0), current.Z)
+	CharacterImpulse.slide(root, flat.Unit * speed, duration)
 end
 
 -- Segunda Chance: cancela o empurrão e zera a queda. Se o personagem ainda

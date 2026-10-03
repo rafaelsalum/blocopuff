@@ -19,6 +19,7 @@ local QueueConfig = require(ReplicatedStorage.Shared.config.QueueConfig)
 local BuildingLayout = require(ReplicatedStorage.Shared.modules.BuildingLayout)
 local BotFillRules = require(script.Parent.Parent.data.BotFillRules)
 local CombatantRegistry = require(script.Parent.CombatantRegistry)
+local DashService = require(script.Parent.DashService)
 local MatchQueueService = require(script.Parent.MatchQueueService)
 local TelemetryService = require(script.Parent.TelemetryService)
 local BotBody = require(script.Parent.bots.BotBody)
@@ -119,6 +120,7 @@ local function destroyBot(bot: Combatant)
 		nameOf[bot] = nil
 	end
 	CombatantRegistry.unregisterBot(bot)
+	DashService.forgetBot(bot)
 	local model = bot.model
 	if model ~= nil then
 		model:Destroy()

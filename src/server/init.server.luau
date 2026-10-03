@@ -43,6 +43,7 @@ local BotFillService = require(script.services.BotFillService)
 local MatchTestControls = require(script.services.MatchTestControls)
 local ReferralService = require(script.services.ReferralService)
 local OnboardingService = require(script.services.OnboardingService)
+local DashService = require(script.services.DashService)
 
 local WORLD_NAME = "BlocoPuffWorld"
 local GENERATED_BY_ATTRIBUTE = "GeneratedBy"
@@ -101,6 +102,8 @@ PuffadorService.start(world)
 print("[BlocoPuff] Puffador system started")
 
 TelemetryService.start(PuffadorService.getRemotesFolder())
+-- Impulso (botão ao lado do pulo): conferência e efeito para todos.
+DashService.start(PuffadorService.getRemotesFolder())
 print("[BlocoPuff] Telemetry ready")
 
 -- Precisa do prédio (quadros marcados) e da pasta de remotes.

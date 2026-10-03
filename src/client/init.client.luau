@@ -28,15 +28,16 @@ local ReactionController = require(script.controllers.ReactionController)
 local LobbyStationsController = require(script.controllers.LobbyStationsController)
 local MatchQueueController = require(script.controllers.MatchQueueController)
 local InviteController = require(script.controllers.InviteController)
+local DashController = require(script.controllers.DashController)
 
 print("[BlocoPuff] Client initialized")
 
--- Celular: a tela segue o aparelho (em pé ou deitado). O padrão do Roblox
--- (LandscapeSensor) obrigava a jogar deitado.
+-- Celular: só deitado (gira entre os dois lados). Em pé a arena e os
+-- controles ficam apertados demais para jogar bem.
 local orientationOk, orientationErr = pcall(function()
 	local playerGui = game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui")
 	if playerGui:IsA("PlayerGui") then
-		playerGui.ScreenOrientation = Enum.ScreenOrientation.Sensor
+		playerGui.ScreenOrientation = Enum.ScreenOrientation.LandscapeSensor
 	end
 end)
 if not orientationOk then
@@ -240,4 +241,12 @@ local inviteOk, inviteErr = pcall(function()
 end)
 if not inviteOk then
 	warn(string.format("[BlocoPuff] Failed to start invite controller: %s", tostring(inviteErr)))
+end
+
+-- Impulso (tecla F, botão B, botão ao lado do pulo no celular).
+local dashOk, dashErr = pcall(function()
+	DashController.start()
+end)
+if not dashOk then
+	warn(string.format("[BlocoPuff] Failed to start dash controller: %s", tostring(dashErr)))
 end

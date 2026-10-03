@@ -213,6 +213,22 @@ Escopo em `docs/FASE_5B_BOTS_PUFF.md`. Ninguém joga sozinho: bots completam a p
 - **Fora do escopo por enquanto:** os bots não entram nos corredores secretos (Barão, Tocas), não abrem o cofre e não constroem.
 - **Testes:** `lune run tests/BotFillRules.spec`, `tests/BotGrid.spec`, `tests/BotLevelRules.spec` e `tests/BotRewardRules.spec`.
 
+### Impulso
+
+- **Como usar:** tecla **F**, botão **B** do controle ou o botão » acima do pulo no celular. O botão imita o visual do pulo nativo do Roblox: círculo escuro translúcido com anel branco.
+- **Efeito:** uma arrancada curta (cerca de 11 studs) para onde o jogador está andando; parado, para a frente.
+- **Regras** (`shared/modules/DashRules`, valores em `config/DashConfig`):
+  - Um impulso a cada 3 s. Na recarga, o botão mostra os segundos que faltam.
+  - No ar, um impulso por pulo; tocar o chão devolve. No ar, a queda para no início da arrancada.
+  - Não funciona durante um empurrão nem no escorregão do tapete.
+  - A tecla é F porque o E é dos prompts de interação (estações do lobby e cofre).
+- **Servidor** (`DashService`): o cliente faz a arrancada na hora, porque é ele quem simula o próprio personagem, e avisa o servidor. O servidor confere o intervalo e marca `LastDashAt` no jogador para todos verem a fumaça (`effects/DashFx`).
+  - Impulso fora do intervalo não aparece para ninguém e conta em `DashRejected`.
+  - A física do personagem continua sendo do cliente, como andar e pular.
+- **Bots:** RoboPuffs Normal e Esperto usam o impulso para sair de bloco piscando ou de área de armadilha, só se todo o caminho da arrancada for chão inteiro e seguro.
+- **Telemetria:** `RoundDashes` (impulsos aceitos por rodada) e `DashRejected`.
+- **Testes:** `lune run tests/DashRules.spec`.
+
 ### Observabilidade (Creator Dashboard)
 
 Além dos eventos customizados (`TelemetryService`), o jogo usa dois relatórios nativos do Creator Dashboard e separa a retenção pelo tipo da primeira partida.

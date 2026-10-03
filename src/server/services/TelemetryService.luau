@@ -30,6 +30,7 @@ type Counters = {
 	blockHits: number,
 	blocksDestroyed: number,
 	vaultShots: number,
+	dashes: number,
 }
 
 local DEVICE_REPORT_COOLDOWN = 5
@@ -141,7 +142,7 @@ function TelemetryService.roundStarted(participants: { Player }, bots: number?)
 	roundBots = bots or 0
 	table.clear(counters)
 	for _, player in ipairs(participants) do
-		counters[player] = { shots = 0, playerHits = 0, blockHits = 0, blocksDestroyed = 0, vaultShots = 0 }
+		counters[player] = { shots = 0, playerHits = 0, blockHits = 0, blocksDestroyed = 0, vaultShots = 0, dashes = 0 }
 		log(player, "RoundStarted", #participants + roundBots, `Bots{roundBots}`)
 		-- Rematch: jogou a rodada anterior e continuou para esta.
 		if lastRoundParticipants[player] then
@@ -155,6 +156,14 @@ function TelemetryService.roundStarted(participants: { Player }, bots: number?)
 	roundToken += 1
 	table.clear(lastFloor)
 	task.spawn(sampleFloors, roundToken, table.clone(participants))
+end
+
+-- Impulso aceito durante a rodada (somado e enviado no fim).
+function TelemetryService.dash(player: Player)
+	local current = getCounters(player)
+	if current ~= nil then
+		current.dashes += 1
+	end
 end
 
 function TelemetryService.shot(player: Player, withVaultPuffador: boolean?)
@@ -322,6 +331,7 @@ function TelemetryService.roundFinished(outcomes: { [Player]: string })
 			log(player, "RoundPlayerHits", current.playerHits)
 			log(player, "RoundBlockHits", current.blockHits)
 			log(player, "RoundBlocksDestroyed", current.blocksDestroyed)
+			log(player, "RoundDashes", current.dashes)
 			if current.vaultShots > 0 then
 				log(player, "RoundVaultShots", current.vaultShots)
 			end

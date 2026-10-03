@@ -34,6 +34,7 @@ export type PuffadorConstantsModule = {
 	ReactionRemoteName: string,
 	MatchQueueRemoteName: string,
 	ReferralRemoteName: string,
+	DashRemoteName: string,
 	PuffShotsRemoteName: string,
 
 	OwnerUserIdAttribute: string,
@@ -74,6 +75,8 @@ local PuffadorConstants: PuffadorConstantsModule = {
 	MatchQueueRemoteName = "MatchQueue",
 	-- Convite com recompensa: avisos de prêmio e convites enviados.
 	ReferralRemoteName = "Referral",
+	-- Cliente → servidor: impulso usado (validação e efeito para todos).
+	DashRemoteName = "Dash",
 	-- Servidor → clientes: disparos para desenhar (ProjectileService).
 	PuffShotsRemoteName = "PuffShots",
 

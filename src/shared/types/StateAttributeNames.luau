@@ -42,6 +42,8 @@ export type StateAttributeNames = {
 	-- corpo também leva a tag BotTag (CollectionService).
 	BotId: string,
 	BotTag: string,
+	-- Hora (GetServerTimeNow) do último impulso aceito: efeito para todos.
+	LastDashAt: string,
 }
 
 local StateAttributeNames: StateAttributeNames = {
@@ -76,6 +78,7 @@ local StateAttributeNames: StateAttributeNames = {
 	PlayerInMatchQueue = "InMatchQueue",
 	BotId = "BotId",
 	BotTag = "RoboPuff",
+	LastDashAt = "LastDashAt",
 }
 
 return table.freeze(StateAttributeNames)

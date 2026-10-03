@@ -20,8 +20,8 @@
     "semantic_hash": ""
   },
   "src/client/init.client.luau": {
-    "mtime": 1790960373.6033745,
-    "ast_hash": "4fbfe235dbff6ca4b4feb7082ded81fd",
+    "mtime": 1791033245.6025434,
+    "ast_hash": "11d845965d15d03c184e6013ac7a3850",
     "semantic_hash": ""
   },
   "src/client/ui/CrosshairView.luau": {
@@ -180,8 +180,8 @@
     "semantic_hash": ""
   },
   "src/client/ui/AdminPanelView.luau": {
-    "mtime": 1790960032.6384733,
-    "ast_hash": "80f654407b5e51b41a9f8b86c434bc96",
+    "mtime": 1791033473.3310783,
+    "ast_hash": "c8da0837d6abc7f87fe8db4373160b73",
     "semantic_hash": ""
   },
   "src/server/config/AdminConfig.luau": {

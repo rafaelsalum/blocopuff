@@ -29,6 +29,8 @@ local KnockbackService = require(script.Parent.KnockbackService)
 local PuffadorService = require(script.Parent.PuffadorService)
 local PlayerDataService = require(script.Parent.PlayerDataService)
 local BotArenaView = require(script.Parent.bots.BotArenaView)
+local DashService = require(script.Parent.DashService)
+local DashConfig = require(ReplicatedStorage.Shared.config.DashConfig)
 
 type Combatant = CombatantRegistry.Combatant
 type LevelConfig = BotConfig.LevelConfig
@@ -125,6 +127,31 @@ local function moveTo(brain: Brain, humanoid: Humanoid, position: Vector3, now: 
 	humanoid:MoveTo(position)
 end
 
+-- Espaço entre os pontos conferidos no caminho do impulso (studs).
+local DASH_PATH_STEP = 1.5
+
+-- O impulso do bot só vale se todo o trajeto (a distância inteira da
+-- arrancada) for chão inteiro e fora de perigo: nada de cair num buraco.
+local function dashPathSafe(view: View, floor: number, from: Vector3, direction: Vector3, avoid: { [number]: boolean }): boolean
+	local flat = Vector3.new(direction.X, 0, direction.Z)
+	if flat.Magnitude < 1e-3 then
+		return false
+	end
+	local unit = flat.Unit
+	local distance = DashConfig.Speed * DashConfig.Duration
+	local travelled = DASH_PATH_STEP
+	while travelled <= distance + DASH_PATH_STEP do
+		local point = from + (unit * travelled)
+		local row, column = BotGrid.cellOf(view.grid, point.X, point.Z)
+		local key = BotGrid.key(floor, row, column)
+		if not view.intact[key] or avoid[key] == true then
+			return false
+		end
+		travelled += DASH_PATH_STEP
+	end
+	return true
+end
+
 -- Escolhe (ou mantém) o destino e pula buracos no caminho.
 local function steer(brain: Brain, root: BasePart, humanoid: Humanoid, view: View, now: number)
 	local floor = BotArenaView.floorAt(view, root.Position.Y)
@@ -159,7 +186,13 @@ local function steer(brain: Brain, root: BasePart, humanoid: Humanoid, view: Vie
 		if goalRow ~= nil and goalColumn ~= nil then
 			local x, z = BotGrid.center(grid, goalRow, goalColumn)
 			brain.goalKey = BotGrid.key(floor, goalRow, goalColumn)
-			moveTo(brain, humanoid, Vector3.new(x, view.floorTops[floor] + ROOT_HEIGHT, z), now)
+			local goal = Vector3.new(x, view.floorTops[floor] + ROOT_HEIGHT, z)
+			moveTo(brain, humanoid, goal, now)
+			-- Em perigo: arranca com o impulso na direção do lugar seguro.
+			local direction = goal - root.Position
+			if inDanger and level.UsesDash and dashPathSafe(view, floor, root.Position, direction, avoid) then
+				DashService.dashBot(brain.bot, direction)
+			end
 		end
 		return
 	end

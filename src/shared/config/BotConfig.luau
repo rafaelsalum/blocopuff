@@ -43,6 +43,8 @@ export type LevelConfig = {
 	ChaseWeight: number,
 	-- Chance, por tiro, de mirar numa armadilha pronta com alguém perto.
 	TrapChance: number,
+	-- Usa o impulso para sair de um bloco piscando ou de área de armadilha.
+	UsesDash: boolean,
 }
 
 export type BrainConfig = {
@@ -150,6 +152,7 @@ local BotConfig: BotConfig = {
 			DodgeWarnings = false,
 			ChaseWeight = 0.2,
 			TrapChance = 0,
+			UsesDash = false,
 		}),
 		Normal = table.freeze({
 			ReactionTime = 0.5,
@@ -161,6 +164,7 @@ local BotConfig: BotConfig = {
 			DodgeWarnings = true,
 			ChaseWeight = 0.4,
 			TrapChance = 0.15,
+			UsesDash = true,
 		}),
 		Hard = table.freeze({
 			ReactionTime = 0.3,
@@ -172,6 +176,7 @@ local BotConfig: BotConfig = {
 			DodgeWarnings = true,
 			ChaseWeight = 0.6,
 			TrapChance = 0.25,
+			UsesDash = true,
 		}),
 	}),
 	LevelRules = table.freeze({
