@@ -31,6 +31,18 @@ local InviteController = require(script.controllers.InviteController)
 
 print("[BlocoPuff] Client initialized")
 
+-- Celular: a tela segue o aparelho (em pé ou deitado). O padrão do Roblox
+-- (LandscapeSensor) obrigava a jogar deitado.
+local orientationOk, orientationErr = pcall(function()
+	local playerGui = game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui")
+	if playerGui:IsA("PlayerGui") then
+		playerGui.ScreenOrientation = Enum.ScreenOrientation.Sensor
+	end
+end)
+if not orientationOk then
+	warn(string.format("[BlocoPuff] Failed to set screen orientation: %s", tostring(orientationErr)))
+end
+
 local hudOk, hudErr = pcall(function()
 	HudController.start()
 end)

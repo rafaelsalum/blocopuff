@@ -58,6 +58,7 @@ export type AdminPanelViewHandle = {
 }
 
 local GUI_NAME = "BlocoPuffAdminPanel"
+local TOPBAR_GUI_NAME = "BlocoPuffAdminTopbar"
 local PANEL_WIDTH = 660
 local PANEL_HEIGHT = 610
 local HEADER_HEIGHT = 76
@@ -144,19 +145,25 @@ end
 function AdminPanelView.new(playerGui: PlayerGui, callbacks: AdminPanelCallbacks): AdminPanelViewHandle
 	local screenGui = UiTheme.createScreenGui(GUI_NAME, playerGui, 60)
 
-	local openButton = UiKit.createButton(screenGui, {
+	-- Botão de abrir na barra do topo, logo depois dos botões do Roblox
+	-- (área TopbarSafeInsets): fora do controle de movimento do celular e
+	-- dos botões de tiro e pulo.
+	local topbarGui = UiTheme.createScreenGui(TOPBAR_GUI_NAME, playerGui, 60)
+	topbarGui.ScreenInsets = Enum.ScreenInsets.TopbarSafeInsets
+	local openButton = UiKit.createButton(topbarGui, {
 		name = "OpenButton",
-		text = "ADM",
-		variant = "Gold",
-		-- Canto inferior esquerdo: longe do HUD (topo), dos avisos (borda
-		-- esquerda, meio) e dos botões de tiro e pulo (canto direito).
-		size = UDim2.fromOffset(48, 48),
-		position = UDim2.new(0, 16, 1, -16),
-		anchorPoint = Vector2.new(0, 1),
+		text = "🛡️",
+		-- Discreto: neutro e menor que os botões do Roblox ao lado.
+		variant = "Neutral",
+		size = UDim2.fromScale(0.6, 0.6),
+		position = UDim2.new(0, 6, 0.5, 0),
+		anchorPoint = Vector2.new(0, 0.5),
 		textSize = 13,
 		round = true,
 		selectionOrder = 100,
 	})
+	-- Quadrado do tamanho da barra (a altura muda entre aparelhos).
+	openButton.root.SizeConstraint = Enum.SizeConstraint.RelativeYY
 
 	local overlay = Instance.new("Frame")
 	overlay.Name = "Overlay"
@@ -650,6 +657,7 @@ function AdminPanelView.new(playerGui: PlayerGui, callbacks: AdminPanelCallbacks
 			connection:Disconnect()
 		end
 		screenGui:Destroy()
+		topbarGui:Destroy()
 	end
 
 	return handle
