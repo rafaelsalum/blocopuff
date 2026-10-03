@@ -1,5 +1,16 @@
 --!strict
 
+-- Primeiro de tudo: celular só deitado (antes de carregar o resto).
+local OrientationController = require(script.controllers.OrientationController)
+task.spawn(function()
+	local orientationOk, orientationErr = pcall(function()
+		OrientationController.start()
+	end)
+	if not orientationOk then
+		warn(string.format("[BlocoPuff] Failed to enforce screen orientation: %s", tostring(orientationErr)))
+	end
+end)
+
 local HudController = require(script.controllers.HudController)
 local PuffadorController = require(script.controllers.PuffadorController)
 local PuffShotController = require(script.controllers.PuffShotController)
@@ -31,18 +42,6 @@ local InviteController = require(script.controllers.InviteController)
 local DashController = require(script.controllers.DashController)
 
 print("[BlocoPuff] Client initialized")
-
--- Celular: só deitado (gira entre os dois lados). Em pé a arena e os
--- controles ficam apertados demais para jogar bem.
-local orientationOk, orientationErr = pcall(function()
-	local playerGui = game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui")
-	if playerGui:IsA("PlayerGui") then
-		playerGui.ScreenOrientation = Enum.ScreenOrientation.LandscapeSensor
-	end
-end)
-if not orientationOk then
-	warn(string.format("[BlocoPuff] Failed to set screen orientation: %s", tostring(orientationErr)))
-end
 
 local hudOk, hudErr = pcall(function()
 	HudController.start()
