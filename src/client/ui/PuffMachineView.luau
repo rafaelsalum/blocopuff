@@ -42,7 +42,9 @@ type OddsRow = {
 }
 
 local GUI_NAME = "BlocoPuffPuffMachine"
-local PANEL_SIZE = Vector2.new(580, 420)
+local PANEL_SIZE = Vector2.new(780, 450)
+local CABINET_WIDTH = 310
+local ODDS_ROW = 36
 local MIN_SPIN_TIME = RewardConfig.MachineRevealTime
 local SPIN_STEP = 0.08
 local SPIN_TIMEOUT = 8
@@ -76,9 +78,7 @@ function PuffMachineView.new(
 	root.Size = UDim2.fromOffset(PANEL_SIZE.X, PANEL_SIZE.Y)
 	root.BackgroundTransparency = 1
 	root.Parent = screenGui
-	local responsive = ResponsiveScale.attach(root, Vector2.new(1280, 720), 0.55, 1.0)
-	local pop = Instance.new("UIScale")
-	pop.Parent = root
+	local responsive = ResponsiveScale.fit(root, PANEL_SIZE, ResponsiveScale.Modal)
 
 	UiTheme.createShadow(root, UDim2.fromScale(0.5, 0.5), UDim2.fromScale(1, 1), 20)
 	local card = Instance.new("Frame")
@@ -88,9 +88,9 @@ function PuffMachineView.new(
 	card.Parent = root
 	UiTheme.stylePanel(card, { accent = UiTheme.Colors.Gold, radius = 20 })
 
-	local title = UiTheme.createLabel(card, "Title", "🎰 PUFF MACHINE", UiTheme.Fonts.Display, 28, UiTheme.Colors.Gold)
+	local title = UiTheme.createLabel(card, "Title", "🎰 PUFF MACHINE", UiTheme.Fonts.Display, 32, UiTheme.Colors.Gold)
 	title.Position = UDim2.fromOffset(20, 12)
-	title.Size = UDim2.new(1, -90, 0, 36)
+	title.Size = UDim2.new(1, -100, 0, 40)
 	title.TextXAlignment = Enum.TextXAlignment.Left
 	title.ZIndex = 3
 	UiTheme.addTextOutline(title, 2.5)
@@ -99,18 +99,18 @@ function PuffMachineView.new(
 		name = "Close",
 		text = "✕",
 		variant = "Neutral",
-		size = UDim2.fromOffset(40, 36),
-		position = UDim2.new(1, -16, 0, 12),
+		size = UDim2.fromOffset(56, 48),
+		position = UDim2.new(1, -14, 0, 10),
 		anchorPoint = Vector2.new(1, 0),
-		textSize = 18,
+		textSize = 24,
 		zIndex = 4,
 	})
 
 	-- Máquina (esquerda).
 	local cabinet = Instance.new("Frame")
 	cabinet.Name = "Cabinet"
-	cabinet.Position = UDim2.fromOffset(20, 58)
-	cabinet.Size = UDim2.new(0, 250, 1, -96)
+	cabinet.Position = UDim2.fromOffset(20, 64)
+	cabinet.Size = UDim2.new(0, CABINET_WIDTH, 1, -104)
 	cabinet.BackgroundColor3 = UiTheme.Colors.White
 	cabinet.ZIndex = 3
 	cabinet.Parent = card
@@ -122,7 +122,7 @@ function PuffMachineView.new(
 	capsule.Name = "Capsule"
 	capsule.AnchorPoint = Vector2.new(0.5, 0)
 	capsule.Position = UDim2.new(0.5, 0, 0, 14)
-	capsule.Size = UDim2.fromOffset(104, 104)
+	capsule.Size = UDim2.fromOffset(116, 116)
 	capsule.BackgroundColor3 = UiTheme.Colors.White
 	capsule.ZIndex = 4
 	capsule.Parent = cabinet
@@ -131,26 +131,26 @@ function PuffMachineView.new(
 	local capsuleGradient = UiTheme.addGradient(capsule, IDLE_COLOR, IDLE_COLOR, 45)
 	local capsuleScale = Instance.new("UIScale")
 	capsuleScale.Parent = capsule
-	local capsuleMark = UiTheme.createLabel(capsule, "Mark", "?", UiTheme.Fonts.Display, 44, UiTheme.Colors.InkSoft)
+	local capsuleMark = UiTheme.createLabel(capsule, "Mark", "?", UiTheme.Fonts.Display, 50, UiTheme.Colors.InkSoft)
 	capsuleMark.Size = UDim2.fromScale(1, 1)
 	capsuleMark.ZIndex = 5
 
-	local resultName = UiTheme.createLabel(cabinet, "ResultName", "Gire para ganhar um Puff!", UiTheme.Fonts.Display, 18, UiTheme.Colors.Ink)
-	resultName.Position = UDim2.fromOffset(10, 124)
-	resultName.Size = UDim2.new(1, -20, 0, 24)
+	local resultName = UiTheme.createLabel(cabinet, "ResultName", "Gire para ganhar um Puff!", UiTheme.Fonts.Display, 22, UiTheme.Colors.Ink)
+	resultName.Position = UDim2.fromOffset(10, 136)
+	resultName.Size = UDim2.new(1, -20, 0, 28)
 	resultName.TextScaled = true
 	resultName.ZIndex = 4
-	UiTheme.addTextConstraint(resultName, 12, 18)
+	UiTheme.addTextConstraint(resultName, 15, 22)
 	UiTheme.addTextOutline(resultName, 1.5)
 
-	local resultInfo = UiTheme.createLabel(cabinet, "ResultInfo", "", UiTheme.Fonts.BodyBold, 13, UiTheme.Colors.InkSoft)
-	resultInfo.Position = UDim2.fromOffset(10, 148)
-	resultInfo.Size = UDim2.new(1, -20, 0, 18)
+	local resultInfo = UiTheme.createLabel(cabinet, "ResultInfo", "", UiTheme.Fonts.BodyBold, 16, UiTheme.Colors.InkSoft)
+	resultInfo.Position = UDim2.fromOffset(10, 164)
+	resultInfo.Size = UDim2.new(1, -20, 0, 22)
 	resultInfo.ZIndex = 4
 
-	local balance = UiTheme.createLabel(cabinet, "Balance", "🎟 0", UiTheme.Fonts.Display, 22, UiTheme.Colors.Gold)
-	balance.Position = UDim2.fromOffset(10, 172)
-	balance.Size = UDim2.new(1, -20, 0, 28)
+	local balance = UiTheme.createLabel(cabinet, "Balance", "🎟 0", UiTheme.Fonts.Display, 26, UiTheme.Colors.Gold)
+	balance.Position = UDim2.fromOffset(10, 188)
+	balance.Size = UDim2.new(1, -20, 0, 32)
 	balance.ZIndex = 4
 	UiTheme.addTextOutline(balance, 2)
 
@@ -158,10 +158,10 @@ function PuffMachineView.new(
 		name = "Pull",
 		text = string.format("GIRAR  ·  %d 🎟", RewardConfig.MachineCost),
 		variant = "Gold",
-		size = UDim2.new(1, -28, 0, 42),
+		size = UDim2.new(1, -28, 0, 52),
 		position = UDim2.new(0.5, 0, 1, -12),
 		anchorPoint = Vector2.new(0.5, 1),
-		textSize = 17,
+		textSize = 21,
 		zIndex = 5,
 	})
 
@@ -169,10 +169,10 @@ function PuffMachineView.new(
 		name = "ShowPuffdex",
 		text = "VER NO PUFFDEX",
 		variant = "Neutral",
-		size = UDim2.new(1, -28, 0, 30),
-		position = UDim2.new(0.5, 0, 1, -60),
+		size = UDim2.new(1, -28, 0, 40),
+		position = UDim2.new(0.5, 0, 1, -70),
 		anchorPoint = Vector2.new(0.5, 1),
-		textSize = 13,
+		textSize = 17,
 		zIndex = 5,
 	})
 	puffdexButton.root.Visible = false
@@ -181,52 +181,52 @@ function PuffMachineView.new(
 	local info = Instance.new("Frame")
 	info.Name = "Info"
 	info.AnchorPoint = Vector2.new(1, 0)
-	info.Position = UDim2.new(1, -20, 0, 58)
-	info.Size = UDim2.new(1, -310, 1, -96)
+	info.Position = UDim2.new(1, -20, 0, 64)
+	info.Size = UDim2.new(1, -(CABINET_WIDTH + 60), 1, -104)
 	info.BackgroundColor3 = UiTheme.Colors.Outline
 	info.BackgroundTransparency = 0.35
 	info.ZIndex = 3
 	info.Parent = card
 	UiTheme.addCorner(info, 14)
 
-	local oddsTitle = UiTheme.createLabel(info, "OddsTitle", "CHANCES", UiTheme.Fonts.Display, 16, UiTheme.Colors.Ink)
-	oddsTitle.Position = UDim2.fromOffset(14, 10)
-	oddsTitle.Size = UDim2.new(1, -28, 0, 20)
+	local oddsTitle = UiTheme.createLabel(info, "OddsTitle", "CHANCES", UiTheme.Fonts.Display, 20, UiTheme.Colors.Ink)
+	oddsTitle.Position = UDim2.fromOffset(16, 10)
+	oddsTitle.Size = UDim2.new(1, -32, 0, 24)
 	oddsTitle.TextXAlignment = Enum.TextXAlignment.Left
 	oddsTitle.ZIndex = 4
 
 	local rows: { OddsRow } = {}
 	for index, weight in ipairs(RewardConfig.MachineOdds) do
 		local rarityInfo = PuffCatalog.rarity(weight.rarity)
-		local y = 34 + (index - 1) * 28
+		local y = 40 + (index - 1) * ODDS_ROW
 		local dot = Instance.new("Frame")
-		dot.Position = UDim2.fromOffset(14, y + 6)
-		dot.Size = UDim2.fromOffset(12, 12)
+		dot.Position = UDim2.fromOffset(16, y + 8)
+		dot.Size = UDim2.fromOffset(16, 16)
 		dot.BackgroundColor3 = rarityInfo.color
 		dot.ZIndex = 4
 		dot.Parent = info
 		UiTheme.addCorner(dot, 999)
-		local name = UiTheme.createLabel(info, `Odds{weight.rarity}`, rarityInfo.label, UiTheme.Fonts.BodyBold, 14, rarityInfo.color)
-		name.Position = UDim2.fromOffset(32, y)
-		name.Size = UDim2.new(0.45, -32, 0, 24)
+		local name = UiTheme.createLabel(info, `Odds{weight.rarity}`, rarityInfo.label, UiTheme.Fonts.BodyBold, 18, rarityInfo.color)
+		name.Position = UDim2.fromOffset(40, y)
+		name.Size = UDim2.new(0.45, -40, 0, 32)
 		name.TextXAlignment = Enum.TextXAlignment.Left
 		name.ZIndex = 4
-		local percent = UiTheme.createLabel(info, `Percent{weight.rarity}`, `{weight.percent}%`, UiTheme.Fonts.Display, 15, UiTheme.Colors.Ink)
+		local percent = UiTheme.createLabel(info, `Percent{weight.rarity}`, `{weight.percent}%`, UiTheme.Fonts.Display, 19, UiTheme.Colors.Ink)
 		percent.Position = UDim2.new(0.45, 0, 0, y)
-		percent.Size = UDim2.new(0.25, 0, 0, 24)
+		percent.Size = UDim2.new(0.25, 0, 0, 32)
 		percent.ZIndex = 4
-		local owned = UiTheme.createLabel(info, `Owned{weight.rarity}`, "", UiTheme.Fonts.Body, 12, UiTheme.Colors.InkSoft)
+		local owned = UiTheme.createLabel(info, `Owned{weight.rarity}`, "", UiTheme.Fonts.Body, 15, UiTheme.Colors.InkSoft)
 		owned.Position = UDim2.new(0.7, 0, 0, y)
-		owned.Size = UDim2.new(0.3, -14, 0, 24)
+		owned.Size = UDim2.new(0.3, -16, 0, 32)
 		owned.TextXAlignment = Enum.TextXAlignment.Right
 		owned.ZIndex = 4
 		table.insert(rows, { rarity = weight.rarity, owned = owned })
 	end
 
-	local rulesTop = 34 + #RewardConfig.MachineOdds * 28 + 8
-	local pityLabel = UiTheme.createLabel(info, "Pity", "", UiTheme.Fonts.BodyBold, 13, UiTheme.Colors.Gold)
-	pityLabel.Position = UDim2.fromOffset(14, rulesTop)
-	pityLabel.Size = UDim2.new(1, -28, 0, 34)
+	local rulesTop = 40 + #RewardConfig.MachineOdds * ODDS_ROW + 6
+	local pityLabel = UiTheme.createLabel(info, "Pity", "", UiTheme.Fonts.BodyBold, 16, UiTheme.Colors.Gold)
+	pityLabel.Position = UDim2.fromOffset(16, rulesTop)
+	pityLabel.Size = UDim2.new(1, -32, 0, 42)
 	pityLabel.TextXAlignment = Enum.TextXAlignment.Left
 	pityLabel.ZIndex = 4
 
@@ -238,18 +238,18 @@ function PuffMachineView.new(
 			RewardConfig.DuplicateRefund
 		),
 		UiTheme.Fonts.Body,
-		12,
+		15,
 		UiTheme.Colors.InkSoft
 	)
-	rules.Position = UDim2.fromOffset(14, rulesTop + 38)
-	rules.Size = UDim2.new(1, -28, 0, 60)
+	rules.Position = UDim2.fromOffset(16, rulesTop + 46)
+	rules.Size = UDim2.new(1, -32, 0, 70)
 	rules.TextXAlignment = Enum.TextXAlignment.Left
 	rules.TextYAlignment = Enum.TextYAlignment.Top
 	rules.ZIndex = 4
 
-	local footer = UiTheme.createLabel(card, "Footer", "Sem compras: tickets só saem jogando. Puffs não dão vantagem.", UiTheme.Fonts.Body, 12, UiTheme.Colors.InkSoft)
-	footer.Position = UDim2.new(0, 20, 1, -32)
-	footer.Size = UDim2.new(1, -40, 0, 20)
+	local footer = UiTheme.createLabel(card, "Footer", "Sem compras: tickets só saem jogando. Puffs não dão vantagem.", UiTheme.Fonts.Body, 15, UiTheme.Colors.InkSoft)
+	footer.Position = UDim2.new(0, 20, 1, -34)
+	footer.Size = UDim2.new(1, -40, 0, 22)
 	footer.TextXAlignment = Enum.TextXAlignment.Left
 	footer.ZIndex = 3
 
@@ -380,8 +380,7 @@ function PuffMachineView.new(
 
 	handle.open = function()
 		screenGui.Enabled = true
-		pop.Scale = 0.9
-		TweenService:Create(pop, TweenInfo.new(0.25, Enum.EasingStyle.Back), { Scale = 1 }):Play()
+		responsive.pop(0.9, 0.25)
 		onOpened()
 	end
 

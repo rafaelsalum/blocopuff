@@ -48,8 +48,15 @@ type SecretBadge = {
 }
 
 local GUI_NAME = "BlocoPuffChallenges"
-local PANEL_SIZE = Vector2.new(580, 470)
-local ROW_HEIGHT = 46
+-- Deitado (o celular só joga deitado): desafios do dia à esquerda,
+-- retorno diário à direita e as conquistas secretas embaixo.
+local PANEL_SIZE = Vector2.new(840, 450)
+local COLUMNS_TOP = 64
+local LEFT_WIDTH = 440
+local COLUMN_GAP = 16
+local ROW_HEIGHT = 70
+local DAY_SIZE = Vector2.new(82, 58)
+local SECRET_HEIGHT = 62
 
 local ChallengesView = {}
 
@@ -74,10 +81,10 @@ local function formatCountdown(seconds: number): string
 	return string.format("Novos desafios em %d min", math.max(1, minutes))
 end
 
-local function sectionTitle(parent: Instance, name: string, text: string, y: number): TextLabel
-	local label = UiTheme.createLabel(parent, name, text, UiTheme.Fonts.Display, 16, UiTheme.Colors.Gold)
-	label.Position = UDim2.fromOffset(20, y)
-	label.Size = UDim2.new(1, -40, 0, 20)
+local function sectionTitle(parent: Instance, name: string, text: string, x: number, y: number, width: number): TextLabel
+	local label = UiTheme.createLabel(parent, name, text, UiTheme.Fonts.Display, 20, UiTheme.Colors.Gold)
+	label.Position = UDim2.fromOffset(x, y)
+	label.Size = UDim2.fromOffset(width, 24)
 	label.TextXAlignment = Enum.TextXAlignment.Left
 	label.ZIndex = 3
 	UiTheme.addTextOutline(label, 1.5)
@@ -95,9 +102,7 @@ function ChallengesView.new(playerGui: PlayerGui, onOpened: () -> ()): Challenge
 	root.Size = UDim2.fromOffset(PANEL_SIZE.X, PANEL_SIZE.Y)
 	root.BackgroundTransparency = 1
 	root.Parent = screenGui
-	local responsive = ResponsiveScale.attach(root, Vector2.new(1280, 720), 0.55, 1.0)
-	local pop = Instance.new("UIScale")
-	pop.Parent = root
+	local responsive = ResponsiveScale.fit(root, PANEL_SIZE, ResponsiveScale.Modal)
 
 	UiTheme.createShadow(root, UDim2.fromScale(0.5, 0.5), UDim2.fromScale(1, 1), 20)
 	local card = Instance.new("Frame")
@@ -107,17 +112,17 @@ function ChallengesView.new(playerGui: PlayerGui, onOpened: () -> ()): Challenge
 	card.Parent = root
 	UiTheme.stylePanel(card, { accent = UiTheme.Colors.Green, radius = 20 })
 
-	local title = UiTheme.createLabel(card, "Title", "📋 DESAFIOS", UiTheme.Fonts.Display, 28, UiTheme.Colors.Gold)
+	local title = UiTheme.createLabel(card, "Title", "📋 DESAFIOS", UiTheme.Fonts.Display, 32, UiTheme.Colors.Gold)
 	title.Position = UDim2.fromOffset(20, 12)
-	title.Size = UDim2.new(0, 240, 0, 36)
+	title.Size = UDim2.new(0, 280, 0, 40)
 	title.TextXAlignment = Enum.TextXAlignment.Left
 	title.ZIndex = 3
 	UiTheme.addTextOutline(title, 2.5)
 
-	local timer = UiTheme.createLabel(card, "Timer", "", UiTheme.Fonts.BodyBold, 13, UiTheme.Colors.InkSoft)
+	local timer = UiTheme.createLabel(card, "Timer", "", UiTheme.Fonts.BodyBold, 16, UiTheme.Colors.InkSoft)
 	timer.AnchorPoint = Vector2.new(1, 0)
-	timer.Position = UDim2.new(1, -68, 0, 20)
-	timer.Size = UDim2.fromOffset(240, 20)
+	timer.Position = UDim2.new(1, -84, 0, 22)
+	timer.Size = UDim2.fromOffset(320, 24)
 	timer.TextXAlignment = Enum.TextXAlignment.Right
 	timer.ZIndex = 3
 
@@ -125,34 +130,36 @@ function ChallengesView.new(playerGui: PlayerGui, onOpened: () -> ()): Challenge
 		name = "Close",
 		text = "✕",
 		variant = "Neutral",
-		size = UDim2.fromOffset(40, 36),
-		position = UDim2.new(1, -16, 0, 12),
+		size = UDim2.fromOffset(56, 48),
+		position = UDim2.new(1, -14, 0, 10),
 		anchorPoint = Vector2.new(1, 0),
-		textSize = 18,
+		textSize = 24,
 		zIndex = 4,
 	})
 
-	-- Desafios do dia.
-	sectionTitle(card, "TodayTitle", "HOJE", 56)
+	-- Desafios do dia (coluna da esquerda).
+	sectionTitle(card, "TodayTitle", "HOJE", 20, COLUMNS_TOP, LEFT_WIDTH)
 	local rows: { ChallengeRow } = {}
 	for index = 1, #DailyConfig.Tiers do
 		local frame = Instance.new("Frame")
 		frame.Name = `Challenge{index}`
-		frame.Position = UDim2.fromOffset(16, 80 + (index - 1) * (ROW_HEIGHT + 6))
-		frame.Size = UDim2.new(1, -32, 0, ROW_HEIGHT)
+		frame.Position = UDim2.fromOffset(16, COLUMNS_TOP + 28 + (index - 1) * (ROW_HEIGHT + 8))
+		frame.Size = UDim2.fromOffset(LEFT_WIDTH, ROW_HEIGHT)
 		frame.BackgroundColor3 = UiTheme.Colors.Outline
 		frame.BackgroundTransparency = 0.35
 		frame.ZIndex = 3
 		frame.Parent = card
 		UiTheme.addCorner(frame, 12)
-		local rowTitle = UiTheme.createLabel(frame, "Title", "", UiTheme.Fonts.BodyBold, 14, UiTheme.Colors.Ink)
-		rowTitle.Position = UDim2.fromOffset(12, 5)
-		rowTitle.Size = UDim2.new(1, -110, 0, 20)
+		local rowTitle = UiTheme.createLabel(frame, "Title", "", UiTheme.Fonts.BodyBold, 19, UiTheme.Colors.Ink)
+		rowTitle.Position = UDim2.fromOffset(14, 8)
+		rowTitle.Size = UDim2.new(1, -130, 0, 26)
 		rowTitle.TextXAlignment = Enum.TextXAlignment.Left
+		rowTitle.TextTruncate = Enum.TextTruncate.AtEnd
+		rowTitle.TextWrapped = false
 		rowTitle.ZIndex = 4
 		local track = Instance.new("Frame")
-		track.Position = UDim2.fromOffset(12, 29)
-		track.Size = UDim2.new(1, -170, 0, 9)
+		track.Position = UDim2.fromOffset(14, 44)
+		track.Size = UDim2.new(1, -222, 0, 12)
 		track.BackgroundColor3 = UiTheme.Colors.Track
 		track.ZIndex = 4
 		track.Parent = frame
@@ -164,41 +171,41 @@ function ChallengesView.new(playerGui: PlayerGui, onOpened: () -> ()): Challenge
 		fill.Parent = track
 		UiTheme.addCorner(fill, 999)
 		UiTheme.addGradient(fill, UiTheme.Colors.Green, UiTheme.Colors.Blue, 0)
-		local count = UiTheme.createLabel(frame, "Count", "", UiTheme.Fonts.Display, 14, UiTheme.Colors.Ink)
+		local count = UiTheme.createLabel(frame, "Count", "", UiTheme.Fonts.Display, 18, UiTheme.Colors.Ink)
 		count.AnchorPoint = Vector2.new(1, 0)
-		count.Position = UDim2.new(1, -92, 0, 22)
-		count.Size = UDim2.fromOffset(62, 22)
+		count.Position = UDim2.new(1, -118, 0, 36)
+		count.Size = UDim2.fromOffset(84, 28)
 		count.TextXAlignment = Enum.TextXAlignment.Right
 		count.ZIndex = 4
-		local reward = UiTheme.createLabel(frame, "Reward", "", UiTheme.Fonts.Display, 16, UiTheme.Colors.Gold)
+		local reward = UiTheme.createLabel(frame, "Reward", "", UiTheme.Fonts.Display, 22, UiTheme.Colors.Gold)
 		reward.AnchorPoint = Vector2.new(1, 0.5)
-		reward.Position = UDim2.new(1, -12, 0.5, 0)
-		reward.Size = UDim2.fromOffset(76, 28)
+		reward.Position = UDim2.new(1, -14, 0.5, 0)
+		reward.Size = UDim2.fromOffset(104, 36)
 		reward.TextXAlignment = Enum.TextXAlignment.Right
 		reward.ZIndex = 4
 		UiTheme.addTextOutline(reward, 1.5)
 		table.insert(rows, { frame = frame, title = rowTitle, fill = fill, count = count, reward = reward })
 	end
 
-	-- Retorno diário.
-	local dailyTop = 80 + #DailyConfig.Tiers * (ROW_HEIGHT + 6) + 8
-	sectionTitle(card, "DailyTitle", "RETORNO DIÁRIO", dailyTop)
-	local streakLabel = UiTheme.createLabel(card, "Streak", "", UiTheme.Fonts.BodyBold, 13, UiTheme.Colors.Ink)
-	streakLabel.AnchorPoint = Vector2.new(1, 0)
-	streakLabel.Position = UDim2.new(1, -20, 0, dailyTop + 2)
-	streakLabel.Size = UDim2.fromOffset(300, 18)
-	streakLabel.TextXAlignment = Enum.TextXAlignment.Right
+	-- Retorno diário (coluna da direita): os dias numa grade de 4 + 3.
+	local rightX = 16 + LEFT_WIDTH + COLUMN_GAP
+	local rightWidth = PANEL_SIZE.X - rightX - 16
+	sectionTitle(card, "DailyTitle", "RETORNO DIÁRIO", rightX + 4, COLUMNS_TOP, rightWidth)
+	local streakLabel = UiTheme.createLabel(card, "Streak", "", UiTheme.Fonts.BodyBold, 15, UiTheme.Colors.Ink)
+	streakLabel.Position = UDim2.fromOffset(rightX + 4, COLUMNS_TOP + 26)
+	streakLabel.Size = UDim2.fromOffset(rightWidth - 4, 22)
+	streakLabel.TextXAlignment = Enum.TextXAlignment.Left
 	streakLabel.ZIndex = 3
 	local days = Instance.new("Frame")
 	days.Name = "Days"
-	days.Position = UDim2.fromOffset(16, dailyTop + 24)
-	days.Size = UDim2.new(1, -32, 0, 50)
+	days.Position = UDim2.fromOffset(rightX, COLUMNS_TOP + 54)
+	days.Size = UDim2.fromOffset(rightWidth, DAY_SIZE.Y * 2 + 8)
 	days.BackgroundTransparency = 1
 	days.ZIndex = 3
 	days.Parent = card
-	local dayLayout = Instance.new("UIListLayout")
-	dayLayout.FillDirection = Enum.FillDirection.Horizontal
-	dayLayout.Padding = UDim.new(0, 6)
+	local dayLayout = Instance.new("UIGridLayout")
+	dayLayout.CellSize = UDim2.fromOffset(DAY_SIZE.X, DAY_SIZE.Y)
+	dayLayout.CellPadding = UDim2.fromOffset(8, 8)
 	dayLayout.SortOrder = Enum.SortOrder.LayoutOrder
 	dayLayout.Parent = days
 	local rewards = DailyConfig.DailyRewards
@@ -207,19 +214,18 @@ function ChallengesView.new(playerGui: PlayerGui, onOpened: () -> ()): Challenge
 		local frame = Instance.new("Frame")
 		frame.Name = `Day{index}`
 		frame.LayoutOrder = index
-		frame.Size = UDim2.new(1 / #rewards, -6, 1, 0)
 		frame.BackgroundColor3 = UiTheme.Colors.Surface
 		frame.ZIndex = 4
 		frame.Parent = days
 		UiTheme.addCorner(frame, 10)
 		local stroke = UiTheme.addStroke(frame, UiTheme.Colors.Border, 1.5)
-		local label = UiTheme.createLabel(frame, "Label", string.format("Dia %d\n🎟 %d", index, tickets), UiTheme.Fonts.BodyBold, 12, UiTheme.Colors.Ink)
+		local label = UiTheme.createLabel(frame, "Label", string.format("Dia %d\n🎟 %d", index, tickets), UiTheme.Fonts.BodyBold, 16, UiTheme.Colors.Ink)
 		label.Size = UDim2.fromScale(1, 1)
 		label.ZIndex = 5
-		local check = UiTheme.createLabel(frame, "Check", "✓", UiTheme.Fonts.Display, 14, UiTheme.Colors.Outline)
+		local check = UiTheme.createLabel(frame, "Check", "✓", UiTheme.Fonts.Display, 16, UiTheme.Colors.Outline)
 		check.AnchorPoint = Vector2.new(1, 0)
-		check.Position = UDim2.new(1, 2, 0, -4)
-		check.Size = UDim2.fromOffset(18, 18)
+		check.Position = UDim2.new(1, 4, 0, -6)
+		check.Size = UDim2.fromOffset(22, 22)
 		check.BackgroundTransparency = 0
 		check.BackgroundColor3 = UiTheme.Colors.Green
 		check.ZIndex = 6
@@ -227,25 +233,26 @@ function ChallengesView.new(playerGui: PlayerGui, onOpened: () -> ()): Challenge
 		UiTheme.addCorner(check, 999)
 		table.insert(dayBoxes, { frame = frame, stroke = stroke, label = label, check = check })
 	end
-	local graceNote = UiTheme.createLabel(card, "Grace", "Perdeu um dia? Tudo bem: a sequência continua.", UiTheme.Fonts.Body, 11, UiTheme.Colors.InkSoft)
-	graceNote.Position = UDim2.fromOffset(20, dailyTop + 78)
-	graceNote.Size = UDim2.new(1, -40, 0, 16)
+	local graceNote = UiTheme.createLabel(card, "Grace", "Perdeu um dia? Tudo bem: a sequência continua.", UiTheme.Fonts.Body, 14, UiTheme.Colors.InkSoft)
+	graceNote.Position = UDim2.fromOffset(rightX + 4, COLUMNS_TOP + 54 + DAY_SIZE.Y * 2 + 14)
+	graceNote.Size = UDim2.fromOffset(rightWidth - 4, 36)
 	graceNote.TextXAlignment = Enum.TextXAlignment.Left
+	graceNote.TextYAlignment = Enum.TextYAlignment.Top
 	graceNote.ZIndex = 3
 
-	-- Conquistas secretas.
-	local secretTop = dailyTop + 102
-	local secretTitle = sectionTitle(card, "SecretTitle", "CONQUISTAS SECRETAS", secretTop)
+	-- Conquistas secretas (faixa de baixo, largura toda).
+	local secretTop = PANEL_SIZE.Y - SECRET_HEIGHT - 44
+	local secretTitle = sectionTitle(card, "SecretTitle", "CONQUISTAS SECRETAS", 20, secretTop, PANEL_SIZE.X - 40)
 	local secretRow = Instance.new("Frame")
 	secretRow.Name = "Secrets"
-	secretRow.Position = UDim2.fromOffset(16, secretTop + 24)
-	secretRow.Size = UDim2.new(1, -32, 0, 56)
+	secretRow.Position = UDim2.fromOffset(16, secretTop + 28)
+	secretRow.Size = UDim2.new(1, -32, 0, SECRET_HEIGHT)
 	secretRow.BackgroundTransparency = 1
 	secretRow.ZIndex = 3
 	secretRow.Parent = card
 	local secretLayout = Instance.new("UIListLayout")
 	secretLayout.FillDirection = Enum.FillDirection.Horizontal
-	secretLayout.Padding = UDim.new(0, 6)
+	secretLayout.Padding = UDim.new(0, 8)
 	secretLayout.SortOrder = Enum.SortOrder.LayoutOrder
 	secretLayout.Parent = secretRow
 	local secrets = SecretCatalog.all()
@@ -254,24 +261,24 @@ function ChallengesView.new(playerGui: PlayerGui, onOpened: () -> ()): Challenge
 		local frame = Instance.new("Frame")
 		frame.Name = definition.id
 		frame.LayoutOrder = index
-		frame.Size = UDim2.new(1 / #secrets, -6, 1, 0)
+		frame.Size = UDim2.new(1 / #secrets, -8, 1, 0)
 		frame.BackgroundColor3 = UiTheme.Colors.Surface
 		frame.ZIndex = 4
 		frame.Parent = secretRow
 		UiTheme.addCorner(frame, 10)
 		local stroke = UiTheme.addStroke(frame, UiTheme.Colors.Border, 1.5)
-		local name = UiTheme.createLabel(frame, "Name", "???", UiTheme.Fonts.Display, 13, UiTheme.Colors.InkSoft)
-		name.Position = UDim2.fromOffset(4, 4)
-		name.Size = UDim2.new(1, -8, 0, 18)
+		local name = UiTheme.createLabel(frame, "Name", "???", UiTheme.Fonts.Display, 16, UiTheme.Colors.InkSoft)
+		name.Position = UDim2.fromOffset(6, 4)
+		name.Size = UDim2.new(1, -12, 0, 22)
 		name.TextScaled = true
 		name.ZIndex = 5
-		UiTheme.addTextConstraint(name, 9, 13)
-		local hint = UiTheme.createLabel(frame, "Hint", definition.hint, UiTheme.Fonts.Body, 10, UiTheme.Colors.InkSoft)
-		hint.Position = UDim2.fromOffset(4, 22)
-		hint.Size = UDim2.new(1, -8, 1, -26)
+		UiTheme.addTextConstraint(name, 11, 16)
+		local hint = UiTheme.createLabel(frame, "Hint", definition.hint, UiTheme.Fonts.Body, 13, UiTheme.Colors.InkSoft)
+		hint.Position = UDim2.fromOffset(6, 26)
+		hint.Size = UDim2.new(1, -12, 1, -30)
 		hint.TextScaled = true
 		hint.ZIndex = 5
-		UiTheme.addTextConstraint(hint, 7, 10)
+		UiTheme.addTextConstraint(hint, 10, 14)
 		badges[definition.id] = { frame = frame, name = name, hint = hint, stroke = stroke }
 	end
 
@@ -337,8 +344,7 @@ function ChallengesView.new(playerGui: PlayerGui, onOpened: () -> ()): Challenge
 
 	handle.open = function()
 		screenGui.Enabled = true
-		pop.Scale = 0.9
-		TweenService:Create(pop, TweenInfo.new(0.25, Enum.EasingStyle.Back), { Scale = 1 }):Play()
+		responsive.pop(0.9, 0.25)
 		generation += 1
 		local current = generation
 		task.spawn(function()

@@ -6,7 +6,6 @@
 -- chamar amigos de fora do servidor. Só visual: tudo é pedido ao servidor.
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local TweenService = game:GetService("TweenService")
 
 local SocialConfig = require(ReplicatedStorage.Shared.config.SocialConfig)
 local ResponsiveScale = require(script.Parent.ResponsiveScale)
@@ -49,8 +48,13 @@ export type PartyViewHandle = {
 }
 
 local GUI_NAME = "BlocoPuffParty"
-local PANEL_SIZE = Vector2.new(560, 430)
-local ROW_HEIGHT = 36
+local PANEL_SIZE = Vector2.new(720, 450)
+-- A lista cabe a Party cheia (4) sem rolar.
+local ROW_HEIGHT = 44
+local LIST_TOP = 112
+local LIST_HEIGHT = 212
+local ROW_BUTTON_SIZE = UDim2.fromOffset(112, 36)
+local ROW_BUTTON_TEXT = 15
 
 local PartyView = {}
 
@@ -63,9 +67,9 @@ local function createRow(parent: Instance, name: string, order: number): (Frame,
 	row.ZIndex = 4
 	row.Parent = parent
 	UiTheme.addCorner(row, 10)
-	local label = UiTheme.createLabel(row, "Name", "", UiTheme.Fonts.BodyBold, 14, UiTheme.Colors.Ink)
-	label.Position = UDim2.fromOffset(10, 0)
-	label.Size = UDim2.new(1, -110, 1, 0)
+	local label = UiTheme.createLabel(row, "Name", "", UiTheme.Fonts.BodyBold, 18, UiTheme.Colors.Ink)
+	label.Position = UDim2.fromOffset(12, 0)
+	label.Size = UDim2.new(1, -136, 1, 0)
 	label.TextXAlignment = Enum.TextXAlignment.Left
 	label.TextTruncate = Enum.TextTruncate.AtEnd
 	label.TextWrapped = false
@@ -81,7 +85,7 @@ local function createList(parent: Instance, name: string, position: UDim2, size:
 	list.BackgroundColor3 = UiTheme.Colors.Outline
 	list.BackgroundTransparency = 0.35
 	list.BorderSizePixel = 0
-	list.ScrollBarThickness = 5
+	list.ScrollBarThickness = 8
 	list.ScrollBarImageColor3 = UiTheme.Colors.Border
 	list.AutomaticCanvasSize = Enum.AutomaticSize.Y
 	list.CanvasSize = UDim2.new()
@@ -90,7 +94,7 @@ local function createList(parent: Instance, name: string, position: UDim2, size:
 	UiTheme.addCorner(list, 12)
 	UiTheme.addPadding(list, 6, 6)
 	local layout = Instance.new("UIListLayout")
-	layout.Padding = UDim.new(0, 4)
+	layout.Padding = UDim.new(0, 6)
 	layout.SortOrder = Enum.SortOrder.LayoutOrder
 	layout.Parent = list
 	return list
@@ -107,9 +111,7 @@ function PartyView.new(playerGui: PlayerGui, callbacks: PartyViewCallbacks): Par
 	root.Size = UDim2.fromOffset(PANEL_SIZE.X, PANEL_SIZE.Y)
 	root.BackgroundTransparency = 1
 	root.Parent = screenGui
-	local responsive = ResponsiveScale.attach(root, Vector2.new(1280, 720), 0.55, 1.0)
-	local pop = Instance.new("UIScale")
-	pop.Parent = root
+	local responsive = ResponsiveScale.fit(root, PANEL_SIZE, ResponsiveScale.Modal)
 
 	UiTheme.createShadow(root, UDim2.fromScale(0.5, 0.5), UDim2.fromScale(1, 1), 20)
 	local card = Instance.new("Frame")
@@ -119,9 +121,9 @@ function PartyView.new(playerGui: PlayerGui, callbacks: PartyViewCallbacks): Par
 	card.Parent = root
 	UiTheme.stylePanel(card, { accent = UiTheme.Colors.Blue, radius = 20 })
 
-	local title = UiTheme.createLabel(card, "Title", "👥 PARTY", UiTheme.Fonts.Display, 28, UiTheme.Colors.Gold)
+	local title = UiTheme.createLabel(card, "Title", "👥 PARTY", UiTheme.Fonts.Display, 32, UiTheme.Colors.Gold)
 	title.Position = UDim2.fromOffset(20, 12)
-	title.Size = UDim2.new(0, 200, 0, 36)
+	title.Size = UDim2.new(0, 240, 0, 40)
 	title.TextXAlignment = Enum.TextXAlignment.Left
 	title.ZIndex = 3
 	UiTheme.addTextOutline(title, 2.5)
@@ -131,11 +133,11 @@ function PartyView.new(playerGui: PlayerGui, callbacks: PartyViewCallbacks): Par
 		"Subtitle",
 		string.format("Até %d jogadores. Vocês entram juntos nas partidas.", SocialConfig.PartyMaxSize),
 		UiTheme.Fonts.Body,
-		12,
+		16,
 		UiTheme.Colors.InkSoft
 	)
-	subtitle.Position = UDim2.fromOffset(20, 46)
-	subtitle.Size = UDim2.new(1, -40, 0, 16)
+	subtitle.Position = UDim2.fromOffset(20, 52)
+	subtitle.Size = UDim2.new(1, -100, 0, 22)
 	subtitle.TextXAlignment = Enum.TextXAlignment.Left
 	subtitle.ZIndex = 3
 
@@ -143,35 +145,35 @@ function PartyView.new(playerGui: PlayerGui, callbacks: PartyViewCallbacks): Par
 		name = "Close",
 		text = "✕",
 		variant = "Neutral",
-		size = UDim2.fromOffset(40, 36),
-		position = UDim2.new(1, -16, 0, 12),
+		size = UDim2.fromOffset(56, 48),
+		position = UDim2.new(1, -14, 0, 10),
 		anchorPoint = Vector2.new(1, 0),
-		textSize = 18,
+		textSize = 24,
 		zIndex = 4,
 	})
 
 	local columnWidth = (PANEL_SIZE.X - 52) / 2
-	local partyTitle = UiTheme.createLabel(card, "PartyTitle", "SUA PARTY", UiTheme.Fonts.Display, 15, UiTheme.Colors.Ink)
-	partyTitle.Position = UDim2.fromOffset(20, 70)
-	partyTitle.Size = UDim2.fromOffset(columnWidth, 20)
+	local partyTitle = UiTheme.createLabel(card, "PartyTitle", "SUA PARTY", UiTheme.Fonts.Display, 19, UiTheme.Colors.Ink)
+	partyTitle.Position = UDim2.fromOffset(20, 82)
+	partyTitle.Size = UDim2.fromOffset(columnWidth, 26)
 	partyTitle.TextXAlignment = Enum.TextXAlignment.Left
 	partyTitle.ZIndex = 3
-	local memberList = createList(card, "Members", UDim2.fromOffset(16, 94), UDim2.fromOffset(columnWidth, 210))
+	local memberList = createList(card, "Members", UDim2.fromOffset(16, LIST_TOP), UDim2.fromOffset(columnWidth, LIST_HEIGHT))
 
-	local inviteTitle = UiTheme.createLabel(card, "InviteTitle", "CHAMAR", UiTheme.Fonts.Display, 15, UiTheme.Colors.Ink)
-	inviteTitle.Position = UDim2.fromOffset(36 + columnWidth, 70)
-	inviteTitle.Size = UDim2.fromOffset(columnWidth, 20)
+	local inviteTitle = UiTheme.createLabel(card, "InviteTitle", "CHAMAR", UiTheme.Fonts.Display, 19, UiTheme.Colors.Ink)
+	inviteTitle.Position = UDim2.fromOffset(36 + columnWidth, 82)
+	inviteTitle.Size = UDim2.fromOffset(columnWidth, 26)
 	inviteTitle.TextXAlignment = Enum.TextXAlignment.Left
 	inviteTitle.ZIndex = 3
-	local candidateList = createList(card, "Candidates", UDim2.fromOffset(36 + columnWidth, 94), UDim2.fromOffset(columnWidth, 210))
+	local candidateList = createList(card, "Candidates", UDim2.fromOffset(36 + columnWidth, LIST_TOP), UDim2.fromOffset(columnWidth, LIST_HEIGHT))
 
 	local leaveButton = UiKit.createButton(card, {
 		name = "Leave",
 		text = "SAIR DA PARTY",
 		variant = "Danger",
-		size = UDim2.fromOffset(columnWidth, 38),
-		position = UDim2.fromOffset(16, 314),
-		textSize = 14,
+		size = UDim2.fromOffset(columnWidth, 50),
+		position = UDim2.fromOffset(16, LIST_TOP + LIST_HEIGHT + 10),
+		textSize = 18,
 		zIndex = 4,
 	})
 	leaveButton.button.Activated:Connect(function()
@@ -183,9 +185,9 @@ function PartyView.new(playerGui: PlayerGui, callbacks: PartyViewCallbacks): Par
 		name = "InviteFriends",
 		text = "CHAMAR AMIGOS PARA O JOGO",
 		variant = "Primary",
-		size = UDim2.fromOffset(columnWidth, 38),
-		position = UDim2.fromOffset(36 + columnWidth, 314),
-		textSize = 13,
+		size = UDim2.fromOffset(columnWidth, 50),
+		position = UDim2.fromOffset(36 + columnWidth, LIST_TOP + LIST_HEIGHT + 10),
+		textSize = 17,
 		zIndex = 4,
 	})
 	friendsButton.button.Activated:Connect(function()
@@ -193,15 +195,15 @@ function PartyView.new(playerGui: PlayerGui, callbacks: PartyViewCallbacks): Par
 		callbacks.inviteFriends()
 	end)
 
-	local status = UiTheme.createLabel(card, "Status", "", UiTheme.Fonts.BodyBold, 13, UiTheme.Colors.Gold)
-	status.Position = UDim2.new(0, 20, 1, -58)
-	status.Size = UDim2.new(1, -40, 0, 20)
+	local status = UiTheme.createLabel(card, "Status", "", UiTheme.Fonts.BodyBold, 16, UiTheme.Colors.Gold)
+	status.Position = UDim2.new(0, 20, 1, -64)
+	status.Size = UDim2.new(1, -40, 0, 22)
 	status.TextXAlignment = Enum.TextXAlignment.Left
 	status.ZIndex = 3
 
-	local footer = UiTheme.createLabel(card, "Footer", "Na partida cada um joga por si: a Party só garante que vocês entrem juntos.", UiTheme.Fonts.Body, 11, UiTheme.Colors.InkSoft)
-	footer.Position = UDim2.new(0, 20, 1, -32)
-	footer.Size = UDim2.new(1, -40, 0, 18)
+	local footer = UiTheme.createLabel(card, "Footer", "Na partida cada um joga por si: a Party só garante que vocês entrem juntos.", UiTheme.Fonts.Body, 14, UiTheme.Colors.InkSoft)
+	footer.Position = UDim2.new(0, 20, 1, -36)
+	footer.Size = UDim2.new(1, -40, 0, 22)
 	footer.TextXAlignment = Enum.TextXAlignment.Left
 	footer.ZIndex = 3
 
@@ -227,7 +229,7 @@ function PartyView.new(playerGui: PlayerGui, callbacks: PartyViewCallbacks): Par
 			label.TextWrapped = true
 			label.Size = UDim2.new(1, -20, 1, 0)
 			label.Font = UiTheme.Fonts.Body
-			label.TextSize = 12
+			label.TextSize = 15
 			leaveButton.root.Visible = false
 			return
 		end
@@ -244,10 +246,10 @@ function PartyView.new(playerGui: PlayerGui, callbacks: PartyViewCallbacks): Par
 					name = "Kick",
 					text = "REMOVER",
 					variant = "Neutral",
-					size = UDim2.fromOffset(84, 26),
+					size = ROW_BUTTON_SIZE,
 					position = UDim2.new(1, -6, 0.5, 0),
 					anchorPoint = Vector2.new(1, 0.5),
-					textSize = 11,
+					textSize = ROW_BUTTON_TEXT,
 					zIndex = 6,
 				})
 				kick.button.Activated:Connect(function()
@@ -278,10 +280,10 @@ function PartyView.new(playerGui: PlayerGui, callbacks: PartyViewCallbacks): Par
 					name = "Invite",
 					text = "CHAMAR",
 					variant = "Success",
-					size = UDim2.fromOffset(84, 26),
+					size = ROW_BUTTON_SIZE,
 					position = UDim2.new(1, -6, 0.5, 0),
 					anchorPoint = Vector2.new(1, 0.5),
-					textSize = 11,
+					textSize = ROW_BUTTON_TEXT,
 					zIndex = 6,
 				})
 				button.setEnabled(not full)
@@ -297,7 +299,7 @@ function PartyView.new(playerGui: PlayerGui, callbacks: PartyViewCallbacks): Par
 			label.TextWrapped = true
 			label.Size = UDim2.new(1, -20, 1, 0)
 			label.Font = UiTheme.Fonts.Body
-			label.TextSize = 12
+			label.TextSize = 15
 		end
 	end
 
@@ -307,8 +309,7 @@ function PartyView.new(playerGui: PlayerGui, callbacks: PartyViewCallbacks): Par
 		renderMembers()
 		renderCandidates()
 		screenGui.Enabled = true
-		pop.Scale = 0.9
-		TweenService:Create(pop, TweenInfo.new(0.25, Enum.EasingStyle.Back), { Scale = 1 }):Play()
+		responsive.pop(0.9, 0.25)
 	end
 
 	handle.close = function()

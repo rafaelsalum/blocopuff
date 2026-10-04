@@ -52,9 +52,9 @@ type Card = {
 }
 
 local GUI_NAME = "BlocoPuffPuffdex"
-local PANEL_SIZE = Vector2.new(620, 440)
-local DETAIL_WIDTH = 210
-local CARD_SIZE = Vector2.new(86, 96)
+local PANEL_SIZE = Vector2.new(840, 470)
+local DETAIL_WIDTH = 260
+local CARD_SIZE = Vector2.new(118, 122)
 local LOCKED_COLOR = Color3.fromRGB(40, 32, 66)
 local UNLOCK_SOUND = "rbxasset://sounds/electronicpingshort.wav"
 -- Intervalo entre as comemorações quando chegam vários Puffs novos.
@@ -111,9 +111,7 @@ function PuffdexView.new(playerGui: PlayerGui, onEquip: (id: string) -> (), onOp
 	root.Size = UDim2.fromOffset(PANEL_SIZE.X, PANEL_SIZE.Y)
 	root.BackgroundTransparency = 1
 	root.Parent = screenGui
-	local responsive = ResponsiveScale.attach(root, Vector2.new(1280, 720), 0.55, 1.0)
-	local pop = Instance.new("UIScale")
-	pop.Parent = root
+	local responsive = ResponsiveScale.fit(root, PANEL_SIZE, ResponsiveScale.Modal)
 
 	UiTheme.createShadow(root, UDim2.fromScale(0.5, 0.5), UDim2.fromScale(1, 1), 20)
 	local card = Instance.new("Frame")
@@ -123,17 +121,17 @@ function PuffdexView.new(playerGui: PlayerGui, onEquip: (id: string) -> (), onOp
 	card.Parent = root
 	UiTheme.stylePanel(card, { accent = UiTheme.Colors.Brand, radius = 20 })
 
-	local title = UiTheme.createLabel(card, "Title", "✨ PUFFDEX", UiTheme.Fonts.Display, 28, UiTheme.Colors.Gold)
+	local title = UiTheme.createLabel(card, "Title", "✨ PUFFDEX", UiTheme.Fonts.Display, 32, UiTheme.Colors.Gold)
 	title.Position = UDim2.fromOffset(20, 12)
-	title.Size = UDim2.new(0, 220, 0, 36)
+	title.Size = UDim2.new(0, 260, 0, 40)
 	title.TextXAlignment = Enum.TextXAlignment.Left
 	title.ZIndex = 3
 	UiTheme.addTextOutline(title, 2.5)
 
-	local progressLabel = UiTheme.createLabel(card, "Progress", "0 / 0", UiTheme.Fonts.Display, 18, UiTheme.Colors.Ink)
+	local progressLabel = UiTheme.createLabel(card, "Progress", "0 / 0", UiTheme.Fonts.Display, 22, UiTheme.Colors.Ink)
 	progressLabel.AnchorPoint = Vector2.new(1, 0)
-	progressLabel.Position = UDim2.new(1, -68, 0, 18)
-	progressLabel.Size = UDim2.fromOffset(160, 26)
+	progressLabel.Position = UDim2.new(1, -84, 0, 18)
+	progressLabel.Size = UDim2.fromOffset(180, 30)
 	progressLabel.TextXAlignment = Enum.TextXAlignment.Right
 	progressLabel.ZIndex = 3
 	UiTheme.addTextOutline(progressLabel, 1.5)
@@ -142,21 +140,21 @@ function PuffdexView.new(playerGui: PlayerGui, onEquip: (id: string) -> (), onOp
 		name = "Close",
 		text = "✕",
 		variant = "Neutral",
-		size = UDim2.fromOffset(40, 36),
-		position = UDim2.new(1, -16, 0, 12),
+		size = UDim2.fromOffset(56, 48),
+		position = UDim2.new(1, -14, 0, 10),
 		anchorPoint = Vector2.new(1, 0),
-		textSize = 18,
+		textSize = 24,
 		zIndex = 4,
 	})
 
 	-- Grade (esquerda).
 	local grid = Instance.new("ScrollingFrame")
 	grid.Name = "Grid"
-	grid.Position = UDim2.fromOffset(16, 58)
-	grid.Size = UDim2.new(1, -(DETAIL_WIDTH + 40), 1, -96)
+	grid.Position = UDim2.fromOffset(16, 64)
+	grid.Size = UDim2.new(1, -(DETAIL_WIDTH + 40), 1, -104)
 	grid.BackgroundTransparency = 1
 	grid.BorderSizePixel = 0
-	grid.ScrollBarThickness = 6
+	grid.ScrollBarThickness = 8
 	grid.ScrollBarImageColor3 = UiTheme.Colors.Border
 	grid.AutomaticCanvasSize = Enum.AutomaticSize.Y
 	grid.CanvasSize = UDim2.new()
@@ -174,8 +172,8 @@ function PuffdexView.new(playerGui: PlayerGui, onEquip: (id: string) -> (), onOp
 	local detail = Instance.new("Frame")
 	detail.Name = "Detail"
 	detail.AnchorPoint = Vector2.new(1, 0)
-	detail.Position = UDim2.new(1, -16, 0, 58)
-	detail.Size = UDim2.new(0, DETAIL_WIDTH, 1, -96)
+	detail.Position = UDim2.new(1, -16, 0, 64)
+	detail.Size = UDim2.new(0, DETAIL_WIDTH, 1, -104)
 	detail.BackgroundColor3 = UiTheme.Colors.Outline
 	detail.BackgroundTransparency = 0.35
 	detail.ZIndex = 3
@@ -186,46 +184,46 @@ function PuffdexView.new(playerGui: PlayerGui, onEquip: (id: string) -> (), onOp
 	previewHolder.Name = "PreviewHolder"
 	previewHolder.AnchorPoint = Vector2.new(0.5, 0)
 	previewHolder.Position = UDim2.new(0.5, 0, 0, 10)
-	previewHolder.Size = UDim2.new(1, -20, 0, 90)
+	previewHolder.Size = UDim2.new(1, -20, 0, 108)
 	previewHolder.BackgroundTransparency = 1
 	previewHolder.ZIndex = 4
 	previewHolder.Parent = detail
 	local preview = PuffPreview.new(previewHolder, 4)
 
-	local detailName = UiTheme.createLabel(detail, "Name", "", UiTheme.Fonts.Display, 20, UiTheme.Colors.Ink)
-	detailName.Position = UDim2.fromOffset(10, 104)
-	detailName.Size = UDim2.new(1, -20, 0, 26)
+	local detailName = UiTheme.createLabel(detail, "Name", "", UiTheme.Fonts.Display, 24, UiTheme.Colors.Ink)
+	detailName.Position = UDim2.fromOffset(10, 122)
+	detailName.Size = UDim2.new(1, -20, 0, 30)
 	detailName.TextScaled = true
 	detailName.ZIndex = 4
-	UiTheme.addTextConstraint(detailName, 12, 20)
+	UiTheme.addTextConstraint(detailName, 15, 24)
 	UiTheme.addTextOutline(detailName, 1.5)
 
-	local detailRarity = UiTheme.createLabel(detail, "Rarity", "", UiTheme.Fonts.BodyBold, 13, UiTheme.Colors.Ink)
-	detailRarity.Position = UDim2.fromOffset(10, 131)
-	detailRarity.Size = UDim2.new(1, -20, 0, 17)
+	local detailRarity = UiTheme.createLabel(detail, "Rarity", "", UiTheme.Fonts.BodyBold, 16, UiTheme.Colors.Ink)
+	detailRarity.Position = UDim2.fromOffset(10, 154)
+	detailRarity.Size = UDim2.new(1, -20, 0, 20)
 	detailRarity.TextScaled = true
 	detailRarity.ZIndex = 4
-	UiTheme.addTextConstraint(detailRarity, 10, 13)
+	UiTheme.addTextConstraint(detailRarity, 12, 16)
 
-	local detailLore = UiTheme.createLabel(detail, "Lore", "", UiTheme.Fonts.Body, 12, UiTheme.Colors.Ink)
-	detailLore.Position = UDim2.fromOffset(12, 148)
-	detailLore.Size = UDim2.new(1, -24, 0, 32)
+	local detailLore = UiTheme.createLabel(detail, "Lore", "", UiTheme.Fonts.Body, 15, UiTheme.Colors.Ink)
+	detailLore.Position = UDim2.fromOffset(12, 176)
+	detailLore.Size = UDim2.new(1, -24, 0, 44)
 	detailLore.TextWrapped = true
 	detailLore.TextScaled = true
 	detailLore.ZIndex = 4
-	UiTheme.addTextConstraint(detailLore, 9, 12)
+	UiTheme.addTextConstraint(detailLore, 11, 15)
 
-	local detailInfo = UiTheme.createLabel(detail, "Info", "", UiTheme.Fonts.Body, 12, UiTheme.Colors.InkSoft)
-	detailInfo.Position = UDim2.fromOffset(12, 184)
-	detailInfo.Size = UDim2.new(1, -24, 0, 46)
+	local detailInfo = UiTheme.createLabel(detail, "Info", "", UiTheme.Fonts.Body, 15, UiTheme.Colors.InkSoft)
+	detailInfo.Position = UDim2.fromOffset(12, 222)
+	detailInfo.Size = UDim2.new(1, -24, 0, 50)
 	detailInfo.TextTruncate = Enum.TextTruncate.AtEnd
 	detailInfo.TextYAlignment = Enum.TextYAlignment.Top
 	detailInfo.ZIndex = 4
 
 	local progressTrack = Instance.new("Frame")
 	progressTrack.Name = "UnlockTrack"
-	progressTrack.Position = UDim2.fromOffset(16, 234)
-	progressTrack.Size = UDim2.new(1, -32, 0, 10)
+	progressTrack.Position = UDim2.fromOffset(16, 278)
+	progressTrack.Size = UDim2.new(1, -32, 0, 12)
 	progressTrack.BackgroundColor3 = UiTheme.Colors.Track
 	progressTrack.ZIndex = 4
 	progressTrack.Parent = detail
@@ -243,16 +241,16 @@ function PuffdexView.new(playerGui: PlayerGui, onEquip: (id: string) -> (), onOp
 		name = "Equip",
 		text = "EQUIPAR",
 		variant = "Success",
-		size = UDim2.new(1, -24, 0, 38),
+		size = UDim2.new(1, -24, 0, 50),
 		position = UDim2.new(0.5, 0, 1, -12),
 		anchorPoint = Vector2.new(0.5, 1),
-		textSize = 16,
+		textSize = 20,
 		zIndex = 5,
 	})
 
-	local footer = UiTheme.createLabel(card, "Footer", "Puffs só mudam o visual do disparo. Não dão vantagem.", UiTheme.Fonts.Body, 12, UiTheme.Colors.InkSoft)
-	footer.Position = UDim2.new(0, 20, 1, -32)
-	footer.Size = UDim2.new(1, -40, 0, 20)
+	local footer = UiTheme.createLabel(card, "Footer", "Puffs só mudam o visual do disparo. Não dão vantagem.", UiTheme.Fonts.Body, 15, UiTheme.Colors.InkSoft)
+	footer.Position = UDim2.new(0, 20, 1, -34)
+	footer.Size = UDim2.new(1, -40, 0, 22)
 	footer.TextXAlignment = Enum.TextXAlignment.Left
 	footer.ZIndex = 3
 	local FOOTER_TEXT = footer.Text
@@ -290,42 +288,42 @@ function PuffdexView.new(playerGui: PlayerGui, onEquip: (id: string) -> (), onOp
 		UiTheme.addCorner(button, 12)
 		local stroke = UiTheme.addStroke(button, rarityInfo.color, 2)
 
-		local orb, orbGradient = createOrb(button, 44, 5)
+		local orb, orbGradient = createOrb(button, 54, 5)
 		orb.Position = UDim2.new(0.5, 0, 0, 8)
-		local mark = UiTheme.createLabel(orb, "Mark", "?", UiTheme.Fonts.Display, 24, UiTheme.Colors.InkSoft)
+		local mark = UiTheme.createLabel(orb, "Mark", "?", UiTheme.Fonts.Display, 28, UiTheme.Colors.InkSoft)
 		mark.Size = UDim2.fromScale(1, 1)
 		mark.ZIndex = 6
 
-		local name = UiTheme.createLabel(button, "Name", "", UiTheme.Fonts.BodyBold, 11, UiTheme.Colors.Ink)
-		name.Position = UDim2.fromOffset(4, 56)
-		name.Size = UDim2.new(1, -8, 0, 34)
+		local name = UiTheme.createLabel(button, "Name", "", UiTheme.Fonts.BodyBold, 14, UiTheme.Colors.Ink)
+		name.Position = UDim2.fromOffset(4, 66)
+		name.Size = UDim2.new(1, -8, 0, 44)
 		name.TextScaled = true
 		name.ZIndex = 5
-		UiTheme.addTextConstraint(name, 8, 11)
+		UiTheme.addTextConstraint(name, 10, 14)
 
-		local equipped = UiTheme.createLabel(button, "Equipped", "✓", UiTheme.Fonts.Display, 14, UiTheme.Colors.Outline)
+		local equipped = UiTheme.createLabel(button, "Equipped", "✓", UiTheme.Fonts.Display, 16, UiTheme.Colors.Outline)
 		equipped.Position = UDim2.fromOffset(4, 4)
-		equipped.Size = UDim2.fromOffset(20, 20)
+		equipped.Size = UDim2.fromOffset(24, 24)
 		equipped.BackgroundTransparency = 0
 		equipped.BackgroundColor3 = UiTheme.Colors.Green
 		equipped.ZIndex = 7
 		equipped.Visible = false
 		UiTheme.addCorner(equipped, 999)
 
-		local newTag = UiTheme.createLabel(button, "New", "NOVO", UiTheme.Fonts.Display, 10, UiTheme.Colors.Outline)
+		local newTag = UiTheme.createLabel(button, "New", "NOVO", UiTheme.Fonts.Display, 12, UiTheme.Colors.Outline)
 		newTag.AnchorPoint = Vector2.new(1, 0)
 		newTag.Position = UDim2.new(1, -4, 0, 4)
-		newTag.Size = UDim2.fromOffset(36, 16)
+		newTag.Size = UDim2.fromOffset(44, 20)
 		newTag.BackgroundTransparency = 0
 		newTag.BackgroundColor3 = UiTheme.Colors.Gold
 		newTag.ZIndex = 7
 		newTag.Visible = false
 		UiTheme.addCorner(newTag, 6)
 
-		local effectIcon = UiTheme.createLabel(button, "Effect", PuffEffects.info(definition.style.effect).icon, UiTheme.Fonts.Display, 14, UiTheme.Colors.Ink)
+		local effectIcon = UiTheme.createLabel(button, "Effect", PuffEffects.info(definition.style.effect).icon, UiTheme.Fonts.Display, 17, UiTheme.Colors.Ink)
 		effectIcon.AnchorPoint = Vector2.new(0.5, 0)
-		effectIcon.Position = UDim2.new(0.5, 20, 0, 34)
-		effectIcon.Size = UDim2.fromOffset(20, 20)
+		effectIcon.Position = UDim2.new(0.5, 24, 0, 42)
+		effectIcon.Size = UDim2.fromOffset(24, 24)
 		effectIcon.ZIndex = 7
 		effectIcon.Visible = false
 
@@ -516,8 +514,7 @@ function PuffdexView.new(playerGui: PlayerGui, onEquip: (id: string) -> (), onOp
 		screenGui.Enabled = true
 		startAnimation()
 		celebrateNew()
-		pop.Scale = 0.9
-		TweenService:Create(pop, TweenInfo.new(0.25, Enum.EasingStyle.Back), { Scale = 1 }):Play()
+		responsive.pop(0.9, 0.25)
 		onOpened()
 	end
 

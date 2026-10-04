@@ -6,7 +6,6 @@
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local TweenService = game:GetService("TweenService")
 
 local LeaderboardTypes = require(ReplicatedStorage.Shared.types.LeaderboardTypes)
 local ResponsiveScale = require(script.Parent.ResponsiveScale)
@@ -33,8 +32,11 @@ type Row = {
 }
 
 local GUI_NAME = "BlocoPuffLeaderboard"
-local PANEL_SIZE = Vector2.new(440, 470)
-local ROW_HEIGHT = 30
+-- Deitado (o celular só joga deitado): o top 10 em duas colunas de 5.
+local PANEL_SIZE = Vector2.new(740, 430)
+local ROW_HEIGHT = 46
+local ROWS_PER_COLUMN = 5
+local COLUMN_GAP = 12
 local MEDALS = { "🥇", "🥈", "🥉" }
 
 local LeaderboardView = {}
@@ -64,9 +66,7 @@ function LeaderboardView.new(playerGui: PlayerGui, onTab: (categoryId: string) -
 	root.Size = UDim2.fromOffset(PANEL_SIZE.X, PANEL_SIZE.Y)
 	root.BackgroundTransparency = 1
 	root.Parent = screenGui
-	local responsive = ResponsiveScale.attach(root, Vector2.new(1280, 720), 0.55, 1.0)
-	local pop = Instance.new("UIScale")
-	pop.Parent = root
+	local responsive = ResponsiveScale.fit(root, PANEL_SIZE, ResponsiveScale.Modal)
 
 	UiTheme.createShadow(root, UDim2.fromScale(0.5, 0.5), UDim2.fromScale(1, 1), 20)
 	local card = Instance.new("Frame")
@@ -76,9 +76,9 @@ function LeaderboardView.new(playerGui: PlayerGui, onTab: (categoryId: string) -
 	card.Parent = root
 	UiTheme.stylePanel(card, { accent = UiTheme.Colors.Gold, radius = 20 })
 
-	local title = UiTheme.createLabel(card, "Title", "🏆 RANKING GLOBAL", UiTheme.Fonts.Display, 28, UiTheme.Colors.Gold)
+	local title = UiTheme.createLabel(card, "Title", "🏆 RANKING GLOBAL", UiTheme.Fonts.Display, 32, UiTheme.Colors.Gold)
 	title.Position = UDim2.fromOffset(20, 12)
-	title.Size = UDim2.new(1, -90, 0, 36)
+	title.Size = UDim2.new(1, -100, 0, 40)
 	title.TextXAlignment = Enum.TextXAlignment.Left
 	title.ZIndex = 3
 	UiTheme.addTextOutline(title, 2.5)
@@ -87,30 +87,30 @@ function LeaderboardView.new(playerGui: PlayerGui, onTab: (categoryId: string) -
 		name = "Close",
 		text = "✕",
 		variant = "Neutral",
-		size = UDim2.fromOffset(40, 36),
-		position = UDim2.new(1, -16, 0, 12),
+		size = UDim2.fromOffset(56, 48),
+		position = UDim2.new(1, -14, 0, 10),
 		anchorPoint = Vector2.new(1, 0),
-		textSize = 18,
+		textSize = 24,
 		zIndex = 4,
 	})
 
 	-- Abas: as categorias e a temporada (reservada).
 	local tabs = Instance.new("Frame")
 	tabs.Name = "Tabs"
-	tabs.Position = UDim2.fromOffset(16, 56)
-	tabs.Size = UDim2.new(1, -32, 0, 34)
+	tabs.Position = UDim2.fromOffset(16, 64)
+	tabs.Size = UDim2.new(1, -32, 0, 50)
 	tabs.BackgroundTransparency = 1
 	tabs.ZIndex = 3
 	tabs.Parent = card
 	local tabLayout = Instance.new("UIListLayout")
 	tabLayout.FillDirection = Enum.FillDirection.Horizontal
-	tabLayout.Padding = UDim.new(0, 4)
+	tabLayout.Padding = UDim.new(0, 8)
 	tabLayout.SortOrder = Enum.SortOrder.LayoutOrder
 	tabLayout.Parent = tabs
 
 	local categories = LeaderboardTypes.Categories
 	local tabCount = #categories + 1
-	local tabWidth = UDim2.new(1 / tabCount, -4, 1, 0)
+	local tabWidth = UDim2.new(1 / tabCount, -8, 1, 0)
 	local selectedId = categories[1].id
 	local tabButtons: { [string]: UiKit.ButtonHandle } = {}
 	local render: () -> () = function() end
@@ -120,7 +120,7 @@ function LeaderboardView.new(playerGui: PlayerGui, onTab: (categoryId: string) -
 			text = category.icon,
 			variant = "Neutral",
 			size = tabWidth,
-			textSize = 18,
+			textSize = 26,
 			layoutOrder = index,
 			zIndex = 4,
 		})
@@ -137,23 +137,23 @@ function LeaderboardView.new(playerGui: PlayerGui, onTab: (categoryId: string) -
 		text = "📅",
 		variant = "Neutral",
 		size = tabWidth,
-		textSize = 18,
+		textSize = 26,
 		layoutOrder = tabCount,
 		zIndex = 4,
 	})
 	seasonTab.setEnabled(false)
 
-	local categoryLabel = UiTheme.createLabel(card, "Category", "", UiTheme.Fonts.Display, 16, UiTheme.Colors.White)
-	categoryLabel.Position = UDim2.fromOffset(20, 96)
-	categoryLabel.Size = UDim2.new(1, -40, 0, 22)
+	local categoryLabel = UiTheme.createLabel(card, "Category", "", UiTheme.Fonts.Display, 20, UiTheme.Colors.White)
+	categoryLabel.Position = UDim2.fromOffset(20, 122)
+	categoryLabel.Size = UDim2.new(1, -40, 0, 26)
 	categoryLabel.TextXAlignment = Enum.TextXAlignment.Left
 	categoryLabel.ZIndex = 3
 	UiTheme.addTextOutline(categoryLabel, 1.5)
 
 	local list = Instance.new("Frame")
 	list.Name = "List"
-	list.Position = UDim2.fromOffset(16, 122)
-	list.Size = UDim2.new(1, -32, 0, ROW_HEIGHT * LeaderboardTypes.TopCount)
+	list.Position = UDim2.fromOffset(16, 154)
+	list.Size = UDim2.new(1, -32, 0, ROW_HEIGHT * ROWS_PER_COLUMN)
 	list.BackgroundTransparency = 1
 	list.ZIndex = 3
 	list.Parent = card
@@ -161,46 +161,49 @@ function LeaderboardView.new(playerGui: PlayerGui, onTab: (categoryId: string) -
 	for index = 1, LeaderboardTypes.TopCount do
 		local frame = Instance.new("Frame")
 		frame.Name = string.format("Row%02d", index)
-		frame.Position = UDim2.fromOffset(0, (index - 1) * ROW_HEIGHT)
-		frame.Size = UDim2.new(1, 0, 0, ROW_HEIGHT - 3)
+		-- 1º a 5º à esquerda, 6º a 10º à direita.
+		local column = (index - 1) // ROWS_PER_COLUMN
+		local line = (index - 1) % ROWS_PER_COLUMN
+		frame.Position = UDim2.new(column * 0.5, column * (COLUMN_GAP / 2), 0, line * ROW_HEIGHT)
+		frame.Size = UDim2.new(0.5, -(COLUMN_GAP / 2), 0, ROW_HEIGHT - 5)
 		frame.BackgroundColor3 = UiTheme.Colors.Outline
 		frame.BackgroundTransparency = 0.5
 		frame.ZIndex = 3
 		frame.Parent = list
 		UiTheme.addCorner(frame, 8)
-		local rank = UiTheme.createLabel(frame, "Rank", "", UiTheme.Fonts.Display, 15, UiTheme.Colors.Gold)
-		rank.Position = UDim2.fromOffset(6, 0)
-		rank.Size = UDim2.new(0, 34, 1, 0)
+		local rank = UiTheme.createLabel(frame, "Rank", "", UiTheme.Fonts.Display, 20, UiTheme.Colors.Gold)
+		rank.Position = UDim2.fromOffset(4, 0)
+		rank.Size = UDim2.new(0, 38, 1, 0)
 		rank.ZIndex = 4
 		local avatar = Instance.new("ImageLabel")
-		avatar.Position = UDim2.fromOffset(42, 2)
-		avatar.Size = UDim2.fromOffset(ROW_HEIGHT - 7, ROW_HEIGHT - 7)
+		avatar.Position = UDim2.fromOffset(44, 4)
+		avatar.Size = UDim2.fromOffset(ROW_HEIGHT - 13, ROW_HEIGHT - 13)
 		avatar.BackgroundColor3 = UiTheme.Colors.SurfaceSoft
 		avatar.ZIndex = 4
 		avatar.Parent = frame
 		UiTheme.addCorner(avatar, 999)
-		local name = UiTheme.createLabel(frame, "Name", "", UiTheme.Fonts.BodyBold, 14, UiTheme.Colors.White)
-		name.Position = UDim2.fromOffset(74, 0)
-		name.Size = UDim2.new(0.62, -74, 1, 0)
+		local name = UiTheme.createLabel(frame, "Name", "", UiTheme.Fonts.BodyBold, 17, UiTheme.Colors.White)
+		name.Position = UDim2.fromOffset(84, 0)
+		name.Size = UDim2.new(0.68, -84, 1, 0)
 		name.TextXAlignment = Enum.TextXAlignment.Left
 		name.TextTruncate = Enum.TextTruncate.AtEnd
 		name.TextWrapped = false
 		name.ZIndex = 4
-		local value = UiTheme.createLabel(frame, "Value", "", UiTheme.Fonts.Display, 15, UiTheme.Colors.Ink)
-		value.Position = UDim2.fromScale(0.62, 0)
-		value.Size = UDim2.new(0.38, -10, 1, 0)
+		local value = UiTheme.createLabel(frame, "Value", "", UiTheme.Fonts.Display, 19, UiTheme.Colors.Ink)
+		value.Position = UDim2.fromScale(0.68, 0)
+		value.Size = UDim2.new(0.32, -10, 1, 0)
 		value.TextXAlignment = Enum.TextXAlignment.Right
 		value.ZIndex = 4
 		table.insert(rows, { frame = frame, avatar = avatar, rank = rank, name = name, value = value })
 	end
-	local empty = UiTheme.createLabel(list, "Empty", "", UiTheme.Fonts.BodyBold, 15, UiTheme.Colors.InkSoft)
+	local empty = UiTheme.createLabel(list, "Empty", "", UiTheme.Fonts.BodyBold, 19, UiTheme.Colors.InkSoft)
 	empty.Position = UDim2.fromScale(0, 0.3)
 	empty.Size = UDim2.new(1, 0, 0, 40)
 	empty.ZIndex = 4
 
-	local footer = UiTheme.createLabel(card, "Footer", "", UiTheme.Fonts.Body, 12, UiTheme.Colors.InkSoft)
+	local footer = UiTheme.createLabel(card, "Footer", "", UiTheme.Fonts.Body, 15, UiTheme.Colors.InkSoft)
 	footer.Position = UDim2.new(0, 20, 1, -34)
-	footer.Size = UDim2.new(1, -40, 0, 20)
+	footer.Size = UDim2.new(1, -40, 0, 22)
 	footer.TextXAlignment = Enum.TextXAlignment.Left
 	footer.ZIndex = 3
 
@@ -248,8 +251,7 @@ function LeaderboardView.new(playerGui: PlayerGui, onTab: (categoryId: string) -
 	handle.open = function()
 		render()
 		screenGui.Enabled = true
-		pop.Scale = 0.9
-		TweenService:Create(pop, TweenInfo.new(0.25, Enum.EasingStyle.Back), { Scale = 1 }):Play()
+		responsive.pop(0.9, 0.25)
 		onTab(selectedId)
 	end
 

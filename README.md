@@ -272,6 +272,24 @@ Seção **TESTES DA PARTIDA** no painel admin. Vale só para o servidor atual e 
 - **Testar de verdade:** só com o jogo publicado. O Roblox só preenche quem convidou em convites reais, e o Studio pode não ter acesso ao DataStore e ao MessagingService. Os banners de recompensa da página do convite são configurados no Creator Hub (Engagement > Referral Rewards), com o jogo publicado há pelo menos 1 dia.
 - **Testes:** `lune run tests/ReferralRules.spec`.
 
+### Modais do lobby maiores e mais fáceis de tocar
+
+- **Ranking, Puffdex, Puff Machine, Desafios e Party** agora crescem até quase a tela toda: 95% da largura e 96% da altura da área segura. O limite de escala vai de 0,5× a 1,5× (`ResponsiveScale.fit` / `ResponsiveScale.Modal`). Antes ficavam presos entre 0,55× e 1×.
+- **Um só UIScale por painel** faz o ajuste à tela e a animação de abertura. Antes havia dois no mesmo painel, e eles não se somavam.
+- **Painéis deitados** (o celular só joga deitado), com fontes e botões maiores:
+  - O botão ✕ passou para 56×48.
+  - As abas do ranking ficaram mais altas.
+  - Os botões das linhas da Party ficaram com 112×36.
+  - O botão Girar ficou com 52 de altura, e o Equipar com 50.
+- **Ranking:** o top 10 aparece em duas colunas (1º–5º e 6º–10º).
+- **Desafios:** os desafios do dia ficam à esquerda, o retorno diário (grade 4 + 3) à direita e as conquistas secretas numa faixa embaixo.
+- **Party:** a lista cabe a Party cheia (4) sem rolar.
+- **Perfil** (botão PERFIL do cartão):
+  - As estatísticas abrem ao lado do cartão, e não mais embaixo, para caber no celular deitado.
+  - As linhas e as letras ficaram maiores: 26 de altura, com texto de 16.
+  - O botão PERFIL também ficou maior.
+- **Tamanho no celular deitado:** o texto fica cerca de 80% maior que antes.
+
 ### Lareira de Fuligem (Fase 5, entrega 5.5)
 
 - **Onde:** no centro da parede sul do térreo, no lugar da porta falsa (`traps/FireplaceTrap`). A parede, a posição e a largura ficam em `TrapConfig.Fireplace`. A decoração da parede deixa esse trecho livre (`StoryOptions.reserved`). Tem lareira de tijolos, consolo de madeira, chaminé até o teto, lenha e brasas acesas.

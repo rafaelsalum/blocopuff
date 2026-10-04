@@ -125,8 +125,8 @@
     "semantic_hash": ""
   },
   "README.md": {
-    "mtime": 1791047979.9056854,
-    "ast_hash": "c402e04b6ef67add61985afe238b1ee8",
+    "mtime": 1791113706.8949068,
+    "ast_hash": "cb824584cf099399de6d9665ebe47435",
     "semantic_hash": ""
   },
   "src/client/controllers/CombatCameraController.luau": {
@@ -145,8 +145,8 @@
     "semantic_hash": ""
   },
   "src/client/ui/ResponsiveScale.luau": {
-    "mtime": 1787006054.897258,
-    "ast_hash": "28d5d8fda8767066cec5570a2bc07e28",
+    "mtime": 1791113473.4663794,
+    "ast_hash": "b59a0f3912ea05ea1a7e4cd46c705d15",
     "semantic_hash": ""
   },
   "src/client/ui/RoundHudView.luau": {
@@ -460,8 +460,8 @@
     "semantic_hash": ""
   },
   "src/client/ui/ProfileCardView.luau": {
-    "mtime": 1790960346.2511568,
-    "ast_hash": "5df2d7771bd130faa9813cae6ef1c310",
+    "mtime": 1791113780.8064828,
+    "ast_hash": "59776c9f3ff4e9a81ac9a4872c08191d",
     "semantic_hash": ""
   },
   "src/server/data/XpCalculator.luau": {
@@ -485,8 +485,8 @@
     "semantic_hash": ""
   },
   "src/client/ui/LeaderboardView.luau": {
-    "mtime": 1790555678.5608833,
-    "ast_hash": "9fb8828e7b5b9e4776259e01942de3a7",
+    "mtime": 1791113473.4658492,
+    "ast_hash": "f8542a99e68b8e147fa971c52de1e93c",
     "semantic_hash": ""
   },
   "src/server/services/HallOfFameService.luau": {
@@ -515,8 +515,8 @@
     "semantic_hash": ""
   },
   "src/client/ui/PuffdexView.luau": {
-    "mtime": 1790743434.1511726,
-    "ast_hash": "1e55e80f93d8689cd52a328031ddb919",
+    "mtime": 1791113473.4661574,
+    "ast_hash": "d605c828cfb82804a65ecfae60324ed9",
     "semantic_hash": ""
   },
   "src/server/data/PuffInventory.luau": {
@@ -545,8 +545,8 @@
     "semantic_hash": ""
   },
   "src/client/ui/PuffMachineView.luau": {
-    "mtime": 1790560916.537512,
-    "ast_hash": "b7c3e84c2f640b8c12ac66e7e7bb9463",
+    "mtime": 1791113118.1492133,
+    "ast_hash": "e6af7b423fbf0f61aee6c6c30b309b02",
     "semantic_hash": ""
   },
   "src/server/data/RewardRules.luau": {
@@ -570,8 +570,8 @@
     "semantic_hash": ""
   },
   "src/client/ui/ChallengesView.luau": {
-    "mtime": 1790562052.5916939,
-    "ast_hash": "07333181a1fd5cba0426246ae16538ba",
+    "mtime": 1791113118.148945,
+    "ast_hash": "44784cf0cc9824f788abbca38effc939",
     "semantic_hash": ""
   },
   "src/server/data/DailyRules.luau": {
@@ -610,8 +610,8 @@
     "semantic_hash": ""
   },
   "src/client/ui/PartyView.luau": {
-    "mtime": 1790563659.6534207,
-    "ast_hash": "da456255215385a02b02c8df9634aca6",
+    "mtime": 1791113473.4656315,
+    "ast_hash": "326975b6841f957f12905dde263179a6",
     "semantic_hash": ""
   },
   "src/client/ui/ReactionView.luau": {

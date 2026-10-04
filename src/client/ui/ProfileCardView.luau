@@ -28,11 +28,19 @@ export type ProfileCardViewHandle = {
 
 local GUI_NAME = "BlocoPuffProfileCard"
 local CARD_SIZE = Vector2.new(236, 66)
-local STATS_SIZE = Vector2.new(236, 234)
 local SHORTCUT_GAP = 4
 local SHORTCUT_HEIGHT = 44
 local SHORTCUT_Y = CARD_SIZE.Y + 6
-local STATS_Y = SHORTCUT_Y + SHORTCUT_HEIGHT + 14
+local CORNER_HEIGHT = SHORTCUT_Y + SHORTCUT_HEIGHT + 14
+-- Painel das estatísticas: abre ao lado do cartão (no celular deitado não
+-- cabe embaixo), com linhas e letras maiores para ler fácil.
+local STATS_GAP = 10
+local STAT_ROW_HEIGHT = 26
+local STAT_ROW_GAP = 2
+local STAT_TEXT_SIZE = 16
+local STAT_VALUE_WIDTH = 72
+local NOTICE_HEIGHT = 34
+local STATS_WIDTH = 320
 
 -- Estatísticas mostradas no painel, na ordem.
 local STAT_ROWS: { { key: string, label: string } } = {
@@ -74,7 +82,7 @@ function ProfileCardView.new(
 	local root = Instance.new("Frame")
 	root.Name = "Root"
 	root.Position = UDim2.fromOffset(18, 16)
-	root.Size = UDim2.fromOffset(CARD_SIZE.X, STATS_Y + STATS_SIZE.Y)
+	root.Size = UDim2.fromOffset(CARD_SIZE.X, CORNER_HEIGHT)
 	root.BackgroundTransparency = 1
 	root.Visible = false
 	root.Parent = screenGui
@@ -106,7 +114,11 @@ function ProfileCardView.new(
 
 	local title = UiTheme.createLabel(card, "Title", "NÍVEL 1", UiTheme.Fonts.Display, 18, UiTheme.Colors.Ink)
 	title.Position = UDim2.fromOffset(68, 8)
-	title.Size = UDim2.new(1, -150, 0, 22)
+	title.Size = UDim2.new(1, -156, 0, 22)
+	-- Nível alto ou com prestígio: a letra encolhe em vez de quebrar a linha.
+	title.TextWrapped = false
+	title.TextScaled = true
+	UiTheme.addTextConstraint(title, 11, 18)
 	title.TextXAlignment = Enum.TextXAlignment.Left
 	title.ZIndex = 2
 	UiTheme.addTextOutline(title, 1.5)
@@ -139,10 +151,10 @@ function ProfileCardView.new(
 		name = "StatsButton",
 		text = "PERFIL",
 		variant = "Neutral",
-		size = UDim2.fromOffset(70, 24),
-		position = UDim2.new(1, -10, 0, 8),
+		size = UDim2.fromOffset(78, 28),
+		position = UDim2.new(1, -8, 0, 6),
 		anchorPoint = Vector2.new(1, 0),
-		textSize = 12,
+		textSize = 14,
 		zIndex = 4,
 	})
 
@@ -157,6 +169,8 @@ function ProfileCardView.new(
 	}
 	local buttonWidth = (CARD_SIZE.X - SHORTCUT_GAP * (#shortcuts - 1)) / #shortcuts
 	local buttons: { [string]: UiKit.ButtonHandle } = {}
+	-- Abrir outro painel fecha as estatísticas (os modais ficam por cima).
+	local closeStats: () -> () = function() end
 	for index, shortcut in ipairs(shortcuts) do
 		local button = UiKit.createButton(root, {
 			name = shortcut.name,
@@ -169,6 +183,7 @@ function ProfileCardView.new(
 		})
 		button.button.Activated:Connect(function()
 			UiKit.playClick()
+			closeStats()
 			shortcut.action()
 		end)
 		buttons[shortcut.name] = button
@@ -210,11 +225,12 @@ function ProfileCardView.new(
 	UiTheme.addTextConstraint(ticketBadge, 8, 11)
 	UiTheme.addCorner(ticketBadge, 999)
 
-	-- Painel das estatísticas (abre abaixo do cartão).
+	-- Painel das estatísticas (abre ao lado do cartão).
+	local statsHeight = 20 + (#STAT_ROWS * (STAT_ROW_HEIGHT + STAT_ROW_GAP)) + NOTICE_HEIGHT
 	local stats = Instance.new("Frame")
 	stats.Name = "Stats"
-	stats.Position = UDim2.fromOffset(0, STATS_Y)
-	stats.Size = UDim2.fromOffset(STATS_SIZE.X, STATS_SIZE.Y)
+	stats.Position = UDim2.fromOffset(CARD_SIZE.X + STATS_GAP, 0)
+	stats.Size = UDim2.fromOffset(STATS_WIDTH, statsHeight)
 	stats.Visible = false
 	stats.Parent = root
 	UiTheme.stylePanel(stats, { radius = 14 })
@@ -228,7 +244,7 @@ function ProfileCardView.new(
 	list.Parent = stats
 	local layout = Instance.new("UIListLayout")
 	layout.SortOrder = Enum.SortOrder.LayoutOrder
-	layout.Padding = UDim.new(0, 2)
+	layout.Padding = UDim.new(0, STAT_ROW_GAP)
 	layout.Parent = list
 
 	local valueLabels: { [string]: TextLabel } = {}
@@ -236,27 +252,36 @@ function ProfileCardView.new(
 		local line = Instance.new("Frame")
 		line.Name = row.key
 		line.LayoutOrder = index
-		line.Size = UDim2.new(1, 0, 0, 20)
+		line.Size = UDim2.new(1, 0, 0, STAT_ROW_HEIGHT)
 		line.BackgroundTransparency = 1
 		line.ZIndex = 2
 		line.Parent = list
-		local name = UiTheme.createLabel(line, "Name", row.label, UiTheme.Fonts.Body, 13, UiTheme.Colors.InkSoft)
-		name.Size = UDim2.new(0.7, 0, 1, 0)
+		local name = UiTheme.createLabel(line, "Name", row.label, UiTheme.Fonts.Body, STAT_TEXT_SIZE, UiTheme.Colors.InkSoft)
+		name.Size = UDim2.new(1, -STAT_VALUE_WIDTH, 1, 0)
+		name.TextWrapped = false
+		name.TextScaled = true
+		UiTheme.addTextConstraint(name, 11, STAT_TEXT_SIZE)
 		name.TextXAlignment = Enum.TextXAlignment.Left
 		name.ZIndex = 3
-		local value = UiTheme.createLabel(line, "Value", "0", UiTheme.Fonts.BodyBold, 13, UiTheme.Colors.Ink)
-		value.Position = UDim2.fromScale(0.7, 0)
-		value.Size = UDim2.new(0.3, 0, 1, 0)
+		local value = UiTheme.createLabel(line, "Value", "0", UiTheme.Fonts.BodyBold, STAT_TEXT_SIZE, UiTheme.Colors.Ink)
+		value.AnchorPoint = Vector2.new(1, 0)
+		value.Position = UDim2.fromScale(1, 0)
+		value.Size = UDim2.new(0, STAT_VALUE_WIDTH, 1, 0)
 		value.TextXAlignment = Enum.TextXAlignment.Right
 		value.ZIndex = 3
 		valueLabels[row.key] = value
 	end
-	local notice = UiTheme.createLabel(list, "Notice", "", UiTheme.Fonts.BodyBold, 11, UiTheme.Colors.Orange)
+	local notice = UiTheme.createLabel(list, "Notice", "", UiTheme.Fonts.BodyBold, 13, UiTheme.Colors.Orange)
 	notice.LayoutOrder = #STAT_ROWS + 1
-	notice.Size = UDim2.new(1, 0, 0, 28)
+	notice.Size = UDim2.new(1, 0, 0, NOTICE_HEIGHT)
 	notice.TextXAlignment = Enum.TextXAlignment.Left
 	notice.ZIndex = 3
 	notice.Visible = false
+
+	closeStats = function()
+		stats.Visible = false
+		statsButton.setText("PERFIL")
+	end
 
 	statsButton.button.Activated:Connect(function()
 		stats.Visible = not stats.Visible
@@ -294,8 +319,7 @@ function ProfileCardView.new(
 	handle.setVisible = function(visible: boolean)
 		root.Visible = visible
 		if not visible then
-			stats.Visible = false
-			statsButton.setText("PERFIL")
+			closeStats()
 		end
 	end
 
