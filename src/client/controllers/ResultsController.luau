@@ -13,8 +13,11 @@ local ResultTypes = require(ReplicatedStorage.Shared.types.ResultTypes)
 local RoundTypes = require(ReplicatedStorage.Shared.types.RoundTypes)
 local StateAttributeNames = require(ReplicatedStorage.Shared.types.StateAttributeNames)
 local ProfileTypes = require(ReplicatedStorage.Shared.types.ProfileTypes)
+local Lang = require(ReplicatedStorage.Shared.i18n.Lang)
 local ResultsView = require(script.Parent.Parent.ui.ResultsView)
 local ProfileController = require(script.Parent.ProfileController)
+
+local T = Lang.t
 
 type RoundResult = ResultTypes.RoundResult
 type ResultEntry = ResultTypes.ResultEntry
@@ -110,16 +113,16 @@ local function footerText(container: Instance, player: Player): string
 	local roundsUntilTurn = asNumber(player:GetAttribute(StateAttributeNames.PlayerRoundsUntilTurn)) or 0
 	local inQueue = player:GetAttribute(StateAttributeNames.PlayerInMatchQueue) == true
 	local queueNote = if not inQueue
-		then "Fique no mirante para jogar a próxima"
-		elseif roundsUntilTurn >= 2 then string.format("Você entra em %d rodadas", roundsUntilTurn)
-		else "Você está na fila da próxima"
+		then T("Fique no mirante para jogar a próxima")
+		elseif roundsUntilTurn >= 2 then T("Você entra em %d rodadas", roundsUntilTurn)
+		else T("Você está na fila da próxima")
 
 	if state == RoundTypes.Ending then
-		return string.format("Voltando ao lobby em %d s\n%s", remaining, queueNote)
+		return T("Voltando ao lobby em %d s\n%s", remaining, queueNote)
 	elseif state == RoundTypes.Countdown then
-		return string.format("Próxima rodada em %d s\n%s", remaining, queueNote)
+		return T("Próxima rodada em %d s\n%s", remaining, queueNote)
 	end
-	return "Aguardando jogadores para a próxima rodada"
+	return T("Aguardando jogadores para a próxima rodada")
 end
 
 function ResultsController.start()

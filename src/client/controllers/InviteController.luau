@@ -7,6 +7,8 @@
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local Lang = require(ReplicatedStorage.Shared.i18n.Lang)
 local SocialService = game:GetService("SocialService")
 
 local PuffadorConstants = require(ReplicatedStorage.Shared.modules.PuffadorConstants)
@@ -61,13 +63,13 @@ function InviteController.invite()
 	lastInviteAt = clock
 	task.spawn(function()
 		if not canInvite(player) then
-			banner("InviteUnavailable", "💌", "CONVITE INDISPONÍVEL", "Sua conta não pode enviar convites agora.", "Info", 3)
+			banner("InviteUnavailable", "💌", Lang.t("CONVITE INDISPONÍVEL"), Lang.t("Sua conta não pode enviar convites agora."), "Info", 3)
 			report("Unavailable")
 			return
 		end
 		local ok, failure = pcall(function()
 			local options = Instance.new("ExperienceInviteOptions")
-			options.PromptMessage = ReferralConfig.PromptMessage
+			options.PromptMessage = Lang.t(ReferralConfig.PromptMessage)
 			options.LaunchData = `\{"inviter":{player.UserId}\}`
 			SocialService:PromptGameInvite(player, options)
 		end)
@@ -76,8 +78,8 @@ function InviteController.invite()
 			banner(
 				"InviteHint",
 				"💌",
-				"CONVIDE E GANHE",
-				`{ReferralConfig.InviterTickets} 🎟️ por amigo novo que jogar uma partida`,
+				Lang.t("CONVIDE E GANHE"),
+				Lang.t("%d 🎟️ por amigo novo que jogar uma partida", ReferralConfig.InviterTickets),
 				"Gold",
 				4
 			)
@@ -104,11 +106,11 @@ local function onReward(raw: unknown)
 		return
 	end
 	if data.kind == "Invitee" then
-		banner("InviteeReward", "💌", `+{tickets} 🎟️ BOAS-VINDAS!`, "Prêmio por chegar a convite de um amigo", "Gold", 4)
+		banner("InviteeReward", "💌", Lang.t("+%d 🎟️ BOAS-VINDAS!", tickets), Lang.t("Prêmio por chegar a convite de um amigo"), "Gold", 4)
 	elseif data.kind == "Inviter" then
 		local friends = readCount(data.friends)
-		local subtitle = if friends == 1 then "Um amigo seu jogou a primeira partida" else `{friends} amigos seus jogaram a primeira partida`
-		banner("InviterReward", "💌", `+{tickets} 🎟️ CONVITE!`, subtitle, "Gold", 4)
+		local subtitle = if friends == 1 then Lang.t("Um amigo seu jogou a primeira partida") else Lang.t("%d amigos seus jogaram a primeira partida", friends)
+		banner("InviterReward", "💌", Lang.t("+%d 🎟️ CONVITE!", tickets), subtitle, "Gold", 4)
 	end
 end
 

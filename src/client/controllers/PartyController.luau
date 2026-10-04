@@ -9,6 +9,7 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local SocialService = game:GetService("SocialService")
 
+local Lang = require(ReplicatedStorage.Shared.i18n.Lang)
 local SocialConfig = require(ReplicatedStorage.Shared.config.SocialConfig)
 local PuffadorConstants = require(ReplicatedStorage.Shared.modules.PuffadorConstants)
 local StateAttributeNames = require(ReplicatedStorage.Shared.types.StateAttributeNames)
@@ -35,7 +36,7 @@ local NOTICES: { [string]: { text: string, banner: boolean } } = {
 	InviteSent = { text = "Convite enviado para %s.", banner = false },
 	Declined = { text = "%s recusou o convite.", banner = false },
 	InviteExpired = { text = "Esse convite expirou.", banner = false },
-	PartyFull = { text = string.format("A Party está cheia (máximo %d).", SocialConfig.PartyMaxSize), banner = false },
+	PartyFull = { text = "A Party está cheia (máximo %d).", banner = false },
 	AlreadyTogether = { text = "%s já está na sua Party.", banner = false },
 	NotFound = { text = "Esse jogador não está mais no servidor.", banner = false },
 	Cooldown = { text = "Espere um pouquinho para chamar de novo.", banner = false },
@@ -166,7 +167,7 @@ function PartyController.start()
 				else
 					local current = view
 					if current ~= nil then
-						current.setStatus("Convites de amigos não estão disponíveis agora.")
+						current.setStatus(Lang.t("Convites de amigos não estão disponíveis agora."))
 					end
 				end
 			end)
@@ -256,7 +257,10 @@ function PartyController.start()
 				if entry == nil then
 					return
 				end
-				local text = if string.find(entry.text, "%%s") then string.format(entry.text, readName(name)) else entry.text
+				local text = if string.find(entry.text, "%%s")
+					then Lang.t(entry.text, readName(name))
+					elseif string.find(entry.text, "%%d") then Lang.t(entry.text, SocialConfig.PartyMaxSize)
+					else Lang.t(entry.text)
 				newView.setStatus(text)
 				if entry.banner then
 					NotificationManager.notify({
@@ -265,7 +269,7 @@ function PartyController.start()
 						priority = "Normal",
 						key = `party-{payload}`,
 						icon = "👥",
-						title = "PARTY",
+						title = Lang.t("PARTY"),
 						subtitle = text,
 						tone = "Info",
 						duration = 3.5,

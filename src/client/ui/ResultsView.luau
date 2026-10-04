@@ -13,9 +13,12 @@ local BotConfig = require(ReplicatedStorage.Shared.config.BotConfig)
 local LevelCurve = require(ReplicatedStorage.Shared.modules.LevelCurve)
 local ProfileTypes = require(ReplicatedStorage.Shared.types.ProfileTypes)
 local ResultTypes = require(ReplicatedStorage.Shared.types.ResultTypes)
+local Lang = require(ReplicatedStorage.Shared.i18n.Lang)
 local ResponsiveScale = require(script.Parent.ResponsiveScale)
 local UiKit = require(script.Parent.UiKit)
 local UiTheme = require(script.Parent.UiTheme)
+
+local T = Lang.t
 
 type RoundResult = ResultTypes.RoundResult
 type ResultEntry = ResultTypes.ResultEntry
@@ -68,6 +71,8 @@ local HIGHLIGHT_ICONS: { [string]: string } = {
 	Comeback = "🔥",
 }
 
+-- Mapeamento de fonte de XP para o nome exibido
+-- Nota: os valores são constantes que são traduzidas dinamicamente com T() onde exibidas
 local XP_SOURCE_NAMES: { [string]: string } = {
 	Participation = "Partida",
 	Placement = "Colocação",
@@ -102,12 +107,13 @@ local function findEntry(result: RoundResult, userId: number): ResultEntry?
 end
 
 local function plural(count: number, singular: string, pluralForm: string): string
-	return string.format("%d %s", count, if count == 1 then singular else pluralForm)
+	local word = if count == 1 then T(singular) else T(pluralForm)
+	return string.format("%d %s", count, word)
 end
 
 local function describe(result: RoundResult, mine: ResultEntry?, localUserId: number): (string, string, Color3)
 	if result.winnerUserId ~= 0 and result.winnerUserId == localUserId then
-		return "VITÓRIA!", "Você foi o último na arena", UiTheme.Colors.Gold
+		return T("VITÓRIA!"), T("Você foi o último na arena"), UiTheme.Colors.Gold
 	elseif result.draw then
 		local survivors = 0
 		for _, entry in ipairs(result.entries) do
@@ -116,13 +122,13 @@ local function describe(result: RoundResult, mine: ResultEntry?, localUserId: nu
 			end
 		end
 		if survivors == 0 then
-			return "EMPATE!", "Os últimos caíram ao mesmo tempo", UiTheme.Colors.Brand
+			return T("EMPATE!"), T("Os últimos caíram ao mesmo tempo"), UiTheme.Colors.Brand
 		end
-		return "EMPATE!", string.format("%d jogadores resistiram até o fim", survivors), UiTheme.Colors.Brand
+		return T("EMPATE!"), T("%d jogadores resistiram até o fim", survivors), UiTheme.Colors.Brand
 	elseif result.winnerUserId ~= 0 then
-		return "FIM DA RODADA", string.format("%s venceu a rodada", result.winnerName), UiTheme.Colors.Brand
+		return T("FIM DA RODADA"), T("%s venceu a rodada", result.winnerName), UiTheme.Colors.Brand
 	end
-	return "FIM DA RODADA", if mine ~= nil then "Ninguém sobrou na arena" else "Rodada encerrada", UiTheme.Colors.Brand
+	return T("FIM DA RODADA"), if mine ~= nil then T("Ninguém sobrou na arena") else T("Rodada encerrada"), UiTheme.Colors.Brand
 end
 
 local function highlightDetail(highlight: Highlight): string
@@ -132,7 +138,7 @@ local function highlightDetail(highlight: Highlight): string
 	elseif highlight.kind == "Knockouts" then
 		return string.format("%s · %s", highlight.name, plural(value, "derrubada", "derrubadas"))
 	elseif highlight.kind == "Vault" then
-		return string.format("%s · %s", highlight.name, if value >= 2 then "pegou o Puffador" else "abriu o cofre")
+		return string.format("%s · %s", highlight.name, if value >= 2 then T("pegou o Puffador") else T("abriu o cofre"))
 	elseif highlight.kind == "BaraoEscapes" then
 		return string.format("%s · %s", highlight.name, plural(value, "fuga", "fugas"))
 	elseif highlight.kind == "Secrets" then
@@ -266,7 +272,7 @@ function ResultsView.new(playerGui: PlayerGui, onClose: () -> ()): ResultsViewHa
 	for index = 1, MAX_CHIPS do
 		table.insert(chips, createChip(chipsFrame, index))
 	end
-	local noHighlights = label(chipsFrame, "Empty", "Sem destaques nesta rodada", UiTheme.Fonts.Body, 12, UiTheme.Colors.InkSoft, UDim2.fromOffset(0, 0), UDim2.new(1, 0, 0, 20))
+	local noHighlights = label(chipsFrame, "Empty", T("Sem destaques nesta rodada"), UiTheme.Fonts.Body, 12, UiTheme.Colors.InkSoft, UDim2.fromOffset(0, 0), UDim2.new(1, 0, 0, 20))
 
 	-- XP da rodada.
 	local xpFrame = Instance.new("Frame")
@@ -395,15 +401,9 @@ function ResultsView.new(playerGui: PlayerGui, onClose: () -> ()): ResultsViewHa
 		end
 
 		if mine ~= nil then
-			personal.Text = string.format(
-				"Você: <font color=\"#FFD166\">#%d</font> de %d  ·  %s  ·  %s",
-				mine.position,
-				result.participantCount,
-				plural(mine.blocks, "bloco", "blocos"),
-				plural(mine.knockouts, "derrubada", "derrubadas")
-			)
+			personal.Text = T("Você: <font color=\"#FFD166\">#%d</font> de %d  ·  %s  ·  %s", mine.position, result.participantCount, plural(mine.blocks, "bloco", "blocos"), plural(mine.knockouts, "derrubada", "derrubadas"))
 		else
-			personal.Text = "Você assistiu esta rodada"
+			personal.Text = T("Você assistiu esta rodada")
 		end
 
 		for index, chip in ipairs(chips) do
@@ -411,7 +411,7 @@ function ResultsView.new(playerGui: PlayerGui, onClose: () -> ()): ResultsViewHa
 			chip.frame.Visible = highlight ~= nil
 			if highlight ~= nil then
 				chip.icon.Text = HIGHLIGHT_ICONS[highlight.kind] or "★"
-				chip.title.Text = highlight.title
+				chip.title.Text = T(highlight.title)
 				chip.detail.Text = highlightDetail(highlight)
 				chip.frame.BackgroundColor3 = if highlight.userId == localUserId then UiTheme.Colors.GoldDeep else UiTheme.Colors.Outline
 			end
@@ -428,20 +428,20 @@ function ResultsView.new(playerGui: PlayerGui, onClose: () -> ()): ResultsViewHa
 		local progress = LevelCurve.progress(totalXp)
 		xpFrame.Visible = true
 		xpTotal.Text = if award.tickets > 0
-			then string.format("+%d XP  +%d 🎟", award.total, award.tickets)
-			else string.format("+%d XP", award.total)
+			then T("+%d XP  +%d 🎟", award.total, award.tickets)
+			else T("+%d XP", award.total)
 		xpLevel.Text = if award.levelAfter > award.levelBefore
-			then string.format("NÍVEL %d → %d!", award.levelBefore, award.levelAfter)
-			elseif progress.isMax then "NÍVEL MÁXIMO"
-			else string.format("NÍVEL %d  ·  %d/%d", progress.level, progress.current, progress.needed)
+			then T("NÍVEL %d → %d!", award.levelBefore, award.levelAfter)
+			elseif progress.isMax then T("NÍVEL MÁXIMO")
+			else T("NÍVEL %d  ·  %d/%d", progress.level, progress.current, progress.needed)
 		local ratio = if progress.isMax then 1 else math.clamp(progress.current / math.max(1, progress.needed), 0, 1)
 		xpFill.Size = UDim2.fromScale(0, 1)
 		TweenService:Create(xpFill, TweenInfo.new(0.8, Enum.EasingStyle.Quad), { Size = UDim2.fromScale(ratio, 1) }):Play()
 		local parts: { string } = {}
 		for _, line in ipairs(award.lines) do
-			table.insert(parts, string.format("%s +%d", XP_SOURCE_NAMES[line.source] or line.source, line.xp))
+			table.insert(parts, string.format("%s +%d", T(XP_SOURCE_NAMES[line.source] or line.source), line.xp))
 		end
-		xpLines.Text = if #parts > 0 then table.concat(parts, "  ·  ") else "Dispare pelo menos um Puff para ganhar XP"
+		xpLines.Text = if #parts > 0 then table.concat(parts, "  ·  ") else T("Dispare pelo menos um Puff para ganhar XP")
 	end
 
 	handle.setFooter = function(text: string)

@@ -3,6 +3,8 @@
 local TweenService = game:GetService("TweenService")
 local Workspace = game:GetService("Workspace")
 
+local Lang = require(game:GetService("ReplicatedStorage").Shared.i18n.Lang)
+local T = Lang.t
 local ResponsiveScale = require(script.Parent.ResponsiveScale)
 local UiTheme = require(script.Parent.UiTheme)
 
@@ -115,7 +117,7 @@ function CombatHudView.new(playerGui: PlayerGui): CombatHudViewHandle
 	local playersCaption = createLabel(
 		"PlayersCaption",
 		playersCard,
-		"JOGADORES",
+		T("JOGADORES"),
 		UiTheme.Fonts.BodyBold,
 		10,
 		UiTheme.Colors.InkSoft
@@ -141,7 +143,7 @@ function CombatHudView.new(playerGui: PlayerGui): CombatHudViewHandle
 	local playersSubLabel = createLabel(
 		"PlayersSubLabel",
 		playersCard,
-		"NA RODADA",
+		T("NA RODADA"),
 		UiTheme.Fonts.Body,
 		8,
 		UiTheme.Colors.InkSoft
@@ -227,7 +229,7 @@ function CombatHudView.new(playerGui: PlayerGui): CombatHudViewHandle
 	local scoreCaption = createLabel(
 		"ScoreCaption",
 		scoreCard,
-		"SEUS BLOCOS",
+		T("SEUS BLOCOS"),
 		UiTheme.Fonts.BodyBold,
 		9,
 		UiTheme.Colors.InkSoft
@@ -345,13 +347,13 @@ function CombatHudView.new(playerGui: PlayerGui): CombatHudViewHandle
 	handle.setLives = function(state: LivesState)
 		livesRoot.Visible = state ~= "Hidden"
 		if state == "SecondChance" then
-			livesLabel.Text = "♥♥ 2 VIDAS"
+			livesLabel.Text = T("♥♥ 2 VIDAS")
 			livesLabel.TextColor3 = UiTheme.Colors.Green
 		elseif state == "LastLife" then
-			livesLabel.Text = "♥ ÚLTIMA VIDA"
+			livesLabel.Text = T("♥ ÚLTIMA VIDA")
 			livesLabel.TextColor3 = UiTheme.Colors.Orange
 		elseif state == "Chaos" then
-			livesLabel.Text = "☠ SEM 2ª CHANCE"
+			livesLabel.Text = T("☠ SEM 2ª CHANCE")
 			livesLabel.TextColor3 = UiTheme.Colors.Danger
 		end
 		if state ~= lastLivesState and state ~= "Hidden" then

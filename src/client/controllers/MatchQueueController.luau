@@ -19,7 +19,10 @@ local QueueConfig = require(ReplicatedStorage.Shared.config.QueueConfig)
 local PuffadorConstants = require(ReplicatedStorage.Shared.modules.PuffadorConstants)
 local RoundTypes = require(ReplicatedStorage.Shared.types.RoundTypes)
 local StateAttributeNames = require(ReplicatedStorage.Shared.types.StateAttributeNames)
+local Lang = require(ReplicatedStorage.Shared.i18n.Lang)
 local NotificationManager = require(script.Parent.Parent.notifications.NotificationManager)
+
+local T = Lang.t
 
 local WAIT_TIMEOUT = 15
 local TRAMPOLINE_TAG = "PuffTrampoline"
@@ -66,13 +69,13 @@ end
 
 local function onMessage(kind: unknown)
 	if kind == "Lonely" then
-		banner("queue-lonely", "👥", "CHAME UM AMIGO", "A partida começa com 2 no mirante. Convide pela Party!", "Info", "Low", 5)
+		banner("queue-lonely", "👥", T("CHAME UM AMIGO"), T("A partida começa com 2 no mirante. Convide pela Party!"), "Info", "Low", 5)
 	elseif kind == "BotsArriving" then
-		banner("queue-bots", "🤖", "ROBOPUFFS CHEGANDO!", "Eles completam a partida. Chame um amigo para jogar junto!", "Info", "Normal", 4)
+		banner("queue-bots", "🤖", T("ROBOPUFFS CHEGANDO!"), T("Eles completam a partida. Chame um amigo para jogar junto!"), "Info", "Normal", 4)
 	elseif kind == "GatesClosed" then
-		banner("queue-closed", "🔒", "EMBARQUE ENCERRADO!", "Portas fechadas: a partida vai começar", "Gold", "High", 3)
+		banner("queue-closed", "🔒", T("EMBARQUE ENCERRADO!"), T("Portas fechadas: a partida vai começar"), "Gold", "High", 3)
 	elseif kind == "BoardingClosed" then
-		banner("queue-closed", "🔒", "EMBARQUE ENCERRADO", "Essa partida já vai começar. Entre na fila da próxima!", "Info", "Normal", 3)
+		banner("queue-closed", "🔒", T("EMBARQUE ENCERRADO"), T("Essa partida já vai começar. Entre na fila da próxima!"), "Info", "Normal", 3)
 	end
 end
 
@@ -91,9 +94,9 @@ local function watchQueue(player: Player)
 		end
 		if queued then
 			playSound(JOIN_SOUND, 1.5, 0.6)
-			banner("queue-state", "✅", "VOCÊ ESTÁ NA FILA!", "Fique no mirante. Para sair, é só voltar pela porta", "Gold", "Normal", 3)
+			banner("queue-state", "✅", T("VOCÊ ESTÁ NA FILA!"), T("Fique no mirante. Para sair, é só voltar pela porta"), "Gold", "Normal", 3)
 		else
-			banner("queue-state", "🚪", "VOCÊ SAIU DA FILA", "Volte ao mirante quando quiser jogar", "Info", "Normal", 2.5)
+			banner("queue-state", "🚪", T("VOCÊ SAIU DA FILA"), T("Volte ao mirante quando quiser jogar"), "Info", "Normal", 2.5)
 		end
 	end)
 end

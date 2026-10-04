@@ -184,6 +184,26 @@ Arquivos `.rbxl` e `.rbxlx` são artefatos locais e não fazem parte da fonte pr
 
 ## Estado atual
 
+### Idiomas: português e inglês
+
+Quem tem o Roblox em português vê o jogo em português; qualquer outro idioma vê inglês (`player.LocaleId`).
+
+- **O texto em português do código é a chave.** O dicionário em inglês fica em `src/shared/i18n/en/`, uma tabela por área: `Collection`, `Match`, `Round`, `Social` e `World`. Sem tradução, o texto aparece em português.
+- **Como usar** (`shared/i18n/Lang`):
+  - no cliente, `Lang.t("FALTAM %d 🎟", n)`: passe o molde e os valores, nunca o texto já montado com `string.format`;
+  - no servidor, para um jogador só (ex.: kick), `Lang.forPlayer(player, "...")`;
+  - no servidor, nas placas, painéis e prompts do cenário, `Lang.t("...")`. O servidor escreve em português, e o `WorldTextLocalizer` do cliente traduz para quem joga em inglês, inclusive textos com números (`"Partida em 12s · entre agora!"`) e trechos separados por ` · `;
+  - no cliente, para texto que chega pronto do servidor, `Lang.localize(texto)`.
+- **Dados de catálogo** (nomes de Puffs, desafios, conquistas, efeitos, categorias do ranking) continuam em português no config e são traduzidos na hora de exibir.
+- **Ficam em português:** o painel de admin e os avisos que o admin digita. A dica da hotbar do Puffador (`Tool.ToolTip`) também fica em português.
+- **Na página do jogo**, nome e descrição em inglês ficam no Creator Hub (Localização).
+- **Testes:** `lune run tests/Locale.spec`. Confere:
+  - os mesmos `%d`/`%s` na tradução;
+  - conflitos entre dicionários;
+  - toda chamada `T("...")`, `Lang.t("...")` e `Lang.forPlayer(p, "...")` com tradução;
+  - os textos dos catálogos;
+  - o uso proibido de `T(string.format(...))`.
+
 ### Bots RoboPuff (Fase 5B)
 
 Escopo em `docs/FASE_5B_BOTS_PUFF.md`. Ninguém joga sozinho: bots completam a partida quando falta gente.

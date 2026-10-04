@@ -8,8 +8,10 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local PuffadorConstants = require(ReplicatedStorage.Shared.modules.PuffadorConstants)
+local Lang = require(ReplicatedStorage.Shared.i18n.Lang)
 local NotificationManager = require(script.Parent.Parent.notifications.NotificationManager)
 
+local T = Lang.t
 local WAIT_TIMEOUT = 15
 
 local PuffMomentController = {}
@@ -20,15 +22,15 @@ local function describe(kind: unknown, detail: unknown, isMe: boolean, name: str
 	if kind == "BaraoEscape" then
 		local jumped = detail == "Jump"
 		if isMe then
-			return "ESCAPOU DO BARÃO!", "🐶", if jumped then "Você pulou por cima dele" else "Você fugiu da perseguição"
+			return T("ESCAPOU DO BARÃO!"), "🐶", if jumped then T("Você pulou por cima dele") else T("Você fugiu da perseguição")
 		end
-		return "ESCAPOU DO BARÃO!", "🐶", if jumped then `{name} pulou por cima do Barão` else `{name} fugiu do Barão`
+		return T("ESCAPOU DO BARÃO!"), "🐶", if jumped then T("%s pulou por cima do Barão", name) else T("%s fugiu do Barão", name)
 	elseif kind == "Comeback" then
 		local won = detail == "Win"
 		if isMe then
-			return "VOLTA POR CIMA!", "🔥", if won then "Você venceu depois da Segunda Chance" else "Você voltou da Segunda Chance e derrubou alguém"
+			return T("VOLTA POR CIMA!"), "🔥", if won then T("Você venceu depois da Segunda Chance") else T("Você voltou da Segunda Chance e derrubou alguém")
 		end
-		return "VOLTA POR CIMA!", "🔥", if won then `{name} venceu depois da Segunda Chance` else `{name} voltou da Segunda Chance e derrubou alguém`
+		return T("VOLTA POR CIMA!"), "🔥", if won then T("%s venceu depois da Segunda Chance", name) else T("%s voltou da Segunda Chance e derrubou alguém", name)
 	end
 	return nil, "", ""
 end
@@ -36,7 +38,7 @@ end
 local function onMoment(kind: unknown, name: unknown, userId: unknown, detail: unknown)
 	local localPlayer = Players.LocalPlayer
 	local isMe = localPlayer ~= nil and userId == localPlayer.UserId
-	local displayName = if typeof(name) == "string" and #name <= 60 then name else "Alguém"
+	local displayName = if typeof(name) == "string" and #name <= 60 then name else T("Alguém")
 	local title, icon, subtitle = describe(kind, detail, isMe, displayName)
 	if title == nil then
 		return

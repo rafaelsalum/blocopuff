@@ -5,11 +5,15 @@
 -- botão JOGAR (leva ao mirante) para quem está fora da fila e, na contagem,
 -- o cronômetro logo acima da etiqueta.
 
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TweenService = game:GetService("TweenService")
 
+local Lang = require(ReplicatedStorage.Shared.i18n.Lang)
 local ResponsiveScale = require(script.Parent.ResponsiveScale)
 local UiKit = require(script.Parent.UiKit)
 local UiTheme = require(script.Parent.UiTheme)
+
+local T = Lang.t
 
 type ResponsiveScaleHandle = ResponsiveScale.ResponsiveScaleHandle
 
@@ -119,7 +123,7 @@ function RoundHudView.new(playerGui: PlayerGui, onJoin: () -> ()): RoundHudViewH
 
 	local joinButton = UiKit.createButton(queueGroup, {
 		name = "JoinButton",
-		text = "🏟 JOGAR",
+		text = T("🏟 JOGAR"),
 		variant = "Success",
 		size = UDim2.fromOffset(QUEUE_SIZE.X, JOIN_HEIGHT),
 		position = UDim2.fromOffset(0, QUEUE_SIZE.Y + JOIN_GAP),
@@ -174,7 +178,7 @@ function RoundHudView.new(playerGui: PlayerGui, onJoin: () -> ()): RoundHudViewH
 	prepareLabel.Position = UDim2.new(0, 13, 0, 0)
 	prepareLabel.Size = UDim2.new(1, -68, 1, 0)
 	prepareLabel.TextXAlignment = Enum.TextXAlignment.Left
-	prepareLabel.Text = "PREPARE-SE"
+	prepareLabel.Text = T("PREPARE-SE")
 	prepareLabel.Font = UiTheme.Fonts.Display
 	prepareLabel.TextSize = 17
 	UiTheme.addTextOutline(prepareLabel, 2)

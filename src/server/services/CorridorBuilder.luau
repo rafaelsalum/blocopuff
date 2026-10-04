@@ -21,6 +21,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local GameConfig = require(ReplicatedStorage.Shared.config.GameConfig)
 local BuildingLayout = require(ReplicatedStorage.Shared.modules.BuildingLayout)
 local BuildingDecor = require(script.Parent.BuildingDecor)
+local Lang = require(ReplicatedStorage.Shared.i18n.Lang)
 
 type BuildingConfig = GameConfig.BuildingConfig
 type Corridor = BuildingLayout.Corridor
@@ -158,13 +159,13 @@ local function buildBaraoDoor(parent: Instance, frame: CFrame, corridor: Corrido
 	CollectionService:AddTag(flap, CorridorBuilder.BaraoDoorTag)
 	surfaceText(flap, inside, "🐾", SIGN_TEXT_COLOR)
 	local plaque = decor(parent, "BaraoDoorSign", frame, Vector3.new(0.15, 0.9, 4.4), CFrame.new(face - (side * 0.1), floorY + height + 1.1, zCenter), SIGN_COLOR, Enum.Material.Wood)
-	surfaceText(plaque, inside, "TÚNEL DO BARÃO", SIGN_TEXT_COLOR)
+	surfaceText(plaque, inside, Lang.t("TÚNEL DO BARÃO"), SIGN_TEXT_COLOR)
 end
 
 -- Placa na parede externa, de frente para quem entra, e pegadas no piso.
 local function buildTerritory(parent: Instance, frame: CFrame, along: number, floorY: number, outerZ: number, zCenter: number)
 	local sign = decor(parent, "TerritorySign", frame, Vector3.new(4, 1.2, 0.12), CFrame.new(along, floorY + 5.6, outerZ - 0.06), SIGN_COLOR, Enum.Material.Wood)
-	surfaceText(sign, Enum.NormalId.Front, "🐾 TERRITÓRIO DO BARÃO", SIGN_TEXT_COLOR)
+	surfaceText(sign, Enum.NormalId.Front, Lang.t("🐾 TERRITÓRIO DO BARÃO"), SIGN_TEXT_COLOR)
 	local direction = math.sign(along)
 	for index = 1, PAW_STEPS do
 		local x = along - (direction * (index - 1) * 1.3)

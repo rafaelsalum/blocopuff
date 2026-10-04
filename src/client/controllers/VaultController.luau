@@ -12,6 +12,7 @@ local SoundService = game:GetService("SoundService")
 local GameConfig = require(ReplicatedStorage.Shared.config.GameConfig)
 local PuffadorConstants = require(ReplicatedStorage.Shared.modules.PuffadorConstants)
 local StateAttributeNames = require(ReplicatedStorage.Shared.types.StateAttributeNames)
+local Lang = require(ReplicatedStorage.Shared.i18n.Lang)
 local SuperChargeView = require(script.Parent.Parent.ui.SuperChargeView)
 local NotificationManager = require(script.Parent.Parent.notifications.NotificationManager)
 
@@ -19,6 +20,7 @@ type SuperChargeViewHandle = SuperChargeView.SuperChargeViewHandle
 type Priority = NotificationManager.Priority
 type Tone = NotificationManager.Tone
 
+local T = Lang.t
 local WAIT_TIMEOUT = 15
 local CHIME_SOUND = "rbxasset://sounds/electronicpingshort.wav"
 local SUPER_SOUND = "rbxasset://sounds/button.wav"
@@ -74,7 +76,7 @@ local function isLocalUser(userId: unknown): boolean
 end
 
 local function asText(value: unknown): string
-	return if typeof(value) == "string" then value else "Alguém"
+	return if typeof(value) == "string" then value else T("Alguém")
 end
 
 local function onVaultEvent(kind: unknown, first: unknown, second: unknown)
@@ -86,29 +88,29 @@ local function onVaultEvent(kind: unknown, first: unknown, second: unknown)
 	if kind == "Unlocked" then
 		playSound(CHIME_SOUND, 1.6, 0.6)
 		playSound(CHIME_SOUND, 2, 0.6, 0.18)
-		banner("🐶", "O BARÃO ACORDOU!", "E o cofre destrancou: porta dourada no andar de baixo", "Gold", 5, "Critical", "vault-unlocked")
+		banner("🐶", T("O BARÃO ACORDOU!"), T("E o cofre destrancou: porta dourada no andar de baixo"), "Gold", 5, "Critical", "vault-unlocked")
 	elseif kind == "Opened" then
 		playAlarm()
 		if isLocalUser(second) then
-			banner("🗝️", "VOCÊ ABRIU O COFRE!", "Pegue o Puffador do Cofre no pedestal. O Barão ficou bravo!", "Gold", 5, "Critical", "vault-opened")
+			banner("🗝️", T("VOCÊ ABRIU O COFRE!"), T("Pegue o Puffador do Cofre no pedestal. O Barão ficou bravo!"), "Gold", 5, "Critical", "vault-opened")
 		else
-			banner("🚨", "COFRE ABERTO!", `{asText(first)} abriu o cofre. O Barão ficou bravo!`, "Danger", 5, "Critical", "vault-opened")
+			banner("🚨", T("COFRE ABERTO!"), T("%s abriu o cofre. O Barão ficou bravo!", asText(first)), "Danger", 5, "Critical", "vault-opened")
 		end
 	elseif kind == "SuperTaken" then
 		playSound(SUPER_SOUND, 0.8, 0.8)
 		if isLocalUser(second) then
-			banner("⚡", "COFRE CONQUISTADO!", "Puffador do Cofre: 2 blocos por Puff. Q, Y ou 🧱 troca para Construir", "Gold", 5, "High", "vault-super")
+			banner("⚡", T("COFRE CONQUISTADO!"), T("Puffador do Cofre: 2 blocos por Puff. Q, Y ou 🧱 troca para Construir"), "Gold", 5, "High", "vault-super")
 		else
-			banner("⚡", "COFRE CONQUISTADO!", `{asText(first)} pegou o Puffador do Cofre. Derrube-o!`, "Gold", 4.5, "High", "vault-super")
+			banner("⚡", T("COFRE CONQUISTADO!"), T("%s pegou o Puffador do Cofre. Derrube-o!", asText(first)), "Gold", 4.5, "High", "vault-super")
 		end
 	elseif kind == "Locked" then
-		local subtitle = if first == true then "O cofre está atrás de outra porta!" else "O cofre abre quando o Barão acordar…"
-		banner("🔒", "TRANCADA", subtitle, "Info", 2.2, "Low", "vault-locked")
+		local subtitle = if first == true then T("O cofre está atrás de outra porta!") else T("O cofre abre quando o Barão acordar…")
+		banner("🔒", T("TRANCADA"), subtitle, "Info", 2.2, "Low", "vault-locked")
 	elseif kind == "StayWarning" then
 		local seconds = if typeof(first) == "number" then first else 5
-		banner("⏳", "SAIA DO COFRE!", string.format("O Barão vai te expulsar em %d s", seconds), "Danger", 2.5, "High", "vault-stay")
+		banner("⏳", T("SAIA DO COFRE!"), T("O Barão vai te expulsar em %d s", seconds), "Danger", 2.5, "High", "vault-stay")
 	elseif kind == "Expelled" then
-		banner("👢", "EXPULSO DO COFRE!", "Seu tempo no cofre acabou nesta rodada", "Info", 2.5, "Normal")
+		banner("👢", T("EXPULSO DO COFRE!"), T("Seu tempo no cofre acabou nesta rodada"), "Info", 2.5, "Normal")
 	end
 end
 
@@ -127,7 +129,7 @@ local function onPuffFeedback(kind: unknown, value: unknown)
 	puffs = remaining
 	current.setCharges(puffs, builds)
 	if remaining == 0 and hadSuper then
-		banner("⚡", "PUFFADOR DO COFRE ESGOTADO", "Seu Puffador voltou ao normal", "Info", 2, "Normal")
+		banner("⚡", T("PUFFADOR DO COFRE ESGOTADO"), T("Seu Puffador voltou ao normal"), "Info", 2, "Normal")
 	end
 end
 

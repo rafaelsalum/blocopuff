@@ -9,6 +9,7 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local DailyConfig = require(ReplicatedStorage.Shared.config.DailyConfig)
+local Lang = require(ReplicatedStorage.Shared.i18n.Lang)
 local SecretCatalog = require(ReplicatedStorage.Shared.config.SecretCatalog)
 local PuffadorConstants = require(ReplicatedStorage.Shared.modules.PuffadorConstants)
 local ProfileTypes = require(ReplicatedStorage.Shared.types.ProfileTypes)
@@ -54,8 +55,8 @@ local function celebrate(snapshot: ProfileSnapshot)
 			priority = "Normal",
 			key = "daily-return",
 			icon = "🌞",
-			title = string.format("RETORNO DIÁRIO · DIA %d", reward.streak),
-			subtitle = string.format("+%d 🎟 para a Puff Machine", reward.tickets),
+			title = Lang.t("RETORNO DIÁRIO · DIA %d", reward.streak),
+			subtitle = Lang.t("+%d 🎟 para a Puff Machine", reward.tickets),
 			tone = "Winner",
 			duration = 4,
 			maxWait = 30,
@@ -68,8 +69,8 @@ local function celebrate(snapshot: ProfileSnapshot)
 			priority = "Normal",
 			key = `challenge-{id}`,
 			icon = "📋",
-			title = "DESAFIO CONCLUÍDO!",
-			subtitle = string.format("%s · +%d 🎟", challengeTitle(id), challengeTickets(id)),
+			title = Lang.t("DESAFIO CONCLUÍDO!"),
+			subtitle = Lang.t("%s · +%d 🎟", Lang.t(challengeTitle(id)), challengeTickets(id)),
 			tone = "Winner",
 			duration = 4,
 			maxWait = 30,
@@ -84,8 +85,8 @@ local function celebrate(snapshot: ProfileSnapshot)
 				priority = "High",
 				key = `secret-{id}`,
 				icon = "🔍",
-				title = "CONQUISTA SECRETA!",
-				subtitle = string.format("%s · +%d 🎟", definition.name, definition.tickets),
+				title = Lang.t("CONQUISTA SECRETA!"),
+				subtitle = Lang.t("%s · +%d 🎟", Lang.t(definition.name), definition.tickets),
 				tone = "Winner",
 				duration = 4.5,
 				maxWait = 30,

@@ -4,9 +4,13 @@
 -- Construir com o Puffador do Cofre (toque). No teclado e no controle a
 -- troca é pela tecla Q / botão Y; a dica fica no próprio botão.
 
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TweenService = game:GetService("TweenService")
 
+local Lang = require(ReplicatedStorage.Shared.i18n.Lang)
 local UiTheme = require(script.Parent.UiTheme)
+
+local T = Lang.t
 
 export type BuildToggleViewHandle = {
 	setVisible: (visible: boolean) -> (),
@@ -44,7 +48,7 @@ function BuildToggleView.new(playerGui: PlayerGui, anchor: ScreenGui, onToggle: 
 	icon.Position = UDim2.fromScale(0.5, 0.38)
 	icon.Size = UDim2.new(1, 0, 0, 26)
 
-	local caption = UiTheme.createLabel(button, "Caption", "CONSTRUIR", UiTheme.Fonts.BodyBold, 10, UiTheme.Colors.Ink)
+	local caption = UiTheme.createLabel(button, "Caption", T("CONSTRUIR"), UiTheme.Fonts.BodyBold, 10, UiTheme.Colors.Ink)
 	caption.AnchorPoint = Vector2.new(0.5, 0.5)
 	caption.Position = UDim2.fromScale(0.5, 0.74)
 	caption.Size = UDim2.new(1, -6, 0, 12)
@@ -87,11 +91,11 @@ function BuildToggleView.new(playerGui: PlayerGui, anchor: ScreenGui, onToggle: 
 	handle.setMode = function(building: boolean, charges: number)
 		if building then
 			icon.Text = "💨"
-			caption.Text = "PUFF"
+			caption.Text = T("PUFF")
 			gradient.Color = ColorSequence.new(UiTheme.Colors.Brand, UiTheme.Colors.BrandDeep)
 		else
 			icon.Text = "🧱"
-			caption.Text = string.format("CONSTRUIR %d", charges)
+			caption.Text = T("CONSTRUIR %d", charges)
 			gradient.Color = ColorSequence.new(UiTheme.Colors.Gold, UiTheme.Colors.GoldDeep)
 		end
 	end

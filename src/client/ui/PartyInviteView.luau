@@ -6,6 +6,7 @@
 
 local TweenService = game:GetService("TweenService")
 
+local Lang = require(game:GetService("ReplicatedStorage").Shared.i18n.Lang)
 local ResponsiveScale = require(script.Parent.ResponsiveScale)
 local UiKit = require(script.Parent.UiKit)
 local UiTheme = require(script.Parent.UiTheme)
@@ -69,7 +70,7 @@ function PartyInviteView.new(
 
 	local acceptButton = UiKit.createButton(card, {
 		name = "Accept",
-		text = "ENTRAR",
+		text = Lang.t("ENTRAR"),
 		variant = "Success",
 		size = UDim2.new(0.5, -18, 0, 32),
 		position = UDim2.new(0, 14, 1, -10),
@@ -79,7 +80,7 @@ function PartyInviteView.new(
 	})
 	local declineButton = UiKit.createButton(card, {
 		name = "Decline",
-		text = "AGORA NÃO",
+		text = Lang.t("AGORA NÃO"),
 		variant = "Neutral",
 		size = UDim2.new(0.5, -18, 0, 32),
 		position = UDim2.new(1, -14, 1, -10),
@@ -102,7 +103,7 @@ function PartyInviteView.new(
 		generation += 1
 		local current = generation
 		currentFrom = fromUserId
-		text.Text = `{fromName} te chamou para a Party!`
+		text.Text = Lang.t("%s te chamou para a Party!", fromName)
 		fill.Size = UDim2.fromScale(1, 1)
 		TweenService:Create(fill, TweenInfo.new(lifetime, Enum.EasingStyle.Linear), { Size = UDim2.fromScale(0, 1) }):Play()
 		screenGui.Enabled = true

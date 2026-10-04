@@ -41,6 +41,7 @@ local LobbyStationsController = require(script.controllers.LobbyStationsControll
 local MatchQueueController = require(script.controllers.MatchQueueController)
 local InviteController = require(script.controllers.InviteController)
 local DashController = require(script.controllers.DashController)
+local WorldTextLocalizer = require(script.controllers.WorldTextLocalizer)
 
 print("[BlocoPuff] Client initialized")
 
@@ -257,4 +258,12 @@ local dashOk, dashErr = pcall(function()
 end)
 if not dashOk then
 	warn(string.format("[BlocoPuff] Failed to start dash controller: %s", tostring(dashErr)))
+end
+
+-- Placas e prompts do cenário no idioma do jogador.
+local worldTextOk, worldTextErr = pcall(function()
+	WorldTextLocalizer.start()
+end)
+if not worldTextOk then
+	warn(string.format("[BlocoPuff] Failed to start world text localizer: %s", tostring(worldTextErr)))
 end

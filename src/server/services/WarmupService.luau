@@ -24,6 +24,7 @@ local ProjectileService = require(script.Parent.ProjectileService)
 local CombatantRegistry = require(script.Parent.CombatantRegistry)
 local PuffadorService = require(script.Parent.PuffadorService)
 local TelemetryService = require(script.Parent.TelemetryService)
+local Lang = require(ReplicatedStorage.Shared.i18n.Lang)
 
 local FOLDER_NAME = "Warmup"
 local GENERATED_BY_ATTRIBUTE = "GeneratedBy"
@@ -76,7 +77,7 @@ local function publishScores()
 	for index = 1, math.min(TOP_SCORES, #ranking) do
 		table.insert(parts, `{ranking[index].name} {ranking[index].score}`)
 	end
-	MatchQueueService.setWarmupLine(if #parts > 0 then `🎈 {table.concat(parts, " · ")}` else "🎈 Estoure os balões enquanto espera!")
+	MatchQueueService.setWarmupLine(if #parts > 0 then `🎈 {table.concat(parts, " · ")}` else Lang.t("🎈 Estoure os balões enquanto espera!"))
 end
 
 local function removeBalloon(balloon: Part)

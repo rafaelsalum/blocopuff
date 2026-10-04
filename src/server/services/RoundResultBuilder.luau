@@ -9,6 +9,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ResultTypes = require(ReplicatedStorage.Shared.types.ResultTypes)
 local StateAttributeNames = require(ReplicatedStorage.Shared.types.StateAttributeNames)
 local CombatantRegistry = require(script.Parent.CombatantRegistry)
+local Lang = require(ReplicatedStorage.Shared.i18n.Lang)
 
 type Combatant = CombatantRegistry.Combatant
 
@@ -154,22 +155,22 @@ function RoundResultBuilder.build(roundId: number, snapshots: { ParticipantSnaps
 	end
 	-- table.pack guarda os nil (quem não tem destaque) sem cortar a lista.
 	local candidates = table.pack(
-		pickHighlight(entries, "Demolisher", "DEMOLIDOR", DEMOLISHER_MIN_BLOCKS, function(entry)
+		pickHighlight(entries, "Demolisher", Lang.t("DEMOLIDOR"), DEMOLISHER_MIN_BLOCKS, function(entry)
 			return entry.blocks
 		end),
-		pickHighlight(entries, "Knockouts", "MAIS DERRUBADAS", 1, function(entry)
+		pickHighlight(entries, "Knockouts", Lang.t("MAIS DERRUBADAS"), 1, function(entry)
 			return entry.knockouts
 		end),
-		pickHighlight(entries, "Vault", "DONO DO COFRE", 1, function(entry)
+		pickHighlight(entries, "Vault", Lang.t("DONO DO COFRE"), 1, function(entry)
 			return entry.vault
 		end),
-		pickHighlight(entries, "BaraoEscapes", "ESCAPOU DO BARÃO", 1, function(entry)
+		pickHighlight(entries, "BaraoEscapes", Lang.t("ESCAPOU DO BARÃO"), 1, function(entry)
 			return entry.baraoEscapes
 		end),
-		pickHighlight(entries, "Secrets", "DESCOBRIDOR", 1, function(entry)
+		pickHighlight(entries, "Secrets", Lang.t("DESCOBRIDOR"), 1, function(entry)
 			return entry.secretsFound
 		end),
-		pickHighlight(entries, "Comeback", "VOLTA POR CIMA", 1, function(entry)
+		pickHighlight(entries, "Comeback", Lang.t("VOLTA POR CIMA"), 1, function(entry)
 			return comebacks[entry.userId] or 0
 		end)
 	)

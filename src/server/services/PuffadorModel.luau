@@ -11,6 +11,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Workspace = game:GetService("Workspace")
 
 local PuffadorConstants = require(ReplicatedStorage.Shared.modules.PuffadorConstants)
+local Lang = require(ReplicatedStorage.Shared.i18n.Lang)
 
 export type Variant = "Standard" | "Super"
 
@@ -215,7 +216,7 @@ function PuffadorModel.build(variant: Variant, owner: string, scale: number?): T
 	tool.Name = PuffadorConstants.ToolName
 	tool.RequiresHandle = true
 	tool.CanBeDropped = false
-	tool.ToolTip = if variant == "Super" then "Puffador do Cofre" else "Puffador"
+	tool.ToolTip = if variant == "Super" then Lang.t("Puffador do Cofre") else "Puffador"
 	tool.Grip = CFrame.new(0, -0.1 * size, 0)
 	tool:SetAttribute("GeneratedBy", owner)
 	tool:SetAttribute("Variant", variant)

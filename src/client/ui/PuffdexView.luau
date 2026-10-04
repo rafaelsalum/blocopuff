@@ -14,6 +14,7 @@ local SoundService = game:GetService("SoundService")
 local TweenService = game:GetService("TweenService")
 
 local PuffCatalog = require(ReplicatedStorage.Shared.config.PuffCatalog)
+local Lang = require(ReplicatedStorage.Shared.i18n.Lang)
 local ProfileTypes = require(ReplicatedStorage.Shared.types.ProfileTypes)
 local PuffTypes = require(ReplicatedStorage.Shared.types.PuffTypes)
 local PuffEffects = require(ReplicatedStorage.Shared.modules.PuffEffects)
@@ -63,9 +64,9 @@ local CARD_FX_INTERVAL = 1 / 30
 
 local ORIGIN_LABELS: { [PuffOrigin]: string } = {
 	Starter = "Inicial",
-	Level = "Nível",
-	Feat = "Façanha",
-	Machine = "Puff Machine",
+	Level = Lang.t("Nível"),
+	Feat = Lang.t("Façanha"),
+	Machine = Lang.t("Puff Machine"),
 }
 
 local PuffdexView = {}
@@ -121,7 +122,7 @@ function PuffdexView.new(playerGui: PlayerGui, onEquip: (id: string) -> (), onOp
 	card.Parent = root
 	UiTheme.stylePanel(card, { accent = UiTheme.Colors.Brand, radius = 20 })
 
-	local title = UiTheme.createLabel(card, "Title", "✨ PUFFDEX", UiTheme.Fonts.Display, 32, UiTheme.Colors.Gold)
+	local title = UiTheme.createLabel(card, "Title", Lang.t("✨ PUFFDEX"), UiTheme.Fonts.Display, 32, UiTheme.Colors.Gold)
 	title.Position = UDim2.fromOffset(20, 12)
 	title.Size = UDim2.new(0, 260, 0, 40)
 	title.TextXAlignment = Enum.TextXAlignment.Left
@@ -239,7 +240,7 @@ function PuffdexView.new(playerGui: PlayerGui, onEquip: (id: string) -> (), onOp
 
 	local equipButton = UiKit.createButton(detail, {
 		name = "Equip",
-		text = "EQUIPAR",
+		text = Lang.t("EQUIPAR"),
 		variant = "Success",
 		size = UDim2.new(1, -24, 0, 50),
 		position = UDim2.new(0.5, 0, 1, -12),
@@ -248,7 +249,7 @@ function PuffdexView.new(playerGui: PlayerGui, onEquip: (id: string) -> (), onOp
 		zIndex = 5,
 	})
 
-	local footer = UiTheme.createLabel(card, "Footer", "Puffs só mudam o visual do disparo. Não dão vantagem.", UiTheme.Fonts.Body, 15, UiTheme.Colors.InkSoft)
+	local footer = UiTheme.createLabel(card, "Footer", Lang.t("Puffs só mudam o visual do disparo. Não dão vantagem."), UiTheme.Fonts.Body, 15, UiTheme.Colors.InkSoft)
 	footer.Position = UDim2.new(0, 20, 1, -34)
 	footer.Size = UDim2.new(1, -40, 0, 22)
 	footer.TextXAlignment = Enum.TextXAlignment.Left
@@ -257,7 +258,7 @@ function PuffdexView.new(playerGui: PlayerGui, onEquip: (id: string) -> (), onOp
 
 	-- Enquanto o perfil não chega, nada de coleção vazia: a grade fica
 	-- escondida e o aviso diz que os Puffs estão guardados.
-	local loadingLabel = UiTheme.createLabel(card, "Loading", "⏳ Carregando sua coleção…\nSeus Puffs estão guardados.", UiTheme.Fonts.Display, 20, UiTheme.Colors.Ink)
+	local loadingLabel = UiTheme.createLabel(card, "Loading", Lang.t("⏳ Carregando sua coleção…\nSeus Puffs estão guardados."), UiTheme.Fonts.Display, 20, UiTheme.Colors.Ink)
 	loadingLabel.Position = grid.Position
 	loadingLabel.Size = grid.Size
 	loadingLabel.TextWrapped = true
@@ -310,7 +311,7 @@ function PuffdexView.new(playerGui: PlayerGui, onEquip: (id: string) -> (), onOp
 		equipped.Visible = false
 		UiTheme.addCorner(equipped, 999)
 
-		local newTag = UiTheme.createLabel(button, "New", "NOVO", UiTheme.Fonts.Display, 12, UiTheme.Colors.Outline)
+		local newTag = UiTheme.createLabel(button, "New", Lang.t("NOVO"), UiTheme.Fonts.Display, 12, UiTheme.Colors.Outline)
 		newTag.AnchorPoint = Vector2.new(1, 0)
 		newTag.Position = UDim2.new(1, -4, 0, 4)
 		newTag.Size = UDim2.fromOffset(44, 20)
@@ -367,7 +368,7 @@ function PuffdexView.new(playerGui: PlayerGui, onEquip: (id: string) -> (), onOp
 			end
 			paintOrb(item.orbGradient, definition, has)
 			item.mark.Visible = not has
-			item.name.Text = if has then definition.name else "???"
+			item.name.Text = if has then Lang.t(definition.name) else Lang.t("???")
 			item.equipped.Visible = has and definition.id == equippedId
 			item.newTag.Visible = has and newIds[definition.id] == true
 			item.effectIcon.Visible = has
@@ -391,10 +392,10 @@ function PuffdexView.new(playerGui: PlayerGui, onEquip: (id: string) -> (), onOp
 		local ownedPuff = owned[definition.id]
 		local has = ownedPuff ~= nil
 		preview.setPuff(definition, has)
-		detailName.Text = if has then definition.name else "???"
+		detailName.Text = if has then Lang.t(definition.name) else Lang.t("???")
 		local effectInfo = PuffEffects.info(definition.style.effect)
-		detailRarity.Text = if has then `{rarityInfo.label} · {effectInfo.icon} {effectInfo.label}` else rarityInfo.label
-		detailLore.Text = if has then `“{definition.lore}”` else "Um Puff misterioso…"
+		detailRarity.Text = if has then `{Lang.t(rarityInfo.label)} · {effectInfo.icon} {Lang.t(effectInfo.label)}` else Lang.t(rarityInfo.label)
+		detailLore.Text = if has then `“{Lang.t(definition.lore)}”` else Lang.t("Um Puff misterioso…")
 		detailRarity.TextColor3 = rarityInfo.color
 
 		local current, target = PuffCatalog.progress(definition, stats, level)
@@ -406,25 +407,25 @@ function PuffdexView.new(playerGui: PlayerGui, onEquip: (id: string) -> (), onOp
 			}):Play()
 		end
 		if ownedPuff ~= nil then
-			local origin = ORIGIN_LABELS[ownedPuff.origin] or ""
+			local origin = Lang.t(ORIGIN_LABELS[ownedPuff.origin] or "")
 			local date = formatDate(ownedPuff.obtainedAt)
-			detailInfo.Text = if date ~= "" then `{origin} · desde {date}` else origin
+			detailInfo.Text = if date ~= "" then Lang.t("%s · desde %s", origin, date) else origin
 		elseif definition.unlock.kind == "Machine" then
-			detailInfo.Text = "Sai na Puff Machine"
+			detailInfo.Text = Lang.t("Sai na Puff Machine")
 		elseif current ~= nil and target ~= nil then
-			detailInfo.Text = `{definition.hint}\n{current} / {target}`
+			detailInfo.Text = `{Lang.t(definition.hint)}\n{current} / {target}`
 		else
-			detailInfo.Text = definition.hint
+			detailInfo.Text = Lang.t(definition.hint)
 		end
 
 		if not has then
-			equipButton.setText("BLOQUEADO")
+			equipButton.setText(Lang.t("BLOQUEADO"))
 			equipButton.setEnabled(false)
 		elseif definition.id == equippedId then
-			equipButton.setText("EQUIPADO")
+			equipButton.setText(Lang.t("EQUIPADO"))
 			equipButton.setEnabled(false)
 		else
-			equipButton.setText("EQUIPAR")
+			equipButton.setText(Lang.t("EQUIPAR"))
 			equipButton.setEnabled(true)
 		end
 	end
@@ -529,7 +530,7 @@ function PuffdexView.new(playerGui: PlayerGui, onEquip: (id: string) -> (), onOp
 
 	handle.setProfile = function(snapshot: ProfileSnapshot)
 		loaded = true
-		footer.Text = if snapshot.saved then FOOTER_TEXT else "⚠ Esta sessão não está salvando o progresso."
+		footer.Text = if snapshot.saved then FOOTER_TEXT else Lang.t("⚠ Esta sessão não está salvando o progresso.")
 		local nextOwned: { [string]: OwnedPuff } = {}
 		for _, item in ipairs(snapshot.puffs) do
 			nextOwned[item.id] = item

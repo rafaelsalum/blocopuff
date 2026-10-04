@@ -13,10 +13,13 @@
 --   * O Output mostra a orientação pedida e a atual (diagnóstico).
 
 local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
 local Workspace = game:GetService("Workspace")
 
+local Lang = require(ReplicatedStorage.Shared.i18n.Lang)
+local T = Lang.t
 local UiTheme = require(script.Parent.Parent.ui.UiTheme)
 
 local REQUESTED = Enum.ScreenOrientation.LandscapeRight
@@ -71,12 +74,12 @@ local function createBlocker(playerGui: PlayerGui): (ScreenGui, GuiObject)
 	phone.Position = UDim2.fromScale(0.5, 0.38)
 	phone.Size = UDim2.fromOffset(120, 120)
 
-	local title = UiTheme.createLabel(cover, "Title", "GIRE O CELULAR", UiTheme.Fonts.Display, 30, UiTheme.Colors.Ink)
+	local title = UiTheme.createLabel(cover, "Title", T("GIRE O CELULAR"), UiTheme.Fonts.Display, 30, UiTheme.Colors.Ink)
 	title.AnchorPoint = Vector2.new(0.5, 0.5)
 	title.Position = UDim2.fromScale(0.5, 0.56)
 	title.Size = UDim2.new(1, -40, 0, 40)
 
-	local subtitle = UiTheme.createLabel(cover, "Subtitle", "O Bloco Puff é jogado com a tela deitada", UiTheme.Fonts.BodyBold, 16, UiTheme.Colors.Ink)
+	local subtitle = UiTheme.createLabel(cover, "Subtitle", T("O Bloco Puff é jogado com a tela deitada"), UiTheme.Fonts.BodyBold, 16, UiTheme.Colors.Ink)
 	subtitle.AnchorPoint = Vector2.new(0.5, 0.5)
 	subtitle.Position = UDim2.fromScale(0.5, 0.64)
 	subtitle.Size = UDim2.new(1, -40, 0, 44)

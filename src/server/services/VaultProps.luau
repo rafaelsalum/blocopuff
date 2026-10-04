@@ -9,6 +9,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TweenService = game:GetService("TweenService")
 
 local GameConfig = require(ReplicatedStorage.Shared.config.GameConfig)
+local Lang = require(ReplicatedStorage.Shared.i18n.Lang)
 local BuildingLayout = require(ReplicatedStorage.Shared.modules.BuildingLayout)
 local BuildingDecor = require(script.Parent.BuildingDecor)
 local PuffadorModel = require(script.Parent.PuffadorModel)
@@ -88,8 +89,8 @@ end
 local function createPrompt(panel: Part): ProximityPrompt
 	local prompt = Instance.new("ProximityPrompt")
 	prompt.Name = "OpenPrompt"
-	prompt.ActionText = "Abrir"
-	prompt.ObjectText = "Porta misteriosa"
+	prompt.ActionText = Lang.t("Abrir")
+	prompt.ObjectText = Lang.t("Porta misteriosa")
 	prompt.HoldDuration = GameConfig.SecretRoom.OpenHoldDuration
 	prompt.MaxActivationDistance = 8
 	prompt.RequiresLineOfSight = false
@@ -243,8 +244,8 @@ function VaultProps.createPrize(parent: Instance, door: SecretDoor, building: Bu
 
 	local prompt = Instance.new("ProximityPrompt")
 	prompt.Name = "GrabPrompt"
-	prompt.ActionText = "Pegar"
-	prompt.ObjectText = "Puffador do Cofre"
+	prompt.ActionText = Lang.t("Pegar")
+	prompt.ObjectText = Lang.t("Puffador do Cofre")
 	prompt.HoldDuration = GameConfig.SecretRoom.GrabHoldDuration
 	prompt.MaxActivationDistance = 7
 	prompt.RequiresLineOfSight = false

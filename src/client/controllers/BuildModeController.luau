@@ -18,9 +18,12 @@ local GameConfig = require(ReplicatedStorage.Shared.config.GameConfig)
 local ArenaConstants = require(ReplicatedStorage.Shared.modules.ArenaConstants)
 local BuildTargeting = require(ReplicatedStorage.Shared.modules.BuildTargeting)
 local PuffadorConstants = require(ReplicatedStorage.Shared.modules.PuffadorConstants)
+local Lang = require(ReplicatedStorage.Shared.i18n.Lang)
 local NotificationManager = require(script.Parent.Parent.notifications.NotificationManager)
 local BuildToggleView = require(script.Parent.Parent.ui.BuildToggleView)
 local FireButtonView = require(script.Parent.Parent.ui.FireButtonView)
+
+local T = Lang.t
 
 type Cell = BuildTargeting.Cell
 type CellState = BuildTargeting.CellState
@@ -201,9 +204,9 @@ local function refresh()
 	local button = fireButton
 	if button ~= nil then
 		if active then
-			button.setLabel("BLOCO!", "CONSTRUIR")
+			button.setLabel(T("BLOCO!"), T("CONSTRUIR"))
 		else
-			button.setLabel("PUFF!", "ATIRAR")
+			button.setLabel(T("PUFF!"), T("ATIRAR"))
 		end
 	end
 	local toggle = toggleView
@@ -234,8 +237,8 @@ local function setActive(value: boolean)
 			priority = "Low",
 			key = "build-mode",
 			icon = "🧱",
-			title = "MODO CONSTRUIR",
-			subtitle = string.format("Mire num buraco da arena e dispare (%d restantes)", charges),
+			title = T("MODO CONSTRUIR"),
+			subtitle = T("Mire num buraco da arena e dispare (%d restantes)", charges),
 			tone = "Gold",
 			duration = 2.2,
 		})
@@ -266,9 +269,9 @@ end
 
 local function blockedMessage(reason: unknown): string
 	if reason == "Occupied" then
-		return "Tem alguém no lugar do bloco"
+		return T("Tem alguém no lugar do bloco")
 	end
-	return "Mire num buraco da arena, mais perto"
+	return T("Mire num buraco da arena, mais perto")
 end
 
 local function onFeedback(kind: unknown, value: unknown)
@@ -286,8 +289,8 @@ local function onFeedback(kind: unknown, value: unknown)
 				priority = "Low",
 				key = "build-mode",
 				icon = "🧱",
-				title = "CONSTRUÇÕES ESGOTADAS",
-				subtitle = "Seu Puffador do Cofre volta a só dar Puff",
+				title = T("CONSTRUÇÕES ESGOTADAS"),
+				subtitle = T("Seu Puffador do Cofre volta a só dar Puff"),
 				tone = "Info",
 				duration = 2,
 			})
@@ -299,7 +302,7 @@ local function onFeedback(kind: unknown, value: unknown)
 			priority = "Low",
 			key = "build-blocked",
 			icon = "🚫",
-			title = "NÃO DÁ PARA CONSTRUIR AQUI",
+			title = T("NÃO DÁ PARA CONSTRUIR AQUI"),
 			subtitle = blockedMessage(value),
 			tone = "Warning",
 			duration = 1.6,

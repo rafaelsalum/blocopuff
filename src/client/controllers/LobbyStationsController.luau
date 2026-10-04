@@ -6,7 +6,9 @@
 
 local Players = game:GetService("Players")
 local ProximityPromptService = game:GetService("ProximityPromptService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
+local Lang = require(ReplicatedStorage.Shared.i18n.Lang)
 local NotificationManager = require(script.Parent.Parent.notifications.NotificationManager)
 local ChallengesController = require(script.Parent.ChallengesController)
 local PartyController = require(script.Parent.PartyController)
@@ -36,8 +38,8 @@ local function openStation(station: unknown)
 			priority = "Normal",
 			key = "shop-soon",
 			icon = "🛍",
-			title = "LOJA EM BREVE",
-			subtitle = "Ainda não tem nada à venda. Puffs saem jogando!",
+			title = Lang.t("LOJA EM BREVE"),
+			subtitle = Lang.t("Ainda não tem nada à venda. Puffs saem jogando!"),
 			tone = "Info",
 			duration = 3.5,
 			maxWait = 5,

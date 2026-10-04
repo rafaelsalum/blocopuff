@@ -8,6 +8,8 @@
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
+local Lang = require(ReplicatedStorage.Shared.i18n.Lang)
+
 local PuffCatalog = require(ReplicatedStorage.Shared.config.PuffCatalog)
 local PuffadorConstants = require(ReplicatedStorage.Shared.modules.PuffadorConstants)
 local ProfileTypes = require(ReplicatedStorage.Shared.types.ProfileTypes)
@@ -47,8 +49,8 @@ local function celebrate(ids: { string })
 				priority = if definition.rarity == "Legendary" or definition.rarity == "Epic" then "High" else "Normal",
 				key = `puff-{id}`,
 				icon = "✨",
-				title = "NOVO PUFF!",
-				subtitle = `{definition.name} · {rarity.label} — veja no Puffdex`,
+				title = Lang.t("NOVO PUFF!"),
+				subtitle = Lang.t("%s · %s — veja no Puffdex", Lang.t(definition.name), Lang.t(rarity.label)),
 				tone = "Winner",
 				duration = 4,
 				maxWait = 30,

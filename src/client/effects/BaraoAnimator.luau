@@ -28,6 +28,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Workspace = game:GetService("Workspace")
 
 local BaraoModel = require(ReplicatedStorage.Shared.modules.BaraoModel)
+local Lang = require(ReplicatedStorage.Shared.i18n.Lang)
 
 type Bone = BaraoModel.Bone
 
@@ -261,7 +262,7 @@ function BaraoAnimator.new(model: Model, options: Options, origin: CFrame?): Ani
 			zzzGui, zzzLabel = billboard(headPart, "Zzz", Vector3.new(0, 1.6 * scale, 0), "z", Color3.fromRGB(200, 190, 235), 60)
 		end
 		if options.effects then
-			bubble = billboard(headPart, "Bark", Vector3.new(0, 2 * scale, 0), "AU AU!", Color3.fromRGB(255, 220, 120), 80)
+			bubble = billboard(headPart, "Bark", Vector3.new(0, 2 * scale, 0), Lang.t("AU AU!"), Color3.fromRGB(255, 220, 120), 80)
 			local emitter = Instance.new("ParticleEmitter")
 			emitter.Texture = "rbxasset://textures/particles/smoke_main.dds"
 			emitter.Rate = 10

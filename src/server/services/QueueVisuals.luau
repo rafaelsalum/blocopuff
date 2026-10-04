@@ -18,6 +18,7 @@ local GameConfig = require(ReplicatedStorage.Shared.config.GameConfig)
 local MansionConfig = require(ReplicatedStorage.Shared.config.MansionConfig)
 local BuildingLayout = require(ReplicatedStorage.Shared.modules.BuildingLayout)
 local MansionLayout = require(ReplicatedStorage.Shared.modules.MansionLayout)
+local Lang = require(ReplicatedStorage.Shared.i18n.Lang)
 
 export type BoardState = {
 	-- Jogadores + bots.
@@ -118,8 +119,8 @@ local function buildPortal(folder: Instance, index: number, wallX: number, floor
 		PANEL
 	)
 	local gui = surface(header, 40)
-	label(gui, "Title", "🏟 ENTRAR NA FILA", Enum.Font.FredokaOne, GOLD, UDim2.fromScale(0.04, 0.04), UDim2.fromScale(0.92, 0.6))
-	label(gui, "Subtitle", "Entre e saia quando quiser", Enum.Font.GothamBold, INK, UDim2.fromScale(0.04, 0.64), UDim2.fromScale(0.92, 0.3))
+	label(gui, "Title", Lang.t("🏟 ENTRAR NA FILA"), Enum.Font.FredokaOne, GOLD, UDim2.fromScale(0.04, 0.04), UDim2.fromScale(0.92, 0.6))
+	label(gui, "Subtitle", Lang.t("Entre e saia quando quiser"), Enum.Font.GothamBold, INK, UDim2.fromScale(0.04, 0.64), UDim2.fromScale(0.92, 0.3))
 end
 
 -- Passadeira com setas do Salão Principal até a porta.
@@ -184,7 +185,7 @@ local function buildBoard(folder: Instance, name: string, cframe: CFrame): Board
 	frame.CastShadow = false
 	local board = part(folder, name, Vector3.new(BOARD_SIZE.X, BOARD_SIZE.Y, 0.2), cframe, PANEL)
 	local gui = surface(board, 30)
-	label(gui, "Title", "🏟 FILA DA PARTIDA", Enum.Font.FredokaOne, GOLD, UDim2.fromScale(0.03, 0.03), UDim2.fromScale(0.94, 0.2))
+	label(gui, "Title", Lang.t("🏟 FILA DA PARTIDA"), Enum.Font.FredokaOne, GOLD, UDim2.fromScale(0.03, 0.03), UDim2.fromScale(0.94, 0.2))
 	local count = label(gui, "Count", "", Enum.Font.FredokaOne, INK, UDim2.fromScale(0.03, 0.24), UDim2.fromScale(0.94, 0.2))
 	local status = label(gui, "Status", "", Enum.Font.GothamBold, GREEN, UDim2.fromScale(0.03, 0.45), UDim2.fromScale(0.94, 0.13))
 	local row = Instance.new("Frame")
@@ -230,21 +231,21 @@ end
 
 local function statusText(state: BoardState): string
 	if state.gatesClosed then
-		return "🔒 Embarque encerrado · a partida vai começar!"
+		return Lang.t("🔒 Embarque encerrado · a partida vai começar!")
 	end
 	local remaining = state.remaining
 	if remaining ~= nil then
-		return string.format("Partida em %ds · entre agora!", math.max(0, math.floor(remaining)))
+		return Lang.t("Partida em %ds · entre agora!", math.max(0, math.floor(remaining)))
 	end
 	local missing = math.max(0, state.minimum - state.count)
 	if missing <= 0 then
-		return "A contagem já vai começar"
+		return Lang.t("A contagem já vai começar")
 	end
-	return if missing == 1 then "Falta 1 jogador para começar" else string.format("Faltam %d jogadores para começar", missing)
+	return if missing == 1 then Lang.t("Falta 1 jogador para começar") else Lang.t("Faltam %d jogadores para começar", missing)
 end
 
 local function render(board: Board, state: BoardState)
-	board.count.Text = string.format("%d / %d na fila", state.count, state.maximum)
+	board.count.Text = Lang.t("%d / %d na fila", state.count, state.maximum)
 	board.status.Text = statusText(state)
 	board.status.TextColor3 = if state.gatesClosed then GOLD else GREEN
 	board.warmup.Text = state.warmup

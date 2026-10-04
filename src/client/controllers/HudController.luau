@@ -10,9 +10,12 @@ local GameConfig = require(ReplicatedStorage.Shared.config.GameConfig)
 local EliminationTypes = require(ReplicatedStorage.Shared.types.EliminationTypes)
 local RoundTypes = require(ReplicatedStorage.Shared.types.RoundTypes)
 local StateAttributeNames = require(ReplicatedStorage.Shared.types.StateAttributeNames)
+local Lang = require(ReplicatedStorage.Shared.i18n.Lang)
 local HudView = require(script.Parent.Parent.ui.HudView)
 local NotificationManager = require(script.Parent.Parent.notifications.NotificationManager)
 local MatchQueueController = require(script.Parent.MatchQueueController)
+
+local T = Lang.t
 
 type RoundState = RoundTypes.RoundState
 type HudViewHandle = HudView.HudViewHandle
@@ -96,9 +99,9 @@ end
 -- Para quem está na fila.
 local function getQueueMessage(): string
 	if cached.roundsUntilTurn >= 2 then
-		return string.format("Sua vez chega em %d rodadas", cached.roundsUntilTurn)
+		return T("Sua vez chega em %d rodadas", cached.roundsUntilTurn)
 	end
-	return "Você participa da próxima rodada"
+	return T("Você participa da próxima rodada")
 end
 
 -- Etiqueta da fila (canto superior direito) na espera e na contagem.
@@ -110,15 +113,15 @@ local function renderQueue(currentView: HudViewHandle, counting: boolean)
 		if cached.roundsUntilTurn >= 2 then
 			subtitle = getQueueMessage()
 		elseif counting then
-			subtitle = string.format("%d na fila · fique no mirante", count)
+			subtitle = T("%d na fila · fique no mirante", count)
 		else
 			local missing = math.max(0, minimum - count)
-			subtitle = if missing == 1 then "Falta 1 jogador para começar" else string.format("Faltam %d jogadores para começar", missing)
+			subtitle = if missing == 1 then T("Falta 1 jogador para começar") else T("Faltam %d jogadores para começar", missing)
 		end
-		currentView.setQueue(if counting then "✅ VOCÊ ESTÁ NA FILA" else string.format("🏟 NA FILA  %d/%d", count, minimum), subtitle, true)
+		currentView.setQueue(if counting then T("✅ VOCÊ ESTÁ NA FILA") else T("🏟 NA FILA  %d/%d", count, minimum), subtitle, true)
 	else
-		local title = if counting then string.format("🏟 %d NA FILA", count) else string.format("🏟 FILA  %d/%d", count, minimum)
-		currentView.setQueue(title, "Vá ao mirante para jogar", false)
+		local title = if counting then T("🏟 %d NA FILA", count) else T("🏟 FILA  %d/%d", count, minimum)
+		currentView.setQueue(title, T("Vá ao mirante para jogar"), false)
 	end
 end
 
@@ -185,8 +188,8 @@ end
 local function renderLobbyDuringMatch(currentView: HudViewHandle)
 	currentView.setRoundMode("Waiting")
 	currentView.setQueue(
-		"⚔️ PARTIDA EM ANDAMENTO",
-		if cached.inMatchQueue then "Você está na fila da próxima" else "Vá ao mirante para jogar a próxima",
+		T("⚔️ PARTIDA EM ANDAMENTO"),
+		if cached.inMatchQueue then T("Você está na fila da próxima") else T("Vá ao mirante para jogar a próxima"),
 		cached.inMatchQueue
 	)
 	currentView.setCombatVisible(false)
@@ -196,11 +199,11 @@ end
 
 local function getPersonalScoreSummary(): string
 	if not cached.isParticipant then
-		return "A próxima rodada está chegando"
+		return T("A próxima rodada está chegando")
 	end
 
 	local safeScore = math.max(0, math.floor(cached.roundBlocksDestroyed))
-	return string.format("Você derrubou %d %s", safeScore, if safeScore == 1 then "bloco" else "blocos")
+	return T("Você derrubou %d %s", safeScore, if safeScore == 1 then T("bloco") else T("blocos"))
 end
 
 local function renderActive(currentView: HudViewHandle)
@@ -230,12 +233,12 @@ local function renderActive(currentView: HudViewHandle)
 
 	if cached.isEliminated then
 		local reason = cached.eliminationReason
-		local title = if reason == EliminationTypes.FellFromArena then "VOCÊ CAIU!" else "ELIMINADO!"
+		local title = if reason == EliminationTypes.FellFromArena then T("VOCÊ CAIU!") else T("ELIMINADO!")
 		showAnnouncement(
 			currentView,
 			string.format("%d:eliminated:%s", cached.roundId, reason),
 			title,
-			string.format("%s • acompanhe os jogadores restantes", getPersonalScoreSummary()),
+			T("%s · acompanhe os jogadores restantes", getPersonalScoreSummary()),
 			"Danger",
 			2.6,
 			"Elimination",
@@ -245,8 +248,8 @@ local function renderActive(currentView: HudViewHandle)
 		showAnnouncement(
 			currentView,
 			string.format("%d:chaos", cached.roundId),
-			"CAOS FINAL!",
-			"Sem Segunda Chance • blocos vermelhos vão cair",
+			T("CAOS FINAL!"),
+			T("Sem Segunda Chance · blocos vermelhos vão cair"),
 			"Danger",
 			3,
 			"Chaos",
@@ -256,8 +259,8 @@ local function renderActive(currentView: HudViewHandle)
 		showAnnouncement(
 			currentView,
 			string.format("%d:second-chance", cached.roundId),
-			"SEGUNDA CHANCE!",
-			"Você voltou para a arena • agora é sua última vida",
+			T("SEGUNDA CHANCE!"),
+			T("Você voltou para a arena · agora é sua última vida"),
 			"Warning",
 			2.6,
 			"Lives",
@@ -267,8 +270,8 @@ local function renderActive(currentView: HudViewHandle)
 		showAnnouncement(
 			currentView,
 			string.format("%d:active", cached.roundId),
-			"VALENDO!",
-			"Empurre os rivais e derrube os blocos embaixo deles",
+			T("VALENDO!"),
+			T("Empurre os rivais e derrube os blocos embaixo deles"),
 			"Info",
 			1.5,
 			"Round",

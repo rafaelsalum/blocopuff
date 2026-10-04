@@ -8,6 +8,8 @@
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
+local Lang = require(ReplicatedStorage.Shared.i18n.Lang)
+
 local PuffCatalog = require(ReplicatedStorage.Shared.config.PuffCatalog)
 local PuffadorConstants = require(ReplicatedStorage.Shared.modules.PuffadorConstants)
 local StateAttributeNames = require(ReplicatedStorage.Shared.types.StateAttributeNames)
@@ -21,12 +23,12 @@ type MachineReveal = PuffMachineView.MachineReveal
 local WAIT_TIMEOUT = 15
 
 local FAILURE_MESSAGES: { [string]: string } = {
-	NoTickets = "Tickets insuficientes. Jogue mais partidas!",
-	NotSaved = "Seu progresso não está sendo salvo agora. Tente mais tarde.",
-	NotLoaded = "Carregando seu perfil…",
-	Competing = "A máquina funciona só no lobby.",
-	Empty = "A máquina está vazia agora.",
-	Cooldown = "Calma! A máquina está recarregando.",
+	NoTickets = Lang.t("Tickets insuficientes. Jogue mais partidas!"),
+	NotSaved = Lang.t("Seu progresso não está sendo salvo agora. Tente mais tarde."),
+	NotLoaded = Lang.t("Carregando seu perfil…"),
+	Competing = Lang.t("A máquina funciona só no lobby."),
+	Empty = Lang.t("A máquina está vazia agora."),
+	Cooldown = Lang.t("Calma! A máquina está recarregando."),
 }
 
 local PuffMachineController = {}
@@ -96,7 +98,7 @@ function PuffMachineController.start()
 		if remote == nil then
 			local currentView = view
 			if currentView ~= nil then
-				currentView.showFailure("A máquina ainda está ligando…")
+				currentView.showFailure(Lang.t("A máquina ainda está ligando…"))
 			end
 			return
 		end
@@ -141,7 +143,7 @@ function PuffMachineController.start()
 			if kind == "Result" then
 				local reveal = parseReveal(payload)
 				if reveal == nil then
-					newView.showFailure("A máquina engasgou. Tente de novo!")
+					newView.showFailure(Lang.t("A máquina engasgou. Tente de novo!"))
 					return
 				end
 				newView.showResult(reveal)
@@ -150,7 +152,7 @@ function PuffMachineController.start()
 				end
 			elseif kind == "Failed" then
 				local message = if typeof(payload) == "string" then FAILURE_MESSAGES[payload] else nil
-				newView.showFailure(message or "A máquina engasgou. Tente de novo!")
+				newView.showFailure(message or Lang.t("A máquina engasgou. Tente de novo!"))
 			end
 		end)
 	end)

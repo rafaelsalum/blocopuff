@@ -8,9 +8,13 @@
 -- sem se sobrepor. O texto continua visível para não depender só de cor.
 
 local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TweenService = game:GetService("TweenService")
 
+local Lang = require(ReplicatedStorage.Shared.i18n.Lang)
 local UiTheme = require(script.Parent.UiTheme)
+
+local T = Lang.t
 
 local FIRE_BUTTON_NAME = "BlocoPuffFireButton"
 local BUTTON_SIZE = 96
@@ -125,14 +129,14 @@ function FireButtonView.new(playerGui: PlayerGui, onPress: () -> (), onRelease: 
 	shine.Parent = face
 	circle(shine)
 
-	local label = UiTheme.createLabel(face, "Label", "PUFF!", UiTheme.Fonts.Display, 24, UiTheme.Colors.Ink)
+	local label = UiTheme.createLabel(face, "Label", T("PUFF!"), UiTheme.Fonts.Display, 24, UiTheme.Colors.Ink)
 	label.AnchorPoint = Vector2.new(0.5, 0.5)
 	label.Position = UDim2.fromScale(0.5, 0.44)
 	label.Size = UDim2.new(1, -16, 0, 28)
 	label.ZIndex = 5
 	UiTheme.addTextOutline(label, 2.5)
 
-	local caption = UiTheme.createLabel(face, "Caption", "ATIRAR", UiTheme.Fonts.BodyBold, 11, UiTheme.Colors.Ink)
+	local caption = UiTheme.createLabel(face, "Caption", T("ATIRAR"), UiTheme.Fonts.BodyBold, 11, UiTheme.Colors.Ink)
 	caption.AnchorPoint = Vector2.new(0.5, 0.5)
 	caption.Position = UDim2.fromScale(0.5, 0.68)
 	caption.Size = UDim2.new(1, -20, 0, 14)
@@ -144,7 +148,7 @@ function FireButtonView.new(playerGui: PlayerGui, onPress: () -> (), onRelease: 
 	button.Name = "Button"
 	button.Size = UDim2.fromOffset(BUTTON_SIZE, BUTTON_SIZE)
 	button.BackgroundTransparency = 1
-	button.Text = "ATIRAR"
+	button.Text = T("ATIRAR")
 	button.TextTransparency = 1
 	button.AutoButtonColor = false
 	button.Active = true
@@ -236,7 +240,7 @@ function FireButtonView.new(playerGui: PlayerGui, onPress: () -> (), onRelease: 
 		end
 	end)
 
-	local idleCaption = "ATIRAR"
+	local idleCaption = T("ATIRAR")
 
 	local handle = {} :: FireButtonViewHandle
 	handle.screenGui = screenGui
@@ -258,8 +262,8 @@ function FireButtonView.new(playerGui: PlayerGui, onPress: () -> (), onRelease: 
 	end
 
 	handle.startCooldown = function(duration: number)
-		button.Text = "RECARREGANDO"
-		caption.Text = "RECARGA"
+		button.Text = T("RECARREGANDO")
+		caption.Text = T("RECARGA")
 		ringStroke.Color = UiTheme.Colors.InkSoft
 		cooldownFill.Size = UDim2.fromScale(1, 1)
 

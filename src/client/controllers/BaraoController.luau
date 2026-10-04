@@ -10,8 +10,10 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local GameConfig = require(ReplicatedStorage.Shared.config.GameConfig)
 local PuffadorConstants = require(ReplicatedStorage.Shared.modules.PuffadorConstants)
+local Lang = require(ReplicatedStorage.Shared.i18n.Lang)
 local NotificationManager = require(script.Parent.Parent.notifications.NotificationManager)
 
+local T = Lang.t
 local WAIT_TIMEOUT = 15
 local CATEGORY_TOCA = "Toca"
 local CATEGORY_BARAO = "Barao"
@@ -35,8 +37,8 @@ local function onFeedback(kind: unknown, value: unknown)
 			priority = "Low",
 			key = "toca",
 			icon = "🐾",
-			title = "TOCA SEGURA",
-			subtitle = `O Barão não te pega aqui por {seconds(value, GameConfig.Toca.MaxStay)} s`,
+			title = T("TOCA SEGURA"),
+			subtitle = T("O Barão não te pega aqui por %d s", seconds(value, GameConfig.Toca.MaxStay)),
 			tone = "Info",
 			duration = 2.5,
 		})
@@ -47,8 +49,8 @@ local function onFeedback(kind: unknown, value: unknown)
 			priority = "Normal",
 			key = "toca",
 			icon = "⏳",
-			title = "SAIA DA TOCA",
-			subtitle = `A proteção acaba em {seconds(value, GameConfig.Toca.WarningAt)} s`,
+			title = T("SAIA DA TOCA"),
+			subtitle = T("A proteção acaba em %d s", seconds(value, GameConfig.Toca.WarningAt)),
 			tone = "Warning",
 			duration = 2,
 		})
@@ -59,8 +61,8 @@ local function onFeedback(kind: unknown, value: unknown)
 			priority = "Normal",
 			key = "toca",
 			icon = "🚪",
-			title = "TEMPO ESGOTADO NA TOCA",
-			subtitle = `Tocas bloqueadas para você por {seconds(value, GameConfig.Toca.Cooldown)} s`,
+			title = T("TEMPO ESGOTADO NA TOCA"),
+			subtitle = T("Tocas bloqueadas para você por %d s", seconds(value, GameConfig.Toca.Cooldown)),
 			tone = "Warning",
 			duration = 2.5,
 		})
@@ -73,8 +75,8 @@ local function onFeedback(kind: unknown, value: unknown)
 			priority = "Normal",
 			key = "barao-contact",
 			icon = "🐶",
-			title = "AU AU!",
-			subtitle = "O Barão te expulsou do corredor",
+			title = T("AU AU!"),
+			subtitle = T("O Barão te expulsou do corredor"),
 			tone = "Warning",
 			duration = 1.8,
 		})

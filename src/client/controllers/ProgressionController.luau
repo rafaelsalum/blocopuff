@@ -8,6 +8,7 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local SoundService = game:GetService("SoundService")
 
+local Lang = require(ReplicatedStorage.Shared.i18n.Lang)
 local ProfileTypes = require(ReplicatedStorage.Shared.types.ProfileTypes)
 local StateAttributeNames = require(ReplicatedStorage.Shared.types.StateAttributeNames)
 local NotificationManager = require(script.Parent.Parent.notifications.NotificationManager)
@@ -59,8 +60,8 @@ local function announce(award: XpAward)
 		priority = "High",
 		key = "level-up",
 		icon = "⭐",
-		title = string.format("NÍVEL %d!", award.levelAfter),
-		subtitle = "Você subiu de nível no BlocoPuff",
+		title = Lang.t("NÍVEL %d!", award.levelAfter),
+		subtitle = Lang.t("Você subiu de nível no BlocoPuff"),
 		tone = "Winner",
 		duration = 4,
 		maxWait = 10,

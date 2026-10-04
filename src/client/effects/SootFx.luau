@@ -16,6 +16,7 @@ local TweenService = game:GetService("TweenService")
 local Workspace = game:GetService("Workspace")
 
 local TrapConfig = require(ReplicatedStorage.Shared.config.TrapConfig)
+local Lang = require(ReplicatedStorage.Shared.i18n.Lang)
 local TrapConstants = require(ReplicatedStorage.Shared.modules.TrapConstants)
 local TrapFxUtil = require(script.Parent.TrapFxUtil)
 
@@ -94,7 +95,7 @@ local function showText(head: BasePart, effectsFolder: Folder)
 	label.BackgroundTransparency = 1
 	label.Size = UDim2.fromScale(1, 1)
 	label.Font = Enum.Font.FredokaOne
-	label.Text = "ATCHIM!"
+	label.Text = Lang.t("ATCHIM!")
 	label.TextScaled = true
 	label.TextColor3 = Color3.fromRGB(255, 255, 255)
 	label.TextStrokeColor3 = SOOT_COLOR

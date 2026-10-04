@@ -9,6 +9,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TweenService = game:GetService("TweenService")
 
 local PuffCatalog = require(ReplicatedStorage.Shared.config.PuffCatalog)
+local Lang = require(ReplicatedStorage.Shared.i18n.Lang)
 local RewardConfig = require(ReplicatedStorage.Shared.config.RewardConfig)
 local ProfileTypes = require(ReplicatedStorage.Shared.types.ProfileTypes)
 local PuffTypes = require(ReplicatedStorage.Shared.types.PuffTypes)
@@ -88,7 +89,7 @@ function PuffMachineView.new(
 	card.Parent = root
 	UiTheme.stylePanel(card, { accent = UiTheme.Colors.Gold, radius = 20 })
 
-	local title = UiTheme.createLabel(card, "Title", "🎰 PUFF MACHINE", UiTheme.Fonts.Display, 32, UiTheme.Colors.Gold)
+	local title = UiTheme.createLabel(card, "Title", Lang.t("🎰 PUFF MACHINE"), UiTheme.Fonts.Display, 32, UiTheme.Colors.Gold)
 	title.Position = UDim2.fromOffset(20, 12)
 	title.Size = UDim2.new(1, -100, 0, 40)
 	title.TextXAlignment = Enum.TextXAlignment.Left
@@ -135,7 +136,7 @@ function PuffMachineView.new(
 	capsuleMark.Size = UDim2.fromScale(1, 1)
 	capsuleMark.ZIndex = 5
 
-	local resultName = UiTheme.createLabel(cabinet, "ResultName", "Gire para ganhar um Puff!", UiTheme.Fonts.Display, 22, UiTheme.Colors.Ink)
+	local resultName = UiTheme.createLabel(cabinet, "ResultName", Lang.t("Gire para ganhar um Puff!"), UiTheme.Fonts.Display, 22, UiTheme.Colors.Ink)
 	resultName.Position = UDim2.fromOffset(10, 136)
 	resultName.Size = UDim2.new(1, -20, 0, 28)
 	resultName.TextScaled = true
@@ -156,7 +157,7 @@ function PuffMachineView.new(
 
 	local pullButton = UiKit.createButton(cabinet, {
 		name = "Pull",
-		text = string.format("GIRAR  ·  %d 🎟", RewardConfig.MachineCost),
+		text = Lang.t("GIRAR  ·  %d 🎟", RewardConfig.MachineCost),
 		variant = "Gold",
 		size = UDim2.new(1, -28, 0, 52),
 		position = UDim2.new(0.5, 0, 1, -12),
@@ -167,7 +168,7 @@ function PuffMachineView.new(
 
 	local puffdexButton = UiKit.createButton(cabinet, {
 		name = "ShowPuffdex",
-		text = "VER NO PUFFDEX",
+		text = Lang.t("VER NO PUFFDEX"),
 		variant = "Neutral",
 		size = UDim2.new(1, -28, 0, 40),
 		position = UDim2.new(0.5, 0, 1, -70),
@@ -189,7 +190,7 @@ function PuffMachineView.new(
 	info.Parent = card
 	UiTheme.addCorner(info, 14)
 
-	local oddsTitle = UiTheme.createLabel(info, "OddsTitle", "CHANCES", UiTheme.Fonts.Display, 20, UiTheme.Colors.Ink)
+	local oddsTitle = UiTheme.createLabel(info, "OddsTitle", Lang.t("CHANCES"), UiTheme.Fonts.Display, 20, UiTheme.Colors.Ink)
 	oddsTitle.Position = UDim2.fromOffset(16, 10)
 	oddsTitle.Size = UDim2.new(1, -32, 0, 24)
 	oddsTitle.TextXAlignment = Enum.TextXAlignment.Left
@@ -206,7 +207,7 @@ function PuffMachineView.new(
 		dot.ZIndex = 4
 		dot.Parent = info
 		UiTheme.addCorner(dot, 999)
-		local name = UiTheme.createLabel(info, `Odds{weight.rarity}`, rarityInfo.label, UiTheme.Fonts.BodyBold, 18, rarityInfo.color)
+		local name = UiTheme.createLabel(info, `Odds{weight.rarity}`, Lang.t(rarityInfo.label), UiTheme.Fonts.BodyBold, 18, rarityInfo.color)
 		name.Position = UDim2.fromOffset(40, y)
 		name.Size = UDim2.new(0.45, -40, 0, 32)
 		name.TextXAlignment = Enum.TextXAlignment.Left
@@ -233,10 +234,7 @@ function PuffMachineView.new(
 	local rules = UiTheme.createLabel(
 		info,
 		"Rules",
-		string.format(
-			"Repetido devolve %d 🎟.\nTickets saem jogando: partida, Top 3, vitória e subir de nível.",
-			RewardConfig.DuplicateRefund
-		),
+		Lang.t("Repetido devolve %d 🎟.\nTickets saem jogando: partida, Top 3, vitória e subir de nível.", RewardConfig.DuplicateRefund),
 		UiTheme.Fonts.Body,
 		15,
 		UiTheme.Colors.InkSoft
@@ -247,7 +245,7 @@ function PuffMachineView.new(
 	rules.TextYAlignment = Enum.TextYAlignment.Top
 	rules.ZIndex = 4
 
-	local footer = UiTheme.createLabel(card, "Footer", "Sem compras: tickets só saem jogando. Puffs não dão vantagem.", UiTheme.Fonts.Body, 15, UiTheme.Colors.InkSoft)
+	local footer = UiTheme.createLabel(card, "Footer", Lang.t("Sem compras: tickets só saem jogando. Puffs não dão vantagem."), UiTheme.Fonts.Body, 15, UiTheme.Colors.InkSoft)
 	footer.Position = UDim2.new(0, 20, 1, -34)
 	footer.Size = UDim2.new(1, -40, 0, 22)
 	footer.TextXAlignment = Enum.TextXAlignment.Left
@@ -273,13 +271,13 @@ function PuffMachineView.new(
 	local function refreshButton()
 		if spinning then
 			pullButton.setEnabled(false)
-			pullButton.setText("GIRANDO…")
+			pullButton.setText(Lang.t("GIRANDO…"))
 		elseif tickets < RewardConfig.MachineCost then
 			pullButton.setEnabled(false)
-			pullButton.setText(string.format("FALTAM %d 🎟", RewardConfig.MachineCost - tickets))
+			pullButton.setText(Lang.t("FALTAM %d 🎟", RewardConfig.MachineCost - tickets))
 		else
 			pullButton.setEnabled(true)
-			pullButton.setText(string.format("GIRAR  ·  %d 🎟", RewardConfig.MachineCost))
+			pullButton.setText(Lang.t("GIRAR  ·  %d 🎟", RewardConfig.MachineCost))
 		end
 	end
 
@@ -299,8 +297,8 @@ function PuffMachineView.new(
 		end
 		local left = math.max(1, RewardConfig.PityThreshold - pity)
 		pityLabel.Text = if left <= 1
-			then "O próximo giro é Épico ou melhor!"
-			else string.format("Épico ou melhor garantido em até %d giros", left)
+			then Lang.t("O próximo giro é Épico ou melhor!")
+			else Lang.t("Épico ou melhor garantido em até %d giros", left)
 		refreshButton()
 	end
 
@@ -317,7 +315,7 @@ function PuffMachineView.new(
 		local token = spinToken
 		spinStartedAt = os.clock()
 		puffdexButton.root.Visible = false
-		resultName.Text = "Girando…"
+		resultName.Text = Lang.t("Girando…")
 		resultName.TextColor3 = UiTheme.Colors.Ink
 		resultInfo.Text = ""
 		refreshButton()
@@ -333,7 +331,7 @@ function PuffMachineView.new(
 				if os.clock() - spinStartedAt > SPIN_TIMEOUT then
 					stopSpin()
 					setCapsule(nil)
-					resultName.Text = "A máquina engasgou. Tente de novo!"
+					resultName.Text = Lang.t("A máquina engasgou. Tente de novo!")
 					return
 				end
 				task.wait(SPIN_STEP)
@@ -361,11 +359,11 @@ function PuffMachineView.new(
 			capsuleScale.Scale = 1.35
 			TweenService:Create(capsuleScale, TweenInfo.new(0.45, Enum.EasingStyle.Back), { Scale = 1 }):Play()
 			UiKit.playClick(if definition.rarity == "Legendary" then 2 else 1.5)
-			resultName.Text = definition.name
+			resultName.Text = Lang.t(definition.name)
 			resultName.TextColor3 = rarityInfo.color
 			resultInfo.Text = if reveal.duplicate
-				then string.format("%s · repetido, +%d 🎟", rarityInfo.label, reveal.refund)
-				else string.format("%s · NOVO!", rarityInfo.label)
+				then Lang.t("%s · repetido, +%d 🎟", Lang.t(rarityInfo.label), reveal.refund)
+				else Lang.t("%s · NOVO!", Lang.t(rarityInfo.label))
 			puffdexButton.root.Visible = true
 		end)
 	end

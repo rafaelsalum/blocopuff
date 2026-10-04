@@ -9,6 +9,8 @@
 
 local TweenService = game:GetService("TweenService")
 
+local Lang = require(game:GetService("ReplicatedStorage").Shared.i18n.Lang)
+local T = Lang.t
 local ResponsiveScale = require(script.Parent.ResponsiveScale)
 local UiKit = require(script.Parent.UiKit)
 local UiTheme = require(script.Parent.UiTheme)
@@ -40,10 +42,10 @@ local CALLOUT_HOLD = 1.2
 local TOAST_DURATION = 3
 local MAX_TOASTS = 4
 local CALLOUTS: { Callout } = {
-	{ count = 3, text = "TRIPLO!", color = UiTheme.Colors.Gold },
-	{ count = 5, text = "EM CHAMAS!", color = UiTheme.Colors.Orange },
-	{ count = 8, text = "IMPARÁVEL!", color = UiTheme.Colors.Pink },
-	{ count = 12, text = "LENDÁRIO!", color = UiTheme.Colors.Brand },
+	{ count = 3, text = T("TRIPLO!"), color = UiTheme.Colors.Gold },
+	{ count = 5, text = T("EM CHAMAS!"), color = UiTheme.Colors.Orange },
+	{ count = 8, text = T("IMPARÁVEL!"), color = UiTheme.Colors.Pink },
+	{ count = 12, text = T("LENDÁRIO!"), color = UiTheme.Colors.Brand },
 }
 
 local FeedbackView = {}

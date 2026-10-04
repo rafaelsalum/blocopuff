@@ -16,6 +16,7 @@ local GameConfig = require(ReplicatedStorage.Shared.config.GameConfig)
 local MansionConfig = require(ReplicatedStorage.Shared.config.MansionConfig)
 local BuildingLayout = require(ReplicatedStorage.Shared.modules.BuildingLayout)
 local MansionLayout = require(ReplicatedStorage.Shared.modules.MansionLayout)
+local Lang = require(ReplicatedStorage.Shared.i18n.Lang)
 local BuildingDecor = require(script.Parent.BuildingDecor)
 local LobbyService = require(script.Parent.LobbyService)
 local WallBuilder = require(script.Parent.WallBuilder)
@@ -232,41 +233,41 @@ local function getFaces(mansion: Mansion): { Face }
 		-- Salão Principal
 		{ name = "HallWest", a = at(x0, north + half), b = at(x0, south - half), inward = toEast, color = colors.GrandHall, openings = passages },
 		{ name = "HallNorth", a = at(x0, north + half), b = at(hallEast - half, north + half), inward = toSouth, color = colors.GrandHall, openings = {
-			opening(leftArch, north, arch, "✨ SALÃO DA COLEÇÃO"),
+			opening(leftArch, north, arch, Lang.t("✨ SALÃO DA COLEÇÃO")),
 		} },
 		{ name = "HallSouth", a = at(x0, south - half), b = at(hallEast - half, south - half), inward = toNorth, color = colors.GrandHall, openings = {
-			opening(leftArch, south, arch, "👥 PONTO DE ENCONTRO"),
+			opening(leftArch, south, arch, Lang.t("👥 PONTO DE ENCONTRO")),
 		} },
 		{ name = "HallEast", a = at(hallEast - half, north + half), b = at(hallEast - half, south - half), inward = toWest, color = colors.GrandHall, openings = {
-			opening(hallEast, mansion.center.Z, arch, "🐶 JARDIM DO BARÃO"),
+			opening(hallEast, mansion.center.Z, arch, Lang.t("🐶 JARDIM DO BARÃO")),
 		} },
 		-- Salão da Coleção (norte)
 		{ name = "CollectionNorth", a = at(x0, z0), b = at(x1, z0), inward = toSouth, color = colors.Collection, openings = {} },
 		{ name = "CollectionWest", a = at(x0, z0), b = at(x0, north - half), inward = toEast, color = colors.Collection, openings = {} },
 		{ name = "CollectionEast", a = at(x1, z0), b = at(x1, north - half), inward = toWest, color = colors.Collection, openings = {} },
 		{ name = "CollectionSouth", a = at(x0, north - half), b = at(x1, north - half), inward = toNorth, color = colors.Collection, openings = {
-			opening(leftArch, north, arch, "🏠 SALÃO PRINCIPAL"),
-			opening(rightArch, north, arch, "🐶 JARDIM DO BARÃO"),
+			opening(leftArch, north, arch, Lang.t("🏠 SALÃO PRINCIPAL")),
+			opening(rightArch, north, arch, Lang.t("🐶 JARDIM DO BARÃO")),
 		} },
 		-- Jardim do Barão (leste)
 		{ name = "GardenWest", a = at(hallEast + half, north + half), b = at(hallEast + half, south - half), inward = toEast, color = colors.Garden, openings = {
-			opening(hallEast, mansion.center.Z, arch, "🏠 SALÃO PRINCIPAL"),
+			opening(hallEast, mansion.center.Z, arch, Lang.t("🏠 SALÃO PRINCIPAL")),
 		} },
 		{ name = "GardenEast", a = at(x1, north + half), b = at(x1, south - half), inward = toWest, color = colors.Garden, openings = {} },
 		{ name = "GardenNorth", a = at(hallEast + half, north + half), b = at(x1, north + half), inward = toSouth, color = colors.Garden, openings = {
-			opening(rightArch, north, arch, "✨ SALÃO DA COLEÇÃO"),
+			opening(rightArch, north, arch, Lang.t("✨ SALÃO DA COLEÇÃO")),
 		} },
 		{ name = "GardenSouth", a = at(hallEast + half, south - half), b = at(x1, south - half), inward = toNorth, color = colors.Garden, openings = {
-			opening(rightArch, south, arch, "🎯 TREINO"),
+			opening(rightArch, south, arch, Lang.t("🎯 TREINO")),
 		} },
 		-- Ala sul: Ponto de Encontro (oeste) e Treino (leste), sem parede entre eles.
 		{ name = "MeetingNorth", a = at(x0, south + half), b = at(splitX, south + half), inward = toSouth, color = colors.Meeting, openings = {
-			opening(leftArch, south, arch, "🏠 SALÃO PRINCIPAL"),
+			opening(leftArch, south, arch, Lang.t("🏠 SALÃO PRINCIPAL")),
 		} },
 		{ name = "MeetingWest", a = at(x0, south + half), b = at(x0, z1), inward = toEast, color = colors.Meeting, openings = {} },
 		{ name = "MeetingSouth", a = at(x0, z1), b = at(splitX, z1), inward = toNorth, color = colors.Meeting, openings = {} },
 		{ name = "TrainingNorth", a = at(splitX, south + half), b = at(x1, south + half), inward = toSouth, color = colors.Training, openings = {
-			opening(rightArch, south, arch, "🐶 JARDIM DO BARÃO"),
+			opening(rightArch, south, arch, Lang.t("🐶 JARDIM DO BARÃO")),
 		} },
 		{ name = "TrainingEast", a = at(x1, south + half), b = at(x1, z1), inward = toWest, color = colors.Training, openings = {} },
 		{ name = "TrainingSouth", a = at(splitX, z1), b = at(x1, z1), inward = toNorth, color = colors.Training, openings = {} },
@@ -343,7 +344,7 @@ local function createStatue(parent: Instance, center: Vector3, style: BuildingCo
 	title.Size = UDim2.fromScale(1, 0.62)
 	title.BackgroundTransparency = 1
 	title.Font = Enum.Font.FredokaOne
-	title.Text = "CASARÃO PUFF"
+	title.Text = Lang.t("CASARÃO PUFF")
 	title.TextColor3 = STATUE_COLOR
 	title.TextScaled = true
 	title.TextStrokeTransparency = 0.2
@@ -353,7 +354,7 @@ local function createStatue(parent: Instance, center: Vector3, style: BuildingCo
 	subtitle.Size = UDim2.fromScale(1, 0.38)
 	subtitle.BackgroundTransparency = 1
 	subtitle.Font = Enum.Font.GothamBold
-	subtitle.Text = "Explore as salas enquanto a partida não começa"
+	subtitle.Text = Lang.t("Explore as salas enquanto a partida não começa")
 	subtitle.TextColor3 = Color3.fromRGB(255, 248, 238)
 	subtitle.TextScaled = true
 	subtitle.TextStrokeTransparency = 0.3

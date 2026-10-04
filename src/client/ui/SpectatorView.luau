@@ -2,6 +2,8 @@
 
 local TweenService = game:GetService("TweenService")
 
+local Lang = require(game:GetService("ReplicatedStorage").Shared.i18n.Lang)
+local T = Lang.t
 local ResponsiveScale = require(script.Parent.ResponsiveScale)
 local UiKit = require(script.Parent.UiKit)
 local UiTheme = require(script.Parent.UiTheme)
@@ -80,7 +82,7 @@ function SpectatorView.new(playerGui: PlayerGui, onPrevious: () -> (), onNext: (
 	captionLabel.Size = UDim2.new(1, 0, 0, 17)
 	captionLabel.BackgroundTransparency = 1
 	captionLabel.Font = UiTheme.Fonts.BodyBold
-	captionLabel.Text = "👁  ASSISTINDO"
+	captionLabel.Text = T("👁  ASSISTINDO")
 	captionLabel.TextSize = 10
 	captionLabel.TextColor3 = UiTheme.Colors.InkSoft
 	captionLabel.Parent = information
@@ -143,7 +145,7 @@ function SpectatorView.new(playerGui: PlayerGui, onPrevious: () -> (), onNext: (
 			UiKit.pop(nameLabel, 0.12)
 		end
 		nameLabel.Text = name
-		countLabel.Text = if activeCount == 1 then "1 jogador restante" else string.format("%d jogadores restantes", activeCount)
+		countLabel.Text = if activeCount == 1 then T("1 jogador restante") else string.format(T("%d jogadores restantes"), activeCount)
 	end
 
 	handle.destroy = function()

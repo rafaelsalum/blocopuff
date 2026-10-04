@@ -7,6 +7,7 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TweenService = game:GetService("TweenService")
 
+local Lang = require(ReplicatedStorage.Shared.i18n.Lang)
 local DailyConfig = require(ReplicatedStorage.Shared.config.DailyConfig)
 local SecretCatalog = require(ReplicatedStorage.Shared.config.SecretCatalog)
 local ProfileTypes = require(ReplicatedStorage.Shared.types.ProfileTypes)
@@ -71,14 +72,14 @@ end
 
 local function formatCountdown(seconds: number): string
 	if seconds <= 0 then
-		return "Novos desafios chegando…"
+		return Lang.t("Novos desafios chegando…")
 	end
 	local hours = math.floor(seconds / 3600)
 	local minutes = math.floor((seconds % 3600) / 60)
 	if hours > 0 then
-		return string.format("Novos desafios em %dh %02dmin", hours, minutes)
+		return Lang.t("Novos desafios em %dh %02dmin", hours, minutes)
 	end
-	return string.format("Novos desafios em %d min", math.max(1, minutes))
+	return Lang.t("Novos desafios em %d min", math.max(1, minutes))
 end
 
 local function sectionTitle(parent: Instance, name: string, text: string, x: number, y: number, width: number): TextLabel
@@ -112,7 +113,7 @@ function ChallengesView.new(playerGui: PlayerGui, onOpened: () -> ()): Challenge
 	card.Parent = root
 	UiTheme.stylePanel(card, { accent = UiTheme.Colors.Green, radius = 20 })
 
-	local title = UiTheme.createLabel(card, "Title", "📋 DESAFIOS", UiTheme.Fonts.Display, 32, UiTheme.Colors.Gold)
+	local title = UiTheme.createLabel(card, "Title", Lang.t("📋 DESAFIOS"), UiTheme.Fonts.Display, 32, UiTheme.Colors.Gold)
 	title.Position = UDim2.fromOffset(20, 12)
 	title.Size = UDim2.new(0, 280, 0, 40)
 	title.TextXAlignment = Enum.TextXAlignment.Left
@@ -138,7 +139,7 @@ function ChallengesView.new(playerGui: PlayerGui, onOpened: () -> ()): Challenge
 	})
 
 	-- Desafios do dia (coluna da esquerda).
-	sectionTitle(card, "TodayTitle", "HOJE", 20, COLUMNS_TOP, LEFT_WIDTH)
+	sectionTitle(card, "TodayTitle", Lang.t("HOJE"), 20, COLUMNS_TOP, LEFT_WIDTH)
 	local rows: { ChallengeRow } = {}
 	for index = 1, #DailyConfig.Tiers do
 		local frame = Instance.new("Frame")
@@ -190,7 +191,7 @@ function ChallengesView.new(playerGui: PlayerGui, onOpened: () -> ()): Challenge
 	-- Retorno diário (coluna da direita): os dias numa grade de 4 + 3.
 	local rightX = 16 + LEFT_WIDTH + COLUMN_GAP
 	local rightWidth = PANEL_SIZE.X - rightX - 16
-	sectionTitle(card, "DailyTitle", "RETORNO DIÁRIO", rightX + 4, COLUMNS_TOP, rightWidth)
+	sectionTitle(card, "DailyTitle", Lang.t("RETORNO DIÁRIO"), rightX + 4, COLUMNS_TOP, rightWidth)
 	local streakLabel = UiTheme.createLabel(card, "Streak", "", UiTheme.Fonts.BodyBold, 15, UiTheme.Colors.Ink)
 	streakLabel.Position = UDim2.fromOffset(rightX + 4, COLUMNS_TOP + 26)
 	streakLabel.Size = UDim2.fromOffset(rightWidth - 4, 22)
@@ -219,7 +220,7 @@ function ChallengesView.new(playerGui: PlayerGui, onOpened: () -> ()): Challenge
 		frame.Parent = days
 		UiTheme.addCorner(frame, 10)
 		local stroke = UiTheme.addStroke(frame, UiTheme.Colors.Border, 1.5)
-		local label = UiTheme.createLabel(frame, "Label", string.format("Dia %d\n🎟 %d", index, tickets), UiTheme.Fonts.BodyBold, 16, UiTheme.Colors.Ink)
+		local label = UiTheme.createLabel(frame, "Label", Lang.t("Dia %d\n🎟 %d", index, tickets), UiTheme.Fonts.BodyBold, 16, UiTheme.Colors.Ink)
 		label.Size = UDim2.fromScale(1, 1)
 		label.ZIndex = 5
 		local check = UiTheme.createLabel(frame, "Check", "✓", UiTheme.Fonts.Display, 16, UiTheme.Colors.Outline)
@@ -233,7 +234,7 @@ function ChallengesView.new(playerGui: PlayerGui, onOpened: () -> ()): Challenge
 		UiTheme.addCorner(check, 999)
 		table.insert(dayBoxes, { frame = frame, stroke = stroke, label = label, check = check })
 	end
-	local graceNote = UiTheme.createLabel(card, "Grace", "Perdeu um dia? Tudo bem: a sequência continua.", UiTheme.Fonts.Body, 14, UiTheme.Colors.InkSoft)
+	local graceNote = UiTheme.createLabel(card, "Grace", Lang.t("Perdeu um dia? Tudo bem: a sequência continua."), UiTheme.Fonts.Body, 14, UiTheme.Colors.InkSoft)
 	graceNote.Position = UDim2.fromOffset(rightX + 4, COLUMNS_TOP + 54 + DAY_SIZE.Y * 2 + 14)
 	graceNote.Size = UDim2.fromOffset(rightWidth - 4, 36)
 	graceNote.TextXAlignment = Enum.TextXAlignment.Left
@@ -242,7 +243,7 @@ function ChallengesView.new(playerGui: PlayerGui, onOpened: () -> ()): Challenge
 
 	-- Conquistas secretas (faixa de baixo, largura toda).
 	local secretTop = PANEL_SIZE.Y - SECRET_HEIGHT - 44
-	local secretTitle = sectionTitle(card, "SecretTitle", "CONQUISTAS SECRETAS", 20, secretTop, PANEL_SIZE.X - 40)
+	local secretTitle = sectionTitle(card, "SecretTitle", Lang.t("CONQUISTAS SECRETAS"), 20, secretTop, PANEL_SIZE.X - 40)
 	local secretRow = Instance.new("Frame")
 	secretRow.Name = "Secrets"
 	secretRow.Position = UDim2.fromOffset(16, secretTop + 28)
@@ -273,7 +274,7 @@ function ChallengesView.new(playerGui: PlayerGui, onOpened: () -> ()): Challenge
 		name.TextScaled = true
 		name.ZIndex = 5
 		UiTheme.addTextConstraint(name, 11, 16)
-		local hint = UiTheme.createLabel(frame, "Hint", definition.hint, UiTheme.Fonts.Body, 13, UiTheme.Colors.InkSoft)
+		local hint = UiTheme.createLabel(frame, "Hint", Lang.t(definition.hint), UiTheme.Fonts.Body, 13, UiTheme.Colors.InkSoft)
 		hint.Position = UDim2.fromOffset(6, 26)
 		hint.Size = UDim2.new(1, -12, 1, -30)
 		hint.TextScaled = true
@@ -299,7 +300,7 @@ function ChallengesView.new(playerGui: PlayerGui, onOpened: () -> ()): Challenge
 			local definition = if state ~= nil then findChallenge(state.id) else nil
 			row.frame.Visible = definition ~= nil
 			if state ~= nil and definition ~= nil then
-				row.title.Text = definition.title
+				row.title.Text = Lang.t(definition.title)
 				local ratio = math.clamp(state.progress / math.max(1, definition.target), 0, 1)
 				TweenService:Create(row.fill, TweenInfo.new(0.4, Enum.EasingStyle.Quad), { Size = UDim2.fromScale(if state.done then 1 else ratio, 1) }):Play()
 				row.count.Text = string.format("%d/%d", math.min(state.progress, definition.target), definition.target)
@@ -320,7 +321,7 @@ function ChallengesView.new(playerGui: PlayerGui, onOpened: () -> ()): Challenge
 			box.label.TextTransparency = if claimed and not isToday then 0.4 else 0
 		end
 		streakLabel.Text = if daily.streak > 0
-			then string.format("Sequência: %d %s  ·  recorde %d", daily.streak, if daily.streak == 1 then "dia" else "dias", daily.best)
+			then Lang.t("Sequência: %d %s  ·  recorde %d", daily.streak, if daily.streak == 1 then Lang.t("dia") else Lang.t("dias"), daily.best)
 			else ""
 
 		local owned: { [string]: boolean } = {}
@@ -334,12 +335,12 @@ function ChallengesView.new(playerGui: PlayerGui, onOpened: () -> ()): Challenge
 			if has then
 				count += 1
 			end
-			badge.name.Text = if has then definition.name else "???"
+			badge.name.Text = if has then Lang.t(definition.name) else "???"
 			badge.name.TextColor3 = if has then UiTheme.Colors.Gold else UiTheme.Colors.InkSoft
-			badge.hint.Text = if has then definition.description else definition.hint
+			badge.hint.Text = if has then Lang.t(definition.description) else Lang.t(definition.hint)
 			badge.stroke.Color = if has then UiTheme.Colors.Gold else UiTheme.Colors.Border
 		end
-		secretTitle.Text = string.format("CONQUISTAS SECRETAS  %d/%d", count, #secrets)
+		secretTitle.Text = Lang.t("CONQUISTAS SECRETAS  %d/%d", count, #secrets)
 	end
 
 	handle.open = function()

@@ -12,6 +12,7 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 
+local Lang = require(ReplicatedStorage.Shared.i18n.Lang)
 local GameConfig = require(ReplicatedStorage.Shared.config.GameConfig)
 local BuildingLayout = require(ReplicatedStorage.Shared.modules.BuildingLayout)
 local LeaderboardTypes = require(ReplicatedStorage.Shared.types.LeaderboardTypes)
@@ -143,13 +144,13 @@ local function createBoard(parent: Instance, id: string, title: string, icon: st
 		value.TextXAlignment = Enum.TextXAlignment.Right
 		table.insert(rows, { frame = row, rank = rank, name = name, value = value })
 	end
-	local empty = textLabel(gui, "Seja o primeiro!", Enum.Font.GothamBold, INK_SOFT, UDim2.fromScale(0.1, 0.45), UDim2.fromScale(0.8, 0.15))
+	local empty = textLabel(gui, Lang.t("Seja o primeiro!"), Enum.Font.GothamBold, INK_SOFT, UDim2.fromScale(0.1, 0.45), UDim2.fromScale(0.8, 0.15))
 	boardViews[id] = { title = titleLabel, rows = rows, empty = empty }
 end
 
 local function createLegend(parent: Instance, center: Vector3)
 	local gui = createPlaque(parent, "Board_Legend", center, BOARD_SIZE.X)
-	textLabel(gui, "👑 LENDA DO BLOCOPUFF", Enum.Font.FredokaOne, GOLD, UDim2.fromScale(0.04, 0.03), UDim2.fromScale(0.92, 0.2))
+	textLabel(gui, Lang.t("👑 LENDA DO BLOCOPUFF"), Enum.Font.FredokaOne, GOLD, UDim2.fromScale(0.04, 0.03), UDim2.fromScale(0.92, 0.2))
 	local avatar = Instance.new("ImageLabel")
 	avatar.BackgroundColor3 = Color3.fromRGB(58, 47, 96)
 	avatar.Position = UDim2.fromScale(0.06, 0.27)
@@ -170,7 +171,7 @@ local function createLegend(parent: Instance, center: Vector3)
 	local detail = textLabel(gui, "", Enum.Font.GothamBold, GOLD, UDim2.fromScale(0.36, 0.56), UDim2.fromScale(0.6, 0.14))
 	detail.TextXAlignment = Enum.TextXAlignment.Left
 	-- Espaço reservado para o ranking sazonal (Fase 6).
-	textLabel(gui, "Ranking da temporada: em breve", Enum.Font.GothamMedium, INK_SOFT, UDim2.fromScale(0.1, 0.87), UDim2.fromScale(0.8, 0.1))
+	textLabel(gui, Lang.t("Ranking da temporada: em breve"), Enum.Font.GothamMedium, INK_SOFT, UDim2.fromScale(0.1, 0.87), UDim2.fromScale(0.8, 0.1))
 	legendView = { avatar = avatar, name = name, detail = detail }
 end
 
@@ -189,7 +190,7 @@ local function renderBoard(board: Leaderboard, available: boolean)
 		end
 	end
 	view.empty.Visible = #board.entries == 0
-	view.empty.Text = if available then "Seja o primeiro!" else "Ranking indisponível"
+	view.empty.Text = if available then Lang.t("Seja o primeiro!") else Lang.t("Ranking indisponível")
 end
 
 local function render(data: LeaderboardData)
@@ -209,13 +210,13 @@ local function render(data: LeaderboardData)
 	local top = if legendBoard ~= nil then legendBoard.entries[1] else nil
 	if top == nil then
 		legend.avatar.Image = ""
-		legend.name.Text = "Ainda sem lenda"
-		legend.detail.Text = "Vença partidas para entrar aqui"
+		legend.name.Text = Lang.t("Ainda sem lenda")
+		legend.detail.Text = Lang.t("Vença partidas para entrar aqui")
 		return
 	end
 	legend.avatar.Image = `rbxthumb://type=AvatarHeadShot&id={top.userId}&w=420&h=420`
 	legend.name.Text = top.name
-	legend.detail.Text = `{formatNumber(top.value)} vitórias`
+	legend.detail.Text = Lang.t("%s vitórias", formatNumber(top.value))
 end
 
 -- Quem está na galeria virado para a parede leste por VIEW_SECONDS conta

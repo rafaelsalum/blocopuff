@@ -14,6 +14,7 @@ local TweenService = game:GetService("TweenService")
 
 local MansionLayout = require(ReplicatedStorage.Shared.modules.MansionLayout)
 local StateAttributeNames = require(ReplicatedStorage.Shared.types.StateAttributeNames)
+local Lang = require(ReplicatedStorage.Shared.i18n.Lang)
 local ProjectileService = require(script.Parent.ProjectileService)
 local CombatantRegistry = require(script.Parent.CombatantRegistry)
 local PuffadorService = require(script.Parent.PuffadorService)
@@ -187,7 +188,7 @@ function TrainingService.start(worldRoot: Model)
 	title.Size = UDim2.fromScale(1, 0.6)
 	title.BackgroundTransparency = 1
 	title.Font = Enum.Font.FredokaOne
-	title.Text = "🎯 TREINO"
+	title.Text = Lang.t("🎯 TREINO")
 	title.TextColor3 = Color3.fromRGB(255, 209, 102)
 	title.TextScaled = true
 	title.TextStrokeTransparency = 0.2
@@ -197,7 +198,7 @@ function TrainingService.start(worldRoot: Model)
 	subtitle.Size = UDim2.fromScale(1, 0.4)
 	subtitle.BackgroundTransparency = 1
 	subtitle.Font = Enum.Font.GothamBold
-	subtitle.Text = "Passe da faixa verde e pratique a mira"
+	subtitle.Text = Lang.t("Passe da faixa verde e pratique a mira")
 	subtitle.TextColor3 = Color3.fromRGB(255, 248, 238)
 	subtitle.TextScaled = true
 	subtitle.TextStrokeTransparency = 0.3

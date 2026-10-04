@@ -18,6 +18,7 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local MansionConfig = require(ReplicatedStorage.Shared.config.MansionConfig)
+local Lang = require(ReplicatedStorage.Shared.i18n.Lang)
 local PuffCatalog = require(ReplicatedStorage.Shared.config.PuffCatalog)
 local MansionLayout = require(ReplicatedStorage.Shared.modules.MansionLayout)
 local PuffEffects = require(ReplicatedStorage.Shared.modules.PuffEffects)
@@ -133,8 +134,8 @@ local function buildMachine(parent: Instance, base: Vector3, facing: number)
 	end
 	local slot = part(model, "Slot", Vector3.new(0.2, 0.8, 1.6), CFrame.new(base + Vector3.new(facing * 1.55, 1.6, 0)), Color3.fromRGB(26, 21, 48))
 	slot.CanCollide = false
-	sign(cabinet, "🎰 PUFF MACHINE", "Tickets viram Puffs", 6.2)
-	prompt(cabinet, "PuffMachine", "Girar", "Puff Machine")
+	sign(cabinet, Lang.t("🎰 PUFF MACHINE"), Lang.t("Tickets viram Puffs"), 6.2)
+	prompt(cabinet, "PuffMachine", Lang.t("Girar"), Lang.t("Puff Machine"))
 	model.PrimaryPart = cabinet
 end
 
@@ -158,7 +159,7 @@ local function buildFriendlyBarao(parent: Instance, base: Vector3)
 	if body == nil or not body:IsA("BasePart") then
 		return
 	end
-	sign(body, "🐶 BARÃO", "Aqui ele é bonzinho", 4.2 * FRIENDLY_BARAO_SCALE)
+	sign(body, Lang.t("🐶 BARÃO"), Lang.t("Aqui ele é bonzinho"), 4.2 * FRIENDLY_BARAO_SCALE)
 	local sleep = Instance.new("BillboardGui")
 	sleep.Name = "Sleep"
 	sleep.Size = UDim2.new(2, 0, 1.2, 0)
@@ -188,7 +189,7 @@ local function buildFriendlyBarao(parent: Instance, base: Vector3)
 	anchor.CanQuery = false
 	anchor.CanTouch = false
 	anchor.CastShadow = false
-	local proximity = prompt(anchor, "Barao", "Fazer carinho", "Barão")
+	local proximity = prompt(anchor, "Barao", Lang.t("Fazer carinho"), Lang.t("Barão"))
 	local happy = false
 	proximity.Triggered:Connect(function(player: Player)
 		local clock = os.clock()
@@ -239,7 +240,7 @@ local function buildPedestal(parent: Instance, index: number, definition: PuffDe
 	text.Size = UDim2.fromScale(1, 1)
 	text.BackgroundTransparency = 1
 	text.Font = Enum.Font.GothamBold
-	text.Text = `{PuffEffects.info(style.effect).icon} {definition.name} · {rarity.label}`
+	text.Text = `{PuffEffects.info(style.effect).icon} {Lang.t(definition.name)} · {Lang.t(rarity.label)}`
 	text.TextColor3 = rarity.color
 	text.TextScaled = true
 	text.TextStrokeTransparency = 0.2
@@ -270,8 +271,8 @@ local function buildPuffdexLectern(parent: Instance, base: Vector3)
 	local stand = part(parent, "PuffdexLectern", Vector3.new(2.4, 3, 1.6), CFrame.new(base + Vector3.new(0, 1.5, 0)), Color3.fromRGB(86, 56, 38), Enum.Material.Wood)
 	local book = part(parent, "PuffdexBook", Vector3.new(2.6, 0.3, 1.9), CFrame.new(base + Vector3.new(0, 3.2, 0.1)) * CFrame.Angles(math.rad(20), 0, 0), Color3.fromRGB(104, 76, 204), Enum.Material.Fabric)
 	book.CanCollide = false
-	sign(stand, "✨ PUFFDEX", "Colecione Puffs jogando", 5)
-	prompt(stand, "Puffdex", "Abrir", "Puffdex")
+	sign(stand, Lang.t("✨ PUFFDEX"), Lang.t("Colecione Puffs jogando"), 5)
+	prompt(stand, "Puffdex", Lang.t("Abrir"), Lang.t("Puffdex"))
 end
 
 -- Quadro de desafios, de frente para o salão (+X).
@@ -283,8 +284,8 @@ local function buildChallengeBoard(parent: Instance, base: Vector3)
 		local note = part(parent, `Note{index}`, Vector3.new(0.1, 0.8, 1), CFrame.new(base + Vector3.new(0.25, 3.8 - (index % 2) * 0.6, -1.4 + (index - 1) * 1.4)), Color3.fromRGB(255, 248, 200))
 		note.CanCollide = false
 	end
-	sign(board, "📋 DESAFIOS", "Novos todo dia", 3.4)
-	prompt(board, "Challenges", "Ver", "Desafios")
+	sign(board, Lang.t("📋 DESAFIOS"), Lang.t("Novos todo dia"), 3.4)
+	prompt(board, "Challenges", Lang.t("Ver"), Lang.t("Desafios"))
 end
 
 -- Loja: só a banca, fechada ("em breve"). Preparação para a Fase 6.
@@ -297,8 +298,8 @@ local function buildShop(parent: Instance, base: Vector3, facing: number)
 	end
 	part(parent, "ShopPostA", Vector3.new(0.3, 3, 0.3), CFrame.new(base + Vector3.new(-facing * 0.9, 4.1, -2.6)), Color3.fromRGB(86, 56, 38), Enum.Material.Wood)
 	part(parent, "ShopPostB", Vector3.new(0.3, 3, 0.3), CFrame.new(base + Vector3.new(-facing * 0.9, 4.1, 2.6)), Color3.fromRGB(86, 56, 38), Enum.Material.Wood)
-	sign(counter, "🛍 LOJA", "Em breve", 5.8)
-	prompt(counter, "Shop", "Espiar", "Loja")
+	sign(counter, Lang.t("🛍 LOJA"), Lang.t("Em breve"), 5.8)
+	prompt(counter, "Shop", Lang.t("Espiar"), Lang.t("Loja"))
 end
 
 -- Canto da Party: placa em pé entre os sofás do Ponto de Encontro.
@@ -306,8 +307,8 @@ local function buildPartyPost(parent: Instance, base: Vector3)
 	local post = part(parent, "PartyPost", Vector3.new(0.5, 3.6, 0.5), CFrame.new(base + Vector3.new(0, 1.8, 0)), Color3.fromRGB(86, 56, 38), Enum.Material.Wood)
 	local board = part(parent, "PartyBoard", Vector3.new(3.6, 1.8, 0.3), CFrame.new(base + Vector3.new(0, 4.2, 0)), Color3.fromRGB(64, 92, 140), Enum.Material.WoodPlanks)
 	board.CanCollide = false
-	sign(post, "👥 PARTY", "Chame amigos para jogar juntos", 6.2)
-	prompt(post, "Party", "Abrir", "Party")
+	sign(post, Lang.t("👥 PARTY"), Lang.t("Chame amigos para jogar juntos"), 6.2)
+	prompt(post, "Party", Lang.t("Abrir"), Lang.t("Party"))
 end
 
 function LobbyStationsService.start(worldRoot: Model)

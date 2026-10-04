@@ -9,6 +9,7 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TweenService = game:GetService("TweenService")
 
+local Lang = require(ReplicatedStorage.Shared.i18n.Lang)
 local LevelCurve = require(ReplicatedStorage.Shared.modules.LevelCurve)
 local ProfileTypes = require(ReplicatedStorage.Shared.types.ProfileTypes)
 local ResponsiveScale = require(script.Parent.ResponsiveScale)
@@ -44,16 +45,16 @@ local STATS_WIDTH = 320
 
 -- Estatísticas mostradas no painel, na ordem.
 local STAT_ROWS: { { key: string, label: string } } = {
-	{ key = "matches", label = "Partidas" },
-	{ key = "wins", label = "Vitórias" },
-	{ key = "top3", label = "Top 3" },
-	{ key = "knockouts", label = "Derrubadas" },
-	{ key = "blocksDestroyed", label = "Blocos destruídos" },
-	{ key = "vaultsConquered", label = "Cofres conquistados" },
-	{ key = "baraoEscapes", label = "Fugas do Barão" },
-	{ key = "secretsFound", label = "Passagens descobertas" },
-	{ key = "comebacks", label = "Voltas por Cima" },
-	{ key = "botWins", label = "Vitórias contra RoboPuffs" },
+	{ key = "matches", label = Lang.t("Partidas") },
+	{ key = "wins", label = Lang.t("Vitórias") },
+	{ key = "top3", label = Lang.t("Top 3") },
+	{ key = "knockouts", label = Lang.t("Derrubadas") },
+	{ key = "blocksDestroyed", label = Lang.t("Blocos destruídos") },
+	{ key = "vaultsConquered", label = Lang.t("Cofres conquistados") },
+	{ key = "baraoEscapes", label = Lang.t("Fugas do Barão") },
+	{ key = "secretsFound", label = Lang.t("Passagens descobertas") },
+	{ key = "comebacks", label = Lang.t("Voltas por Cima") },
+	{ key = "botWins", label = Lang.t("Vitórias contra RoboPuffs") },
 }
 
 local ProfileCardView = {}
@@ -112,7 +113,7 @@ function ProfileCardView.new(
 	levelLabel.ZIndex = 3
 	UiTheme.addTextOutline(levelLabel, 2)
 
-	local title = UiTheme.createLabel(card, "Title", "NÍVEL 1", UiTheme.Fonts.Display, 18, UiTheme.Colors.Ink)
+	local title = UiTheme.createLabel(card, "Title", Lang.t("NÍVEL %d%s", 1, ""), UiTheme.Fonts.Display, 18, UiTheme.Colors.Ink)
 	title.Position = UDim2.fromOffset(68, 8)
 	title.Size = UDim2.new(1, -156, 0, 22)
 	-- Nível alto ou com prestígio: a letra encolhe em vez de quebrar a linha.
@@ -149,7 +150,7 @@ function ProfileCardView.new(
 
 	local statsButton = UiKit.createButton(card, {
 		name = "StatsButton",
-		text = "PERFIL",
+		text = Lang.t("PERFIL"),
 		variant = "Neutral",
 		size = UDim2.fromOffset(78, 28),
 		position = UDim2.new(1, -8, 0, 6),
@@ -280,12 +281,12 @@ function ProfileCardView.new(
 
 	closeStats = function()
 		stats.Visible = false
-		statsButton.setText("PERFIL")
+		statsButton.setText(Lang.t("PERFIL"))
 	end
 
 	statsButton.button.Activated:Connect(function()
 		stats.Visible = not stats.Visible
-		statsButton.setText(if stats.Visible then "FECHAR" else "PERFIL")
+		statsButton.setText(if stats.Visible then Lang.t("FECHAR") else Lang.t("PERFIL"))
 	end)
 
 	local handle = {} :: ProfileCardViewHandle
@@ -294,11 +295,11 @@ function ProfileCardView.new(
 		local progress = LevelCurve.progress(snapshot.xp)
 		levelLabel.Text = tostring(progress.level)
 		local prestigeText = if snapshot.prestige > 0 then string.format("  ★%d", snapshot.prestige) else ""
-		title.Text = string.format("NÍVEL %d%s", progress.level, prestigeText)
+		title.Text = Lang.t("NÍVEL %d%s", progress.level, prestigeText)
 		local ratio = if progress.isMax then 1 else math.clamp(progress.current / math.max(1, progress.needed), 0, 1)
 		TweenService:Create(fill, TweenInfo.new(0.6, Enum.EasingStyle.Quad), { Size = UDim2.fromScale(ratio, 1) }):Play()
 		xpLabel.Text = if progress.isMax
-			then "NÍVEL MÁXIMO"
+			then Lang.t("NÍVEL MÁXIMO")
 			else string.format("%s / %s XP", formatNumber(progress.current), formatNumber(progress.needed))
 		local statsTable = snapshot.stats :: any
 		for key, value in pairs(valueLabels) do
@@ -313,7 +314,7 @@ function ProfileCardView.new(
 		end
 		pendingDot.Visible = pending
 		notice.Visible = not snapshot.saved
-		notice.Text = "Progresso desta sessão não está sendo salvo"
+		notice.Text = Lang.t("Progresso desta sessão não está sendo salvo")
 	end
 
 	handle.setVisible = function(visible: boolean)

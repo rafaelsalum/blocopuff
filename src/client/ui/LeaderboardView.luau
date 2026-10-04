@@ -7,6 +7,7 @@
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
+local Lang = require(ReplicatedStorage.Shared.i18n.Lang)
 local LeaderboardTypes = require(ReplicatedStorage.Shared.types.LeaderboardTypes)
 local ResponsiveScale = require(script.Parent.ResponsiveScale)
 local UiKit = require(script.Parent.UiKit)
@@ -49,10 +50,10 @@ end
 
 local function describeAge(updatedAt: number): string
 	if updatedAt <= 0 then
-		return "Carregando ranking…"
+		return Lang.t("Carregando ranking…")
 	end
 	local minutes = math.floor(math.max(0, os.time() - updatedAt) / 60)
-	return if minutes < 1 then "Atualizado agora" else string.format("Atualizado há %d min", minutes)
+	return if minutes < 1 then Lang.t("Atualizado agora") else Lang.t("Atualizado há %d min", minutes)
 end
 
 function LeaderboardView.new(playerGui: PlayerGui, onTab: (categoryId: string) -> ()): LeaderboardViewHandle
@@ -76,7 +77,7 @@ function LeaderboardView.new(playerGui: PlayerGui, onTab: (categoryId: string) -
 	card.Parent = root
 	UiTheme.stylePanel(card, { accent = UiTheme.Colors.Gold, radius = 20 })
 
-	local title = UiTheme.createLabel(card, "Title", "🏆 RANKING GLOBAL", UiTheme.Fonts.Display, 32, UiTheme.Colors.Gold)
+	local title = UiTheme.createLabel(card, "Title", Lang.t("🏆 RANKING GLOBAL"), UiTheme.Fonts.Display, 32, UiTheme.Colors.Gold)
 	title.Position = UDim2.fromOffset(20, 12)
 	title.Size = UDim2.new(1, -100, 0, 40)
 	title.TextXAlignment = Enum.TextXAlignment.Left
@@ -221,7 +222,7 @@ function LeaderboardView.new(playerGui: PlayerGui, onTab: (categoryId: string) -
 		end
 		for _, category in ipairs(categories) do
 			if category.id == selectedId then
-				categoryLabel.Text = `{category.icon} {category.title}`
+				categoryLabel.Text = `{category.icon} {Lang.t(category.title)}`
 			end
 		end
 		local localPlayer = Players.LocalPlayer
@@ -240,10 +241,10 @@ function LeaderboardView.new(playerGui: PlayerGui, onTab: (categoryId: string) -
 		end
 		empty.Visible = #entries == 0
 		empty.Text = if not data.available
-			then "Ranking indisponível no momento"
+			then Lang.t("Ranking indisponível no momento")
 			elseif data.updatedAt <= 0 then "Carregando…"
-			else "Ninguém aqui ainda. Seja o primeiro!"
-		footer.Text = describeAge(data.updatedAt) .. "  ·  Temporadas: em breve"
+			else Lang.t("Ninguém aqui ainda. Seja o primeiro!")
+		footer.Text = describeAge(data.updatedAt) .. Lang.t("  ·  Temporadas: em breve")
 	end
 
 	local handle = {} :: LeaderboardViewHandle

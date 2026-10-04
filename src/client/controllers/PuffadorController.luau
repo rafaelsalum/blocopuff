@@ -14,6 +14,8 @@ local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
 local Workspace = game:GetService("Workspace")
 
+local Lang = require(ReplicatedStorage.Shared.i18n.Lang)
+local T = Lang.t
 local GameConfig = require(ReplicatedStorage.Shared.config.GameConfig)
 local ArenaConstants = require(ReplicatedStorage.Shared.modules.ArenaConstants)
 local PuffadorConstants = require(ReplicatedStorage.Shared.modules.PuffadorConstants)
@@ -34,9 +36,9 @@ local STATE_WAIT_TIMEOUT = 10
 local MUZZLE_FLASH_LIFETIME = 0.12
 -- Marcos de blocos derrubados na rodada que merecem uma notificação.
 local SCORE_MILESTONES: { [number]: string } = {
-	[10] = "10 blocos derrubados! 🔥",
-	[25] = "25 blocos! Você está dominando a arena",
-	[50] = "50 blocos! Demolidor oficial 🏆",
+	[10] = T("10 blocos derrubados! 🔥"),
+	[25] = T("25 blocos! Você está dominando a arena"),
+	[50] = T("50 blocos! Demolidor oficial 🏆"),
 }
 
 local PuffadorController = {}
@@ -68,12 +70,12 @@ local function getControlHintText(): string
 		string.find(inputName, "Gamepad") ~= nil
 		or (UserInputService.GamepadEnabled and not UserInputService.KeyboardEnabled and not UserInputService.TouchEnabled)
 	then
-		return "SEGURE O GATILHO DIREITO (R2) PARA ATIRAR"
+		return T("SEGURE O GATILHO DIREITO (R2) PARA ATIRAR")
 	end
 	if UserInputService.TouchEnabled and not UserInputService.KeyboardEnabled then
-		return "SEGURE O BOTÃO PUFF PARA ATIRAR"
+		return T("SEGURE O BOTÃO PUFF PARA ATIRAR")
 	end
-	return "SEGURE O CLIQUE PARA ATIRAR"
+	return T("SEGURE O CLIQUE PARA ATIRAR")
 end
 
 local function setCombatBackpackHidden(hidden: boolean)

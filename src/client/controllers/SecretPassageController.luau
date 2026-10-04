@@ -9,6 +9,7 @@ local SoundService = game:GetService("SoundService")
 
 local GameConfig = require(ReplicatedStorage.Shared.config.GameConfig)
 local PuffadorConstants = require(ReplicatedStorage.Shared.modules.PuffadorConstants)
+local Lang = require(ReplicatedStorage.Shared.i18n.Lang)
 local NotificationManager = require(script.Parent.Parent.notifications.NotificationManager)
 
 local WAIT_TIMEOUT = 15
@@ -18,13 +19,15 @@ local SecretPassageController = {}
 
 local started = false
 
+local T = Lang.t
+
 local function floorName(floor: unknown): string
 	if floor == 1 then
-		return "no andar de baixo"
+		return T("no andar de baixo")
 	elseif floor == GameConfig.Arena.FloorCount then
-		return "no andar de cima"
+		return T("no andar de cima")
 	end
-	return "na mansão"
+	return T("na mansão")
 end
 
 local function playChime()
@@ -48,17 +51,21 @@ local function onEvent(kind: unknown, floor: unknown, name: unknown, userId: unk
 		playChime()
 		local localPlayer = Players.LocalPlayer
 		local isMe = localPlayer ~= nil and userId == localPlayer.UserId
-		local who = if typeof(name) == "string" then name else "Alguém"
+		local who = if typeof(name) == "string" then name else T("Alguém")
+		local subtitle: string
+		if isMe then
+			subtitle = T("Você revelou as passagens %s", floorName(floor))
+		else
+			subtitle = T("%s revelou as passagens %s", who, floorName(floor))
+		end
 		NotificationManager.notify({
 			channel = "Banner",
 			category = "Secret",
 			priority = "High",
 			key = `secret-{tostring(floor)}`,
 			icon = "🗝️",
-			title = "PASSAGEM SECRETA!",
-			subtitle = if isMe
-				then `Você revelou as passagens {floorName(floor)}`
-				else `{who} revelou as passagens {floorName(floor)}`,
+			title = T("PASSAGEM SECRETA!"),
+			subtitle = subtitle,
 			tone = "Gold",
 			duration = 4,
 		})
@@ -69,8 +76,8 @@ local function onEvent(kind: unknown, floor: unknown, name: unknown, userId: unk
 			priority = "Low",
 			key = "secret-wrong",
 			icon = "🖼️",
-			title = "NÃO ERA ESSE QUADRO",
-			subtitle = `Algum quadro {floorName(floor)} esconde um segredo…`,
+			title = T("NÃO ERA ESSE QUADRO"),
+			subtitle = T("Algum quadro %s esconde um segredo…", floorName(floor)),
 			tone = "Info",
 			duration = 1.8,
 		})

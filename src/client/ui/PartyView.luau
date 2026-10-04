@@ -7,6 +7,7 @@
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
+local Lang = require(ReplicatedStorage.Shared.i18n.Lang)
 local SocialConfig = require(ReplicatedStorage.Shared.config.SocialConfig)
 local ResponsiveScale = require(script.Parent.ResponsiveScale)
 local UiKit = require(script.Parent.UiKit)
@@ -121,7 +122,7 @@ function PartyView.new(playerGui: PlayerGui, callbacks: PartyViewCallbacks): Par
 	card.Parent = root
 	UiTheme.stylePanel(card, { accent = UiTheme.Colors.Blue, radius = 20 })
 
-	local title = UiTheme.createLabel(card, "Title", "👥 PARTY", UiTheme.Fonts.Display, 32, UiTheme.Colors.Gold)
+	local title = UiTheme.createLabel(card, "Title", Lang.t("👥 PARTY"), UiTheme.Fonts.Display, 32, UiTheme.Colors.Gold)
 	title.Position = UDim2.fromOffset(20, 12)
 	title.Size = UDim2.new(0, 240, 0, 40)
 	title.TextXAlignment = Enum.TextXAlignment.Left
@@ -131,7 +132,7 @@ function PartyView.new(playerGui: PlayerGui, callbacks: PartyViewCallbacks): Par
 	local subtitle = UiTheme.createLabel(
 		card,
 		"Subtitle",
-		string.format("Até %d jogadores. Vocês entram juntos nas partidas.", SocialConfig.PartyMaxSize),
+		Lang.t("Até %d jogadores. Vocês entram juntos nas partidas.", SocialConfig.PartyMaxSize),
 		UiTheme.Fonts.Body,
 		16,
 		UiTheme.Colors.InkSoft
@@ -153,14 +154,14 @@ function PartyView.new(playerGui: PlayerGui, callbacks: PartyViewCallbacks): Par
 	})
 
 	local columnWidth = (PANEL_SIZE.X - 52) / 2
-	local partyTitle = UiTheme.createLabel(card, "PartyTitle", "SUA PARTY", UiTheme.Fonts.Display, 19, UiTheme.Colors.Ink)
+	local partyTitle = UiTheme.createLabel(card, "PartyTitle", Lang.t("SUA PARTY"), UiTheme.Fonts.Display, 19, UiTheme.Colors.Ink)
 	partyTitle.Position = UDim2.fromOffset(20, 82)
 	partyTitle.Size = UDim2.fromOffset(columnWidth, 26)
 	partyTitle.TextXAlignment = Enum.TextXAlignment.Left
 	partyTitle.ZIndex = 3
 	local memberList = createList(card, "Members", UDim2.fromOffset(16, LIST_TOP), UDim2.fromOffset(columnWidth, LIST_HEIGHT))
 
-	local inviteTitle = UiTheme.createLabel(card, "InviteTitle", "CHAMAR", UiTheme.Fonts.Display, 19, UiTheme.Colors.Ink)
+	local inviteTitle = UiTheme.createLabel(card, "InviteTitle", Lang.t("CHAMAR"), UiTheme.Fonts.Display, 19, UiTheme.Colors.Ink)
 	inviteTitle.Position = UDim2.fromOffset(36 + columnWidth, 82)
 	inviteTitle.Size = UDim2.fromOffset(columnWidth, 26)
 	inviteTitle.TextXAlignment = Enum.TextXAlignment.Left
@@ -169,7 +170,7 @@ function PartyView.new(playerGui: PlayerGui, callbacks: PartyViewCallbacks): Par
 
 	local leaveButton = UiKit.createButton(card, {
 		name = "Leave",
-		text = "SAIR DA PARTY",
+		text = Lang.t("SAIR DA PARTY"),
 		variant = "Danger",
 		size = UDim2.fromOffset(columnWidth, 50),
 		position = UDim2.fromOffset(16, LIST_TOP + LIST_HEIGHT + 10),
@@ -183,7 +184,7 @@ function PartyView.new(playerGui: PlayerGui, callbacks: PartyViewCallbacks): Par
 
 	local friendsButton = UiKit.createButton(card, {
 		name = "InviteFriends",
-		text = "CHAMAR AMIGOS PARA O JOGO",
+		text = Lang.t("CHAMAR AMIGOS PARA O JOGO"),
 		variant = "Primary",
 		size = UDim2.fromOffset(columnWidth, 50),
 		position = UDim2.fromOffset(36 + columnWidth, LIST_TOP + LIST_HEIGHT + 10),
@@ -201,7 +202,7 @@ function PartyView.new(playerGui: PlayerGui, callbacks: PartyViewCallbacks): Par
 	status.TextXAlignment = Enum.TextXAlignment.Left
 	status.ZIndex = 3
 
-	local footer = UiTheme.createLabel(card, "Footer", "Na partida cada um joga por si: a Party só garante que vocês entrem juntos.", UiTheme.Fonts.Body, 14, UiTheme.Colors.InkSoft)
+	local footer = UiTheme.createLabel(card, "Footer", Lang.t("Na partida cada um joga por si: a Party só garante que vocês entrem juntos."), UiTheme.Fonts.Body, 14, UiTheme.Colors.InkSoft)
 	footer.Position = UDim2.new(0, 20, 1, -36)
 	footer.Size = UDim2.new(1, -40, 0, 22)
 	footer.TextXAlignment = Enum.TextXAlignment.Left
@@ -223,9 +224,9 @@ function PartyView.new(playerGui: PlayerGui, callbacks: PartyViewCallbacks): Par
 		clear(memberList)
 		local state = currentState
 		if state == nil then
-			partyTitle.Text = "SUA PARTY"
+			partyTitle.Text = Lang.t("SUA PARTY")
 			local _, label = createRow(memberList, "Empty", 1)
-			label.Text = "Você ainda não está numa Party. Chame alguém ao lado!"
+			label.Text = Lang.t("Você ainda não está numa Party. Chame alguém ao lado!")
 			label.TextWrapped = true
 			label.Size = UDim2.new(1, -20, 1, 0)
 			label.Font = UiTheme.Fonts.Body
@@ -233,18 +234,18 @@ function PartyView.new(playerGui: PlayerGui, callbacks: PartyViewCallbacks): Par
 			leaveButton.root.Visible = false
 			return
 		end
-		partyTitle.Text = string.format("SUA PARTY  %d/%d", #state.members, state.maxSize)
+		partyTitle.Text = Lang.t("SUA PARTY  %d/%d", #state.members, state.maxSize)
 		leaveButton.root.Visible = true
 		local isLeader = state.leaderUserId == localUserId
 		for index, member in ipairs(state.members) do
 			local row, label = createRow(memberList, `Member{member.userId}`, index)
 			local crown = if member.userId == state.leaderUserId then "👑 " else ""
-			local you = if member.userId == localUserId then " (você)" else ""
+			local you = if member.userId == localUserId then Lang.t(" (você)") else ""
 			label.Text = `{crown}{member.name}{you}`
 			if isLeader and member.userId ~= localUserId then
 				local kick = UiKit.createButton(row, {
 					name = "Kick",
-					text = "REMOVER",
+					text = Lang.t("REMOVER"),
 					variant = "Neutral",
 					size = ROW_BUTTON_SIZE,
 					position = UDim2.new(1, -6, 0.5, 0),
@@ -278,7 +279,7 @@ function PartyView.new(playerGui: PlayerGui, callbacks: PartyViewCallbacks): Par
 				label.Text = if candidate.friend then `⭐ {candidate.name}` else candidate.name
 				local button = UiKit.createButton(row, {
 					name = "Invite",
-					text = "CHAMAR",
+					text = Lang.t("CHAMAR"),
 					variant = "Success",
 					size = ROW_BUTTON_SIZE,
 					position = UDim2.new(1, -6, 0.5, 0),
@@ -295,7 +296,7 @@ function PartyView.new(playerGui: PlayerGui, callbacks: PartyViewCallbacks): Par
 		end
 		if shown == 0 then
 			local _, label = createRow(candidateList, "Empty", 1)
-			label.Text = "Ninguém para chamar agora. Chame amigos para o jogo!"
+			label.Text = Lang.t("Ninguém para chamar agora. Chame amigos para o jogo!")
 			label.TextWrapped = true
 			label.Size = UDim2.new(1, -20, 1, 0)
 			label.Font = UiTheme.Fonts.Body
