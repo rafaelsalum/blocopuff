@@ -175,7 +175,7 @@ local function snapshotOf(entry: Entry, award: XpAward?, events: Events?): Profi
 		end
 	end
 	local relics: { ProfileTypes.RelicState } = {}
-	for _, id in ipairs(RelicCatalog.allIds()) do
+	for _, id in ipairs(RelicCatalog.everyId()) do
 		local obtainedAt = profile.relics[id]
 		if obtainedAt ~= nil then
 			table.insert(relics, { id = id, obtainedAt = obtainedAt })

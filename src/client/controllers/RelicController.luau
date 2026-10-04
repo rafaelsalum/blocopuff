@@ -3,6 +3,8 @@
 -- Relíquias e Álbum do Casarão no cliente (Fase 5C.2):
 --   * as relíquias que o jogador já tem viram um contorno vazio (sem brilho
 --     e sem prompt), só para ele;
+--   * as faíscas das que faltam só acendem bem de perto (de longe, nada
+--     entrega o esconderijo);
 --   * traduz o prompt "Pegar" e o nome da relíquia;
 --   * comemora o que o servidor avisou no perfil (relíquia, cômodo
 --     completo, álbum completo, Relíquia do Dia) com aviso e som;
@@ -12,6 +14,7 @@
 local CollectionService = game:GetService("CollectionService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
 local SoundService = game:GetService("SoundService")
 
 local Lang = require(ReplicatedStorage.Shared.i18n.Lang)
@@ -35,6 +38,10 @@ local PROMPT_NAME = "PickPrompt"
 local FOUND_SOUND = "rbxassetid://138190748214493"
 local COMPLETE_SOUND = "rbxassetid://112485797063762"
 local SOUND_VOLUME = 0.6
+local SPARKLES_NAME = "Sparkles"
+-- Distância (studs) em que as faíscas acendem e intervalo da conferência.
+local SPARKLE_RADIUS = 10
+local SPARKLE_INTERVAL = 0.3
 
 local RelicController = {}
 
@@ -90,8 +97,8 @@ local function setGhost(model: Model, ghost: boolean)
 					descendant.Transparency = original.transparency
 				end
 			end
-		elseif descendant:IsA("ParticleEmitter") or descendant:IsA("PointLight") then
-			descendant.Enabled = not ghost
+		elseif descendant:IsA("ParticleEmitter") and ghost then
+			descendant.Enabled = false
 		end
 	end
 	local prompt = promptOf(model)
@@ -202,7 +209,7 @@ local function celebrate(event: RelicEvent)
 		return
 	end
 	local definition = RelicCatalog.get(relicId)
-	local room = if definition ~= nil then RelicCatalog.room(definition.room) else nil
+	local room = if definition ~= nil then RelicCatalog.group(definition.group) else nil
 	if definition == nil or room == nil then
 		return
 	end
@@ -218,8 +225,8 @@ local function celebrate(event: RelicEvent)
 		notify(
 			`relic-room-{room.id}`,
 			"🏅",
-			Lang.t("CÔMODO COMPLETO!"),
-			Lang.t("Título: %s · +%d 🎟", Lang.t(room.title), RelicCatalog.Rewards.RoomTickets),
+			if room.season then Lang.t("TEMPORADA COMPLETA!") else Lang.t("CÔMODO COMPLETO!"),
+			Lang.t("Título: %s · +%d 🎟", Lang.t(room.title), room.tickets),
 			"High"
 		)
 	end
@@ -245,6 +252,25 @@ local function onProfile(snapshot: ProfileSnapshot, initial: boolean?)
 	-- O perfil guardado de antes do controlador subir não comemora de novo.
 	if event ~= nil and initial ~= true then
 		celebrate(event)
+	end
+end
+
+-- Faíscas só de perto e só nas que faltam.
+local function refreshSparkles()
+	local localPlayer = Players.LocalPlayer
+	local character = if localPlayer ~= nil then localPlayer.Character else nil
+	local root = if character ~= nil then character:FindFirstChild("HumanoidRootPart") else nil
+	local origin = if root ~= nil and root:IsA("BasePart") then root.Position else nil
+	for _, model in ipairs(allRelics()) do
+		local hitbox = model:FindFirstChild(HITBOX_NAME)
+		local sparkles = if hitbox ~= nil then hitbox:FindFirstChild(SPARKLES_NAME) else nil
+		if sparkles ~= nil and sparkles:IsA("ParticleEmitter") and hitbox ~= nil and hitbox:IsA("BasePart") then
+			local near = origin ~= nil and (hitbox.Position - origin).Magnitude <= SPARKLE_RADIUS
+			local wanted = near and ghosted[model] ~= true
+			if sparkles.Enabled ~= wanted then
+				sparkles.Enabled = wanted
+			end
+		end
 	end
 end
 
@@ -313,6 +339,16 @@ function RelicController.start()
 			watch(instance)
 		end
 	end
+
+	local elapsed = 0
+	RunService.Heartbeat:Connect(function(deltaTime: number)
+		elapsed += deltaTime
+		if elapsed < SPARKLE_INTERVAL then
+			return
+		end
+		elapsed = 0
+		refreshSparkles()
+	end)
 
 	ProfileController.Changed:Connect(onProfile)
 	local current = ProfileController.get()

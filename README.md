@@ -294,20 +294,37 @@ Seção **TESTES DA PARTIDA** no painel admin. Vale só para o servidor atual e 
 
 ### Relíquias e Álbum do Casarão (Fase 5C, entrega 5C.2)
 
-- **Relíquias** (`RelicService`, catálogo em `config/RelicCatalog`, regras em `data/RelicRules`): 40 objetos pequenos, 5 em cada um de 8 cômodos (Salão Principal, Salão da Coleção, Jardim do Barão, Ponto de Encontro, Biblioteca, Sala de Música, Sótão e Porão). São bonequinhos Puff, moedas, chaves, retratos e peças de xadrez (`RelicModels`).
-  - Cada relíquia tem um brilho fraco e o prompt **"Pegar"**. O servidor confere a distância e limita a frequência antes de entregar.
-  - **Lugar de cada uma:** o catálogo diz um ponto do cômodo, e o servidor (`RelicSpots`) acomoda a relíquia em cima do que houver ali, no piso ou num móvel baixo. Se o ponto cair dentro de um móvel alto, de uma parede ou no vão de uma escada, tenta pontos vizinhos.
-  - **Quem já pegou** vê só o contorno vazio, sem brilho e sem prompt (só para ele, `RelicController`).
+- **Relíquias** (`RelicService`, catálogo em `config/RelicCatalog`, regras em `data/RelicRules`): 40 objetos pequenos, 5 em cada um de 8 cômodos (Salão Principal, Salão da Coleção, Jardim do Barão, Ponto de Encontro, Biblioteca, Sala de Música, Sótão e Porão).
+- **Modelos** (`RelicModels`): malhas gratuitas da Creator Store, criadas na hora pelo servidor com `AssetService:CreateMeshPartAsync`. Só malha e textura entram, nunca scripts.
+  - São relógio de bolso, moedas de ouro e prata, chave antiga, rei, torre e bispo de xadrez, xícara com pires, livro antigo, bússola e frasco de poção.
+  - O Puff, a abóbora e a estrela da Relíquia do Dia são feitos de peças.
+  - Se uma malha não carregar, entra uma versão simples de peças.
+- **Esconderijos de verdade:** cada relíquia diz o móvel onde fica (sofá, vaso, mesa, estante, piano, baú, barril, adega, pedestal da vitrine, balcão da loja, cama do Barão…). O servidor (`RelicSpots`) procura em volta e embaixo dele o ponto mais escondido.
+  - O ponto vencedor é o que tem mais direções tapadas e, de preferência, algo por cima.
+  - Fica sempre no chão; só vai para cima de um móvel se não houver lugar no chão.
+  - A decoração não aparece nos raios do Roblox, então o cálculo usa um índice próprio das peças visíveis.
+- **Difícil de achar:**
+  - sem luz;
+  - as faíscas só acendem a 10 studs (no cliente);
+  - o prompt **"Pegar"** só aparece a 7 studs (o servidor confere a distância);
+  - as pistas do Álbum são charadas ("Onde o Barão sonha com ossos").
+  - O servidor confere a distância, se o jogador está vivo e um intervalo mínimo.
+- **Quem já pegou** vê só o contorno vazio, sem faíscas e sem prompt (só para ele, `RelicController`).
 - **Recompensas:**
   - 1 🎟 por relíquia;
   - **cômodo completo:** +5 🎟 e um título (Anfitrião, Colecionador, Amigo do Barão, Detetive, Bibliotecário, Maestro, Rato de Sótão, Guardião do Porão);
-  - **álbum completo:** o título Explorador do Casarão e o **Puff Explorador** (Lendário, exclusivo, não sai na Puff Machine; origem "Álbum do Casarão" no Puffdex).
-- **Relíquia do Dia:** uma estrela dourada aparece num esconderijo sorteado do dia (12 esconderijos, nunca o mesmo de ontem, igual em todos os servidores) e muda de lugar na virada do dia. Vale 2 🎟, uma vez por dia. Ao juntar 30, ganha +20 🎟 e o título Caçador de Relíquias.
-- **Álbum** (`AlbumView`, botão 📜 no cartão do perfil): uma página por cômodo com as 5 relíquias. As que faltam aparecem como "❔" com uma dica curta. Tem também a página da Relíquia do Dia, os títulos ganhos e o prêmio do álbum.
-- **Títulos:** aparecem no Álbum e no painel PERFIL do cartão, que mostra o melhor título ganho. Não são equipáveis.
-- **Avisos e sons:** relíquia encontrada, cômodo completo, álbum completo e Relíquia do Dia. Os sons reaproveitam o desbloqueio do Puffdex e a subida de nível.
-- **Perfil:** campos `relics` (id e data), `dailyRelicDay` e `dailyRelicCount`. São opcionais, sem nova versão. A guarda de gravação nunca perde relíquias e nunca diminui a contagem da Relíquia do Dia.
-- **Telemetria:** `RelicFound`, `RoomSetCompleted`, `AlbumCompleted`, `DailyRelicFound`, `AlbumOpened` e as entradas de tickets `Relic` e `DailyRelic`.
+  - **álbum completo:** o título Explorador do Casarão e o **Puff Explorador** (Lendário, exclusivo, não sai na Puff Machine).
+- **Temporadas** (o álbum nunca acaba): páginas novas por tempo limitado, com título e tickets próprios.
+  - As relíquias de uma temporada entram e saem do Casarão sozinhas nas datas dela.
+  - A página fica no álbum para sempre, mesmo depois de a temporada acabar.
+  - Não contam para o Puff Explorador.
+  - **Temporada 1, "Noite das Abóboras"** (1º/out a 8/nov de 2026): 10 relíquias de Halloween, título Caça-Abóboras e +10 🎟.
+  - Para criar outra: nova entrada em `SEASONS` no catálogo, com datas e relíquias.
+- **Relíquia do Dia:** uma estrela dourada escondida junto a um de 12 móveis, sorteado por dia. Nunca é o mesmo de ontem e é igual em todos os servidores. Vale 2 🎟, uma vez por dia. Ao juntar 30, dá +20 🎟 e o título Caçador de Relíquias.
+- **Álbum** (`AlbumView`, botão 📜 no cartão do perfil): abas com rolagem para as temporadas, os cômodos e a Relíquia do Dia. As que faltam aparecem como "❔" com a charada. Mostra também os títulos ganhos e o prêmio do álbum.
+- **Títulos:** aparecem no Álbum e no painel PERFIL do cartão (o melhor ganho). Não são equipáveis.
+- **Perfil:** campos `relics` (id e data, álbum e temporadas), `dailyRelicDay` e `dailyRelicCount`. São opcionais, sem nova versão. A guarda de gravação nunca perde relíquias e nunca diminui a contagem da Relíquia do Dia.
+- **Telemetria:** `RelicFound`, `RoomSetCompleted`, `SeasonCompleted`, `AlbumCompleted`, `DailyRelicFound`, `AlbumOpened` e as entradas de tickets `Relic` e `DailyRelic`.
 - **Opcional:** se a colocação das relíquias falhar, o servidor sobe mesmo assim.
 - **Testes:** `lune run tests/RelicRules.spec` e `lune run tests/ProfileGuard.spec`.
 

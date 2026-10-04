@@ -32,25 +32,25 @@ check("daily spots exist", #RelicCatalog.dailySpots() >= 7)
 
 -- Pegar uma relíquia.
 local libraryIds = RelicCatalog.roomIds("Library")
-local relics, outcome = RelicRules.collect({}, libraryIds[1], libraryIds, allIds, rewards, 100)
+local relics, outcome = RelicRules.collect({}, libraryIds[1], libraryIds, allIds, rewards, rewards.RoomTickets, 100)
 check("first relic is collected", relics ~= nil and outcome ~= nil and relics[libraryIds[1]] == 100)
 check("first relic pays one ticket", outcome ~= nil and outcome.tickets == rewards.RelicTickets and outcome.roomCount == 1 and outcome.total == 1)
 check("first relic does not complete the room", outcome ~= nil and not outcome.roomCompleted and not outcome.albumCompleted)
 
-local again = RelicRules.collect(relics :: any, libraryIds[1], libraryIds, allIds, rewards, 200)
+local again = RelicRules.collect(relics :: any, libraryIds[1], libraryIds, allIds, rewards, rewards.RoomTickets, 200)
 check("same relic twice is refused", again == nil)
-check("unknown relic is refused", RelicRules.collect({}, "nao_existe", libraryIds, allIds, rewards, 1) == nil)
-check("relic from another room is refused", RelicRules.collect({}, RelicCatalog.roomIds("Music")[1], libraryIds, allIds, rewards, 1) == nil)
+check("unknown relic is refused", RelicRules.collect({}, "nao_existe", libraryIds, allIds, rewards, rewards.RoomTickets, 1) == nil)
+check("relic from another room is refused", RelicRules.collect({}, RelicCatalog.roomIds("Music")[1], libraryIds, allIds, rewards, rewards.RoomTickets, 1) == nil)
 
 local original = {}
-RelicRules.collect(original, libraryIds[2], libraryIds, allIds, rewards, 5)
+RelicRules.collect(original, libraryIds[2], libraryIds, allIds, rewards, rewards.RoomTickets, 5)
 check("collect does not mutate the input", next(original) == nil)
 
 -- Completar o cômodo.
 local state: { [string]: number } = {}
 local last = nil
 for _, id in ipairs(libraryIds) do
-	local updated, result = RelicRules.collect(state, id, libraryIds, allIds, rewards, 10)
+	local updated, result = RelicRules.collect(state, id, libraryIds, allIds, rewards, rewards.RoomTickets, 10)
 	state = updated :: any
 	last = result
 end
@@ -65,12 +65,40 @@ for _, id in ipairs(allIds) do
 end
 local lastId = allIds[#allIds]
 everything[lastId] = nil
-local lastRoom = (RelicCatalog.get(lastId) :: any).room
-local _, finalOutcome = RelicRules.collect(everything, lastId, RelicCatalog.roomIds(lastRoom), allIds, rewards, 50)
+local lastRoom = (RelicCatalog.get(lastId) :: any).group
+local _, finalOutcome = RelicRules.collect(everything, lastId, RelicCatalog.roomIds(lastRoom), allIds, rewards, rewards.RoomTickets, 50)
 check("last relic completes the album", finalOutcome ~= nil and finalOutcome.albumCompleted and finalOutcome.total == 40)
 everything[lastId] = 50
 local titles = RelicCatalog.titlesFor(everything, 0)
 check("album title comes first", titles[1] == RelicCatalog.AlbumTitle and #titles == 9)
+
+-- Temporadas: página própria, bônus próprio e fora do álbum fixo.
+local seasons = RelicCatalog.seasons()
+check("there is a season", #seasons >= 1)
+local season = seasons[1]
+check("season has relics and window", #season.relics >= 5 and season.startsAt < season.endsAt)
+check("season relics are not in the album", table.find(allIds, season.relics[1].id) == nil and table.find(RelicCatalog.everyId(), season.relics[1].id) ~= nil)
+check("season relic has a real room", RelicCatalog.room(season.relics[1].room) ~= nil)
+check("season active inside its window", RelicCatalog.isActive(season, season.startsAt) and not RelicCatalog.isActive(season, season.endsAt) and not RelicCatalog.isActive(season, season.startsAt - 1))
+local seasonIds = RelicCatalog.groupIds(season.id)
+local seasonState: { [string]: number } = table.clone(everything)
+local seasonLast = nil
+for _, id in ipairs(seasonIds) do
+	local updated, result = RelicRules.collect(seasonState, id, seasonIds, allIds, rewards, season.tickets, 70)
+	seasonState = updated :: any
+	seasonLast = result
+end
+check("season completes with its own bonus", seasonLast ~= nil and seasonLast.roomCompleted and seasonLast.tickets == rewards.RelicTickets + season.tickets)
+check("season never completes the album again", seasonLast ~= nil and not seasonLast.albumCompleted)
+check("season title is earned", table.find(RelicCatalog.titlesFor(seasonState, 0), season.title) ~= nil)
+check("every relic has an anchor", (function()
+	for _, id in ipairs(RelicCatalog.everyId()) do
+		if (RelicCatalog.get(id) :: any).anchor == "" then
+			return false
+		end
+	end
+	return true
+end)())
 
 -- Relíquia do Dia.
 local daily = RelicRules.collectDaily(0, 0, 500, rewards)

@@ -184,7 +184,7 @@ local function parseRelics(raw: unknown): { RelicState }
 		return list
 	end
 	local seen: { [string]: boolean } = {}
-	local limit = #RelicCatalog.allIds()
+	local limit = #RelicCatalog.everyId()
 	for index, item in ipairs(raw :: { any }) do
 		if index > limit then
 			break

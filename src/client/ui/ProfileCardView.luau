@@ -33,6 +33,7 @@ local GUI_NAME = "BlocoPuffProfileCard"
 local CARD_SIZE = Vector2.new(266, 66)
 local SHORTCUT_GAP = 4
 local SHORTCUT_HEIGHT = 44
+local SHORTCUT_PADDING = 1
 local SHORTCUT_Y = CARD_SIZE.Y + 6
 local CORNER_HEIGHT = SHORTCUT_Y + SHORTCUT_HEIGHT + 14
 -- Painel das estatísticas: abre ao lado do cartão (no celular deitado não
@@ -187,6 +188,17 @@ function ProfileCardView.new(
 			textSize = 22,
 			zIndex = 4,
 		})
+		-- Botão estreito: o ícone precisa de quase toda a largura (com a
+		-- margem padrão e quebra de linha, o emoji não cabe e some).
+		local padding = button.button:FindFirstChildOfClass("UIPadding")
+		if padding ~= nil then
+			padding.PaddingLeft = UDim.new(0, SHORTCUT_PADDING)
+			padding.PaddingRight = UDim.new(0, SHORTCUT_PADDING)
+		end
+		local icon = button.button:FindFirstChild("Label")
+		if icon ~= nil and icon:IsA("TextLabel") then
+			icon.TextWrapped = false
+		end
 		button.button.Activated:Connect(function()
 			UiKit.playClick()
 			closeStats()

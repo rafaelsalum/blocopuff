@@ -40,27 +40,29 @@ local function countOwned(owned: { [string]: number }, ids: { string }): number
 	return count
 end
 
--- Pega `relicId` (do cômodo `roomIds`, entre todas `allIds`). Devolve o
--- novo mapa de relíquias e o resultado, ou nil se já tinha ou o id não
--- existe.
+-- Pega `relicId` da página `groupIds` (cômodo ou temporada). `albumIds`
+-- são as relíquias do álbum fixo (completar todas dá o Puff Explorador) e
+-- `groupTickets` o bônus de completar a página. Devolve o novo mapa de
+-- relíquias e o resultado, ou nil se já tinha ou o id não é da página.
 function RelicRules.collect(
 	relics: { [string]: number },
 	relicId: string,
-	roomIds: { string },
-	allIds: { string },
+	groupIds: { string },
+	albumIds: { string },
 	rewards: Rewards,
+	groupTickets: number,
 	now: number
 ): ({ [string]: number }?, Outcome?)
-	if relics[relicId] ~= nil or table.find(roomIds, relicId) == nil or table.find(allIds, relicId) == nil then
+	if relics[relicId] ~= nil or table.find(groupIds, relicId) == nil then
 		return nil, nil
 	end
 	local updated = table.clone(relics)
 	updated[relicId] = now
-	local roomCount = countOwned(updated, roomIds)
-	local total = countOwned(updated, allIds)
-	local roomCompleted = roomCount == #roomIds
-	local albumCompleted = total == #allIds
-	local tickets = rewards.RelicTickets + (if roomCompleted then rewards.RoomTickets else 0)
+	local roomCount = countOwned(updated, groupIds)
+	local total = countOwned(updated, albumIds)
+	local roomCompleted = roomCount == #groupIds
+	local albumCompleted = table.find(albumIds, relicId) ~= nil and total == #albumIds
+	local tickets = rewards.RelicTickets + (if roomCompleted then groupTickets else 0)
 	return updated, {
 		tickets = tickets,
 		roomCount = roomCount,

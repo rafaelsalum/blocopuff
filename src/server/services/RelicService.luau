@@ -1,8 +1,9 @@
 --!strict
 
 -- Relíquias e Álbum do Casarão (Fase 5C.2), no servidor:
---   * coloca as 40 relíquias do álbum nos esconderijos do catálogo e a
---     Relíquia do Dia no esconderijo sorteado do dia (troca na virada);
+--   * esconde as 40 relíquias do álbum junto aos móveis do catálogo, as
+--     relíquias das temporadas no ar (entram e saem sozinhas) e a Relíquia
+--     do Dia no esconderijo sorteado do dia (troca na virada);
 --   * cada uma tem o prompt "Pegar"; o servidor confere a distância, limita
 --     a frequência e entrega pelo perfil (tickets, bônus do cômodo, Puff
 --     Explorador ao completar o álbum, coleção da Relíquia do Dia).
@@ -34,7 +35,7 @@ local SERVICE_NAME = "RelicService"
 -- Intervalo mínimo (s) entre duas relíquias do mesmo jogador.
 local PICK_COOLDOWN = 0.4
 -- Folga além do alcance do prompt (atraso de rede).
-local DISTANCE_SLACK = 6
+local DISTANCE_SLACK = 4
 local DAY_CHECK_INTERVAL = 20
 
 local RelicService = {}
@@ -44,6 +45,8 @@ local folder: Folder? = nil
 local world: Model? = nil
 local dailyModel: Model? = nil
 local dailyDay = 0
+-- Modelos das relíquias de temporada no mundo, por temporada.
+local seasonModels: { [string]: { Model } } = {}
 local lastPick: { [Player]: number } = {}
 
 local function color(rgb: { number }): Color3
@@ -108,10 +111,15 @@ end
 
 local function grantRelic(player: Player, relicId: string)
 	local definition = RelicCatalog.get(relicId)
-	if definition == nil then
+	local group = if definition ~= nil then RelicCatalog.group(definition.group) else nil
+	if definition == nil or group == nil then
 		return
 	end
-	local roomIds = RelicCatalog.roomIds(definition.room)
+	-- Temporada encerrada: a relíquia já saiu do mundo (aviso atrasado).
+	if group.season and not RelicCatalog.isActive(group, os.time()) then
+		return
+	end
+	local groupIds = RelicCatalog.groupIds(group.id)
 	local outcome: RelicRules.Outcome? = nil
 	local saved = false
 	local before = 0
@@ -119,7 +127,7 @@ local function grantRelic(player: Player, relicId: string)
 	local rooms = 0
 	local granted = PlayerDataService.update(player, function(profile: Profile, canSave: boolean): (Profile?, PlayerDataService.Events?)
 		local now = os.time()
-		local relics, result = RelicRules.collect(profile.relics, relicId, roomIds, RelicCatalog.allIds(), RelicCatalog.Rewards, now)
+		local relics, result = RelicRules.collect(profile.relics, relicId, groupIds, RelicCatalog.allIds(), RelicCatalog.Rewards, group.tickets, now)
 		if relics == nil or result == nil then
 			return nil, nil
 		end
@@ -150,10 +158,12 @@ local function grantRelic(player: Player, relicId: string)
 	if not granted or result == nil or not saved then
 		return
 	end
-	TelemetryService.lobbyEvent(player, "RelicFound", result.total, relicId, definition.room)
+	TelemetryService.lobbyEvent(player, "RelicFound", result.total, relicId, group.id)
 	TelemetryService.ticketsEarned(player, before, balance, "Relic")
-	if result.roomCompleted then
-		TelemetryService.lobbyEvent(player, "RoomSetCompleted", rooms, definition.room)
+	if result.roomCompleted and group.season then
+		TelemetryService.lobbyEvent(player, "SeasonCompleted", result.roomCount, group.id)
+	elseif result.roomCompleted then
+		TelemetryService.lobbyEvent(player, "RoomSetCompleted", rooms, group.id)
 	end
 	if result.albumCompleted then
 		TelemetryService.lobbyEvent(player, "AlbumCompleted", result.total)
@@ -210,52 +220,99 @@ local function connectPrompt(model: Model, onPick: (player: Player) -> ())
 end
 
 -- Índice das peças visíveis do Casarão (sem as relíquias).
+-- O Casarão não muda depois de pronto: o índice é montado uma vez.
+local cachedIndex: RelicSpots.Index? = nil
 local function spotIndex(parent: Folder): RelicSpots.Index
+	local existing = cachedIndex
+	if existing ~= nil then
+		return existing
+	end
 	local root: Instance = world or parent
-	return RelicSpots.index(root, parent)
+	local index = RelicSpots.index(root, parent)
+	cachedIndex = index
+	return index
+end
+
+-- Esconderijo junto ao móvel-âncora; sem ele, a fração (u, v) do cômodo.
+local function spotFor(index: RelicSpots.Index, level: Level, anchor: string, nth: number?, u: number, v: number): Vector3?
+	local occupied = occupiedSpots()
+	return RelicSpots.hide(index, level, anchor, nth, occupied) or RelicSpots.find(index, level, u, v, occupied)
+end
+
+-- Esconde as relíquias de uma página (menos as que já estão em `placed`).
+-- Devolve os modelos criados, por id.
+local function placeGroup(parent: Folder, index: RelicSpots.Index, group: RelicCatalog.RelicGroup, placed: { [string]: Model }?): { [string]: Model }
+	local models: { [string]: Model } = if placed ~= nil then placed else {}
+	for _, definition in ipairs(group.relics) do
+		if models[definition.id] ~= nil then
+			continue
+		end
+		local level = RelicSpots.level(definition.room)
+		local position = if level ~= nil then spotFor(index, level, definition.anchor, definition.nth, definition.u, definition.v) else nil
+		if level == nil or position == nil then
+			warn(`[BlocoPuff] Relic {definition.id} has no free spot in {definition.room}`)
+		else
+			local model = RelicModels.build(
+				parent,
+				`Relic_{definition.id}`,
+				definition.shape,
+				color(definition.color),
+				baseFor(level, position),
+				definition.name,
+				{ [RelicCatalog.IdAttribute] = definition.id },
+				RelicCatalog.Tag
+			)
+			local relicId = definition.id
+			connectPrompt(model, function(player: Player)
+				grantRelic(player, relicId)
+			end)
+			models[definition.id] = model
+		end
+	end
+	return models
+end
+
+local function countPlaced(models: { [string]: Model }): number
+	local count = 0
+	for _ in pairs(models) do
+		count += 1
+	end
+	return count
 end
 
 local function placeRelics(parent: Folder)
 	local index = spotIndex(parent)
-	local missing = 0
 	for _, room in ipairs(RelicCatalog.rooms()) do
-		local level = RelicSpots.level(room.id)
-		for _, definition in ipairs(room.relics) do
-			local position = if level ~= nil then RelicSpots.find(index, level, definition.u, definition.v, occupiedSpots()) else nil
-			if level == nil or position == nil then
-				missing += 1
-				warn(`[BlocoPuff] Relic {definition.id} has no free spot in {room.id}`)
-			else
-				local model = RelicModels.build(
-					parent,
-					`Relic_{definition.id}`,
-					definition.shape,
-					color(definition.color),
-					baseFor(level, position),
-					definition.name,
-					{ [RelicCatalog.IdAttribute] = definition.id },
-					RelicCatalog.Tag
-				)
-				local relicId = definition.id
-				connectPrompt(model, function(player: Player)
-					grantRelic(player, relicId)
-				end)
+		placeGroup(parent, index, room, nil)
+	end
+end
+
+-- Coloca as temporadas que entraram no ar (e as relíquias que ainda não
+-- acharam lugar) e tira as que acabaram.
+local function refreshSeasons(parent: Folder)
+	local now = os.time()
+	for _, season in ipairs(RelicCatalog.seasons()) do
+		local active = RelicCatalog.isActive(season, now)
+		local placed = seasonModels[season.id]
+		if active and (placed == nil or countPlaced(placed) < #season.relics) then
+			seasonModels[season.id] = placeGroup(parent, spotIndex(parent), season, placed)
+		elseif not active and placed ~= nil then
+			seasonModels[season.id] = nil
+			for _, model in pairs(placed) do
+				model:Destroy()
 			end
 		end
-	end
-	if missing > 0 then
-		warn(`[BlocoPuff] {missing} relics could not be placed`)
 	end
 end
 
 -- Relíquia do Dia no esconderijo sorteado de `day` (troca a anterior).
+-- `dailyDay` só muda quando ela é colocada (senão o laço tenta de novo).
 local function placeDaily(parent: Folder, day: number)
 	local previous = dailyModel
 	dailyModel = nil
 	if previous ~= nil then
 		previous:Destroy()
 	end
-	dailyDay = day
 	local spots = RelicCatalog.dailySpots()
 	local index = spotIndex(parent)
 	local first = RelicRules.dailySpotIndex(day, #spots)
@@ -265,7 +322,7 @@ local function placeDaily(parent: Folder, day: number)
 		local spotNumber = ((first - 1 + attempt) % #spots) + 1
 		local spot = spots[spotNumber]
 		local level = if spotNumber ~= yesterday or #spots == 1 then RelicSpots.level(spot.room) else nil
-		local position = if level ~= nil then RelicSpots.find(index, level, spot.u, spot.v, occupiedSpots()) else nil
+		local position = if level ~= nil then spotFor(index, level, spot.anchor, spot.nth, spot.u, spot.v) else nil
 		if level ~= nil and position ~= nil then
 			local model = RelicModels.build(
 				parent,
@@ -278,10 +335,11 @@ local function placeDaily(parent: Folder, day: number)
 				RelicCatalog.DailyTag
 			)
 			dailyModel = model
+			dailyDay = day
 			connectPrompt(model, function(player: Player)
 				-- Só vale a do dia atual (na virada ela muda de lugar).
-				if model.Parent ~= nil and dailyDay == DailyRules.dayIndex(os.time()) then
-					grantDaily(player, dailyDay)
+				if model.Parent ~= nil and day == DailyRules.dayIndex(os.time()) then
+					grantDaily(player, day)
 				end
 			end)
 			return
@@ -315,22 +373,34 @@ function RelicService.start(worldRoot: Model)
 	world = worldRoot
 	local parent = createFolder(worldRoot)
 	folder = parent
-	placeRelics(parent)
-	placeDaily(parent, DailyRules.dayIndex(os.time()))
 
 	Players.PlayerRemoving:Connect(function(player: Player)
 		lastPick[player] = nil
 	end)
 
+	-- Fora do caminho da inicialização: carregar as malhas pode demorar.
 	task.spawn(function()
+		RelicModels.preload()
+		local ok, err = pcall(function()
+			placeRelics(parent)
+			refreshSeasons(parent)
+			placeDaily(parent, DailyRules.dayIndex(os.time()))
+		end)
+		if not ok then
+			warn(`[BlocoPuff] Relic placement failed: {err}`)
+		end
 		while parent.Parent ~= nil do
 			task.wait(DAY_CHECK_INTERVAL)
 			local today = DailyRules.dayIndex(os.time())
-			if today ~= dailyDay then
+			if today ~= dailyDay or dailyModel == nil then
 				local ok, err = pcall(placeDaily, parent, today)
 				if not ok then
 					warn(`[BlocoPuff] Daily relic move failed: {err}`)
 				end
+			end
+			local seasonsOk, seasonsErr = pcall(refreshSeasons, parent)
+			if not seasonsOk then
+				warn(`[BlocoPuff] Season relics refresh failed: {seasonsErr}`)
 			end
 		end
 	end)

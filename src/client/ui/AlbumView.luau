@@ -1,9 +1,9 @@
 --!strict
 
 -- ÁLBUM DO CASARÃO (Fase 5C.2): uma página por cômodo com as 5 relíquias
--- (as que faltam aparecem como "❔" com uma dica curta), o título de cada
--- cômodo, a página da Relíquia do Dia e os títulos ganhos. Só visual: tudo
--- vem do perfil.
+-- (as que faltam aparecem como "❔" com uma pista em charada), o título de
+-- cada cômodo, as páginas das Temporadas (por tempo limitado), a página da
+-- Relíquia do Dia e os títulos ganhos. Só visual: tudo vem do perfil.
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TweenService = game:GetService("TweenService")
@@ -17,7 +17,7 @@ local UiKit = require(script.Parent.UiKit)
 local UiTheme = require(script.Parent.UiTheme)
 
 type ProfileSnapshot = ProfileTypes.ProfileSnapshot
-type RelicRoom = RelicCatalog.RelicRoom
+type RelicRoom = RelicCatalog.RelicGroup
 
 export type AlbumViewHandle = {
 	open: () -> (),
@@ -51,12 +51,23 @@ local CARDS_Y = 62
 local DAILY_PAGE = "Daily"
 
 local SHAPE_ICONS: { [string]: string } = {
-	Key = "🗝️",
-	Coin = "🪙",
 	Puff = "☁️",
-	Portrait = "🖼️",
-	Chess = "♟️",
+	Watch = "🕰️",
+	GoldCoin = "🪙",
+	SilverCoin = "🪙",
+	Key = "🗝️",
+	King = "♚",
+	Rook = "♜",
+	Bishop = "♝",
+	Teacup = "☕",
+	Book = "📕",
+	Compass = "🧭",
+	Potion = "🧪",
+	Pumpkin = "🎃",
 }
+-- Páginas com pelo menos 5 cartas por linha; temporadas maiores usam duas.
+local CARDS_PER_ROW = 5
+local SMALL_CARD_HEIGHT = 120
 
 local AlbumView = {}
 
@@ -114,25 +125,44 @@ function AlbumView.new(playerGui: PlayerGui, onOpened: () -> ()): AlbumViewHandl
 		zIndex = 4,
 	})
 
-	-- Abas: os cômodos e a Relíquia do Dia.
+	-- Abas (com rolagem): as temporadas, os cômodos e a Relíquia do Dia.
 	local rooms = RelicCatalog.rooms()
+	local pages: { RelicRoom } = {}
+	-- Temporadas (só aparecem depois de começar; encerradas continuam).
+	for _, season in ipairs(RelicCatalog.seasons()) do
+		table.insert(pages, season)
+	end
+	for _, room in ipairs(rooms) do
+		table.insert(pages, room)
+	end
 	local tabs: { [string]: UiKit.ButtonHandle } = {}
 	local selected = rooms[1].id
 	local refresh: () -> () = function() end
 	local tabIds: { string } = {}
-	for _, room in ipairs(rooms) do
-		table.insert(tabIds, room.id)
+	for _, page in ipairs(pages) do
+		table.insert(tabIds, page.id)
 	end
 	table.insert(tabIds, DAILY_PAGE)
+	local tabList = Instance.new("ScrollingFrame")
+	tabList.Name = "Tabs"
+	tabList.Position = UDim2.fromOffset(16, TOP)
+	tabList.Size = UDim2.fromOffset(TAB_WIDTH + 8, PANEL_SIZE.Y - TOP - 16)
+	tabList.BackgroundTransparency = 1
+	tabList.BorderSizePixel = 0
+	tabList.ScrollBarThickness = 4
+	tabList.ScrollingDirection = Enum.ScrollingDirection.Y
+	tabList.CanvasSize = UDim2.fromOffset(0, #tabIds * (TAB_HEIGHT + TAB_GAP))
+	tabList.ZIndex = 4
+	tabList.Parent = card
 	for index, id in ipairs(tabIds) do
-		local tab = UiKit.createButton(card, {
+		local tab = UiKit.createButton(tabList, {
 			name = `Tab{id}`,
 			text = "",
 			variant = "Neutral",
 			size = UDim2.fromOffset(TAB_WIDTH, TAB_HEIGHT),
-			position = UDim2.fromOffset(16, TOP + (index - 1) * (TAB_HEIGHT + TAB_GAP)),
+			position = UDim2.fromOffset(0, (index - 1) * (TAB_HEIGHT + TAB_GAP)),
 			textSize = 15,
-			zIndex = 4,
+			zIndex = 5,
 		})
 		tab.button.Activated:Connect(function()
 			UiKit.playClick()
@@ -153,12 +183,15 @@ function AlbumView.new(playerGui: PlayerGui, onOpened: () -> ()): AlbumViewHandl
 	local pageTitle = label(roomPage, "PageTitle", "", UiTheme.Fonts.Display, 24, UiTheme.Colors.Ink, UDim2.fromOffset(0, 0), UDim2.new(1, 0, 0, 28))
 	UiTheme.addTextOutline(pageTitle, 1.5)
 	local rewardLabel = label(roomPage, "Reward", "", UiTheme.Fonts.BodyBold, 15, UiTheme.Colors.Gold, UDim2.fromOffset(0, 32), UDim2.new(1, 0, 0, 22))
-	local cardWidth = (PAGE_WIDTH - CARD_GAP * 4) / 5
+	local cardWidth = (PAGE_WIDTH - CARD_GAP * (CARDS_PER_ROW - 1)) / CARDS_PER_ROW
+	local maxCards = CARDS_PER_ROW
+	for _, page in ipairs(pages) do
+		maxCards = math.max(maxCards, #page.relics)
+	end
 	local cards: { RelicCard } = {}
-	for index = 1, 5 do
+	for index = 1, maxCards do
 		local frame = Instance.new("Frame")
 		frame.Name = `Relic{index}`
-		frame.Position = UDim2.fromOffset((index - 1) * (cardWidth + CARD_GAP), CARDS_Y)
 		frame.Size = UDim2.fromOffset(cardWidth, CARD_HEIGHT)
 		frame.BackgroundColor3 = UiTheme.Colors.Surface
 		frame.ZIndex = 4
@@ -182,6 +215,25 @@ function AlbumView.new(playerGui: PlayerGui, onOpened: () -> ()): AlbumViewHandl
 		hint.ZIndex = 5
 		UiTheme.addTextConstraint(hint, 9, 13)
 		table.insert(cards, { frame = frame, stroke = stroke, icon = icon, name = name, hint = hint })
+	end
+	-- Até 5 relíquias: uma fileira de cartas altas; mais (temporadas): duas
+	-- fileiras de cartas baixas.
+	local function layoutCards(count: number)
+		local small = count > CARDS_PER_ROW
+		local height = if small then SMALL_CARD_HEIGHT else CARD_HEIGHT
+		for index, cardItem in ipairs(cards) do
+			local row = math.floor((index - 1) / CARDS_PER_ROW)
+			local column = (index - 1) % CARDS_PER_ROW
+			cardItem.frame.Position = UDim2.fromOffset(column * (cardWidth + CARD_GAP), CARDS_Y + row * (height + CARD_GAP))
+			cardItem.frame.Size = UDim2.fromOffset(cardWidth, height)
+			cardItem.icon.Position = UDim2.fromOffset(0, if small then 4 else 10)
+			cardItem.icon.Size = UDim2.new(1, 0, 0, if small then 36 else 64)
+			cardItem.icon.TextSize = if small then 30 else 44
+			cardItem.name.Position = UDim2.fromOffset(6, if small then 40 else 80)
+			cardItem.name.Size = UDim2.new(1, -12, 0, if small then 34 else 52)
+			cardItem.hint.Position = UDim2.fromOffset(6, if small then 76 else 136)
+			cardItem.hint.Size = UDim2.new(1, -12, 0, if small then 40 else 52)
+		end
 	end
 	local titlesLabel = label(roomPage, "Titles", "", UiTheme.Fonts.BodyBold, 14, UiTheme.Colors.Ink, UDim2.fromOffset(0, CARDS_Y + CARD_HEIGHT + 14), UDim2.new(1, 0, 0, 44))
 	titlesLabel.TextWrapped = true
@@ -252,14 +304,29 @@ function AlbumView.new(playerGui: PlayerGui, onOpened: () -> ()): AlbumViewHandl
 		return string.format("%s %s  %d/%d%s", room.emoji, Lang.t(room.name), count, #room.relics, mark)
 	end
 
+	-- Linha do prêmio da página (cômodo ou temporada).
+	local function rewardText(room: RelicRoom, complete: boolean): string
+		if complete then
+			return Lang.t("🏅 Título ganho: %s", Lang.t(room.title))
+		elseif not room.season then
+			return Lang.t("🔒 Complete o cômodo: título %s e +%d 🎟", Lang.t(room.title), room.tickets)
+		elseif RelicCatalog.isActive(room, os.time()) then
+			local dateFormat = if Lang.current() == "en" then "!%b %d" else "!%d/%m"
+			return Lang.t("⏳ Só até %s · complete: título %s e +%d 🎟", os.date(dateFormat, room.endsAt - 1), Lang.t(room.title), room.tickets)
+		end
+		return Lang.t("⏳ Temporada encerrada · fique de olho nas próximas!")
+	end
+
 	local function showRoom(room: RelicRoom, owned: { [string]: number })
-		local count = RelicCatalog.roomCount(owned, room.id)
+		local count = RelicCatalog.groupCount(owned, room.id)
 		local complete = count >= #room.relics
 		pageTitle.Text = string.format("%s %s  ·  %d/%d", room.emoji, Lang.t(room.name), count, #room.relics)
-		rewardLabel.Text = if complete
-			then Lang.t("🏅 Título ganho: %s", Lang.t(room.title))
-			else Lang.t("🔒 Complete o cômodo: título %s e +%d 🎟", Lang.t(room.title), rewards.RoomTickets)
+		rewardLabel.Text = rewardText(room, complete)
 		rewardLabel.TextColor3 = if complete then UiTheme.Colors.Gold else UiTheme.Colors.InkSoft
+		layoutCards(#room.relics)
+		local tall = #room.relics <= CARDS_PER_ROW
+		titlesLabel.Position = UDim2.fromOffset(0, CARDS_Y + (if tall then CARD_HEIGHT else SMALL_CARD_HEIGHT * 2 + CARD_GAP) + 14)
+		prizeLabel.Visible = tall
 		for index, cardItem in ipairs(cards) do
 			local definition = room.relics[index]
 			cardItem.frame.Visible = definition ~= nil
@@ -298,16 +365,28 @@ function AlbumView.new(playerGui: PlayerGui, onOpened: () -> ()): AlbumViewHandl
 			end
 		end
 		totalLabel.Text = Lang.t("%d/%d relíquias", total, #RelicCatalog.allIds())
-		for _, room in ipairs(rooms) do
-			local tab = tabs[room.id]
-			tab.setText(roomTabText(room, RelicCatalog.roomCount(owned, room.id)))
-			tab.setSelected(selected == room.id)
+		local now = os.time()
+		local row = 0
+		for _, id in ipairs(tabIds) do
+			local page = RelicCatalog.group(id)
+			local tab = tabs[id]
+			local visible = page == nil or not page.season or now >= page.startsAt
+			tab.root.Visible = visible
+			if visible then
+				tab.root.Position = UDim2.fromOffset(0, row * (TAB_HEIGHT + TAB_GAP))
+				row += 1
+			end
+			if page ~= nil then
+				tab.setText(roomTabText(page, RelicCatalog.groupCount(owned, page.id)))
+				tab.setSelected(selected == page.id)
+			end
 		end
+		tabList.CanvasSize = UDim2.fromOffset(0, row * (TAB_HEIGHT + TAB_GAP))
 		local dailyTab = tabs[DAILY_PAGE]
 		dailyTab.setText(Lang.t("🌟 Relíquia do Dia  %d/%d", math.min(snapshot.dailyRelicCount, rewards.DailyGoal), rewards.DailyGoal))
 		dailyTab.setSelected(selected == DAILY_PAGE)
 
-		local room = RelicCatalog.room(selected)
+		local room = RelicCatalog.group(selected)
 		roomPage.Visible = room ~= nil
 		dailyPage.Visible = room == nil
 		if room ~= nil then
