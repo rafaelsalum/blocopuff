@@ -232,7 +232,7 @@ function LeaderboardView.new(playerGui: PlayerGui, onTab: (categoryId: string) -
 			local entry = entries[index]
 			row.frame.Visible = entry ~= nil
 			if entry ~= nil then
-				row.rank.Text = MEDALS[entry.rank] or `{entry.rank}º`
+				row.rank.Text = MEDALS[entry.rank] or Lang.ordinal(entry.rank)
 				row.name.Text = entry.name
 				row.value.Text = formatNumber(entry.value)
 				row.avatar.Image = `rbxthumb://type=AvatarHeadShot&id={entry.userId}&w=48&h=48`

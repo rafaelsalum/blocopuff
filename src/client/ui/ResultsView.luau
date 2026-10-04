@@ -184,7 +184,7 @@ local function createPodiumSlot(parent: Instance, rank: number, x: number): Podi
 	UiTheme.addCorner(stand, 10)
 	UiTheme.addGradient(stand, MEDAL_COLORS[rank], MEDAL_COLORS[rank]:Lerp(UiTheme.Colors.Outline, 0.45))
 
-	local medal = UiTheme.createLabel(stand, "Medal", string.format("%dº", rank), UiTheme.Fonts.Display, if rank == 1 then 26 else 20, UiTheme.Colors.White)
+	local medal = UiTheme.createLabel(stand, "Medal", Lang.ordinal(rank), UiTheme.Fonts.Display, if rank == 1 then 26 else 20, UiTheme.Colors.White)
 	medal.Size = UDim2.fromScale(1, 1)
 	medal.ZIndex = 4
 	UiTheme.addTextOutline(medal, 2)
@@ -395,7 +395,7 @@ function ResultsView.new(playerGui: PlayerGui, onClose: () -> ()): ResultsViewHa
 			if entry ~= nil then
 				slot.name.Text = entry.name
 				slot.name.TextColor3 = if entry.userId == localUserId then UiTheme.Colors.Gold else UiTheme.Colors.White
-				slot.medal.Text = string.format("%dº", entry.position)
+				slot.medal.Text = Lang.ordinal(entry.position)
 				loadAvatar(slot.avatar, entry.userId, token)
 			end
 		end

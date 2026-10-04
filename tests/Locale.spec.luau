@@ -60,6 +60,17 @@ check("localize magic characters", LocaleCore.localize(dict, patterns, "en", "Ga
 check("localize unknown keeps text", LocaleCore.localize(dict, patterns, "en", "Outra coisa") == "Outra coisa")
 check("localize in portuguese is identity", LocaleCore.localize(dict, patterns, "pt", "Ana venceu") == "Ana venceu")
 check("localize does not match partial", LocaleCore.localize(dict, patterns, "en", "Partida em 12s · entre agora! extra") == "Partida em 12s · entre agora! extra")
+-- Posições (1º / 1st).
+check("ordinal pt", LocaleCore.ordinal("pt", 4) == "4º")
+check("ordinal en 1st", LocaleCore.ordinal("en", 1) == "1st")
+check("ordinal en 2nd", LocaleCore.ordinal("en", 2) == "2nd")
+check("ordinal en 3rd", LocaleCore.ordinal("en", 3) == "3rd")
+check("ordinal en 4th", LocaleCore.ordinal("en", 4) == "4th")
+check("ordinal en 11th-13th", LocaleCore.ordinal("en", 11) == "11th" and LocaleCore.ordinal("en", 12) == "12th" and LocaleCore.ordinal("en", 13) == "13th")
+check("ordinal en 21st 22nd 23rd", LocaleCore.ordinal("en", 21) == "21st" and LocaleCore.ordinal("en", 22) == "22nd" and LocaleCore.ordinal("en", 23) == "23rd")
+check("ordinal en 111th", LocaleCore.ordinal("en", 111) == "111th")
+check("localize server ordinal", LocaleCore.localize(dict, patterns, "en", "6º") == "6th")
+
 -- Placas montadas em partes ("✨ Nome · Raro", "🏆 VITÓRIAS").
 local parts = {
 	["Puff Branco"] = "White Puff",

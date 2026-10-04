@@ -114,6 +114,20 @@ function LocaleCore.compile(dictionary: Dictionary): { Pattern }
 	return patterns
 end
 
+-- Posição no ranking/pódio: "4º" em português, "4th" em inglês.
+function LocaleCore.ordinal(language: Language, position: number): string
+	if language ~= "en" then
+		return string.format("%dº", position)
+	end
+	local lastTwo = position % 100
+	local suffix = "th"
+	if lastTwo < 11 or lastTwo > 13 then
+		local last = position % 10
+		suffix = if last == 1 then "st" elseif last == 2 then "nd" elseif last == 3 then "rd" else "th"
+	end
+	return string.format("%d%s", position, suffix)
+end
+
 local SEPARATOR = " · "
 
 local function localizeWhole(dictionary: Dictionary, patterns: { Pattern }, text: string): string
@@ -144,6 +158,10 @@ local function localizePiece(dictionary: Dictionary, patterns: { Pattern }, piec
 	local whole = localizeWhole(dictionary, patterns, piece)
 	if whole ~= piece then
 		return whole
+	end
+	local position = string.match(piece, "^(%d+)º$")
+	if position ~= nil then
+		return LocaleCore.ordinal("en", tonumber(position) :: number)
 	end
 	local prefix, rest = string.match(piece, "^([^%w\195]-%s+)(.+)$")
 	if prefix == nil or rest == nil then

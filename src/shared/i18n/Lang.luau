@@ -48,6 +48,10 @@ function Lang.forPlayer(player: Player, template: string, ...: any): string
 	return LocaleCore.format(English, Lang.languageOf(player), template, ...)
 end
 
+function Lang.ordinal(position: number): string
+	return LocaleCore.ordinal(Lang.current(), position)
+end
+
 function Lang.localize(text: string): string
 	return LocaleCore.localize(English, compiled(), Lang.current(), text)
 end

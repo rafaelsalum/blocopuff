@@ -165,6 +165,7 @@ return table.freeze({
 	["Ainda sem lenda"] = "No legend yet",
 	["Vença partidas para entrar aqui"] = "Win matches to get here",
 	["%s vitórias"] = "%s wins",
+	["✓ FEITO"] = "✓ DONE",
 	["dia"] = "day",
 	["dias"] = "days",
 })

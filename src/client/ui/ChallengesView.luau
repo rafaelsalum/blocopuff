@@ -304,7 +304,7 @@ function ChallengesView.new(playerGui: PlayerGui, onOpened: () -> ()): Challenge
 				local ratio = math.clamp(state.progress / math.max(1, definition.target), 0, 1)
 				TweenService:Create(row.fill, TweenInfo.new(0.4, Enum.EasingStyle.Quad), { Size = UDim2.fromScale(if state.done then 1 else ratio, 1) }):Play()
 				row.count.Text = string.format("%d/%d", math.min(state.progress, definition.target), definition.target)
-				row.reward.Text = if state.done then "✓ FEITO" else string.format("+%d 🎟", definition.tickets)
+				row.reward.Text = if state.done then Lang.t("✓ FEITO") else string.format("+%d 🎟", definition.tickets)
 				row.reward.TextColor3 = if state.done then UiTheme.Colors.Green else UiTheme.Colors.Gold
 			end
 		end

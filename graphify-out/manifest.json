@@ -330,8 +330,8 @@
     "semantic_hash": ""
   },
   "src/client/ui/ResultsView.luau": {
-    "mtime": 1791126117.703323,
-    "ast_hash": "e6742a9ba9463eb97274db659b80c028",
+    "mtime": 1791136248.1870263,
+    "ast_hash": "b2b38ba3ffdebeb8de289dfe33757761",
     "semantic_hash": ""
   },
   "src/server/services/RoundResultBuilder.luau": {
@@ -485,8 +485,8 @@
     "semantic_hash": ""
   },
   "src/client/ui/LeaderboardView.luau": {
-    "mtime": 1791125506.055855,
-    "ast_hash": "2e31407bc370aa5d61036a2efa453735",
+    "mtime": 1791136248.1865625,
+    "ast_hash": "8fafef3a00606cf4ccbf831ee293775c",
     "semantic_hash": ""
   },
   "src/server/services/HallOfFameService.luau": {
@@ -570,8 +570,8 @@
     "semantic_hash": ""
   },
   "src/client/ui/ChallengesView.luau": {
-    "mtime": 1791126117.7037253,
-    "ast_hash": "9622341c8cca92c784188b41513d8406",
+    "mtime": 1791136206.808339,
+    "ast_hash": "992506829e6a36f842f70ced8fbc9367",
     "semantic_hash": ""
   },
   "src/server/data/DailyRules.luau": {
@@ -1270,13 +1270,13 @@
     "semantic_hash": ""
   },
   "src/shared/i18n/Lang.luau": {
-    "mtime": 1791124712.1506732,
-    "ast_hash": "e48434c7921a6fc0932e4fe94a3952d3",
+    "mtime": 1791136248.1861112,
+    "ast_hash": "a69d641c092b035394b022295bda0393",
     "semantic_hash": ""
   },
   "src/shared/i18n/LocaleCore.luau": {
-    "mtime": 1791126104.2827358,
-    "ast_hash": "f86014511d3e3e14897dc0326f131aad",
+    "mtime": 1791136247.91413,
+    "ast_hash": "cd41b582229b1625cecfe9bf2e78de3d",
     "semantic_hash": ""
   },
   "src/shared/i18n/en/Collection.luau": {
@@ -1295,8 +1295,8 @@
     "semantic_hash": ""
   },
   "src/shared/i18n/en/Social.luau": {
-    "mtime": 1791126128.7201428,
-    "ast_hash": "e06b8ba61c5e5f0c58d329ba9515059c",
+    "mtime": 1791136206.913646,
+    "ast_hash": "1cfe1f1301f175b32d56fa423608872f",
     "semantic_hash": ""
   },
   "src/shared/i18n/en/World.luau": {
@@ -1305,8 +1305,8 @@
     "semantic_hash": ""
   },
   "tests/Locale.spec.luau": {
-    "mtime": 1791126128.7199724,
-    "ast_hash": "fea9a4b4a440cf1577ad0bdfe70c9ce3",
+    "mtime": 1791136247.8641222,
+    "ast_hash": "fa525bc5989eec44cb08f02fcd5d3948",
     "semantic_hash": ""
   }
 }

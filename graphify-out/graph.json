@@ -648,7 +648,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_client_controllers_admincontroller",
-      "community": 33,
+      "community": 127,
       "community_name": "AdminController.luau",
       "norm_label": "admincontroller.luau"
     },
@@ -659,7 +659,7 @@
       "source_location": "L25",
       "_origin": "ast",
       "id": "src_client_controllers_admincontroller_getremote",
-      "community": 33,
+      "community": 127,
       "community_name": "AdminController.luau",
       "norm_label": "getremote()"
     },
@@ -670,7 +670,7 @@
       "source_location": "L33",
       "_origin": "ast",
       "id": "src_client_controllers_admincontroller_buildplayerentries",
-      "community": 33,
+      "community": 127,
       "community_name": "AdminController.luau",
       "norm_label": "buildplayerentries()"
     },
@@ -681,7 +681,7 @@
       "source_location": "L50",
       "_origin": "ast",
       "id": "src_client_controllers_admincontroller_admincontroller_start",
-      "community": 33,
+      "community": 127,
       "community_name": "AdminController.luau",
       "norm_label": "admincontroller.start()"
     },
@@ -692,7 +692,7 @@
       "source_location": "L189",
       "_origin": "ast",
       "id": "src_client_controllers_admincontroller_refreshplayers",
-      "community": 33,
+      "community": 127,
       "community_name": "AdminController.luau",
       "norm_label": "refreshplayers()"
     },
@@ -1826,7 +1826,7 @@
       "_origin": "ast",
       "id": "src_client_controllers_leaderboardcontroller",
       "community": 31,
-      "community_name": "TelemetryService.lobbyEvent",
+      "community_name": "ProfileController.luau",
       "norm_label": "leaderboardcontroller.luau"
     },
     {
@@ -1837,7 +1837,7 @@
       "_origin": "ast",
       "id": "src_client_controllers_leaderboardcontroller_asnumber",
       "community": 31,
-      "community_name": "TelemetryService.lobbyEvent",
+      "community_name": "ProfileController.luau",
       "norm_label": "asnumber()"
     },
     {
@@ -1848,7 +1848,7 @@
       "_origin": "ast",
       "id": "src_client_controllers_leaderboardcontroller_leaderboardcontroller_open",
       "community": 31,
-      "community_name": "TelemetryService.lobbyEvent",
+      "community_name": "ProfileController.luau",
       "norm_label": "leaderboardcontroller.open()"
     },
     {
@@ -1859,7 +1859,7 @@
       "_origin": "ast",
       "id": "src_client_controllers_leaderboardcontroller_leaderboardcontroller_start",
       "community": 31,
-      "community_name": "TelemetryService.lobbyEvent",
+      "community_name": "ProfileController.luau",
       "norm_label": "leaderboardcontroller.start()"
     },
     {
@@ -2112,7 +2112,7 @@
       "_origin": "ast",
       "id": "src_client_controllers_profilecontroller",
       "community": 31,
-      "community_name": "TelemetryService.lobbyEvent",
+      "community_name": "ProfileController.luau",
       "norm_label": "profilecontroller.luau"
     },
     {
@@ -2123,7 +2123,7 @@
       "_origin": "ast",
       "id": "src_client_controllers_profilecontroller_readnumber",
       "community": 31,
-      "community_name": "TelemetryService.lobbyEvent",
+      "community_name": "ProfileController.luau",
       "norm_label": "readnumber()"
     },
     {
@@ -2134,7 +2134,7 @@
       "_origin": "ast",
       "id": "src_client_controllers_profilecontroller_parseaward",
       "community": 31,
-      "community_name": "TelemetryService.lobbyEvent",
+      "community_name": "ProfileController.luau",
       "norm_label": "parseaward()"
     },
     {
@@ -2145,7 +2145,7 @@
       "_origin": "ast",
       "id": "src_client_controllers_profilecontroller_parsepuffs",
       "community": 31,
-      "community_name": "TelemetryService.lobbyEvent",
+      "community_name": "ProfileController.luau",
       "norm_label": "parsepuffs()"
     },
     {
@@ -2155,7 +2155,7 @@
       "source_location": "L99",
       "_origin": "ast",
       "id": "src_client_controllers_profilecontroller_parsenewpuffs",
-      "community": 31,
+      "community": 113,
       "community_name": "TelemetryService.lobbyEvent",
       "norm_label": "parsenewpuffs()"
     },
@@ -2167,7 +2167,7 @@
       "_origin": "ast",
       "id": "src_client_controllers_profilecontroller_ischallengeid",
       "community": 31,
-      "community_name": "TelemetryService.lobbyEvent",
+      "community_name": "ProfileController.luau",
       "norm_label": "ischallengeid()"
     },
     {
@@ -2178,7 +2178,7 @@
       "_origin": "ast",
       "id": "src_client_controllers_profilecontroller_parsechallenges",
       "community": 31,
-      "community_name": "TelemetryService.lobbyEvent",
+      "community_name": "ProfileController.luau",
       "norm_label": "parsechallenges()"
     },
     {
@@ -2189,7 +2189,7 @@
       "_origin": "ast",
       "id": "src_client_controllers_profilecontroller_parsedaily",
       "community": 31,
-      "community_name": "TelemetryService.lobbyEvent",
+      "community_name": "ProfileController.luau",
       "norm_label": "parsedaily()"
     },
     {
@@ -2200,7 +2200,7 @@
       "_origin": "ast",
       "id": "src_client_controllers_profilecontroller_parsedailyreward",
       "community": 31,
-      "community_name": "TelemetryService.lobbyEvent",
+      "community_name": "ProfileController.luau",
       "norm_label": "parsedailyreward()"
     },
     {
@@ -2210,8 +2210,8 @@
       "source_location": "L161",
       "_origin": "ast",
       "id": "src_client_controllers_profilecontroller_parsesecrets",
-      "community": 31,
-      "community_name": "TelemetryService.lobbyEvent",
+      "community": 74,
+      "community_name": "grant",
       "norm_label": "parsesecrets()"
     },
     {
@@ -2222,7 +2222,7 @@
       "_origin": "ast",
       "id": "src_client_controllers_profilecontroller_parseids",
       "community": 31,
-      "community_name": "TelemetryService.lobbyEvent",
+      "community_name": "ProfileController.luau",
       "norm_label": "parseids()"
     },
     {
@@ -2233,7 +2233,7 @@
       "_origin": "ast",
       "id": "src_client_controllers_profilecontroller_parse",
       "community": 31,
-      "community_name": "TelemetryService.lobbyEvent",
+      "community_name": "ProfileController.luau",
       "norm_label": "parse()"
     },
     {
@@ -2244,7 +2244,7 @@
       "_origin": "ast",
       "id": "src_client_controllers_profilecontroller_profilecontroller_start",
       "community": 31,
-      "community_name": "TelemetryService.lobbyEvent",
+      "community_name": "ProfileController.luau",
       "norm_label": "profilecontroller.start()"
     },
     {
@@ -2936,8 +2936,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_client_controllers_slipperycontroller",
-      "community": 124,
-      "community_name": "SlipperyController.luau",
+      "community": 58,
+      "community_name": "WindowTrap.luau",
       "norm_label": "slipperycontroller.luau"
     },
     {
@@ -2947,8 +2947,8 @@
       "source_location": "L40",
       "_origin": "ast",
       "id": "src_client_controllers_slipperycontroller_refreshrain",
-      "community": 124,
-      "community_name": "SlipperyController.luau",
+      "community": 58,
+      "community_name": "WindowTrap.luau",
       "norm_label": "refreshrain()"
     },
     {
@@ -2958,8 +2958,8 @@
       "source_location": "L50",
       "_origin": "ast",
       "id": "src_client_controllers_slipperycontroller_watch",
-      "community": 124,
-      "community_name": "SlipperyController.luau",
+      "community": 58,
+      "community_name": "WindowTrap.luau",
       "norm_label": "watch()"
     },
     {
@@ -2969,8 +2969,8 @@
       "source_location": "L63",
       "_origin": "ast",
       "id": "src_client_controllers_slipperycontroller_unwatch",
-      "community": 124,
-      "community_name": "SlipperyController.luau",
+      "community": 58,
+      "community_name": "WindowTrap.luau",
       "norm_label": "unwatch()"
     },
     {
@@ -2980,8 +2980,8 @@
       "source_location": "L76",
       "_origin": "ast",
       "id": "src_client_controllers_slipperycontroller_iswet",
-      "community": 124,
-      "community_name": "SlipperyController.luau",
+      "community": 58,
+      "community_name": "WindowTrap.luau",
       "norm_label": "iswet()"
     },
     {
@@ -2991,8 +2991,8 @@
       "source_location": "L88",
       "_origin": "ast",
       "id": "src_client_controllers_slipperycontroller_step",
-      "community": 124,
-      "community_name": "SlipperyController.luau",
+      "community": 58,
+      "community_name": "WindowTrap.luau",
       "norm_label": "step()"
     },
     {
@@ -3002,8 +3002,8 @@
       "source_location": "L116",
       "_origin": "ast",
       "id": "src_client_controllers_slipperycontroller_slipperycontroller_start",
-      "community": 124,
-      "community_name": "SlipperyController.luau",
+      "community": 58,
+      "community_name": "WindowTrap.luau",
       "norm_label": "slipperycontroller.start()"
     },
     {
@@ -5411,7 +5411,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_server_data_dailyrules",
-      "community": 21,
+      "community": 2,
       "community_name": "DailyRules.luau",
       "norm_label": "dailyrules.luau"
     },
@@ -5422,7 +5422,7 @@
       "source_location": "L32",
       "_origin": "ast",
       "id": "src_server_data_dailyrules_dailyrules_challenge",
-      "community": 21,
+      "community": 2,
       "community_name": "DailyRules.luau",
       "norm_label": "dailyrules.challenge()"
     },
@@ -5433,7 +5433,7 @@
       "source_location": "L36",
       "_origin": "ast",
       "id": "src_server_data_dailyrules_shifted",
-      "community": 21,
+      "community": 2,
       "community_name": "DailyRules.luau",
       "norm_label": "shifted()"
     },
@@ -5444,7 +5444,7 @@
       "source_location": "L41",
       "_origin": "ast",
       "id": "src_server_data_dailyrules_dailyrules_dayindex",
-      "community": 21,
+      "community": 2,
       "community_name": "DailyRules.luau",
       "norm_label": "dailyrules.dayindex()"
     },
@@ -5455,7 +5455,7 @@
       "source_location": "L46",
       "_origin": "ast",
       "id": "src_server_data_dailyrules_dailyrules_nextresetat",
-      "community": 21,
+      "community": 2,
       "community_name": "DailyRules.luau",
       "norm_label": "dailyrules.nextresetat()"
     },
@@ -5466,7 +5466,7 @@
       "source_location": "L50",
       "_origin": "ast",
       "id": "src_server_data_dailyrules_dailyrules_emptydaily",
-      "community": 2,
+      "community": 21,
       "community_name": "ProfileSchema.luau",
       "norm_label": "dailyrules.emptydaily()"
     },
@@ -5477,7 +5477,7 @@
       "source_location": "L56",
       "_origin": "ast",
       "id": "src_server_data_dailyrules_dailyrules_claimdaily",
-      "community": 21,
+      "community": 2,
       "community_name": "DailyRules.luau",
       "norm_label": "dailyrules.claimdaily()"
     },
@@ -5488,7 +5488,7 @@
       "source_location": "L70",
       "_origin": "ast",
       "id": "src_server_data_dailyrules_dailyrules_assign",
-      "community": 21,
+      "community": 2,
       "community_name": "DailyRules.luau",
       "norm_label": "dailyrules.assign()"
     },
@@ -5499,7 +5499,7 @@
       "source_location": "L89",
       "_origin": "ast",
       "id": "src_server_data_dailyrules_dailyrules_ensuretoday",
-      "community": 21,
+      "community": 2,
       "community_name": "DailyRules.luau",
       "norm_label": "dailyrules.ensuretoday()"
     },
@@ -5510,7 +5510,7 @@
       "source_location": "L98",
       "_origin": "ast",
       "id": "src_server_data_dailyrules_dailyrules_applyround",
-      "community": 21,
+      "community": 2,
       "community_name": "DailyRules.luau",
       "norm_label": "dailyrules.applyround()"
     },
@@ -5521,7 +5521,7 @@
       "source_location": "L119",
       "_origin": "ast",
       "id": "src_server_data_dailyrules_readcount",
-      "community": 21,
+      "community": 2,
       "community_name": "DailyRules.luau",
       "norm_label": "readcount()"
     },
@@ -5532,7 +5532,7 @@
       "source_location": "L126",
       "_origin": "ast",
       "id": "src_server_data_dailyrules_dailyrules_readdaily",
-      "community": 21,
+      "community": 2,
       "community_name": "DailyRules.luau",
       "norm_label": "dailyrules.readdaily()"
     },
@@ -5543,7 +5543,7 @@
       "source_location": "L135",
       "_origin": "ast",
       "id": "src_server_data_dailyrules_dailyrules_readchallenges",
-      "community": 21,
+      "community": 2,
       "community_name": "DailyRules.luau",
       "norm_label": "dailyrules.readchallenges()"
     },
@@ -5741,7 +5741,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_server_data_profileschema",
-      "community": 2,
+      "community": 21,
       "community_name": "ProfileSchema.luau",
       "norm_label": "profileschema.luau"
     },
@@ -5752,7 +5752,7 @@
       "source_location": "L94",
       "_origin": "ast",
       "id": "src_server_data_profileschema_cleannumber",
-      "community": 2,
+      "community": 21,
       "community_name": "ProfileSchema.luau",
       "norm_label": "cleannumber()"
     },
@@ -5763,7 +5763,7 @@
       "source_location": "L102",
       "_origin": "ast",
       "id": "src_server_data_profileschema_cleanlarge",
-      "community": 2,
+      "community": 21,
       "community_name": "ProfileSchema.luau",
       "norm_label": "cleanlarge()"
     },
@@ -5774,7 +5774,7 @@
       "source_location": "L109",
       "_origin": "ast",
       "id": "src_server_data_profileschema_profileschema_emptystats",
-      "community": 2,
+      "community": 21,
       "community_name": "ProfileSchema.luau",
       "norm_label": "profileschema.emptystats()"
     },
@@ -5785,7 +5785,7 @@
       "source_location": "L117",
       "_origin": "ast",
       "id": "src_server_data_profileschema_profileschema_default",
-      "community": 2,
+      "community": 21,
       "community_name": "ProfileSchema.luau",
       "norm_label": "profileschema.default()"
     },
@@ -5796,7 +5796,7 @@
       "source_location": "L154",
       "_origin": "ast",
       "id": "src_server_data_profileschema_readidlist",
-      "community": 2,
+      "community": 21,
       "community_name": "ProfileSchema.luau",
       "norm_label": "readidlist()"
     },
@@ -5807,7 +5807,7 @@
       "source_location": "L209",
       "_origin": "ast",
       "id": "src_server_data_profileschema_readsecrets",
-      "community": 2,
+      "community": 21,
       "community_name": "ProfileSchema.luau",
       "norm_label": "readsecrets()"
     },
@@ -5818,7 +5818,7 @@
       "source_location": "L225",
       "_origin": "ast",
       "id": "src_server_data_profileschema_repairedtime",
-      "community": 2,
+      "community": 21,
       "community_name": "ProfileSchema.luau",
       "norm_label": "repairedtime()"
     },
@@ -5829,7 +5829,7 @@
       "source_location": "L260",
       "_origin": "ast",
       "id": "src_server_data_profileschema_readsession",
-      "community": 2,
+      "community": 21,
       "community_name": "ProfileSchema.luau",
       "norm_label": "readsession()"
     },
@@ -5840,7 +5840,7 @@
       "source_location": "L273",
       "_origin": "ast",
       "id": "src_server_data_profileschema_readappliedrounds",
-      "community": 2,
+      "community": 21,
       "community_name": "ProfileSchema.luau",
       "norm_label": "readappliedrounds()"
     },
@@ -5851,7 +5851,7 @@
       "source_location": "L287",
       "_origin": "ast",
       "id": "src_server_data_profileschema_profileschema_storedsession",
-      "community": 2,
+      "community": 21,
       "community_name": "ProfileSchema.luau",
       "norm_label": "profileschema.storedsession()"
     },
@@ -5862,7 +5862,7 @@
       "source_location": "L298",
       "_origin": "ast",
       "id": "src_server_data_profileschema_profileschema_fromstored",
-      "community": 2,
+      "community": 21,
       "community_name": "ProfileSchema.luau",
       "norm_label": "profileschema.fromstored()"
     },
@@ -5873,7 +5873,7 @@
       "source_location": "L363",
       "_origin": "ast",
       "id": "src_server_data_profileschema_roundlimits",
-      "community": 2,
+      "community": 21,
       "community_name": "ProfileSchema.luau",
       "norm_label": "roundlimits()"
     },
@@ -5884,7 +5884,7 @@
       "source_location": "L384",
       "_origin": "ast",
       "id": "src_server_data_profileschema_profileschema_clampdelta",
-      "community": 2,
+      "community": 21,
       "community_name": "ProfileSchema.luau",
       "norm_label": "profileschema.clampdelta()"
     },
@@ -5895,7 +5895,7 @@
       "source_location": "L405",
       "_origin": "ast",
       "id": "src_server_data_profileschema_profileschema_addstats",
-      "community": 2,
+      "community": 21,
       "community_name": "ProfileSchema.luau",
       "norm_label": "profileschema.addstats()"
     },
@@ -5906,7 +5906,7 @@
       "source_location": "L416",
       "_origin": "ast",
       "id": "src_server_data_profileschema_profileschema_withtickets",
-      "community": 21,
+      "community": 2,
       "community_name": "DailyRules.luau",
       "norm_label": "profileschema.withtickets()"
     },
@@ -5917,7 +5917,7 @@
       "source_location": "L425",
       "_origin": "ast",
       "id": "src_server_data_profileschema_profileschema_withappliedround",
-      "community": 2,
+      "community": 21,
       "community_name": "ProfileSchema.luau",
       "norm_label": "profileschema.withappliedround()"
     },
@@ -5928,7 +5928,7 @@
       "source_location": "L435",
       "_origin": "ast",
       "id": "src_server_data_profileschema_profileschema_tostored",
-      "community": 113,
+      "community": 124,
       "community_name": "PlayerDataService.luau",
       "norm_label": "profileschema.tostored()"
     },
@@ -6005,8 +6005,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_server_data_rewardrules",
-      "community": 31,
-      "community_name": "TelemetryService.lobbyEvent",
+      "community": 33,
+      "community_name": "RewardRules.rollMachine",
       "norm_label": "rewardrules.luau"
     },
     {
@@ -6016,8 +6016,8 @@
       "source_location": "L28",
       "_origin": "ast",
       "id": "src_server_data_rewardrules_isepicorbetter",
-      "community": 31,
-      "community_name": "TelemetryService.lobbyEvent",
+      "community": 33,
+      "community_name": "RewardRules.rollMachine",
       "norm_label": "isepicorbetter()"
     },
     {
@@ -6027,8 +6027,8 @@
       "source_location": "L36",
       "_origin": "ast",
       "id": "src_server_data_rewardrules_rewardrules_ticketsforround",
-      "community": 31,
-      "community_name": "TelemetryService.lobbyEvent",
+      "community": 33,
+      "community_name": "RewardRules.rollMachine",
       "norm_label": "rewardrules.ticketsforround()"
     },
     {
@@ -6038,8 +6038,8 @@
       "source_location": "L59",
       "_origin": "ast",
       "id": "src_server_data_rewardrules_rollrarity",
-      "community": 31,
-      "community_name": "TelemetryService.lobbyEvent",
+      "community": 33,
+      "community_name": "RewardRules.rollMachine",
       "norm_label": "rollrarity()"
     },
     {
@@ -6049,8 +6049,8 @@
       "source_location": "L82",
       "_origin": "ast",
       "id": "src_server_data_rewardrules_rewardrules_rollmachine",
-      "community": 31,
-      "community_name": "TelemetryService.lobbyEvent",
+      "community": 33,
+      "community_name": "RewardRules.rollMachine",
       "norm_label": "rewardrules.rollmachine()"
     },
     {
@@ -6478,8 +6478,8 @@
       "source_location": "L327",
       "_origin": "ast",
       "id": "src_server_services_arenaservice_arenaservice_getblocks",
-      "community": 4,
-      "community_name": "CombatantRegistry.getRoot",
+      "community": 132,
+      "community_name": "TrapService.luau",
       "norm_label": "arenaservice.getblocks()"
     },
     {
@@ -6599,8 +6599,8 @@
       "source_location": "L483",
       "_origin": "ast",
       "id": "src_server_services_arenaservice_arenaservice_getintactblocks",
-      "community": 74,
-      "community_name": "CombatantRegistry.all",
+      "community": 123,
+      "community_name": "FinalChaosService.luau",
       "norm_label": "arenaservice.getintactblocks()"
     },
     {
@@ -6610,8 +6610,8 @@
       "source_location": "L497",
       "_origin": "ast",
       "id": "src_server_services_arenaservice_arenaservice_getsaferespawncframe",
-      "community": 83,
-      "community_name": "ArenaService.luau",
+      "community": 116,
+      "community_name": "CombatantRegistry.luau",
       "norm_label": "arenaservice.getsaferespawncframe()"
     },
     {
@@ -7248,8 +7248,8 @@
       "source_location": "L237",
       "_origin": "ast",
       "id": "src_server_services_botfillservice_botfillservice_count",
-      "community": 1,
-      "community_name": "RoundService.luau",
+      "community": 104,
+      "community_name": "BotFillService.luau",
       "norm_label": "botfillservice.count()"
     },
     {
@@ -7776,8 +7776,8 @@
       "source_location": "L40",
       "_origin": "ast",
       "id": "src_server_services_combatantregistry_combatantregistry_forplayer",
-      "community": 116,
-      "community_name": "CombatantRegistry.luau",
+      "community": 1,
+      "community_name": "RoundService.luau",
       "norm_label": "combatantregistry.forplayer()"
     },
     {
@@ -7787,8 +7787,8 @@
       "source_location": "L55",
       "_origin": "ast",
       "id": "src_server_services_combatantregistry_combatantregistry_forplayers",
-      "community": 116,
-      "community_name": "CombatantRegistry.luau",
+      "community": 1,
+      "community_name": "RoundService.luau",
       "norm_label": "combatantregistry.forplayers()"
     },
     {
@@ -7831,8 +7831,8 @@
       "source_location": "L91",
       "_origin": "ast",
       "id": "src_server_services_combatantregistry_combatantregistry_getbots",
-      "community": 127,
-      "community_name": "stepRains",
+      "community": 58,
+      "community_name": "WindowTrap.luau",
       "norm_label": "combatantregistry.getbots()"
     },
     {
@@ -7842,8 +7842,8 @@
       "source_location": "L104",
       "_origin": "ast",
       "id": "src_server_services_combatantregistry_combatantregistry_all",
-      "community": 74,
-      "community_name": "CombatantRegistry.all",
+      "community": 58,
+      "community_name": "WindowTrap.luau",
       "norm_label": "combatantregistry.all()"
     },
     {
@@ -7864,8 +7864,8 @@
       "source_location": "L122",
       "_origin": "ast",
       "id": "src_server_services_combatantregistry_combatantregistry_ispresent",
-      "community": 58,
-      "community_name": "KnockbackService.luau",
+      "community": 116,
+      "community_name": "CombatantRegistry.luau",
       "norm_label": "combatantregistry.ispresent()"
     },
     {
@@ -7952,8 +7952,8 @@
       "source_location": "L174",
       "_origin": "ast",
       "id": "src_server_services_combatantregistry_combatantregistry_playersof",
-      "community": 116,
-      "community_name": "CombatantRegistry.luau",
+      "community": 1,
+      "community_name": "RoundService.luau",
       "norm_label": "combatantregistry.playersof()"
     },
     {
@@ -8073,8 +8073,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_server_services_corridortelemetryservice",
-      "community": 80,
-      "community_name": "TelemetryService.luau",
+      "community": 30,
+      "community_name": "VaultService.luau",
       "norm_label": "corridortelemetryservice.luau"
     },
     {
@@ -8084,8 +8084,8 @@
       "source_location": "L44",
       "_origin": "ast",
       "id": "src_server_services_corridortelemetryservice_isactiveparticipant",
-      "community": 80,
-      "community_name": "TelemetryService.luau",
+      "community": 30,
+      "community_name": "VaultService.luau",
       "norm_label": "isactiveparticipant()"
     },
     {
@@ -8095,8 +8095,8 @@
       "source_location": "L53",
       "_origin": "ast",
       "id": "src_server_services_corridortelemetryservice_floorof",
-      "community": 80,
-      "community_name": "TelemetryService.luau",
+      "community": 30,
+      "community_name": "VaultService.luau",
       "norm_label": "floorof()"
     },
     {
@@ -8106,8 +8106,8 @@
       "source_location": "L58",
       "_origin": "ast",
       "id": "src_server_services_corridortelemetryservice_findcorridor",
-      "community": 80,
-      "community_name": "TelemetryService.luau",
+      "community": 30,
+      "community_name": "VaultService.luau",
       "norm_label": "findcorridor()"
     },
     {
@@ -8117,8 +8117,8 @@
       "source_location": "L67",
       "_origin": "ast",
       "id": "src_server_services_corridortelemetryservice_closevisit",
-      "community": 80,
-      "community_name": "TelemetryService.luau",
+      "community": 30,
+      "community_name": "VaultService.luau",
       "norm_label": "closevisit()"
     },
     {
@@ -8128,8 +8128,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_server_services_dashservice",
-      "community": 80,
-      "community_name": "TelemetryService.luau",
+      "community": 145,
+      "community_name": "DashService.luau",
       "norm_label": "dashservice.luau"
     },
     {
@@ -8139,8 +8139,8 @@
       "source_location": "L40",
       "_origin": "ast",
       "id": "src_server_services_dashservice_isalive",
-      "community": 80,
-      "community_name": "TelemetryService.luau",
+      "community": 145,
+      "community_name": "DashService.luau",
       "norm_label": "isalive()"
     },
     {
@@ -8150,8 +8150,8 @@
       "source_location": "L45",
       "_origin": "ast",
       "id": "src_server_services_dashservice_ondash",
-      "community": 80,
-      "community_name": "TelemetryService.luau",
+      "community": 145,
+      "community_name": "DashService.luau",
       "norm_label": "ondash()"
     },
     {
@@ -8172,8 +8172,8 @@
       "source_location": "L91",
       "_origin": "ast",
       "id": "src_server_services_dashservice_dashservice_forgetbot",
-      "community": 80,
-      "community_name": "TelemetryService.luau",
+      "community": 104,
+      "community_name": "BotFillService.luau",
       "norm_label": "dashservice.forgetbot()"
     },
     {
@@ -8183,8 +8183,8 @@
       "source_location": "L95",
       "_origin": "ast",
       "id": "src_server_services_dashservice_dashservice_start",
-      "community": 80,
-      "community_name": "TelemetryService.luau",
+      "community": 145,
+      "community_name": "DashService.luau",
       "norm_label": "dashservice.start()"
     },
     {
@@ -8249,8 +8249,8 @@
       "source_location": "L149",
       "_origin": "ast",
       "id": "src_server_services_eliminationservice_monitorloop",
-      "community": 90,
-      "community_name": "EliminationService.luau",
+      "community": 116,
+      "community_name": "CombatantRegistry.luau",
       "norm_label": "monitorloop()"
     },
     {
@@ -8502,7 +8502,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_server_services_knockbackservice",
-      "community": 58,
+      "community": 107,
       "community_name": "KnockbackService.luau",
       "norm_label": "knockbackservice.luau"
     },
@@ -8513,7 +8513,7 @@
       "source_location": "L39",
       "_origin": "ast",
       "id": "src_server_services_knockbackservice_isactiveparticipant",
-      "community": 58,
+      "community": 107,
       "community_name": "KnockbackService.luau",
       "norm_label": "isactiveparticipant()"
     },
@@ -8535,7 +8535,7 @@
       "source_location": "L63",
       "_origin": "ast",
       "id": "src_server_services_knockbackservice_notify",
-      "community": 58,
+      "community": 107,
       "community_name": "KnockbackService.luau",
       "norm_label": "notify()"
     },
@@ -8546,7 +8546,7 @@
       "source_location": "L73",
       "_origin": "ast",
       "id": "src_server_services_knockbackservice_computevelocity",
-      "community": 58,
+      "community": 107,
       "community_name": "KnockbackService.luau",
       "norm_label": "computevelocity()"
     },
@@ -8557,7 +8557,7 @@
       "source_location": "L81",
       "_origin": "ast",
       "id": "src_server_services_knockbackservice_oncharacterhit",
-      "community": 58,
+      "community": 107,
       "community_name": "KnockbackService.luau",
       "norm_label": "oncharacterhit()"
     },
@@ -8579,7 +8579,7 @@
       "source_location": "L113",
       "_origin": "ast",
       "id": "src_server_services_knockbackservice_deliver",
-      "community": 58,
+      "community": 107,
       "community_name": "KnockbackService.luau",
       "norm_label": "deliver()"
     },
@@ -8590,8 +8590,8 @@
       "source_location": "L129",
       "_origin": "ast",
       "id": "src_server_services_knockbackservice_knockbackservice_push",
-      "community": 74,
-      "community_name": "CombatantRegistry.all",
+      "community": 107,
+      "community_name": "KnockbackService.luau",
       "norm_label": "knockbackservice.push()"
     },
     {
@@ -8601,7 +8601,7 @@
       "source_location": "L136",
       "_origin": "ast",
       "id": "src_server_services_knockbackservice_knockbackservice_slide",
-      "community": 58,
+      "community": 107,
       "community_name": "KnockbackService.luau",
       "norm_label": "knockbackservice.slide()"
     },
@@ -8612,7 +8612,7 @@
       "source_location": "L142",
       "_origin": "ast",
       "id": "src_server_services_knockbackservice_knockbackservice_markattacker",
-      "community": 58,
+      "community": 107,
       "community_name": "KnockbackService.luau",
       "norm_label": "knockbackservice.markattacker()"
     },
@@ -8623,8 +8623,8 @@
       "source_location": "L155",
       "_origin": "ast",
       "id": "src_server_services_knockbackservice_knockbackservice_getrecentattacker",
-      "community": 58,
-      "community_name": "KnockbackService.luau",
+      "community": 116,
+      "community_name": "CombatantRegistry.luau",
       "norm_label": "knockbackservice.getrecentattacker()"
     },
     {
@@ -8634,8 +8634,8 @@
       "source_location": "L166",
       "_origin": "ast",
       "id": "src_server_services_knockbackservice_knockbackservice_protect",
-      "community": 58,
-      "community_name": "KnockbackService.luau",
+      "community": 116,
+      "community_name": "CombatantRegistry.luau",
       "norm_label": "knockbackservice.protect()"
     },
     {
@@ -8645,8 +8645,8 @@
       "source_location": "L171",
       "_origin": "ast",
       "id": "src_server_services_knockbackservice_knockbackservice_forget",
-      "community": 58,
-      "community_name": "KnockbackService.luau",
+      "community": 116,
+      "community_name": "CombatantRegistry.luau",
       "norm_label": "knockbackservice.forget()"
     },
     {
@@ -8656,8 +8656,8 @@
       "source_location": "L176",
       "_origin": "ast",
       "id": "src_server_services_knockbackservice_knockbackservice_beginround",
-      "community": 58,
-      "community_name": "KnockbackService.luau",
+      "community": 1,
+      "community_name": "RoundService.luau",
       "norm_label": "knockbackservice.beginround()"
     },
     {
@@ -8667,7 +8667,7 @@
       "source_location": "L183",
       "_origin": "ast",
       "id": "src_server_services_knockbackservice_knockbackservice_endround",
-      "community": 58,
+      "community": 107,
       "community_name": "KnockbackService.luau",
       "norm_label": "knockbackservice.endround()"
     },
@@ -8678,7 +8678,7 @@
       "source_location": "L189",
       "_origin": "ast",
       "id": "src_server_services_knockbackservice_knockbackservice_start",
-      "community": 58,
+      "community": 107,
       "community_name": "KnockbackService.luau",
       "norm_label": "knockbackservice.start()"
     },
@@ -8689,7 +8689,7 @@
       "source_location": "L194",
       "_origin": "ast",
       "id": "src_server_services_knockbackservice_knockbackservice_stop",
-      "community": 58,
+      "community": 107,
       "community_name": "KnockbackService.luau",
       "norm_label": "knockbackservice.stop()"
     },
@@ -9316,8 +9316,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_server_services_matchaudience",
-      "community": 80,
-      "community_name": "TelemetryService.luau",
+      "community": 30,
+      "community_name": "VaultService.luau",
       "norm_label": "matchaudience.luau"
     },
     {
@@ -9327,8 +9327,8 @@
       "source_location": "L15",
       "_origin": "ast",
       "id": "src_server_services_matchaudience_matchaudience_isinmatch",
-      "community": 80,
-      "community_name": "TelemetryService.luau",
+      "community": 30,
+      "community_name": "VaultService.luau",
       "norm_label": "matchaudience.isinmatch()"
     },
     {
@@ -9338,8 +9338,8 @@
       "source_location": "L19",
       "_origin": "ast",
       "id": "src_server_services_matchaudience_matchaudience_players",
-      "community": 80,
-      "community_name": "TelemetryService.luau",
+      "community": 30,
+      "community_name": "VaultService.luau",
       "norm_label": "matchaudience.players()"
     },
     {
@@ -9349,8 +9349,8 @@
       "source_location": "L30",
       "_origin": "ast",
       "id": "src_server_services_matchaudience_matchaudience_fire",
-      "community": 80,
-      "community_name": "TelemetryService.luau",
+      "community": 30,
+      "community_name": "VaultService.luau",
       "norm_label": "matchaudience.fire()"
     },
     {
@@ -9492,8 +9492,8 @@
       "source_location": "L242",
       "_origin": "ast",
       "id": "src_server_services_matchqueueservice_matchqueueservice_setopen",
-      "community": 1,
-      "community_name": "RoundService.luau",
+      "community": 104,
+      "community_name": "BotFillService.luau",
       "norm_label": "matchqueueservice.setopen()"
     },
     {
@@ -9514,8 +9514,8 @@
       "source_location": "L267",
       "_origin": "ast",
       "id": "src_server_services_matchqueueservice_matchqueueservice_setcountdown",
-      "community": 1,
-      "community_name": "RoundService.luau",
+      "community": 104,
+      "community_name": "BotFillService.luau",
       "norm_label": "matchqueueservice.setcountdown()"
     },
     {
@@ -9800,8 +9800,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_server_services_photomodeservice",
-      "community": 107,
-      "community_name": "PhotoModeService.luau",
+      "community": 132,
+      "community_name": "TrapService.luau",
       "norm_label": "photomodeservice.luau"
     },
     {
@@ -9811,8 +9811,8 @@
       "source_location": "L67",
       "_origin": "ast",
       "id": "src_server_services_photomodeservice_blockcenter",
-      "community": 107,
-      "community_name": "PhotoModeService.luau",
+      "community": 132,
+      "community_name": "TrapService.luau",
       "norm_label": "blockcenter()"
     },
     {
@@ -9822,8 +9822,8 @@
       "source_location": "L80",
       "_origin": "ast",
       "id": "src_server_services_photomodeservice_standingon",
-      "community": 107,
-      "community_name": "PhotoModeService.luau",
+      "community": 132,
+      "community_name": "TrapService.luau",
       "norm_label": "standingon()"
     },
     {
@@ -9833,8 +9833,8 @@
       "source_location": "L84",
       "_origin": "ast",
       "id": "src_server_services_photomodeservice_createpart",
-      "community": 107,
-      "community_name": "PhotoModeService.luau",
+      "community": 132,
+      "community_name": "TrapService.luau",
       "norm_label": "createpart()"
     },
     {
@@ -9844,8 +9844,8 @@
       "source_location": "L99",
       "_origin": "ast",
       "id": "src_server_services_photomodeservice_openhole",
-      "community": 107,
-      "community_name": "PhotoModeService.luau",
+      "community": 132,
+      "community_name": "TrapService.luau",
       "norm_label": "openhole()"
     },
     {
@@ -9855,8 +9855,8 @@
       "source_location": "L110",
       "_origin": "ast",
       "id": "src_server_services_photomodeservice_rotatejoint",
-      "community": 107,
-      "community_name": "PhotoModeService.luau",
+      "community": 132,
+      "community_name": "TrapService.luau",
       "norm_label": "rotatejoint()"
     },
     {
@@ -9866,8 +9866,8 @@
       "source_location": "L117",
       "_origin": "ast",
       "id": "src_server_services_photomodeservice_applypose",
-      "community": 107,
-      "community_name": "PhotoModeService.luau",
+      "community": 132,
+      "community_name": "TrapService.luau",
       "norm_label": "applypose()"
     },
     {
@@ -9877,8 +9877,8 @@
       "source_location": "L137",
       "_origin": "ast",
       "id": "src_server_services_photomodeservice_attachpuffador",
-      "community": 107,
-      "community_name": "PhotoModeService.luau",
+      "community": 132,
+      "community_name": "TrapService.luau",
       "norm_label": "attachpuffador()"
     },
     {
@@ -9888,8 +9888,8 @@
       "source_location": "L167",
       "_origin": "ast",
       "id": "src_server_services_photomodeservice_builddescription",
-      "community": 107,
-      "community_name": "PhotoModeService.luau",
+      "community": 132,
+      "community_name": "TrapService.luau",
       "norm_label": "builddescription()"
     },
     {
@@ -9899,8 +9899,8 @@
       "source_location": "L180",
       "_origin": "ast",
       "id": "src_server_services_photomodeservice_spawnactor",
-      "community": 107,
-      "community_name": "PhotoModeService.luau",
+      "community": 132,
+      "community_name": "TrapService.luau",
       "norm_label": "spawnactor()"
     },
     {
@@ -9910,8 +9910,8 @@
       "source_location": "L216",
       "_origin": "ast",
       "id": "src_server_services_photomodeservice_createshot",
-      "community": 107,
-      "community_name": "PhotoModeService.luau",
+      "community": 132,
+      "community_name": "TrapService.luau",
       "norm_label": "createshot()"
     },
     {
@@ -9921,8 +9921,8 @@
       "source_location": "L236",
       "_origin": "ast",
       "id": "src_server_services_photomodeservice_createdebris",
-      "community": 107,
-      "community_name": "PhotoModeService.luau",
+      "community": 132,
+      "community_name": "TrapService.luau",
       "norm_label": "createdebris()"
     },
     {
@@ -9932,8 +9932,8 @@
       "source_location": "L253",
       "_origin": "ast",
       "id": "src_server_services_photomodeservice_getscene",
-      "community": 107,
-      "community_name": "PhotoModeService.luau",
+      "community": 132,
+      "community_name": "TrapService.luau",
       "norm_label": "getscene()"
     },
     {
@@ -9943,8 +9943,8 @@
       "source_location": "L338",
       "_origin": "ast",
       "id": "src_server_services_photomodeservice_photomodeservice_clear",
-      "community": 107,
-      "community_name": "PhotoModeService.luau",
+      "community": 132,
+      "community_name": "TrapService.luau",
       "norm_label": "photomodeservice.clear()"
     },
     {
@@ -9954,8 +9954,8 @@
       "source_location": "L353",
       "_origin": "ast",
       "id": "src_server_services_photomodeservice_photomodeservice_show",
-      "community": 107,
-      "community_name": "PhotoModeService.luau",
+      "community": 132,
+      "community_name": "TrapService.luau",
       "norm_label": "photomodeservice.show()"
     },
     {
@@ -9965,8 +9965,8 @@
       "source_location": "L394",
       "_origin": "ast",
       "id": "src_server_services_photomodeservice_photomodeservice_start",
-      "community": 107,
-      "community_name": "PhotoModeService.luau",
+      "community": 132,
+      "community_name": "TrapService.luau",
       "norm_label": "photomodeservice.start()"
     },
     {
@@ -9976,7 +9976,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_server_services_playerdataservice",
-      "community": 113,
+      "community": 124,
       "community_name": "PlayerDataService.luau",
       "norm_label": "playerdataservice.luau"
     },
@@ -9987,7 +9987,7 @@
       "source_location": "L154",
       "_origin": "ast",
       "id": "src_server_services_playerdataservice_now",
-      "community": 113,
+      "community": 124,
       "community_name": "PlayerDataService.luau",
       "norm_label": "now()"
     },
@@ -9998,7 +9998,7 @@
       "source_location": "L158",
       "_origin": "ast",
       "id": "src_server_services_playerdataservice_keyfor",
-      "community": 113,
+      "community": 124,
       "community_name": "PlayerDataService.luau",
       "norm_label": "keyfor()"
     },
@@ -10020,7 +10020,7 @@
       "source_location": "L247",
       "_origin": "ast",
       "id": "src_server_services_playerdataservice_reportguard",
-      "community": 113,
+      "community": 124,
       "community_name": "PlayerDataService.luau",
       "norm_label": "reportguard()"
     },
@@ -10031,7 +10031,7 @@
       "source_location": "L255",
       "_origin": "ast",
       "id": "src_server_services_playerdataservice_isnewerformat",
-      "community": 113,
+      "community": 124,
       "community_name": "PlayerDataService.luau",
       "norm_label": "isnewerformat()"
     },
@@ -10042,7 +10042,7 @@
       "source_location": "L264",
       "_origin": "ast",
       "id": "src_server_services_playerdataservice_rebuild",
-      "community": 113,
+      "community": 124,
       "community_name": "PlayerDataService.luau",
       "norm_label": "rebuild()"
     },
@@ -10053,7 +10053,7 @@
       "source_location": "L271",
       "_origin": "ast",
       "id": "src_server_services_playerdataservice_normalize",
-      "community": 113,
+      "community": 124,
       "community_name": "PlayerDataService.luau",
       "norm_label": "normalize()"
     },
@@ -10064,7 +10064,7 @@
       "source_location": "L280",
       "_origin": "ast",
       "id": "src_server_services_playerdataservice_withoutwallet",
-      "community": 113,
+      "community": 124,
       "community_name": "PlayerDataService.luau",
       "norm_label": "withoutwallet()"
     },
@@ -10075,7 +10075,7 @@
       "source_location": "L291",
       "_origin": "ast",
       "id": "src_server_services_playerdataservice_healfrombackup",
-      "community": 113,
+      "community": 124,
       "community_name": "PlayerDataService.luau",
       "norm_label": "healfrombackup()"
     },
@@ -10086,7 +10086,7 @@
       "source_location": "L316",
       "_origin": "ast",
       "id": "src_server_services_playerdataservice_writebackup",
-      "community": 113,
+      "community": 124,
       "community_name": "PlayerDataService.luau",
       "norm_label": "writebackup()"
     },
@@ -10097,7 +10097,7 @@
       "source_location": "L339",
       "_origin": "ast",
       "id": "src_server_services_playerdataservice_grantpuffs",
-      "community": 31,
+      "community": 113,
       "community_name": "TelemetryService.lobbyEvent",
       "norm_label": "grantpuffs()"
     },
@@ -10108,7 +10108,7 @@
       "source_location": "L366",
       "_origin": "ast",
       "id": "src_server_services_playerdataservice_addtickets",
-      "community": 21,
+      "community": 2,
       "community_name": "DailyRules.luau",
       "norm_label": "addtickets()"
     },
@@ -10119,7 +10119,7 @@
       "source_location": "L378",
       "_origin": "ast",
       "id": "src_server_services_playerdataservice_refreshday",
-      "community": 21,
+      "community": 2,
       "community_name": "DailyRules.luau",
       "norm_label": "refreshday()"
     },
@@ -10130,7 +10130,7 @@
       "source_location": "L411",
       "_origin": "ast",
       "id": "src_server_services_playerdataservice_progresschallenges",
-      "community": 21,
+      "community": 2,
       "community_name": "DailyRules.luau",
       "norm_label": "progresschallenges()"
     },
@@ -10141,7 +10141,7 @@
       "source_location": "L439",
       "_origin": "ast",
       "id": "src_server_services_playerdataservice_tryload",
-      "community": 113,
+      "community": 124,
       "community_name": "PlayerDataService.luau",
       "norm_label": "tryload()"
     },
@@ -10240,7 +10240,7 @@
       "source_location": "L292",
       "_origin": "ast",
       "id": "src_server_services_projectileservice_projectileservice_setcharacterhithandler",
-      "community": 58,
+      "community": 107,
       "community_name": "KnockbackService.luau",
       "norm_label": "projectileservice.setcharacterhithandler()"
     },
@@ -10295,8 +10295,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_server_services_puffmachineservice",
-      "community": 31,
-      "community_name": "TelemetryService.lobbyEvent",
+      "community": 142,
+      "community_name": "pull",
       "norm_label": "puffmachineservice.luau"
     },
     {
@@ -10306,8 +10306,8 @@
       "source_location": "L52",
       "_origin": "ast",
       "id": "src_server_services_puffmachineservice_iscompeting",
-      "community": 31,
-      "community_name": "TelemetryService.lobbyEvent",
+      "community": 142,
+      "community_name": "pull",
       "norm_label": "iscompeting()"
     },
     {
@@ -10317,8 +10317,8 @@
       "source_location": "L61",
       "_origin": "ast",
       "id": "src_server_services_puffmachineservice_pull",
-      "community": 31,
-      "community_name": "TelemetryService.lobbyEvent",
+      "community": 142,
+      "community_name": "pull",
       "norm_label": "pull()"
     },
     {
@@ -10328,8 +10328,8 @@
       "source_location": "L116",
       "_origin": "ast",
       "id": "src_server_services_puffmachineservice_readrequestid",
-      "community": 31,
-      "community_name": "TelemetryService.lobbyEvent",
+      "community": 142,
+      "community_name": "pull",
       "norm_label": "readrequestid()"
     },
     {
@@ -10339,8 +10339,8 @@
       "source_location": "L123",
       "_origin": "ast",
       "id": "src_server_services_puffmachineservice_onrequest",
-      "community": 31,
-      "community_name": "TelemetryService.lobbyEvent",
+      "community": 142,
+      "community_name": "pull",
       "norm_label": "onrequest()"
     },
     {
@@ -10350,8 +10350,8 @@
       "source_location": "L157",
       "_origin": "ast",
       "id": "src_server_services_puffmachineservice_puffmachineservice_start",
-      "community": 31,
-      "community_name": "TelemetryService.lobbyEvent",
+      "community": 142,
+      "community_name": "pull",
       "norm_label": "puffmachineservice.start()"
     },
     {
@@ -10361,8 +10361,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_server_services_puffmomentservice",
-      "community": 80,
-      "community_name": "TelemetryService.luau",
+      "community": 30,
+      "community_name": "VaultService.luau",
       "norm_label": "puffmomentservice.luau"
     },
     {
@@ -10372,8 +10372,8 @@
       "source_location": "L36",
       "_origin": "ast",
       "id": "src_server_services_puffmomentservice_puffmomentservice_record",
-      "community": 80,
-      "community_name": "TelemetryService.luau",
+      "community": 30,
+      "community_name": "VaultService.luau",
       "norm_label": "puffmomentservice.record()"
     },
     {
@@ -10383,8 +10383,8 @@
       "source_location": "L56",
       "_origin": "ast",
       "id": "src_server_services_puffmomentservice_puffmomentservice_beginround",
-      "community": 80,
-      "community_name": "TelemetryService.luau",
+      "community": 30,
+      "community_name": "VaultService.luau",
       "norm_label": "puffmomentservice.beginround()"
     },
     {
@@ -10394,8 +10394,8 @@
       "source_location": "L61",
       "_origin": "ast",
       "id": "src_server_services_puffmomentservice_puffmomentservice_endround",
-      "community": 80,
-      "community_name": "TelemetryService.luau",
+      "community": 30,
+      "community_name": "VaultService.luau",
       "norm_label": "puffmomentservice.endround()"
     },
     {
@@ -10405,8 +10405,8 @@
       "source_location": "L66",
       "_origin": "ast",
       "id": "src_server_services_puffmomentservice_puffmomentservice_start",
-      "community": 80,
-      "community_name": "TelemetryService.luau",
+      "community": 30,
+      "community_name": "VaultService.luau",
       "norm_label": "puffmomentservice.start()"
     },
     {
@@ -10416,8 +10416,8 @@
       "source_location": "L76",
       "_origin": "ast",
       "id": "src_server_services_puffmomentservice_puffmomentservice_stop",
-      "community": 80,
-      "community_name": "TelemetryService.luau",
+      "community": 30,
+      "community_name": "VaultService.luau",
       "norm_label": "puffmomentservice.stop()"
     },
     {
@@ -10713,8 +10713,8 @@
       "source_location": "L247",
       "_origin": "ast",
       "id": "src_server_services_puffadorservice_puffadorservice_beginround",
-      "community": 112,
-      "community_name": "PuffadorService.luau",
+      "community": 1,
+      "community_name": "RoundService.luau",
       "norm_label": "puffadorservice.beginround()"
     },
     {
@@ -10768,7 +10768,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_server_services_puffdexservice",
-      "community": 31,
+      "community": 113,
       "community_name": "TelemetryService.lobbyEvent",
       "norm_label": "puffdexservice.luau"
     },
@@ -10779,7 +10779,7 @@
       "source_location": "L32",
       "_origin": "ast",
       "id": "src_server_services_puffdexservice_throttled",
-      "community": 31,
+      "community": 113,
       "community_name": "TelemetryService.lobbyEvent",
       "norm_label": "throttled()"
     },
@@ -10790,7 +10790,7 @@
       "source_location": "L43",
       "_origin": "ast",
       "id": "src_server_services_puffdexservice_equip",
-      "community": 31,
+      "community": 113,
       "community_name": "TelemetryService.lobbyEvent",
       "norm_label": "equip()"
     },
@@ -10801,7 +10801,7 @@
       "source_location": "L60",
       "_origin": "ast",
       "id": "src_server_services_puffdexservice_onrequest",
-      "community": 31,
+      "community": 113,
       "community_name": "TelemetryService.lobbyEvent",
       "norm_label": "onrequest()"
     },
@@ -10812,7 +10812,7 @@
       "source_location": "L93",
       "_origin": "ast",
       "id": "src_server_services_puffdexservice_puffdexservice_start",
-      "community": 31,
+      "community": 113,
       "community_name": "TelemetryService.lobbyEvent",
       "norm_label": "puffdexservice.start()"
     },
@@ -10955,8 +10955,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_server_services_reactionservice",
-      "community": 31,
-      "community_name": "TelemetryService.lobbyEvent",
+      "community": 141,
+      "community_name": "ReactionService.luau",
       "norm_label": "reactionservice.luau"
     },
     {
@@ -10966,8 +10966,8 @@
       "source_location": "L27",
       "_origin": "ast",
       "id": "src_server_services_reactionservice_iscompeting",
-      "community": 31,
-      "community_name": "TelemetryService.lobbyEvent",
+      "community": 141,
+      "community_name": "ReactionService.luau",
       "norm_label": "iscompeting()"
     },
     {
@@ -10977,8 +10977,8 @@
       "source_location": "L32",
       "_origin": "ast",
       "id": "src_server_services_reactionservice_ismatchactive",
-      "community": 31,
-      "community_name": "TelemetryService.lobbyEvent",
+      "community": 141,
+      "community_name": "ReactionService.luau",
       "norm_label": "ismatchactive()"
     },
     {
@@ -10988,8 +10988,8 @@
       "source_location": "L39",
       "_origin": "ast",
       "id": "src_server_services_reactionservice_iswatching",
-      "community": 31,
-      "community_name": "TelemetryService.lobbyEvent",
+      "community": 141,
+      "community_name": "ReactionService.luau",
       "norm_label": "iswatching()"
     },
     {
@@ -10999,8 +10999,8 @@
       "source_location": "L47",
       "_origin": "ast",
       "id": "src_server_services_reactionservice_throttled",
-      "community": 31,
-      "community_name": "TelemetryService.lobbyEvent",
+      "community": 141,
+      "community_name": "ReactionService.luau",
       "norm_label": "throttled()"
     },
     {
@@ -11010,8 +11010,8 @@
       "source_location": "L57",
       "_origin": "ast",
       "id": "src_server_services_reactionservice_onrequest",
-      "community": 31,
-      "community_name": "TelemetryService.lobbyEvent",
+      "community": 141,
+      "community_name": "ReactionService.luau",
       "norm_label": "onrequest()"
     },
     {
@@ -11021,8 +11021,8 @@
       "source_location": "L80",
       "_origin": "ast",
       "id": "src_server_services_reactionservice_reactionservice_start",
-      "community": 31,
-      "community_name": "TelemetryService.lobbyEvent",
+      "community": 141,
+      "community_name": "ReactionService.luau",
       "norm_label": "reactionservice.start()"
     },
     {
@@ -11406,8 +11406,8 @@
       "source_location": "L124",
       "_origin": "ast",
       "id": "src_server_services_roundservice_countqueued",
-      "community": 1,
-      "community_name": "RoundService.luau",
+      "community": 104,
+      "community_name": "BotFillService.luau",
       "norm_label": "countqueued()"
     },
     {
@@ -11417,8 +11417,8 @@
       "source_location": "L129",
       "_origin": "ast",
       "id": "src_server_services_roundservice_setstate",
-      "community": 1,
-      "community_name": "RoundService.luau",
+      "community": 104,
+      "community_name": "BotFillService.luau",
       "norm_label": "setstate()"
     },
     {
@@ -11593,8 +11593,8 @@
       "source_location": "L394",
       "_origin": "ast",
       "id": "src_server_services_roundservice_onparticipantdied",
-      "community": 1,
-      "community_name": "RoundService.luau",
+      "community": 116,
+      "community_name": "CombatantRegistry.luau",
       "norm_label": "onparticipantdied()"
     },
     {
@@ -11604,8 +11604,8 @@
       "source_location": "L398",
       "_origin": "ast",
       "id": "src_server_services_roundservice_connectparticipantdeathhandlers",
-      "community": 1,
-      "community_name": "RoundService.luau",
+      "community": 116,
+      "community_name": "CombatantRegistry.luau",
       "norm_label": "connectparticipantdeathhandlers()"
     },
     {
@@ -11670,8 +11670,8 @@
       "source_location": "L481",
       "_origin": "ast",
       "id": "src_server_services_roundservice_runwaitingforplayers",
-      "community": 1,
-      "community_name": "RoundService.luau",
+      "community": 104,
+      "community_name": "BotFillService.luau",
       "norm_label": "runwaitingforplayers()"
     },
     {
@@ -11681,8 +11681,8 @@
       "source_location": "L496",
       "_origin": "ast",
       "id": "src_server_services_roundservice_runcountdown",
-      "community": 1,
-      "community_name": "RoundService.luau",
+      "community": 104,
+      "community_name": "BotFillService.luau",
       "norm_label": "runcountdown()"
     },
     {
@@ -11725,8 +11725,8 @@
       "source_location": "L671",
       "_origin": "ast",
       "id": "src_server_services_roundservice_isbeginner",
-      "community": 103,
-      "community_name": "RoundStatsService.luau",
+      "community": 1,
+      "community_name": "RoundService.luau",
       "norm_label": "isbeginner()"
     },
     {
@@ -11736,8 +11736,8 @@
       "source_location": "L676",
       "_origin": "ast",
       "id": "src_server_services_roundservice_commitprofiles",
-      "community": 103,
-      "community_name": "RoundStatsService.luau",
+      "community": 1,
+      "community_name": "RoundService.luau",
       "norm_label": "commitprofiles()"
     },
     {
@@ -11890,8 +11890,8 @@
       "source_location": "L94",
       "_origin": "ast",
       "id": "src_server_services_roundstatsservice_roundstatsservice_beginround",
-      "community": 103,
-      "community_name": "RoundStatsService.luau",
+      "community": 1,
+      "community_name": "RoundService.luau",
       "norm_label": "roundstatsservice.beginround()"
     },
     {
@@ -11901,8 +11901,8 @@
       "source_location": "L99",
       "_origin": "ast",
       "id": "src_server_services_roundstatsservice_roundstatsservice_endround",
-      "community": 103,
-      "community_name": "RoundStatsService.luau",
+      "community": 1,
+      "community_name": "RoundService.luau",
       "norm_label": "roundstatsservice.endround()"
     },
     {
@@ -11912,8 +11912,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_server_services_secretachievementservice",
-      "community": 31,
-      "community_name": "TelemetryService.lobbyEvent",
+      "community": 74,
+      "community_name": "grant",
       "norm_label": "secretachievementservice.luau"
     },
     {
@@ -11923,8 +11923,8 @@
       "source_location": "L43",
       "_origin": "ast",
       "id": "src_server_services_secretachievementservice_grant",
-      "community": 31,
-      "community_name": "TelemetryService.lobbyEvent",
+      "community": 74,
+      "community_name": "grant",
       "norm_label": "grant()"
     },
     {
@@ -11934,8 +11934,8 @@
       "source_location": "L80",
       "_origin": "ast",
       "id": "src_server_services_secretachievementservice_secretachievementservice_corridorentered",
-      "community": 31,
-      "community_name": "TelemetryService.lobbyEvent",
+      "community": 74,
+      "community_name": "grant",
       "norm_label": "secretachievementservice.corridorentered()"
     },
     {
@@ -11945,8 +11945,8 @@
       "source_location": "L86",
       "_origin": "ast",
       "id": "src_server_services_secretachievementservice_secretachievementservice_baraoevent",
-      "community": 31,
-      "community_name": "TelemetryService.lobbyEvent",
+      "community": 74,
+      "community_name": "grant",
       "norm_label": "secretachievementservice.baraoevent()"
     },
     {
@@ -11956,8 +11956,8 @@
       "source_location": "L97",
       "_origin": "ast",
       "id": "src_server_services_secretachievementservice_secretachievementservice_passagerevealed",
-      "community": 31,
-      "community_name": "TelemetryService.lobbyEvent",
+      "community": 74,
+      "community_name": "grant",
       "norm_label": "secretachievementservice.passagerevealed()"
     },
     {
@@ -11967,8 +11967,8 @@
       "source_location": "L110",
       "_origin": "ast",
       "id": "src_server_services_secretachievementservice_secretachievementservice_roundfinished",
-      "community": 31,
-      "community_name": "TelemetryService.lobbyEvent",
+      "community": 74,
+      "community_name": "grant",
       "norm_label": "secretachievementservice.roundfinished()"
     },
     {
@@ -11978,8 +11978,8 @@
       "source_location": "L118",
       "_origin": "ast",
       "id": "src_server_services_secretachievementservice_secretachievementservice_beginround",
-      "community": 31,
-      "community_name": "TelemetryService.lobbyEvent",
+      "community": 74,
+      "community_name": "grant",
       "norm_label": "secretachievementservice.beginround()"
     },
     {
@@ -11989,8 +11989,8 @@
       "source_location": "L125",
       "_origin": "ast",
       "id": "src_server_services_secretachievementservice_createlobbypuff",
-      "community": 31,
-      "community_name": "TelemetryService.lobbyEvent",
+      "community": 74,
+      "community_name": "grant",
       "norm_label": "createlobbypuff()"
     },
     {
@@ -12000,8 +12000,8 @@
       "source_location": "L204",
       "_origin": "ast",
       "id": "src_server_services_secretachievementservice_secretachievementservice_start",
-      "community": 31,
-      "community_name": "TelemetryService.lobbyEvent",
+      "community": 74,
+      "community_name": "grant",
       "norm_label": "secretachievementservice.start()"
     },
     {
@@ -12429,8 +12429,8 @@
       "source_location": "L162",
       "_origin": "ast",
       "id": "src_server_services_telemetryservice_telemetryservice_dash",
-      "community": 80,
-      "community_name": "TelemetryService.luau",
+      "community": 145,
+      "community_name": "DashService.luau",
       "norm_label": "telemetryservice.dash()"
     },
     {
@@ -12451,8 +12451,8 @@
       "source_location": "L181",
       "_origin": "ast",
       "id": "src_server_services_telemetryservice_telemetryservice_event",
-      "community": 80,
-      "community_name": "TelemetryService.luau",
+      "community": 30,
+      "community_name": "VaultService.luau",
       "norm_label": "telemetryservice.event()"
     },
     {
@@ -12484,7 +12484,7 @@
       "source_location": "L236",
       "_origin": "ast",
       "id": "src_server_services_telemetryservice_telemetryservice_ticketsearned",
-      "community": 21,
+      "community": 2,
       "community_name": "DailyRules.luau",
       "norm_label": "telemetryservice.ticketsearned()"
     },
@@ -12506,7 +12506,7 @@
       "source_location": "L245",
       "_origin": "ast",
       "id": "src_server_services_telemetryservice_telemetryservice_lobbyevent",
-      "community": 31,
+      "community": 113,
       "community_name": "TelemetryService.lobbyEvent",
       "norm_label": "telemetryservice.lobbyevent()"
     },
@@ -13023,8 +13023,8 @@
       "source_location": "L287",
       "_origin": "ast",
       "id": "src_server_services_trapservice_trapservice_refresh",
-      "community": 107,
-      "community_name": "PhotoModeService.luau",
+      "community": 132,
+      "community_name": "TrapService.luau",
       "norm_label": "trapservice.refresh()"
     },
     {
@@ -13914,8 +13914,8 @@
       "source_location": "L194",
       "_origin": "ast",
       "id": "src_server_services_traps_chandeliertrap_chandeliertrap_trigger",
-      "community": 74,
-      "community_name": "CombatantRegistry.all",
+      "community": 58,
+      "community_name": "WindowTrap.luau",
       "norm_label": "chandeliertrap.trigger()"
     },
     {
@@ -13936,8 +13936,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_server_services_traps_fireplacetrap",
-      "community": 126,
-      "community_name": "FireplaceTrap.luau",
+      "community": 132,
+      "community_name": "TrapService.luau",
       "norm_label": "fireplacetrap.luau"
     },
     {
@@ -13947,8 +13947,8 @@
       "source_location": "L61",
       "_origin": "ast",
       "id": "src_server_services_traps_fireplacetrap_wallsegment",
-      "community": 126,
-      "community_name": "FireplaceTrap.luau",
+      "community": 132,
+      "community_name": "TrapService.luau",
       "norm_label": "wallsegment()"
     },
     {
@@ -13958,8 +13958,8 @@
       "source_location": "L83",
       "_origin": "ast",
       "id": "src_server_services_traps_fireplacetrap_buildmodel",
-      "community": 126,
-      "community_name": "FireplaceTrap.luau",
+      "community": 132,
+      "community_name": "TrapService.luau",
       "norm_label": "buildmodel()"
     },
     {
@@ -13969,8 +13969,8 @@
       "source_location": "L170",
       "_origin": "ast",
       "id": "src_server_services_traps_fireplacetrap_fireplacetrap_build",
-      "community": 126,
-      "community_name": "FireplaceTrap.luau",
+      "community": 132,
+      "community_name": "TrapService.luau",
       "norm_label": "fireplacetrap.build()"
     },
     {
@@ -13980,8 +13980,8 @@
       "source_location": "L193",
       "_origin": "ast",
       "id": "src_server_services_traps_fireplacetrap_marksneeze",
-      "community": 126,
-      "community_name": "FireplaceTrap.luau",
+      "community": 116,
+      "community_name": "CombatantRegistry.luau",
       "norm_label": "marksneeze()"
     },
     {
@@ -13991,8 +13991,8 @@
       "source_location": "L205",
       "_origin": "ast",
       "id": "src_server_services_traps_fireplacetrap_sneeze",
-      "community": 126,
-      "community_name": "FireplaceTrap.luau",
+      "community": 116,
+      "community_name": "CombatantRegistry.luau",
       "norm_label": "sneeze()"
     },
     {
@@ -14002,8 +14002,8 @@
       "source_location": "L218",
       "_origin": "ast",
       "id": "src_server_services_traps_fireplacetrap_sweep",
-      "community": 126,
-      "community_name": "FireplaceTrap.luau",
+      "community": 58,
+      "community_name": "WindowTrap.luau",
       "norm_label": "sweep()"
     },
     {
@@ -14013,8 +14013,8 @@
       "source_location": "L242",
       "_origin": "ast",
       "id": "src_server_services_traps_fireplacetrap_fireplacetrap_trigger",
-      "community": 126,
-      "community_name": "FireplaceTrap.luau",
+      "community": 116,
+      "community_name": "CombatantRegistry.luau",
       "norm_label": "fireplacetrap.trigger()"
     },
     {
@@ -14024,8 +14024,8 @@
       "source_location": "L270",
       "_origin": "ast",
       "id": "src_server_services_traps_fireplacetrap_fireplacetrap_restore",
-      "community": 126,
-      "community_name": "FireplaceTrap.luau",
+      "community": 132,
+      "community_name": "TrapService.luau",
       "norm_label": "fireplacetrap.restore()"
     },
     {
@@ -14035,8 +14035,8 @@
       "source_location": "L273",
       "_origin": "ast",
       "id": "src_server_services_traps_fireplacetrap_fireplacetrap_roundreset",
-      "community": 126,
-      "community_name": "FireplaceTrap.luau",
+      "community": 132,
+      "community_name": "TrapService.luau",
       "norm_label": "fireplacetrap.roundreset()"
     },
     {
@@ -14046,8 +14046,8 @@
       "source_location": "L284",
       "_origin": "ast",
       "id": "src_server_services_traps_fireplacetrap_fireplacetrap_clear",
-      "community": 126,
-      "community_name": "FireplaceTrap.luau",
+      "community": 132,
+      "community_name": "TrapService.luau",
       "norm_label": "fireplacetrap.clear()"
     },
     {
@@ -14057,8 +14057,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_server_services_traps_rugtrap",
-      "community": 4,
-      "community_name": "CombatantRegistry.getRoot",
+      "community": 132,
+      "community_name": "TrapService.luau",
       "norm_label": "rugtrap.luau"
     },
     {
@@ -14068,8 +14068,8 @@
       "source_location": "L83",
       "_origin": "ast",
       "id": "src_server_services_traps_rugtrap_cellkey",
-      "community": 4,
-      "community_name": "CombatantRegistry.getRoot",
+      "community": 132,
+      "community_name": "TrapService.luau",
       "norm_label": "cellkey()"
     },
     {
@@ -14079,8 +14079,8 @@
       "source_location": "L87",
       "_origin": "ast",
       "id": "src_server_services_traps_rugtrap_newpart",
-      "community": 4,
-      "community_name": "CombatantRegistry.getRoot",
+      "community": 132,
+      "community_name": "TrapService.luau",
       "norm_label": "newpart()"
     },
     {
@@ -14090,8 +14090,8 @@
       "source_location": "L105",
       "_origin": "ast",
       "id": "src_server_services_traps_rugtrap_isstanding",
-      "community": 4,
-      "community_name": "CombatantRegistry.getRoot",
+      "community": 132,
+      "community_name": "TrapService.luau",
       "norm_label": "isstanding()"
     },
     {
@@ -14101,8 +14101,8 @@
       "source_location": "L112",
       "_origin": "ast",
       "id": "src_server_services_traps_rugtrap_syncfringe",
-      "community": 4,
-      "community_name": "CombatantRegistry.getRoot",
+      "community": 132,
+      "community_name": "TrapService.luau",
       "norm_label": "syncfringe()"
     },
     {
@@ -14112,8 +14112,8 @@
       "source_location": "L124",
       "_origin": "ast",
       "id": "src_server_services_traps_rugtrap_synccell",
-      "community": 4,
-      "community_name": "CombatantRegistry.getRoot",
+      "community": 132,
+      "community_name": "TrapService.luau",
       "norm_label": "synccell()"
     },
     {
@@ -14123,8 +14123,8 @@
       "source_location": "L132",
       "_origin": "ast",
       "id": "src_server_services_traps_rugtrap_bindblock",
-      "community": 4,
-      "community_name": "CombatantRegistry.getRoot",
+      "community": 132,
+      "community_name": "TrapService.luau",
       "norm_label": "bindblock()"
     },
     {
@@ -14134,8 +14134,8 @@
       "source_location": "L144",
       "_origin": "ast",
       "id": "src_server_services_traps_rugtrap_blockcell",
-      "community": 4,
-      "community_name": "CombatantRegistry.getRoot",
+      "community": 132,
+      "community_name": "TrapService.luau",
       "norm_label": "blockcell()"
     },
     {
@@ -14145,8 +14145,8 @@
       "source_location": "L156",
       "_origin": "ast",
       "id": "src_server_services_traps_rugtrap_buildrug",
-      "community": 4,
-      "community_name": "CombatantRegistry.getRoot",
+      "community": 132,
+      "community_name": "TrapService.luau",
       "norm_label": "buildrug()"
     },
     {
@@ -14156,8 +14156,8 @@
       "source_location": "L242",
       "_origin": "ast",
       "id": "src_server_services_traps_rugtrap_onblockadded",
-      "community": 4,
-      "community_name": "CombatantRegistry.getRoot",
+      "community": 132,
+      "community_name": "TrapService.luau",
       "norm_label": "onblockadded()"
     },
     {
@@ -14167,8 +14167,8 @@
       "source_location": "L261",
       "_origin": "ast",
       "id": "src_server_services_traps_rugtrap_rugtrap_build",
-      "community": 4,
-      "community_name": "CombatantRegistry.getRoot",
+      "community": 132,
+      "community_name": "TrapService.luau",
       "norm_label": "rugtrap.build()"
     },
     {
@@ -14189,8 +14189,8 @@
       "source_location": "L293",
       "_origin": "ast",
       "id": "src_server_services_traps_rugtrap_isonrug",
-      "community": 4,
-      "community_name": "CombatantRegistry.getRoot",
+      "community": 132,
+      "community_name": "TrapService.luau",
       "norm_label": "isonrug()"
     },
     {
@@ -14200,8 +14200,8 @@
       "source_location": "L311",
       "_origin": "ast",
       "id": "src_server_services_traps_rugtrap_rugtrap_trigger",
-      "community": 4,
-      "community_name": "CombatantRegistry.getRoot",
+      "community": 132,
+      "community_name": "TrapService.luau",
       "norm_label": "rugtrap.trigger()"
     },
     {
@@ -14211,8 +14211,8 @@
       "source_location": "L331",
       "_origin": "ast",
       "id": "src_server_services_traps_rugtrap_rugtrap_restore",
-      "community": 4,
-      "community_name": "CombatantRegistry.getRoot",
+      "community": 132,
+      "community_name": "TrapService.luau",
       "norm_label": "rugtrap.restore()"
     },
     {
@@ -14222,8 +14222,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_server_services_traps_trapblocks",
-      "community": 74,
-      "community_name": "CombatantRegistry.all",
+      "community": 58,
+      "community_name": "WindowTrap.luau",
       "norm_label": "trapblocks.luau"
     },
     {
@@ -14233,8 +14233,8 @@
       "source_location": "L25",
       "_origin": "ast",
       "id": "src_server_services_traps_trapblocks_trapblocks_targetroot",
-      "community": 74,
-      "community_name": "CombatantRegistry.all",
+      "community": 58,
+      "community_name": "WindowTrap.luau",
       "norm_label": "trapblocks.targetroot()"
     },
     {
@@ -14244,8 +14244,8 @@
       "source_location": "L32",
       "_origin": "ast",
       "id": "src_server_services_traps_trapblocks_trapblocks_isstandingon",
-      "community": 74,
-      "community_name": "CombatantRegistry.all",
+      "community": 58,
+      "community_name": "WindowTrap.luau",
       "norm_label": "trapblocks.isstandingon()"
     },
     {
@@ -14255,8 +14255,8 @@
       "source_location": "L43",
       "_origin": "ast",
       "id": "src_server_services_traps_trapblocks_trapblocks_intactnear",
-      "community": 74,
-      "community_name": "CombatantRegistry.all",
+      "community": 58,
+      "community_name": "WindowTrap.luau",
       "norm_label": "trapblocks.intactnear()"
     },
     {
@@ -14266,8 +14266,8 @@
       "source_location": "L58",
       "_origin": "ast",
       "id": "src_server_services_traps_trapblocks_trapblocks_drop",
-      "community": 74,
-      "community_name": "CombatantRegistry.all",
+      "community": 58,
+      "community_name": "WindowTrap.luau",
       "norm_label": "trapblocks.drop()"
     },
     {
@@ -14277,8 +14277,8 @@
       "source_location": "L101",
       "_origin": "ast",
       "id": "src_server_services_traps_trapblocks_trapblocks_pushaway",
-      "community": 74,
-      "community_name": "CombatantRegistry.all",
+      "community": 58,
+      "community_name": "WindowTrap.luau",
       "norm_label": "trapblocks.pushaway()"
     },
     {
@@ -14288,7 +14288,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_server_services_traps_windowtrap",
-      "community": 128,
+      "community": 58,
       "community_name": "WindowTrap.luau",
       "norm_label": "windowtrap.luau"
     },
@@ -14299,7 +14299,7 @@
       "source_location": "L68",
       "_origin": "ast",
       "id": "src_server_services_traps_windowtrap_sethidden",
-      "community": 128,
+      "community": 58,
       "community_name": "WindowTrap.luau",
       "norm_label": "sethidden()"
     },
@@ -14310,7 +14310,7 @@
       "source_location": "L77",
       "_origin": "ast",
       "id": "src_server_services_traps_windowtrap_windowparts",
-      "community": 128,
+      "community": 58,
       "community_name": "WindowTrap.luau",
       "norm_label": "windowparts()"
     },
@@ -14321,7 +14321,7 @@
       "source_location": "L92",
       "_origin": "ast",
       "id": "src_server_services_traps_windowtrap_boards",
-      "community": 128,
+      "community": 58,
       "community_name": "WindowTrap.luau",
       "norm_label": "boards()"
     },
@@ -14332,7 +14332,7 @@
       "source_location": "L107",
       "_origin": "ast",
       "id": "src_server_services_traps_windowtrap_setbroken",
-      "community": 128,
+      "community": 58,
       "community_name": "WindowTrap.luau",
       "norm_label": "setbroken()"
     },
@@ -14343,7 +14343,7 @@
       "source_location": "L115",
       "_origin": "ast",
       "id": "src_server_services_traps_windowtrap_setboarded",
-      "community": 128,
+      "community": 58,
       "community_name": "WindowTrap.luau",
       "norm_label": "setboarded()"
     },
@@ -14354,8 +14354,8 @@
       "source_location": "L123",
       "_origin": "ast",
       "id": "src_server_services_traps_windowtrap_gustat",
-      "community": 74,
-      "community_name": "CombatantRegistry.all",
+      "community": 58,
+      "community_name": "WindowTrap.luau",
       "norm_label": "gustat()"
     },
     {
@@ -14365,8 +14365,8 @@
       "source_location": "L142",
       "_origin": "ast",
       "id": "src_server_services_traps_windowtrap_pushplayers",
-      "community": 74,
-      "community_name": "CombatantRegistry.all",
+      "community": 58,
+      "community_name": "WindowTrap.luau",
       "norm_label": "pushplayers()"
     },
     {
@@ -14376,7 +14376,7 @@
       "source_location": "L163",
       "_origin": "ast",
       "id": "src_server_services_traps_windowtrap_looseblocks",
-      "community": 128,
+      "community": 58,
       "community_name": "WindowTrap.luau",
       "norm_label": "looseblocks()"
     },
@@ -14387,7 +14387,7 @@
       "source_location": "L179",
       "_origin": "ast",
       "id": "src_server_services_traps_windowtrap_windowtrap_describe",
-      "community": 128,
+      "community": 58,
       "community_name": "WindowTrap.luau",
       "norm_label": "windowtrap.describe()"
     },
@@ -14398,7 +14398,7 @@
       "source_location": "L192",
       "_origin": "ast",
       "id": "src_server_services_traps_windowtrap_curtaincolorof",
-      "community": 128,
+      "community": 58,
       "community_name": "WindowTrap.luau",
       "norm_label": "curtaincolorof()"
     },
@@ -14409,7 +14409,7 @@
       "source_location": "L201",
       "_origin": "ast",
       "id": "src_server_services_traps_windowtrap_setvariant",
-      "community": 128,
+      "community": 58,
       "community_name": "WindowTrap.luau",
       "norm_label": "setvariant()"
     },
@@ -14420,7 +14420,7 @@
       "source_location": "L211",
       "_origin": "ast",
       "id": "src_server_services_traps_windowtrap_rollvariant",
-      "community": 128,
+      "community": 58,
       "community_name": "WindowTrap.luau",
       "norm_label": "rollvariant()"
     },
@@ -14431,7 +14431,7 @@
       "source_location": "L227",
       "_origin": "ast",
       "id": "src_server_services_traps_windowtrap_gust",
-      "community": 128,
+      "community": 58,
       "community_name": "WindowTrap.luau",
       "norm_label": "gust()"
     },
@@ -14442,8 +14442,8 @@
       "source_location": "L236",
       "_origin": "ast",
       "id": "src_server_services_traps_windowtrap_pigeons",
-      "community": 74,
-      "community_name": "CombatantRegistry.all",
+      "community": 58,
+      "community_name": "WindowTrap.luau",
       "norm_label": "pigeons()"
     },
     {
@@ -14453,8 +14453,8 @@
       "source_location": "L287",
       "_origin": "ast",
       "id": "src_server_services_traps_windowtrap_steprains",
-      "community": 127,
-      "community_name": "stepRains",
+      "community": 58,
+      "community_name": "WindowTrap.luau",
       "norm_label": "steprains()"
     },
     {
@@ -14464,8 +14464,8 @@
       "source_location": "L345",
       "_origin": "ast",
       "id": "src_server_services_traps_windowtrap_startrain",
-      "community": 74,
-      "community_name": "CombatantRegistry.all",
+      "community": 58,
+      "community_name": "WindowTrap.luau",
       "norm_label": "startrain()"
     },
     {
@@ -14475,7 +14475,7 @@
       "source_location": "L369",
       "_origin": "ast",
       "id": "src_server_services_traps_windowtrap_windowtrap_trigger",
-      "community": 128,
+      "community": 58,
       "community_name": "WindowTrap.luau",
       "norm_label": "windowtrap.trigger()"
     },
@@ -14486,7 +14486,7 @@
       "source_location": "L392",
       "_origin": "ast",
       "id": "src_server_services_traps_windowtrap_windowtrap_restore",
-      "community": 128,
+      "community": 58,
       "community_name": "WindowTrap.luau",
       "norm_label": "windowtrap.restore()"
     },
@@ -14497,7 +14497,7 @@
       "source_location": "L404",
       "_origin": "ast",
       "id": "src_server_services_traps_windowtrap_windowtrap_roundreset",
-      "community": 128,
+      "community": 58,
       "community_name": "WindowTrap.luau",
       "norm_label": "windowtrap.roundreset()"
     },
@@ -14596,7 +14596,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_shared_config_puffcatalog",
-      "community": 31,
+      "community": 113,
       "community_name": "TelemetryService.lobbyEvent",
       "norm_label": "puffcatalog.luau"
     },
@@ -14607,7 +14607,7 @@
       "source_location": "L41",
       "_origin": "ast",
       "id": "src_shared_config_puffcatalog_style",
-      "community": 31,
+      "community": 113,
       "community_name": "TelemetryService.lobbyEvent",
       "norm_label": "style()"
     },
@@ -14618,7 +14618,7 @@
       "source_location": "L313",
       "_origin": "ast",
       "id": "src_shared_config_puffcatalog_puffcatalog_all",
-      "community": 31,
+      "community": 113,
       "community_name": "TelemetryService.lobbyEvent",
       "norm_label": "puffcatalog.all()"
     },
@@ -14629,7 +14629,7 @@
       "source_location": "L318",
       "_origin": "ast",
       "id": "src_shared_config_puffcatalog_puffcatalog_machinepool",
-      "community": 31,
+      "community": 113,
       "community_name": "TelemetryService.lobbyEvent",
       "norm_label": "puffcatalog.machinepool()"
     },
@@ -14640,7 +14640,7 @@
       "source_location": "L328",
       "_origin": "ast",
       "id": "src_shared_config_puffcatalog_puffcatalog_get",
-      "community": 31,
+      "community": 113,
       "community_name": "TelemetryService.lobbyEvent",
       "norm_label": "puffcatalog.get()"
     },
@@ -14662,8 +14662,8 @@
       "source_location": "L340",
       "_origin": "ast",
       "id": "src_shared_config_puffcatalog_puffcatalog_stylefor",
-      "community": 0,
-      "community_name": "PuffShotRenderer.luau",
+      "community": 113,
+      "community_name": "TelemetryService.lobbyEvent",
       "norm_label": "puffcatalog.stylefor()"
     },
     {
@@ -14673,7 +14673,7 @@
       "source_location": "L347",
       "_origin": "ast",
       "id": "src_shared_config_puffcatalog_puffcatalog_progress",
-      "community": 31,
+      "community": 113,
       "community_name": "TelemetryService.lobbyEvent",
       "norm_label": "puffcatalog.progress()"
     },
@@ -14684,7 +14684,7 @@
       "source_location": "L362",
       "_origin": "ast",
       "id": "src_shared_config_puffcatalog_puffcatalog_meetsrule",
-      "community": 31,
+      "community": 113,
       "community_name": "TelemetryService.lobbyEvent",
       "norm_label": "puffcatalog.meetsrule()"
     },
@@ -14728,8 +14728,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_shared_config_secretcatalog",
-      "community": 31,
-      "community_name": "TelemetryService.lobbyEvent",
+      "community": 74,
+      "community_name": "grant",
       "norm_label": "secretcatalog.luau"
     },
     {
@@ -14739,8 +14739,8 @@
       "source_location": "L19",
       "_origin": "ast",
       "id": "src_shared_config_secretcatalog_secret",
-      "community": 31,
-      "community_name": "TelemetryService.lobbyEvent",
+      "community": 74,
+      "community_name": "grant",
       "norm_label": "secret()"
     },
     {
@@ -14750,8 +14750,8 @@
       "source_location": "L41",
       "_origin": "ast",
       "id": "src_shared_config_secretcatalog_secretcatalog_all",
-      "community": 31,
-      "community_name": "TelemetryService.lobbyEvent",
+      "community": 74,
+      "community_name": "grant",
       "norm_label": "secretcatalog.all()"
     },
     {
@@ -14761,8 +14761,8 @@
       "source_location": "L45",
       "_origin": "ast",
       "id": "src_shared_config_secretcatalog_secretcatalog_get",
-      "community": 31,
-      "community_name": "TelemetryService.lobbyEvent",
+      "community": 74,
+      "community_name": "grant",
       "norm_label": "secretcatalog.get()"
     },
     {
@@ -14865,10 +14865,21 @@
       "norm_label": "lang.forplayer()"
     },
     {
-      "label": "Lang.localize()",
+      "label": "Lang.ordinal()",
       "file_type": "code",
       "source_file": "src/shared/i18n/Lang.luau",
       "source_location": "L51",
+      "_origin": "ast",
+      "id": "src_shared_i18n_lang_lang_ordinal",
+      "community": 9,
+      "community_name": "UiTheme.addCorner",
+      "norm_label": "lang.ordinal()"
+    },
+    {
+      "label": "Lang.localize()",
+      "file_type": "code",
+      "source_file": "src/shared/i18n/Lang.luau",
+      "source_location": "L55",
       "_origin": "ast",
       "id": "src_shared_i18n_lang_lang_localize",
       "community": 59,
@@ -14973,39 +14984,6 @@
       "community": 59,
       "community_name": "LocaleCore.luau",
       "norm_label": "localecore.compile()"
-    },
-    {
-      "label": "localizeWhole()",
-      "file_type": "code",
-      "source_file": "src/shared/i18n/LocaleCore.luau",
-      "source_location": "L119",
-      "_origin": "ast",
-      "id": "src_shared_i18n_localecore_localizewhole",
-      "community": 59,
-      "community_name": "LocaleCore.luau",
-      "norm_label": "localizewhole()"
-    },
-    {
-      "label": "localizePiece()",
-      "file_type": "code",
-      "source_file": "src/shared/i18n/LocaleCore.luau",
-      "source_location": "L143",
-      "_origin": "ast",
-      "id": "src_shared_i18n_localecore_localizepiece",
-      "community": 59,
-      "community_name": "LocaleCore.luau",
-      "norm_label": "localizepiece()"
-    },
-    {
-      "label": "LocaleCore.localize()",
-      "file_type": "code",
-      "source_file": "src/shared/i18n/LocaleCore.luau",
-      "source_location": "L157",
-      "_origin": "ast",
-      "id": "src_shared_i18n_localecore_localecore_localize",
-      "community": 59,
-      "community_name": "LocaleCore.luau",
-      "norm_label": "localecore.localize()"
     },
     {
       "label": "Collection.luau",
@@ -15366,8 +15344,8 @@
       "source_location": "L111",
       "_origin": "ast",
       "id": "src_shared_modules_characterimpulse_characterimpulse_stopfalling",
-      "community": 54,
-      "community_name": "CharacterImpulse.luau",
+      "community": 116,
+      "community_name": "CombatantRegistry.luau",
       "norm_label": "characterimpulse.stopfalling()"
     },
     {
@@ -15388,7 +15366,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_shared_modules_levelcurve",
-      "community": 129,
+      "community": 126,
       "community_name": "LevelCurve.luau",
       "norm_label": "levelcurve.luau"
     },
@@ -15399,7 +15377,7 @@
       "source_location": "L21",
       "_origin": "ast",
       "id": "src_shared_modules_levelcurve_levelcurve_xpfornextlevel",
-      "community": 129,
+      "community": 126,
       "community_name": "LevelCurve.luau",
       "norm_label": "levelcurve.xpfornextlevel()"
     },
@@ -15410,7 +15388,7 @@
       "source_location": "L26",
       "_origin": "ast",
       "id": "src_shared_modules_levelcurve_levelcurve_totalxpforlevel",
-      "community": 129,
+      "community": 126,
       "community_name": "LevelCurve.luau",
       "norm_label": "levelcurve.totalxpforlevel()"
     },
@@ -15421,7 +15399,7 @@
       "source_location": "L36",
       "_origin": "ast",
       "id": "src_shared_modules_levelcurve_levelcurve_maxxp",
-      "community": 129,
+      "community": 126,
       "community_name": "LevelCurve.luau",
       "norm_label": "levelcurve.maxxp()"
     },
@@ -15432,7 +15410,7 @@
       "source_location": "L40",
       "_origin": "ast",
       "id": "src_shared_modules_levelcurve_levelcurve_progress",
-      "community": 129,
+      "community": 126,
       "community_name": "LevelCurve.luau",
       "norm_label": "levelcurve.progress()"
     },
@@ -15443,7 +15421,7 @@
       "source_location": "L55",
       "_origin": "ast",
       "id": "src_shared_modules_levelcurve_levelcurve_levelforxp",
-      "community": 129,
+      "community": 126,
       "community_name": "LevelCurve.luau",
       "norm_label": "levelcurve.levelforxp()"
     },
@@ -15674,8 +15652,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_shared_modules_slipperyground",
-      "community": 127,
-      "community_name": "stepRains",
+      "community": 58,
+      "community_name": "WindowTrap.luau",
       "norm_label": "slipperyground.luau"
     },
     {
@@ -15685,8 +15663,8 @@
       "source_location": "L27",
       "_origin": "ast",
       "id": "src_shared_modules_slipperyground_slipperyground_new",
-      "community": 127,
-      "community_name": "stepRains",
+      "community": 58,
+      "community_name": "WindowTrap.luau",
       "norm_label": "slipperyground.new()"
     },
     {
@@ -15696,8 +15674,8 @@
       "source_location": "L31",
       "_origin": "ast",
       "id": "src_shared_modules_slipperyground_ensureconstraint",
-      "community": 127,
-      "community_name": "stepRains",
+      "community": 58,
+      "community_name": "WindowTrap.luau",
       "norm_label": "ensureconstraint()"
     },
     {
@@ -15707,8 +15685,8 @@
       "source_location": "L56",
       "_origin": "ast",
       "id": "src_shared_modules_slipperyground_pause",
-      "community": 127,
-      "community_name": "stepRains",
+      "community": 58,
+      "community_name": "WindowTrap.luau",
       "norm_label": "pause()"
     },
     {
@@ -15718,8 +15696,8 @@
       "source_location": "L66",
       "_origin": "ast",
       "id": "src_shared_modules_slipperyground_slipperyground_step",
-      "community": 127,
-      "community_name": "stepRains",
+      "community": 58,
+      "community_name": "WindowTrap.luau",
       "norm_label": "slipperyground.step()"
     },
     {
@@ -15729,8 +15707,8 @@
       "source_location": "L97",
       "_origin": "ast",
       "id": "src_shared_modules_slipperyground_slipperyground_release",
-      "community": 127,
-      "community_name": "stepRains",
+      "community": 58,
+      "community_name": "WindowTrap.luau",
       "norm_label": "slipperyground.release()"
     },
     {
@@ -15751,8 +15729,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_shared_modules_windowgeometry",
-      "community": 124,
-      "community_name": "SlipperyController.luau",
+      "community": 58,
+      "community_name": "WindowTrap.luau",
       "norm_label": "windowgeometry.luau"
     },
     {
@@ -15773,8 +15751,8 @@
       "source_location": "L51",
       "_origin": "ast",
       "id": "src_shared_modules_windowgeometry_windowgeometry_local3",
-      "community": 124,
-      "community_name": "SlipperyController.luau",
+      "community": 58,
+      "community_name": "WindowTrap.luau",
       "norm_label": "windowgeometry.local3()"
     },
     {
@@ -15784,8 +15762,8 @@
       "source_location": "L57",
       "_origin": "ast",
       "id": "src_shared_modules_windowgeometry_windowgeometry_inpigeonlane",
-      "community": 124,
-      "community_name": "SlipperyController.luau",
+      "community": 58,
+      "community_name": "WindowTrap.luau",
       "norm_label": "windowgeometry.inpigeonlane()"
     },
     {
@@ -15795,8 +15773,8 @@
       "source_location": "L67",
       "_origin": "ast",
       "id": "src_shared_modules_windowgeometry_windowgeometry_inrain",
-      "community": 124,
-      "community_name": "SlipperyController.luau",
+      "community": 58,
+      "community_name": "WindowTrap.luau",
       "norm_label": "windowgeometry.inrain()"
     },
     {
@@ -15806,7 +15784,7 @@
       "source_location": "L77",
       "_origin": "ast",
       "id": "src_shared_modules_windowgeometry_windowgeometry_variantof",
-      "community": 128,
+      "community": 58,
       "community_name": "WindowTrap.luau",
       "norm_label": "windowgeometry.variantof()"
     },
@@ -16067,7 +16045,7 @@
       "label": "sameSpecifiers()",
       "file_type": "code",
       "source_file": "tests/Locale.spec.luau",
-      "source_location": "L96",
+      "source_location": "L107",
       "_origin": "ast",
       "id": "tests_locale_spec_samespecifiers",
       "community": 59,
@@ -16078,7 +16056,7 @@
       "label": "unescape()",
       "file_type": "code",
       "source_file": "tests/Locale.spec.luau",
-      "source_location": "L116",
+      "source_location": "L127",
       "_origin": "ast",
       "id": "tests_locale_spec_unescape",
       "community": 59,
@@ -16089,7 +16067,7 @@
       "label": "literalAt()",
       "file_type": "code",
       "source_file": "tests/Locale.spec.luau",
-      "source_location": "L129",
+      "source_location": "L140",
       "_origin": "ast",
       "id": "tests_locale_spec_literalat",
       "community": 59,
@@ -29119,6 +29097,18 @@
       "confidence": "INFERRED",
       "confidence_score": 0.8,
       "source_file": "src/client/ui/LeaderboardView.luau",
+      "source_location": "L235",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_client_ui_leaderboardview_leaderboardview_new",
+      "target": "src_shared_i18n_lang_lang_ordinal"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "src/client/ui/LeaderboardView.luau",
       "source_location": "L80",
       "weight": 1.0,
       "_origin": "ast",
@@ -30603,6 +30593,18 @@
     {
       "relation": "calls",
       "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "src/client/ui/ResultsView.luau",
+      "source_location": "L187",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_client_ui_resultsview_createpodiumslot",
+      "target": "src_shared_i18n_lang_lang_ordinal"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/client/ui/ResultsView.luau",
       "source_location": "L256",
@@ -30743,6 +30745,18 @@
       "_origin": "ast",
       "source": "src_client_ui_resultsview_resultsview_new",
       "target": "src_client_ui_uitheme_uitheme_stylepanel"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "src/client/ui/ResultsView.luau",
+      "source_location": "L398",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_client_ui_resultsview_resultsview_new",
+      "target": "src_shared_i18n_lang_lang_ordinal"
     },
     {
       "relation": "calls",
@@ -53030,11 +53044,22 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/shared/i18n/Lang.luau",
-      "source_location": "L51",
+      "source_location": "L55",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_shared_i18n_lang",
       "target": "src_shared_i18n_lang_lang_localize",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/shared/i18n/Lang.luau",
+      "source_location": "L51",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_shared_i18n_lang",
+      "target": "src_shared_i18n_lang_lang_ordinal",
       "confidence_score": 1.0
     },
     {
@@ -53065,7 +53090,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/shared/i18n/Lang.luau",
-      "source_location": "L52",
+      "source_location": "L56",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_shared_i18n_lang_lang_localize",
@@ -53113,10 +53138,22 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/shared/i18n/Lang.luau",
-      "source_location": "L52",
+      "source_location": "L56",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_shared_i18n_lang_lang_localize",
+      "target": "src_shared_i18n_lang_lang_current",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/shared/i18n/Lang.luau",
+      "source_location": "L52",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_shared_i18n_lang_lang_ordinal",
       "target": "src_shared_i18n_lang_lang_current",
       "confidence_score": 1.0
     },
@@ -53155,18 +53192,6 @@
       "_origin": "ast",
       "source": "src_shared_i18n_lang_lang_forplayer",
       "target": "src_shared_i18n_localecore_localecore_format"
-    },
-    {
-      "relation": "calls",
-      "context": "call",
-      "confidence": "INFERRED",
-      "confidence_score": 0.8,
-      "source_file": "src/shared/i18n/Lang.luau",
-      "source_location": "L52",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "src_shared_i18n_lang_lang_localize",
-      "target": "src_shared_i18n_localecore_localecore_localize"
     },
     {
       "relation": "contains",
@@ -53227,17 +53252,6 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/shared/i18n/LocaleCore.luau",
-      "source_location": "L157",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "src_shared_i18n_localecore",
-      "target": "src_shared_i18n_localecore_localecore_localize",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "src/shared/i18n/LocaleCore.luau",
       "source_location": "L51",
       "weight": 1.0,
       "_origin": "ast",
@@ -53254,28 +53268,6 @@
       "_origin": "ast",
       "source": "src_shared_i18n_localecore",
       "target": "src_shared_i18n_localecore_localecore_translate",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "src/shared/i18n/LocaleCore.luau",
-      "source_location": "L143",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "src_shared_i18n_localecore",
-      "target": "src_shared_i18n_localecore_localizepiece",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "src/shared/i18n/LocaleCore.luau",
-      "source_location": "L119",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "src_shared_i18n_localecore",
-      "target": "src_shared_i18n_localecore_localizewhole",
       "confidence_score": 1.0
     },
     {
@@ -53331,7 +53323,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.8,
       "source_file": "tests/Locale.spec.luau",
-      "source_location": "L97",
+      "source_location": "L108",
       "weight": 1.0,
       "_origin": "ast",
       "source": "tests_locale_spec_samespecifiers",
@@ -53371,30 +53363,6 @@
       "_origin": "ast",
       "source": "src_shared_i18n_localecore_localecore_compile",
       "target": "src_shared_i18n_localecore_patternfor",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "calls",
-      "context": "call",
-      "confidence": "EXTRACTED",
-      "source_file": "src/shared/i18n/LocaleCore.luau",
-      "source_location": "L144",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "src_shared_i18n_localecore_localizepiece",
-      "target": "src_shared_i18n_localecore_localizewhole",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "calls",
-      "context": "call",
-      "confidence": "EXTRACTED",
-      "source_file": "src/shared/i18n/LocaleCore.luau",
-      "source_location": "L161",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "src_shared_i18n_localecore_localecore_localize",
-      "target": "src_shared_i18n_localecore_localizepiece",
       "confidence_score": 1.0
     },
     {
@@ -54527,7 +54495,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "tests/Locale.spec.luau",
-      "source_location": "L129",
+      "source_location": "L140",
       "weight": 1.0,
       "_origin": "ast",
       "source": "tests_locale_spec",
@@ -54538,7 +54506,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "tests/Locale.spec.luau",
-      "source_location": "L96",
+      "source_location": "L107",
       "weight": 1.0,
       "_origin": "ast",
       "source": "tests_locale_spec",
@@ -54549,7 +54517,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "tests/Locale.spec.luau",
-      "source_location": "L116",
+      "source_location": "L127",
       "weight": 1.0,
       "_origin": "ast",
       "source": "tests_locale_spec",
@@ -54561,7 +54529,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "tests/Locale.spec.luau",
-      "source_location": "L138",
+      "source_location": "L149",
       "weight": 1.0,
       "_origin": "ast",
       "source": "tests_locale_spec_literalat",
@@ -57795,5 +57763,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "b455bfe810d3087703f36f0e51a38279c94ddd36"
+  "built_at_commit": "23fe072b70e49fd822f17a9974ce2c215c22ed93"
 }
