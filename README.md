@@ -391,6 +391,12 @@ Escopo em `docs/FASE_5_PARTIDA_VIVA_CASARAO_REAGE.md`.
   - Em cima: Janela Ventania, Pombos e Chuva.
   - Embaixo: Tapete Puxado, Lustre Despencando e Lareira de Fuligem.
   - Tempestade no Caos Final.
+- **Fase 5C — Casarão Vivo: explorar, descobrir, colecionar** (`docs/FASE_5C_CASARAO_VIVO.md`): o lobby vira um lugar para explorar enquanto se espera a partida.
+  - Ficha da Partida (passear sem perder a vez), portas com som e cômodos novos.
+  - Relíquias escondidas e o Álbum do Casarão.
+  - Mistérios do Barão e salas secretas.
+  - Barão passeando, Fantasminha e mapa.
+  - Ordem sugerida: 5.7 Tempestade, depois 5C.1 a 5C.4, e por último a 5.8 (Momentos Puff, conquistas e telemetria), cobrindo armadilhas e Casarão Vivo juntos.
 - **Fase 6 — LiveOps, Temporadas & Monetização** (`docs/FASE_6_LIVEOPS_TEMPORADAS_MONETIZACAO.md`), que antes era a Fase 5. Inclui as skins do Puffador.
 
 ### Painel administrativo seguro

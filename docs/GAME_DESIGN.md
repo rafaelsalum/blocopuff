@@ -650,6 +650,21 @@ Elementos planejados:
 
 O jogador deve ter algo interessante para fazer enquanto aguarda.
 
+### Casarão Vivo (Fase 5C)
+
+O Casarão vira um lugar para explorar enquanto se espera a partida (ver `docs/FASE_5C_CASARAO_VIVO.md`):
+
+- **Ficha da Partida:** quem entra na fila pode sair do mirante e passear; a partida avisa 15 s antes e leva o jogador de onde ele estiver.
+- **Portas e cômodos novos:**
+  - portas que abrem e fecham com som, algumas trancadas por chave ou por nível;
+  - Biblioteca, Sala de Música, Sótão e Porão.
+- **Relíquias e Álbum:**
+  - 40 relíquias escondidas, salvas no perfil;
+  - um álbum por cômodo, com prêmio por cômodo completo e um Puff exclusivo para quem completar tudo;
+  - Relíquia do Dia.
+- **Mistérios do Barão:** páginas do Diário, quebra-cabeças simples (relógio, velas, piano, cofrinho) e salas secretas.
+- **Vida:** o Barão passeando, o Fantasminha Puff (evento rápido em que o primeiro a tocar ganha), quadros que olham, relógio que bate e o mapa do Casarão com "% explorado".
+
 ---
 
 ## 26. Social e Party

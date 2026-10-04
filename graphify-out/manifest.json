@@ -125,8 +125,8 @@
     "semantic_hash": ""
   },
   "README.md": {
-    "mtime": 1791126144.7963243,
-    "ast_hash": "f5cba9b268875bbb31386a6cd20dac29",
+    "mtime": 1791147173.4268272,
+    "ast_hash": "8d37a2a4b634cd1105a9100988eb645d",
     "semantic_hash": ""
   },
   "src/client/controllers/CombatCameraController.luau": {
@@ -290,8 +290,8 @@
     "semantic_hash": ""
   },
   "docs/GAME_DESIGN.md": {
-    "mtime": 1791036445.2481155,
-    "ast_hash": "d121c82d9a952ee810dd857bbddbce8b",
+    "mtime": 1791147173.4263368,
+    "ast_hash": "ad21d2b48bb0a5da675986f2e9613f0e",
     "semantic_hash": ""
   },
   "src/client/controllers/KnockbackController.luau": {
@@ -995,8 +995,8 @@
     "semantic_hash": ""
   },
   "docs/FASE_5_PARTIDA_VIVA_CASARAO_REAGE.md": {
-    "mtime": 1790913376.1704123,
-    "ast_hash": "6e57fb5ab0c50167a4f88f10017b5118",
+    "mtime": 1791147173.4272022,
+    "ast_hash": "534d36d847ca2da9c630da3d250b6369",
     "semantic_hash": ""
   },
   "docs/FASE_6_LIVEOPS_TEMPORADAS_MONETIZACAO.md": {
@@ -1307,6 +1307,11 @@
   "tests/Locale.spec.luau": {
     "mtime": 1791136247.8641222,
     "ast_hash": "fa525bc5989eec44cb08f02fcd5d3948",
+    "semantic_hash": ""
+  },
+  "docs/FASE_5C_CASARAO_VIVO.md": {
+    "mtime": 1791147173.425864,
+    "ast_hash": "68c88d10aa96d5b1a551e73dc65ff536",
     "semantic_hash": ""
   }
 }

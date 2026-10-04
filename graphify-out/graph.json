@@ -2144,8 +2144,8 @@
       "source_location": "L72",
       "_origin": "ast",
       "id": "src_client_controllers_profilecontroller_parsepuffs",
-      "community": 31,
-      "community_name": "ProfileController.luau",
+      "community": 113,
+      "community_name": "TelemetryService.lobbyEvent",
       "norm_label": "parsepuffs()"
     },
     {
@@ -2342,8 +2342,8 @@
       "source_location": "L76",
       "_origin": "ast",
       "id": "src_client_controllers_puffmachinecontroller_puffmachinecontroller_show",
-      "community": 69,
-      "community_name": "celebrate",
+      "community": 75,
+      "community_name": "PuffMachineController.start",
       "norm_label": "puffmachinecontroller.show()"
     },
     {
@@ -2804,8 +2804,8 @@
       "source_location": "L83",
       "_origin": "ast",
       "id": "src_client_controllers_puffdexcontroller_puffdexcontroller_show",
-      "community": 75,
-      "community_name": "PuffMachineController.start",
+      "community": 69,
+      "community_name": "celebrate",
       "norm_label": "puffdexcontroller.show()"
     },
     {
@@ -2937,7 +2937,7 @@
       "_origin": "ast",
       "id": "src_client_controllers_slipperycontroller",
       "community": 58,
-      "community_name": "WindowTrap.luau",
+      "community_name": "ArenaService.luau",
       "norm_label": "slipperycontroller.luau"
     },
     {
@@ -2948,7 +2948,7 @@
       "_origin": "ast",
       "id": "src_client_controllers_slipperycontroller_refreshrain",
       "community": 58,
-      "community_name": "WindowTrap.luau",
+      "community_name": "ArenaService.luau",
       "norm_label": "refreshrain()"
     },
     {
@@ -2959,7 +2959,7 @@
       "_origin": "ast",
       "id": "src_client_controllers_slipperycontroller_watch",
       "community": 58,
-      "community_name": "WindowTrap.luau",
+      "community_name": "ArenaService.luau",
       "norm_label": "watch()"
     },
     {
@@ -2970,7 +2970,7 @@
       "_origin": "ast",
       "id": "src_client_controllers_slipperycontroller_unwatch",
       "community": 58,
-      "community_name": "WindowTrap.luau",
+      "community_name": "ArenaService.luau",
       "norm_label": "unwatch()"
     },
     {
@@ -2981,7 +2981,7 @@
       "_origin": "ast",
       "id": "src_client_controllers_slipperycontroller_iswet",
       "community": 58,
-      "community_name": "WindowTrap.luau",
+      "community_name": "ArenaService.luau",
       "norm_label": "iswet()"
     },
     {
@@ -2992,7 +2992,7 @@
       "_origin": "ast",
       "id": "src_client_controllers_slipperycontroller_step",
       "community": 58,
-      "community_name": "WindowTrap.luau",
+      "community_name": "ArenaService.luau",
       "norm_label": "step()"
     },
     {
@@ -3003,7 +3003,7 @@
       "_origin": "ast",
       "id": "src_client_controllers_slipperycontroller_slipperycontroller_start",
       "community": 58,
-      "community_name": "WindowTrap.luau",
+      "community_name": "ArenaService.luau",
       "norm_label": "slipperycontroller.start()"
     },
     {
@@ -5554,8 +5554,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_server_data_datastoreerrors",
-      "community": 61,
-      "community_name": "LeaderboardService.luau",
+      "community": 124,
+      "community_name": "PlayerDataService.luau",
       "norm_label": "datastoreerrors.luau"
     },
     {
@@ -5565,8 +5565,8 @@
       "source_location": "L8",
       "_origin": "ast",
       "id": "src_server_data_datastoreerrors_datastoreerrors_isstudioaccessdenied",
-      "community": 61,
-      "community_name": "LeaderboardService.luau",
+      "community": 124,
+      "community_name": "PlayerDataService.luau",
       "norm_label": "datastoreerrors.isstudioaccessdenied()"
     },
     {
@@ -5906,8 +5906,8 @@
       "source_location": "L416",
       "_origin": "ast",
       "id": "src_server_data_profileschema_profileschema_withtickets",
-      "community": 2,
-      "community_name": "DailyRules.luau",
+      "community": 121,
+      "community_name": "ReferralService.luau",
       "norm_label": "profileschema.withtickets()"
     },
     {
@@ -6368,7 +6368,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_server_services_arenaservice",
-      "community": 83,
+      "community": 58,
       "community_name": "ArenaService.luau",
       "norm_label": "arenaservice.luau"
     },
@@ -6379,7 +6379,7 @@
       "source_location": "L83",
       "_origin": "ast",
       "id": "src_server_services_arenaservice_isowned",
-      "community": 83,
+      "community": 58,
       "community_name": "ArenaService.luau",
       "norm_label": "isowned()"
     },
@@ -6390,7 +6390,7 @@
       "source_location": "L87",
       "_origin": "ast",
       "id": "src_server_services_arenaservice_destroyownedchild",
-      "community": 83,
+      "community": 58,
       "community_name": "ArenaService.luau",
       "norm_label": "destroyownedchild()"
     },
@@ -6401,7 +6401,7 @@
       "source_location": "L100",
       "_origin": "ast",
       "id": "src_server_services_arenaservice_getfloorstyle",
-      "community": 83,
+      "community": 58,
       "community_name": "ArenaService.luau",
       "norm_label": "getfloorstyle()"
     },
@@ -6412,7 +6412,7 @@
       "source_location": "L105",
       "_origin": "ast",
       "id": "src_server_services_arenaservice_setarenaenergy",
-      "community": 83,
+      "community": 58,
       "community_name": "ArenaService.luau",
       "norm_label": "setarenaenergy()"
     },
@@ -6423,7 +6423,7 @@
       "source_location": "L125",
       "_origin": "ast",
       "id": "src_server_services_arenaservice_createarenavisuals",
-      "community": 83,
+      "community": 58,
       "community_name": "ArenaService.luau",
       "norm_label": "createarenavisuals()"
     },
@@ -6434,7 +6434,7 @@
       "source_location": "L199",
       "_origin": "ast",
       "id": "src_server_services_arenaservice_publishblockcounts",
-      "community": 83,
+      "community": 58,
       "community_name": "ArenaService.luau",
       "norm_label": "publishblockcounts()"
     },
@@ -6445,7 +6445,7 @@
       "source_location": "L206",
       "_origin": "ast",
       "id": "src_server_services_arenaservice_arenaservice_destroy",
-      "community": 83,
+      "community": 58,
       "community_name": "ArenaService.luau",
       "norm_label": "arenaservice.destroy()"
     },
@@ -6456,7 +6456,7 @@
       "source_location": "L231",
       "_origin": "ast",
       "id": "src_server_services_arenaservice_arenaservice_create",
-      "community": 83,
+      "community": 58,
       "community_name": "ArenaService.luau",
       "norm_label": "arenaservice.create()"
     },
@@ -6478,8 +6478,8 @@
       "source_location": "L327",
       "_origin": "ast",
       "id": "src_server_services_arenaservice_arenaservice_getblocks",
-      "community": 132,
-      "community_name": "TrapService.luau",
+      "community": 4,
+      "community_name": "CombatantRegistry.getRoot",
       "norm_label": "arenaservice.getblocks()"
     },
     {
@@ -6489,8 +6489,8 @@
       "source_location": "L336",
       "_origin": "ast",
       "id": "src_server_services_arenaservice_arenaservice_getplayerspawncframes",
-      "community": 1,
-      "community_name": "RoundService.luau",
+      "community": 58,
+      "community_name": "ArenaService.luau",
       "norm_label": "arenaservice.getplayerspawncframes()"
     },
     {
@@ -6500,7 +6500,7 @@
       "source_location": "L346",
       "_origin": "ast",
       "id": "src_server_services_arenaservice_arenaservice_beginround",
-      "community": 83,
+      "community": 58,
       "community_name": "ArenaService.luau",
       "norm_label": "arenaservice.beginround()"
     },
@@ -6511,7 +6511,7 @@
       "source_location": "L352",
       "_origin": "ast",
       "id": "src_server_services_arenaservice_arenaservice_endround",
-      "community": 83,
+      "community": 58,
       "community_name": "ArenaService.luau",
       "norm_label": "arenaservice.endround()"
     },
@@ -6522,7 +6522,7 @@
       "source_location": "L357",
       "_origin": "ast",
       "id": "src_server_services_arenaservice_arenaservice_isactiveblock",
-      "community": 83,
+      "community": 58,
       "community_name": "ArenaService.luau",
       "norm_label": "arenaservice.isactiveblock()"
     },
@@ -6533,7 +6533,7 @@
       "source_location": "L370",
       "_origin": "ast",
       "id": "src_server_services_arenaservice_findactiveblockat",
-      "community": 83,
+      "community": 58,
       "community_name": "ArenaService.luau",
       "norm_label": "findactiveblockat()"
     },
@@ -6544,7 +6544,7 @@
       "source_location": "L390",
       "_origin": "ast",
       "id": "src_server_services_arenaservice_notifydestroyed",
-      "community": 83,
+      "community": 58,
       "community_name": "ArenaService.luau",
       "norm_label": "notifydestroyed()"
     },
@@ -6555,7 +6555,7 @@
       "source_location": "L396",
       "_origin": "ast",
       "id": "src_server_services_arenaservice_arenaservice_adddestroyedlistener",
-      "community": 83,
+      "community": 58,
       "community_name": "ArenaService.luau",
       "norm_label": "arenaservice.adddestroyedlistener()"
     },
@@ -6566,7 +6566,7 @@
       "source_location": "L400",
       "_origin": "ast",
       "id": "src_server_services_arenaservice_markdestroyed",
-      "community": 83,
+      "community": 58,
       "community_name": "ArenaService.luau",
       "norm_label": "markdestroyed()"
     },
@@ -6577,7 +6577,7 @@
       "source_location": "L416",
       "_origin": "ast",
       "id": "src_server_services_arenaservice_arenaservice_trydestroyblock",
-      "community": 83,
+      "community": 58,
       "community_name": "ArenaService.luau",
       "norm_label": "arenaservice.trydestroyblock()"
     },
@@ -6588,7 +6588,7 @@
       "source_location": "L470",
       "_origin": "ast",
       "id": "src_server_services_arenaservice_arenaservice_collapseblock",
-      "community": 83,
+      "community": 58,
       "community_name": "ArenaService.luau",
       "norm_label": "arenaservice.collapseblock()"
     },
@@ -6599,8 +6599,8 @@
       "source_location": "L483",
       "_origin": "ast",
       "id": "src_server_services_arenaservice_arenaservice_getintactblocks",
-      "community": 123,
-      "community_name": "FinalChaosService.luau",
+      "community": 58,
+      "community_name": "ArenaService.luau",
       "norm_label": "arenaservice.getintactblocks()"
     },
     {
@@ -6621,8 +6621,8 @@
       "source_location": "L547",
       "_origin": "ast",
       "id": "src_server_services_arenaservice_arenaservice_setcollapsewarning",
-      "community": 123,
-      "community_name": "FinalChaosService.luau",
+      "community": 58,
+      "community_name": "ArenaService.luau",
       "norm_label": "arenaservice.setcollapsewarning()"
     },
     {
@@ -6632,7 +6632,7 @@
       "source_location": "L561",
       "_origin": "ast",
       "id": "src_server_services_arenaservice_arenaservice_getneighborblock",
-      "community": 83,
+      "community": 58,
       "community_name": "ArenaService.luau",
       "norm_label": "arenaservice.getneighborblock()"
     },
@@ -6643,7 +6643,7 @@
       "source_location": "L587",
       "_origin": "ast",
       "id": "src_server_services_arenaservice_findblockat",
-      "community": 83,
+      "community": 58,
       "community_name": "ArenaService.luau",
       "norm_label": "findblockat()"
     },
@@ -7336,8 +7336,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_server_services_buildmodeservice",
-      "community": 112,
-      "community_name": "PuffadorService.luau",
+      "community": 125,
+      "community_name": "onRequestBuild",
       "norm_label": "buildmodeservice.luau"
     },
     {
@@ -7347,8 +7347,8 @@
       "source_location": "L42",
       "_origin": "ast",
       "id": "src_server_services_buildmodeservice_isfinitevector3",
-      "community": 112,
-      "community_name": "PuffadorService.luau",
+      "community": 125,
+      "community_name": "onRequestBuild",
       "norm_label": "isfinitevector3()"
     },
     {
@@ -7358,8 +7358,8 @@
       "source_location": "L51",
       "_origin": "ast",
       "id": "src_server_services_buildmodeservice_getroot",
-      "community": 112,
-      "community_name": "PuffadorService.luau",
+      "community": 125,
+      "community_name": "onRequestBuild",
       "norm_label": "getroot()"
     },
     {
@@ -7369,8 +7369,8 @@
       "source_location": "L60",
       "_origin": "ast",
       "id": "src_server_services_buildmodeservice_isoccupied",
-      "community": 112,
-      "community_name": "PuffadorService.luau",
+      "community": 125,
+      "community_name": "onRequestBuild",
       "norm_label": "isoccupied()"
     },
     {
@@ -7380,8 +7380,8 @@
       "source_location": "L80",
       "_origin": "ast",
       "id": "src_server_services_buildmodeservice_playbuildsound",
-      "community": 112,
-      "community_name": "PuffadorService.luau",
+      "community": 125,
+      "community_name": "onRequestBuild",
       "norm_label": "playbuildsound()"
     },
     {
@@ -7391,8 +7391,8 @@
       "source_location": "L96",
       "_origin": "ast",
       "id": "src_server_services_buildmodeservice_findtarget",
-      "community": 112,
-      "community_name": "PuffadorService.luau",
+      "community": 125,
+      "community_name": "onRequestBuild",
       "norm_label": "findtarget()"
     },
     {
@@ -7402,8 +7402,8 @@
       "source_location": "L120",
       "_origin": "ast",
       "id": "src_server_services_buildmodeservice_onrequestbuild",
-      "community": 112,
-      "community_name": "PuffadorService.luau",
+      "community": 125,
+      "community_name": "onRequestBuild",
       "norm_label": "onrequestbuild()"
     },
     {
@@ -7413,8 +7413,8 @@
       "source_location": "L156",
       "_origin": "ast",
       "id": "src_server_services_buildmodeservice_buildmodeservice_start",
-      "community": 112,
-      "community_name": "PuffadorService.luau",
+      "community": 125,
+      "community_name": "onRequestBuild",
       "norm_label": "buildmodeservice.start()"
     },
     {
@@ -7424,8 +7424,8 @@
       "source_location": "L175",
       "_origin": "ast",
       "id": "src_server_services_buildmodeservice_buildmodeservice_stop",
-      "community": 112,
-      "community_name": "PuffadorService.luau",
+      "community": 125,
+      "community_name": "onRequestBuild",
       "norm_label": "buildmodeservice.stop()"
     },
     {
@@ -7776,8 +7776,8 @@
       "source_location": "L40",
       "_origin": "ast",
       "id": "src_server_services_combatantregistry_combatantregistry_forplayer",
-      "community": 1,
-      "community_name": "RoundService.luau",
+      "community": 116,
+      "community_name": "CombatantRegistry.luau",
       "norm_label": "combatantregistry.forplayer()"
     },
     {
@@ -7787,8 +7787,8 @@
       "source_location": "L55",
       "_origin": "ast",
       "id": "src_server_services_combatantregistry_combatantregistry_forplayers",
-      "community": 1,
-      "community_name": "RoundService.luau",
+      "community": 116,
+      "community_name": "CombatantRegistry.luau",
       "norm_label": "combatantregistry.forplayers()"
     },
     {
@@ -7798,8 +7798,8 @@
       "source_location": "L64",
       "_origin": "ast",
       "id": "src_server_services_combatantregistry_combatantregistry_registerbot",
-      "community": 116,
-      "community_name": "CombatantRegistry.luau",
+      "community": 104,
+      "community_name": "BotFillService.luau",
       "norm_label": "combatantregistry.registerbot()"
     },
     {
@@ -7809,8 +7809,8 @@
       "source_location": "L78",
       "_origin": "ast",
       "id": "src_server_services_combatantregistry_combatantregistry_unregisterbot",
-      "community": 104,
-      "community_name": "BotFillService.luau",
+      "community": 116,
+      "community_name": "CombatantRegistry.luau",
       "norm_label": "combatantregistry.unregisterbot()"
     },
     {
@@ -7831,8 +7831,8 @@
       "source_location": "L91",
       "_origin": "ast",
       "id": "src_server_services_combatantregistry_combatantregistry_getbots",
-      "community": 58,
-      "community_name": "WindowTrap.luau",
+      "community": 116,
+      "community_name": "CombatantRegistry.luau",
       "norm_label": "combatantregistry.getbots()"
     },
     {
@@ -7842,8 +7842,8 @@
       "source_location": "L104",
       "_origin": "ast",
       "id": "src_server_services_combatantregistry_combatantregistry_all",
-      "community": 58,
-      "community_name": "WindowTrap.luau",
+      "community": 116,
+      "community_name": "CombatantRegistry.luau",
       "norm_label": "combatantregistry.all()"
     },
     {
@@ -7864,8 +7864,8 @@
       "source_location": "L122",
       "_origin": "ast",
       "id": "src_server_services_combatantregistry_combatantregistry_ispresent",
-      "community": 116,
-      "community_name": "CombatantRegistry.luau",
+      "community": 132,
+      "community_name": "TrapService.luau",
       "norm_label": "combatantregistry.ispresent()"
     },
     {
@@ -8073,8 +8073,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_server_services_corridortelemetryservice",
-      "community": 30,
-      "community_name": "VaultService.luau",
+      "community": 130,
+      "community_name": "CorridorTelemetryService.luau",
       "norm_label": "corridortelemetryservice.luau"
     },
     {
@@ -8084,8 +8084,8 @@
       "source_location": "L44",
       "_origin": "ast",
       "id": "src_server_services_corridortelemetryservice_isactiveparticipant",
-      "community": 30,
-      "community_name": "VaultService.luau",
+      "community": 130,
+      "community_name": "CorridorTelemetryService.luau",
       "norm_label": "isactiveparticipant()"
     },
     {
@@ -8095,8 +8095,8 @@
       "source_location": "L53",
       "_origin": "ast",
       "id": "src_server_services_corridortelemetryservice_floorof",
-      "community": 30,
-      "community_name": "VaultService.luau",
+      "community": 130,
+      "community_name": "CorridorTelemetryService.luau",
       "norm_label": "floorof()"
     },
     {
@@ -8106,8 +8106,8 @@
       "source_location": "L58",
       "_origin": "ast",
       "id": "src_server_services_corridortelemetryservice_findcorridor",
-      "community": 30,
-      "community_name": "VaultService.luau",
+      "community": 130,
+      "community_name": "CorridorTelemetryService.luau",
       "norm_label": "findcorridor()"
     },
     {
@@ -8117,8 +8117,8 @@
       "source_location": "L67",
       "_origin": "ast",
       "id": "src_server_services_corridortelemetryservice_closevisit",
-      "community": 30,
-      "community_name": "VaultService.luau",
+      "community": 130,
+      "community_name": "CorridorTelemetryService.luau",
       "norm_label": "closevisit()"
     },
     {
@@ -8172,8 +8172,8 @@
       "source_location": "L91",
       "_origin": "ast",
       "id": "src_server_services_dashservice_dashservice_forgetbot",
-      "community": 104,
-      "community_name": "BotFillService.luau",
+      "community": 145,
+      "community_name": "DashService.luau",
       "norm_label": "dashservice.forgetbot()"
     },
     {
@@ -8271,8 +8271,8 @@
       "source_location": "L162",
       "_origin": "ast",
       "id": "src_server_services_eliminationservice_eliminationservice_beginround",
-      "community": 90,
-      "community_name": "EliminationService.luau",
+      "community": 1,
+      "community_name": "RoundService.luau",
       "norm_label": "eliminationservice.beginround()"
     },
     {
@@ -8304,8 +8304,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_server_services_finalchaosservice",
-      "community": 123,
-      "community_name": "FinalChaosService.luau",
+      "community": 58,
+      "community_name": "ArenaService.luau",
       "norm_label": "finalchaosservice.luau"
     },
     {
@@ -8315,8 +8315,8 @@
       "source_location": "L19",
       "_origin": "ast",
       "id": "src_server_services_finalchaosservice_pickrandom",
-      "community": 123,
-      "community_name": "FinalChaosService.luau",
+      "community": 58,
+      "community_name": "ArenaService.luau",
       "norm_label": "pickrandom()"
     },
     {
@@ -8326,8 +8326,8 @@
       "source_location": "L31",
       "_origin": "ast",
       "id": "src_server_services_finalchaosservice_runwaves",
-      "community": 123,
-      "community_name": "FinalChaosService.luau",
+      "community": 58,
+      "community_name": "ArenaService.luau",
       "norm_label": "runwaves()"
     },
     {
@@ -8337,8 +8337,8 @@
       "source_location": "L54",
       "_origin": "ast",
       "id": "src_server_services_finalchaosservice_finalchaosservice_getduration",
-      "community": 123,
-      "community_name": "FinalChaosService.luau",
+      "community": 1,
+      "community_name": "RoundService.luau",
       "norm_label": "finalchaosservice.getduration()"
     },
     {
@@ -8348,8 +8348,8 @@
       "source_location": "L59",
       "_origin": "ast",
       "id": "src_server_services_finalchaosservice_finalchaosservice_begin",
-      "community": 123,
-      "community_name": "FinalChaosService.luau",
+      "community": 1,
+      "community_name": "RoundService.luau",
       "norm_label": "finalchaosservice.begin()"
     },
     {
@@ -8359,8 +8359,8 @@
       "source_location": "L68",
       "_origin": "ast",
       "id": "src_server_services_finalchaosservice_finalchaosservice_stop",
-      "community": 123,
-      "community_name": "FinalChaosService.luau",
+      "community": 58,
+      "community_name": "ArenaService.luau",
       "norm_label": "finalchaosservice.stop()"
     },
     {
@@ -8370,8 +8370,8 @@
       "source_location": "L73",
       "_origin": "ast",
       "id": "src_server_services_finalchaosservice_finalchaosservice_isrunning",
-      "community": 123,
-      "community_name": "FinalChaosService.luau",
+      "community": 1,
+      "community_name": "RoundService.luau",
       "norm_label": "finalchaosservice.isrunning()"
     },
     {
@@ -8502,7 +8502,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_server_services_knockbackservice",
-      "community": 107,
+      "community": 53,
       "community_name": "KnockbackService.luau",
       "norm_label": "knockbackservice.luau"
     },
@@ -8513,7 +8513,7 @@
       "source_location": "L39",
       "_origin": "ast",
       "id": "src_server_services_knockbackservice_isactiveparticipant",
-      "community": 107,
+      "community": 53,
       "community_name": "KnockbackService.luau",
       "norm_label": "isactiveparticipant()"
     },
@@ -8535,7 +8535,7 @@
       "source_location": "L63",
       "_origin": "ast",
       "id": "src_server_services_knockbackservice_notify",
-      "community": 107,
+      "community": 53,
       "community_name": "KnockbackService.luau",
       "norm_label": "notify()"
     },
@@ -8546,7 +8546,7 @@
       "source_location": "L73",
       "_origin": "ast",
       "id": "src_server_services_knockbackservice_computevelocity",
-      "community": 107,
+      "community": 53,
       "community_name": "KnockbackService.luau",
       "norm_label": "computevelocity()"
     },
@@ -8557,7 +8557,7 @@
       "source_location": "L81",
       "_origin": "ast",
       "id": "src_server_services_knockbackservice_oncharacterhit",
-      "community": 107,
+      "community": 53,
       "community_name": "KnockbackService.luau",
       "norm_label": "oncharacterhit()"
     },
@@ -8579,7 +8579,7 @@
       "source_location": "L113",
       "_origin": "ast",
       "id": "src_server_services_knockbackservice_deliver",
-      "community": 107,
+      "community": 53,
       "community_name": "KnockbackService.luau",
       "norm_label": "deliver()"
     },
@@ -8590,8 +8590,8 @@
       "source_location": "L129",
       "_origin": "ast",
       "id": "src_server_services_knockbackservice_knockbackservice_push",
-      "community": 107,
-      "community_name": "KnockbackService.luau",
+      "community": 58,
+      "community_name": "ArenaService.luau",
       "norm_label": "knockbackservice.push()"
     },
     {
@@ -8601,7 +8601,7 @@
       "source_location": "L136",
       "_origin": "ast",
       "id": "src_server_services_knockbackservice_knockbackservice_slide",
-      "community": 107,
+      "community": 53,
       "community_name": "KnockbackService.luau",
       "norm_label": "knockbackservice.slide()"
     },
@@ -8612,7 +8612,7 @@
       "source_location": "L142",
       "_origin": "ast",
       "id": "src_server_services_knockbackservice_knockbackservice_markattacker",
-      "community": 107,
+      "community": 53,
       "community_name": "KnockbackService.luau",
       "norm_label": "knockbackservice.markattacker()"
     },
@@ -8656,8 +8656,8 @@
       "source_location": "L176",
       "_origin": "ast",
       "id": "src_server_services_knockbackservice_knockbackservice_beginround",
-      "community": 1,
-      "community_name": "RoundService.luau",
+      "community": 53,
+      "community_name": "KnockbackService.luau",
       "norm_label": "knockbackservice.beginround()"
     },
     {
@@ -8667,7 +8667,7 @@
       "source_location": "L183",
       "_origin": "ast",
       "id": "src_server_services_knockbackservice_knockbackservice_endround",
-      "community": 107,
+      "community": 53,
       "community_name": "KnockbackService.luau",
       "norm_label": "knockbackservice.endround()"
     },
@@ -8678,7 +8678,7 @@
       "source_location": "L189",
       "_origin": "ast",
       "id": "src_server_services_knockbackservice_knockbackservice_start",
-      "community": 107,
+      "community": 53,
       "community_name": "KnockbackService.luau",
       "norm_label": "knockbackservice.start()"
     },
@@ -8689,7 +8689,7 @@
       "source_location": "L194",
       "_origin": "ast",
       "id": "src_server_services_knockbackservice_knockbackservice_stop",
-      "community": 107,
+      "community": 53,
       "community_name": "KnockbackService.luau",
       "norm_label": "knockbackservice.stop()"
     },
@@ -9316,8 +9316,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_server_services_matchaudience",
-      "community": 30,
-      "community_name": "VaultService.luau",
+      "community": 25,
+      "community_name": "BuildingDecor.createPart",
       "norm_label": "matchaudience.luau"
     },
     {
@@ -9327,8 +9327,8 @@
       "source_location": "L15",
       "_origin": "ast",
       "id": "src_server_services_matchaudience_matchaudience_isinmatch",
-      "community": 30,
-      "community_name": "VaultService.luau",
+      "community": 25,
+      "community_name": "BuildingDecor.createPart",
       "norm_label": "matchaudience.isinmatch()"
     },
     {
@@ -9338,8 +9338,8 @@
       "source_location": "L19",
       "_origin": "ast",
       "id": "src_server_services_matchaudience_matchaudience_players",
-      "community": 30,
-      "community_name": "VaultService.luau",
+      "community": 25,
+      "community_name": "BuildingDecor.createPart",
       "norm_label": "matchaudience.players()"
     },
     {
@@ -9349,8 +9349,8 @@
       "source_location": "L30",
       "_origin": "ast",
       "id": "src_server_services_matchaudience_matchaudience_fire",
-      "community": 30,
-      "community_name": "VaultService.luau",
+      "community": 25,
+      "community_name": "BuildingDecor.createPart",
       "norm_label": "matchaudience.fire()"
     },
     {
@@ -9360,8 +9360,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_server_services_matchqueueservice",
-      "community": 104,
-      "community_name": "BotFillService.luau",
+      "community": 83,
+      "community_name": "MatchQueueService.luau",
       "norm_label": "matchqueueservice.luau"
     },
     {
@@ -9371,8 +9371,8 @@
       "source_location": "L70",
       "_origin": "ast",
       "id": "src_server_services_matchqueueservice_iscompeting",
-      "community": 104,
-      "community_name": "BotFillService.luau",
+      "community": 83,
+      "community_name": "MatchQueueService.luau",
       "norm_label": "iscompeting()"
     },
     {
@@ -9382,8 +9382,8 @@
       "source_location": "L75",
       "_origin": "ast",
       "id": "src_server_services_matchqueueservice_livingroot",
-      "community": 104,
-      "community_name": "BotFillService.luau",
+      "community": 83,
+      "community_name": "MatchQueueService.luau",
       "norm_label": "livingroot()"
     },
     {
@@ -9393,8 +9393,8 @@
       "source_location": "L89",
       "_origin": "ast",
       "id": "src_server_services_matchqueueservice_updatelonely",
-      "community": 104,
-      "community_name": "BotFillService.luau",
+      "community": 83,
+      "community_name": "MatchQueueService.luau",
       "norm_label": "updatelonely()"
     },
     {
@@ -9404,8 +9404,8 @@
       "source_location": "L115",
       "_origin": "ast",
       "id": "src_server_services_matchqueueservice_updateboard",
-      "community": 104,
-      "community_name": "BotFillService.luau",
+      "community": 83,
+      "community_name": "MatchQueueService.luau",
       "norm_label": "updateboard()"
     },
     {
@@ -9415,8 +9415,8 @@
       "source_location": "L143",
       "_origin": "ast",
       "id": "src_server_services_matchqueueservice_refresh",
-      "community": 104,
-      "community_name": "BotFillService.luau",
+      "community": 83,
+      "community_name": "MatchQueueService.luau",
       "norm_label": "refresh()"
     },
     {
@@ -9426,8 +9426,8 @@
       "source_location": "L178",
       "_origin": "ast",
       "id": "src_server_services_matchqueueservice_onrequest",
-      "community": 104,
-      "community_name": "BotFillService.luau",
+      "community": 83,
+      "community_name": "MatchQueueService.luau",
       "norm_label": "onrequest()"
     },
     {
@@ -9437,8 +9437,8 @@
       "source_location": "L204",
       "_origin": "ast",
       "id": "src_server_services_matchqueueservice_matchqueueservice_count",
-      "community": 104,
-      "community_name": "BotFillService.luau",
+      "community": 83,
+      "community_name": "MatchQueueService.luau",
       "norm_label": "matchqueueservice.count()"
     },
     {
@@ -9448,8 +9448,8 @@
       "source_location": "L210",
       "_origin": "ast",
       "id": "src_server_services_matchqueueservice_matchqueueservice_setbotcount",
-      "community": 104,
-      "community_name": "BotFillService.luau",
+      "community": 83,
+      "community_name": "MatchQueueService.luau",
       "norm_label": "matchqueueservice.setbotcount()"
     },
     {
@@ -9459,8 +9459,8 @@
       "source_location": "L216",
       "_origin": "ast",
       "id": "src_server_services_matchqueueservice_matchqueueservice_queuedplayers",
-      "community": 104,
-      "community_name": "BotFillService.luau",
+      "community": 83,
+      "community_name": "MatchQueueService.luau",
       "norm_label": "matchqueueservice.queuedplayers()"
     },
     {
@@ -9481,8 +9481,8 @@
       "source_location": "L236",
       "_origin": "ast",
       "id": "src_server_services_matchqueueservice_matchqueueservice_isinzone",
-      "community": 104,
-      "community_name": "BotFillService.luau",
+      "community": 112,
+      "community_name": "PuffadorService.luau",
       "norm_label": "matchqueueservice.isinzone()"
     },
     {
@@ -9492,8 +9492,8 @@
       "source_location": "L242",
       "_origin": "ast",
       "id": "src_server_services_matchqueueservice_matchqueueservice_setopen",
-      "community": 104,
-      "community_name": "BotFillService.luau",
+      "community": 83,
+      "community_name": "MatchQueueService.luau",
       "norm_label": "matchqueueservice.setopen()"
     },
     {
@@ -9503,8 +9503,8 @@
       "source_location": "L246",
       "_origin": "ast",
       "id": "src_server_services_matchqueueservice_setgatesclosed",
-      "community": 104,
-      "community_name": "BotFillService.luau",
+      "community": 83,
+      "community_name": "MatchQueueService.luau",
       "norm_label": "setgatesclosed()"
     },
     {
@@ -9514,8 +9514,8 @@
       "source_location": "L267",
       "_origin": "ast",
       "id": "src_server_services_matchqueueservice_matchqueueservice_setcountdown",
-      "community": 104,
-      "community_name": "BotFillService.luau",
+      "community": 83,
+      "community_name": "MatchQueueService.luau",
       "norm_label": "matchqueueservice.setcountdown()"
     },
     {
@@ -9525,8 +9525,8 @@
       "source_location": "L280",
       "_origin": "ast",
       "id": "src_server_services_matchqueueservice_matchqueueservice_isboardingopen",
-      "community": 104,
-      "community_name": "BotFillService.luau",
+      "community": 112,
+      "community_name": "PuffadorService.luau",
       "norm_label": "matchqueueservice.isboardingopen()"
     },
     {
@@ -9536,8 +9536,8 @@
       "source_location": "L285",
       "_origin": "ast",
       "id": "src_server_services_matchqueueservice_matchqueueservice_setwarmupline",
-      "community": 104,
-      "community_name": "BotFillService.luau",
+      "community": 112,
+      "community_name": "PuffadorService.luau",
       "norm_label": "matchqueueservice.setwarmupline()"
     },
     {
@@ -9547,8 +9547,8 @@
       "source_location": "L291",
       "_origin": "ast",
       "id": "src_server_services_matchqueueservice_matchqueueservice_refresh",
-      "community": 104,
-      "community_name": "BotFillService.luau",
+      "community": 83,
+      "community_name": "MatchQueueService.luau",
       "norm_label": "matchqueueservice.refresh()"
     },
     {
@@ -9558,8 +9558,8 @@
       "source_location": "L295",
       "_origin": "ast",
       "id": "src_server_services_matchqueueservice_matchqueueservice_start",
-      "community": 104,
-      "community_name": "BotFillService.luau",
+      "community": 83,
+      "community_name": "MatchQueueService.luau",
       "norm_label": "matchqueueservice.start()"
     },
     {
@@ -9800,8 +9800,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_server_services_photomodeservice",
-      "community": 132,
-      "community_name": "TrapService.luau",
+      "community": 123,
+      "community_name": "PhotoModeService.luau",
       "norm_label": "photomodeservice.luau"
     },
     {
@@ -9811,8 +9811,8 @@
       "source_location": "L67",
       "_origin": "ast",
       "id": "src_server_services_photomodeservice_blockcenter",
-      "community": 132,
-      "community_name": "TrapService.luau",
+      "community": 123,
+      "community_name": "PhotoModeService.luau",
       "norm_label": "blockcenter()"
     },
     {
@@ -9822,8 +9822,8 @@
       "source_location": "L80",
       "_origin": "ast",
       "id": "src_server_services_photomodeservice_standingon",
-      "community": 132,
-      "community_name": "TrapService.luau",
+      "community": 123,
+      "community_name": "PhotoModeService.luau",
       "norm_label": "standingon()"
     },
     {
@@ -9833,8 +9833,8 @@
       "source_location": "L84",
       "_origin": "ast",
       "id": "src_server_services_photomodeservice_createpart",
-      "community": 132,
-      "community_name": "TrapService.luau",
+      "community": 123,
+      "community_name": "PhotoModeService.luau",
       "norm_label": "createpart()"
     },
     {
@@ -9844,8 +9844,8 @@
       "source_location": "L99",
       "_origin": "ast",
       "id": "src_server_services_photomodeservice_openhole",
-      "community": 132,
-      "community_name": "TrapService.luau",
+      "community": 123,
+      "community_name": "PhotoModeService.luau",
       "norm_label": "openhole()"
     },
     {
@@ -9855,8 +9855,8 @@
       "source_location": "L110",
       "_origin": "ast",
       "id": "src_server_services_photomodeservice_rotatejoint",
-      "community": 132,
-      "community_name": "TrapService.luau",
+      "community": 123,
+      "community_name": "PhotoModeService.luau",
       "norm_label": "rotatejoint()"
     },
     {
@@ -9866,8 +9866,8 @@
       "source_location": "L117",
       "_origin": "ast",
       "id": "src_server_services_photomodeservice_applypose",
-      "community": 132,
-      "community_name": "TrapService.luau",
+      "community": 123,
+      "community_name": "PhotoModeService.luau",
       "norm_label": "applypose()"
     },
     {
@@ -9877,8 +9877,8 @@
       "source_location": "L137",
       "_origin": "ast",
       "id": "src_server_services_photomodeservice_attachpuffador",
-      "community": 132,
-      "community_name": "TrapService.luau",
+      "community": 123,
+      "community_name": "PhotoModeService.luau",
       "norm_label": "attachpuffador()"
     },
     {
@@ -9888,8 +9888,8 @@
       "source_location": "L167",
       "_origin": "ast",
       "id": "src_server_services_photomodeservice_builddescription",
-      "community": 132,
-      "community_name": "TrapService.luau",
+      "community": 123,
+      "community_name": "PhotoModeService.luau",
       "norm_label": "builddescription()"
     },
     {
@@ -9899,8 +9899,8 @@
       "source_location": "L180",
       "_origin": "ast",
       "id": "src_server_services_photomodeservice_spawnactor",
-      "community": 132,
-      "community_name": "TrapService.luau",
+      "community": 123,
+      "community_name": "PhotoModeService.luau",
       "norm_label": "spawnactor()"
     },
     {
@@ -9910,8 +9910,8 @@
       "source_location": "L216",
       "_origin": "ast",
       "id": "src_server_services_photomodeservice_createshot",
-      "community": 132,
-      "community_name": "TrapService.luau",
+      "community": 123,
+      "community_name": "PhotoModeService.luau",
       "norm_label": "createshot()"
     },
     {
@@ -9921,8 +9921,8 @@
       "source_location": "L236",
       "_origin": "ast",
       "id": "src_server_services_photomodeservice_createdebris",
-      "community": 132,
-      "community_name": "TrapService.luau",
+      "community": 123,
+      "community_name": "PhotoModeService.luau",
       "norm_label": "createdebris()"
     },
     {
@@ -9932,8 +9932,8 @@
       "source_location": "L253",
       "_origin": "ast",
       "id": "src_server_services_photomodeservice_getscene",
-      "community": 132,
-      "community_name": "TrapService.luau",
+      "community": 123,
+      "community_name": "PhotoModeService.luau",
       "norm_label": "getscene()"
     },
     {
@@ -9943,8 +9943,8 @@
       "source_location": "L338",
       "_origin": "ast",
       "id": "src_server_services_photomodeservice_photomodeservice_clear",
-      "community": 132,
-      "community_name": "TrapService.luau",
+      "community": 123,
+      "community_name": "PhotoModeService.luau",
       "norm_label": "photomodeservice.clear()"
     },
     {
@@ -9954,8 +9954,8 @@
       "source_location": "L353",
       "_origin": "ast",
       "id": "src_server_services_photomodeservice_photomodeservice_show",
-      "community": 132,
-      "community_name": "TrapService.luau",
+      "community": 123,
+      "community_name": "PhotoModeService.luau",
       "norm_label": "photomodeservice.show()"
     },
     {
@@ -9965,8 +9965,8 @@
       "source_location": "L394",
       "_origin": "ast",
       "id": "src_server_services_photomodeservice_photomodeservice_start",
-      "community": 132,
-      "community_name": "TrapService.luau",
+      "community": 123,
+      "community_name": "PhotoModeService.luau",
       "norm_label": "photomodeservice.start()"
     },
     {
@@ -10009,8 +10009,8 @@
       "source_location": "L162",
       "_origin": "ast",
       "id": "src_server_services_playerdataservice_nonempty",
-      "community": 61,
-      "community_name": "LeaderboardService.luau",
+      "community": 124,
+      "community_name": "PlayerDataService.luau",
       "norm_label": "nonempty()"
     },
     {
@@ -10152,8 +10152,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_server_services_projectileservice",
-      "community": 125,
-      "community_name": "ProjectileService.luau",
+      "community": 112,
+      "community_name": "PuffadorService.luau",
       "norm_label": "projectileservice.luau"
     },
     {
@@ -10163,8 +10163,8 @@
       "source_location": "L68",
       "_origin": "ast",
       "id": "src_server_services_projectileservice_isowned",
-      "community": 125,
-      "community_name": "ProjectileService.luau",
+      "community": 112,
+      "community_name": "PuffadorService.luau",
       "norm_label": "isowned()"
     },
     {
@@ -10174,8 +10174,8 @@
       "source_location": "L72",
       "_origin": "ast",
       "id": "src_server_services_projectileservice_broadcast",
-      "community": 125,
-      "community_name": "ProjectileService.luau",
+      "community": 112,
+      "community_name": "PuffadorService.luau",
       "norm_label": "broadcast()"
     },
     {
@@ -10185,8 +10185,8 @@
       "source_location": "L82",
       "_origin": "ast",
       "id": "src_server_services_projectileservice_removeprojectileat",
-      "community": 125,
-      "community_name": "ProjectileService.luau",
+      "community": 112,
+      "community_name": "PuffadorService.luau",
       "norm_label": "removeprojectileat()"
     },
     {
@@ -10196,8 +10196,8 @@
       "source_location": "L94",
       "_origin": "ast",
       "id": "src_server_services_projectileservice_notifyhit",
-      "community": 125,
-      "community_name": "ProjectileService.luau",
+      "community": 112,
+      "community_name": "PuffadorService.luau",
       "norm_label": "notifyhit()"
     },
     {
@@ -10207,8 +10207,8 @@
       "source_location": "L113",
       "_origin": "ast",
       "id": "src_server_services_projectileservice_updateprojectiles",
-      "community": 125,
-      "community_name": "ProjectileService.luau",
+      "community": 112,
+      "community_name": "PuffadorService.luau",
       "norm_label": "updateprojectiles()"
     },
     {
@@ -10218,8 +10218,8 @@
       "source_location": "L195",
       "_origin": "ast",
       "id": "src_server_services_projectileservice_projectileservice_start",
-      "community": 125,
-      "community_name": "ProjectileService.luau",
+      "community": 112,
+      "community_name": "PuffadorService.luau",
       "norm_label": "projectileservice.start()"
     },
     {
@@ -10229,8 +10229,8 @@
       "source_location": "L229",
       "_origin": "ast",
       "id": "src_server_services_projectileservice_projectileservice_spawn",
-      "community": 125,
-      "community_name": "ProjectileService.luau",
+      "community": 112,
+      "community_name": "PuffadorService.luau",
       "norm_label": "projectileservice.spawn()"
     },
     {
@@ -10240,7 +10240,7 @@
       "source_location": "L292",
       "_origin": "ast",
       "id": "src_server_services_projectileservice_projectileservice_setcharacterhithandler",
-      "community": 107,
+      "community": 53,
       "community_name": "KnockbackService.luau",
       "norm_label": "projectileservice.setcharacterhithandler()"
     },
@@ -10262,8 +10262,8 @@
       "source_location": "L300",
       "_origin": "ast",
       "id": "src_server_services_projectileservice_projectileservice_clearall",
-      "community": 125,
-      "community_name": "ProjectileService.luau",
+      "community": 112,
+      "community_name": "PuffadorService.luau",
       "norm_label": "projectileservice.clearall()"
     },
     {
@@ -10273,8 +10273,8 @@
       "source_location": "L308",
       "_origin": "ast",
       "id": "src_server_services_projectileservice_projectileservice_clearfor",
-      "community": 125,
-      "community_name": "ProjectileService.luau",
+      "community": 112,
+      "community_name": "PuffadorService.luau",
       "norm_label": "projectileservice.clearfor()"
     },
     {
@@ -10284,8 +10284,8 @@
       "source_location": "L317",
       "_origin": "ast",
       "id": "src_server_services_projectileservice_projectileservice_stop",
-      "community": 125,
-      "community_name": "ProjectileService.luau",
+      "community": 112,
+      "community_name": "PuffadorService.luau",
       "norm_label": "projectileservice.stop()"
     },
     {
@@ -10361,8 +10361,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_server_services_puffmomentservice",
-      "community": 30,
-      "community_name": "VaultService.luau",
+      "community": 126,
+      "community_name": "PuffMomentService.luau",
       "norm_label": "puffmomentservice.luau"
     },
     {
@@ -10372,8 +10372,8 @@
       "source_location": "L36",
       "_origin": "ast",
       "id": "src_server_services_puffmomentservice_puffmomentservice_record",
-      "community": 30,
-      "community_name": "VaultService.luau",
+      "community": 126,
+      "community_name": "PuffMomentService.luau",
       "norm_label": "puffmomentservice.record()"
     },
     {
@@ -10383,8 +10383,8 @@
       "source_location": "L56",
       "_origin": "ast",
       "id": "src_server_services_puffmomentservice_puffmomentservice_beginround",
-      "community": 30,
-      "community_name": "VaultService.luau",
+      "community": 126,
+      "community_name": "PuffMomentService.luau",
       "norm_label": "puffmomentservice.beginround()"
     },
     {
@@ -10394,8 +10394,8 @@
       "source_location": "L61",
       "_origin": "ast",
       "id": "src_server_services_puffmomentservice_puffmomentservice_endround",
-      "community": 30,
-      "community_name": "VaultService.luau",
+      "community": 126,
+      "community_name": "PuffMomentService.luau",
       "norm_label": "puffmomentservice.endround()"
     },
     {
@@ -10405,8 +10405,8 @@
       "source_location": "L66",
       "_origin": "ast",
       "id": "src_server_services_puffmomentservice_puffmomentservice_start",
-      "community": 30,
-      "community_name": "VaultService.luau",
+      "community": 126,
+      "community_name": "PuffMomentService.luau",
       "norm_label": "puffmomentservice.start()"
     },
     {
@@ -10416,8 +10416,8 @@
       "source_location": "L76",
       "_origin": "ast",
       "id": "src_server_services_puffmomentservice_puffmomentservice_stop",
-      "community": 30,
-      "community_name": "VaultService.luau",
+      "community": 126,
+      "community_name": "PuffMomentService.luau",
       "norm_label": "puffmomentservice.stop()"
     },
     {
@@ -10713,8 +10713,8 @@
       "source_location": "L247",
       "_origin": "ast",
       "id": "src_server_services_puffadorservice_puffadorservice_beginround",
-      "community": 1,
-      "community_name": "RoundService.luau",
+      "community": 112,
+      "community_name": "PuffadorService.luau",
       "norm_label": "puffadorservice.beginround()"
     },
     {
@@ -11164,8 +11164,8 @@
       "source_location": "L251",
       "_origin": "ast",
       "id": "src_server_services_referralservice_onclientreport",
-      "community": 121,
-      "community_name": "ReferralService.luau",
+      "community": 113,
+      "community_name": "TelemetryService.lobbyEvent",
       "norm_label": "onclientreport()"
     },
     {
@@ -11406,8 +11406,8 @@
       "source_location": "L124",
       "_origin": "ast",
       "id": "src_server_services_roundservice_countqueued",
-      "community": 104,
-      "community_name": "BotFillService.luau",
+      "community": 83,
+      "community_name": "MatchQueueService.luau",
       "norm_label": "countqueued()"
     },
     {
@@ -11417,8 +11417,8 @@
       "source_location": "L129",
       "_origin": "ast",
       "id": "src_server_services_roundservice_setstate",
-      "community": 104,
-      "community_name": "BotFillService.luau",
+      "community": 83,
+      "community_name": "MatchQueueService.luau",
       "norm_label": "setstate()"
     },
     {
@@ -11516,8 +11516,8 @@
       "source_location": "L243",
       "_origin": "ast",
       "id": "src_server_services_roundservice_markparticipantattributes",
-      "community": 1,
-      "community_name": "RoundService.luau",
+      "community": 116,
+      "community_name": "CombatantRegistry.luau",
       "norm_label": "markparticipantattributes()"
     },
     {
@@ -11593,8 +11593,8 @@
       "source_location": "L394",
       "_origin": "ast",
       "id": "src_server_services_roundservice_onparticipantdied",
-      "community": 116,
-      "community_name": "CombatantRegistry.luau",
+      "community": 1,
+      "community_name": "RoundService.luau",
       "norm_label": "onparticipantdied()"
     },
     {
@@ -11604,8 +11604,8 @@
       "source_location": "L398",
       "_origin": "ast",
       "id": "src_server_services_roundservice_connectparticipantdeathhandlers",
-      "community": 116,
-      "community_name": "CombatantRegistry.luau",
+      "community": 1,
+      "community_name": "RoundService.luau",
       "norm_label": "connectparticipantdeathhandlers()"
     },
     {
@@ -11637,8 +11637,8 @@
       "source_location": "L427",
       "_origin": "ast",
       "id": "src_server_services_roundservice_evaluateactiveparticipants",
-      "community": 123,
-      "community_name": "FinalChaosService.luau",
+      "community": 1,
+      "community_name": "RoundService.luau",
       "norm_label": "evaluateactiveparticipants()"
     },
     {
@@ -11670,8 +11670,8 @@
       "source_location": "L481",
       "_origin": "ast",
       "id": "src_server_services_roundservice_runwaitingforplayers",
-      "community": 104,
-      "community_name": "BotFillService.luau",
+      "community": 83,
+      "community_name": "MatchQueueService.luau",
       "norm_label": "runwaitingforplayers()"
     },
     {
@@ -11681,8 +11681,8 @@
       "source_location": "L496",
       "_origin": "ast",
       "id": "src_server_services_roundservice_runcountdown",
-      "community": 104,
-      "community_name": "BotFillService.luau",
+      "community": 83,
+      "community_name": "MatchQueueService.luau",
       "norm_label": "runcountdown()"
     },
     {
@@ -11703,8 +11703,8 @@
       "source_location": "L600",
       "_origin": "ast",
       "id": "src_server_services_roundservice_startfinalchaos",
-      "community": 123,
-      "community_name": "FinalChaosService.luau",
+      "community": 1,
+      "community_name": "RoundService.luau",
       "norm_label": "startfinalchaos()"
     },
     {
@@ -11714,8 +11714,8 @@
       "source_location": "L615",
       "_origin": "ast",
       "id": "src_server_services_roundservice_runactive",
-      "community": 123,
-      "community_name": "FinalChaosService.luau",
+      "community": 1,
+      "community_name": "RoundService.luau",
       "norm_label": "runactive()"
     },
     {
@@ -11725,8 +11725,8 @@
       "source_location": "L671",
       "_origin": "ast",
       "id": "src_server_services_roundservice_isbeginner",
-      "community": 1,
-      "community_name": "RoundService.luau",
+      "community": 103,
+      "community_name": "RoundStatsService.luau",
       "norm_label": "isbeginner()"
     },
     {
@@ -11736,8 +11736,8 @@
       "source_location": "L676",
       "_origin": "ast",
       "id": "src_server_services_roundservice_commitprofiles",
-      "community": 1,
-      "community_name": "RoundService.luau",
+      "community": 103,
+      "community_name": "RoundStatsService.luau",
       "norm_label": "commitprofiles()"
     },
     {
@@ -12429,8 +12429,8 @@
       "source_location": "L162",
       "_origin": "ast",
       "id": "src_server_services_telemetryservice_telemetryservice_dash",
-      "community": 145,
-      "community_name": "DashService.luau",
+      "community": 80,
+      "community_name": "TelemetryService.luau",
       "norm_label": "telemetryservice.dash()"
     },
     {
@@ -12451,8 +12451,8 @@
       "source_location": "L181",
       "_origin": "ast",
       "id": "src_server_services_telemetryservice_telemetryservice_event",
-      "community": 30,
-      "community_name": "VaultService.luau",
+      "community": 80,
+      "community_name": "TelemetryService.luau",
       "norm_label": "telemetryservice.event()"
     },
     {
@@ -12484,8 +12484,8 @@
       "source_location": "L236",
       "_origin": "ast",
       "id": "src_server_services_telemetryservice_telemetryservice_ticketsearned",
-      "community": 2,
-      "community_name": "DailyRules.luau",
+      "community": 80,
+      "community_name": "TelemetryService.luau",
       "norm_label": "telemetryservice.ticketsearned()"
     },
     {
@@ -12539,8 +12539,8 @@
       "source_location": "L265",
       "_origin": "ast",
       "id": "src_server_services_telemetryservice_telemetryservice_playerhit",
-      "community": 80,
-      "community_name": "TelemetryService.luau",
+      "community": 53,
+      "community_name": "KnockbackService.luau",
       "norm_label": "telemetryservice.playerhit()"
     },
     {
@@ -12551,7 +12551,7 @@
       "_origin": "ast",
       "id": "src_server_services_tocaservice",
       "community": 53,
-      "community_name": "TocaService.luau",
+      "community_name": "KnockbackService.luau",
       "norm_label": "tocaservice.luau"
     },
     {
@@ -12562,7 +12562,7 @@
       "_origin": "ast",
       "id": "src_server_services_tocaservice_isactiveparticipant",
       "community": 53,
-      "community_name": "TocaService.luau",
+      "community_name": "KnockbackService.luau",
       "norm_label": "isactiveparticipant()"
     },
     {
@@ -12573,7 +12573,7 @@
       "_origin": "ast",
       "id": "src_server_services_tocaservice_getroot",
       "community": 53,
-      "community_name": "TocaService.luau",
+      "community_name": "KnockbackService.luau",
       "norm_label": "getroot()"
     },
     {
@@ -12584,7 +12584,7 @@
       "_origin": "ast",
       "id": "src_server_services_tocaservice_send",
       "community": 53,
-      "community_name": "TocaService.luau",
+      "community_name": "KnockbackService.luau",
       "norm_label": "send()"
     },
     {
@@ -12595,7 +12595,7 @@
       "_origin": "ast",
       "id": "src_server_services_tocaservice_emit",
       "community": 53,
-      "community_name": "TocaService.luau",
+      "community_name": "KnockbackService.luau",
       "norm_label": "emit()"
     },
     {
@@ -12606,7 +12606,7 @@
       "_origin": "ast",
       "id": "src_server_services_tocaservice_paint",
       "community": 53,
-      "community_name": "TocaService.luau",
+      "community_name": "KnockbackService.luau",
       "norm_label": "paint()"
     },
     {
@@ -12617,7 +12617,7 @@
       "_origin": "ast",
       "id": "src_server_services_tocaservice_release",
       "community": 53,
-      "community_name": "TocaService.luau",
+      "community_name": "KnockbackService.luau",
       "norm_label": "release()"
     },
     {
@@ -12628,7 +12628,7 @@
       "_origin": "ast",
       "id": "src_server_services_tocaservice_occupiedtoca",
       "community": 53,
-      "community_name": "TocaService.luau",
+      "community_name": "KnockbackService.luau",
       "norm_label": "occupiedtoca()"
     },
     {
@@ -12639,7 +12639,7 @@
       "_origin": "ast",
       "id": "src_server_services_tocaservice_eject",
       "community": 53,
-      "community_name": "TocaService.luau",
+      "community_name": "KnockbackService.luau",
       "norm_label": "eject()"
     },
     {
@@ -12650,7 +12650,7 @@
       "_origin": "ast",
       "id": "src_server_services_tocaservice_updateoccupied",
       "community": 53,
-      "community_name": "TocaService.luau",
+      "community_name": "KnockbackService.luau",
       "norm_label": "updateoccupied()"
     },
     {
@@ -12661,7 +12661,7 @@
       "_origin": "ast",
       "id": "src_server_services_tocaservice_claim",
       "community": 53,
-      "community_name": "TocaService.luau",
+      "community_name": "KnockbackService.luau",
       "norm_label": "claim()"
     },
     {
@@ -12672,7 +12672,7 @@
       "_origin": "ast",
       "id": "src_server_services_tocaservice_step",
       "community": 53,
-      "community_name": "TocaService.luau",
+      "community_name": "KnockbackService.luau",
       "norm_label": "step()"
     },
     {
@@ -12683,7 +12683,7 @@
       "_origin": "ast",
       "id": "src_server_services_tocaservice_tocaservice_isprotected",
       "community": 53,
-      "community_name": "TocaService.luau",
+      "community_name": "KnockbackService.luau",
       "norm_label": "tocaservice.isprotected()"
     },
     {
@@ -12694,7 +12694,7 @@
       "_origin": "ast",
       "id": "src_server_services_tocaservice_tocaservice_seteventlistener",
       "community": 53,
-      "community_name": "TocaService.luau",
+      "community_name": "KnockbackService.luau",
       "norm_label": "tocaservice.seteventlistener()"
     },
     {
@@ -12705,7 +12705,7 @@
       "_origin": "ast",
       "id": "src_server_services_tocaservice_tocaservice_beginround",
       "community": 53,
-      "community_name": "TocaService.luau",
+      "community_name": "KnockbackService.luau",
       "norm_label": "tocaservice.beginround()"
     },
     {
@@ -12716,7 +12716,7 @@
       "_origin": "ast",
       "id": "src_server_services_tocaservice_tocaservice_endround",
       "community": 53,
-      "community_name": "TocaService.luau",
+      "community_name": "KnockbackService.luau",
       "norm_label": "tocaservice.endround()"
     },
     {
@@ -12727,7 +12727,7 @@
       "_origin": "ast",
       "id": "src_server_services_tocaservice_tocaservice_start",
       "community": 53,
-      "community_name": "TocaService.luau",
+      "community_name": "KnockbackService.luau",
       "norm_label": "tocaservice.start()"
     },
     {
@@ -12738,7 +12738,7 @@
       "_origin": "ast",
       "id": "src_server_services_tocaservice_tocaservice_stop",
       "community": 53,
-      "community_name": "TocaService.luau",
+      "community_name": "KnockbackService.luau",
       "norm_label": "tocaservice.stop()"
     },
     {
@@ -13023,8 +13023,8 @@
       "source_location": "L287",
       "_origin": "ast",
       "id": "src_server_services_trapservice_trapservice_refresh",
-      "community": 132,
-      "community_name": "TrapService.luau",
+      "community": 123,
+      "community_name": "PhotoModeService.luau",
       "norm_label": "trapservice.refresh()"
     },
     {
@@ -13496,8 +13496,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_server_services_warmupservice",
-      "community": 104,
-      "community_name": "BotFillService.luau",
+      "community": 112,
+      "community_name": "PuffadorService.luau",
       "norm_label": "warmupservice.luau"
     },
     {
@@ -13507,8 +13507,8 @@
       "source_location": "L61",
       "_origin": "ast",
       "id": "src_server_services_warmupservice_iscompeting",
-      "community": 104,
-      "community_name": "BotFillService.luau",
+      "community": 112,
+      "community_name": "PuffadorService.luau",
       "norm_label": "iscompeting()"
     },
     {
@@ -13518,8 +13518,8 @@
       "source_location": "L66",
       "_origin": "ast",
       "id": "src_server_services_warmupservice_publishscores",
-      "community": 104,
-      "community_name": "BotFillService.luau",
+      "community": 112,
+      "community_name": "PuffadorService.luau",
       "norm_label": "publishscores()"
     },
     {
@@ -13529,8 +13529,8 @@
       "source_location": "L95",
       "_origin": "ast",
       "id": "src_server_services_warmupservice_spawnballoon",
-      "community": 104,
-      "community_name": "BotFillService.luau",
+      "community": 112,
+      "community_name": "PuffadorService.luau",
       "norm_label": "spawnballoon()"
     },
     {
@@ -13540,8 +13540,8 @@
       "source_location": "L133",
       "_origin": "ast",
       "id": "src_server_services_warmupservice_setactive",
-      "community": 104,
-      "community_name": "BotFillService.luau",
+      "community": 112,
+      "community_name": "PuffadorService.luau",
       "norm_label": "setactive()"
     },
     {
@@ -13551,8 +13551,8 @@
       "source_location": "L157",
       "_origin": "ast",
       "id": "src_server_services_warmupservice_onsurfacehit",
-      "community": 104,
-      "community_name": "BotFillService.luau",
+      "community": 112,
+      "community_name": "PuffadorService.luau",
       "norm_label": "onsurfacehit()"
     },
     {
@@ -13562,8 +13562,8 @@
       "source_location": "L186",
       "_origin": "ast",
       "id": "src_server_services_warmupservice_release",
-      "community": 104,
-      "community_name": "BotFillService.luau",
+      "community": 112,
+      "community_name": "PuffadorService.luau",
       "norm_label": "release()"
     },
     {
@@ -13573,8 +13573,8 @@
       "source_location": "L196",
       "_origin": "ast",
       "id": "src_server_services_warmupservice_check",
-      "community": 104,
-      "community_name": "BotFillService.luau",
+      "community": 112,
+      "community_name": "PuffadorService.luau",
       "norm_label": "check()"
     },
     {
@@ -13584,8 +13584,8 @@
       "source_location": "L216",
       "_origin": "ast",
       "id": "src_server_services_warmupservice_buildtrampolines",
-      "community": 104,
-      "community_name": "BotFillService.luau",
+      "community": 112,
+      "community_name": "PuffadorService.luau",
       "norm_label": "buildtrampolines()"
     },
     {
@@ -13595,8 +13595,8 @@
       "source_location": "L245",
       "_origin": "ast",
       "id": "src_server_services_warmupservice_warmupservice_start",
-      "community": 104,
-      "community_name": "BotFillService.luau",
+      "community": 112,
+      "community_name": "PuffadorService.luau",
       "norm_label": "warmupservice.start()"
     },
     {
@@ -13915,7 +13915,7 @@
       "_origin": "ast",
       "id": "src_server_services_traps_chandeliertrap_chandeliertrap_trigger",
       "community": 58,
-      "community_name": "WindowTrap.luau",
+      "community_name": "ArenaService.luau",
       "norm_label": "chandeliertrap.trigger()"
     },
     {
@@ -13991,8 +13991,8 @@
       "source_location": "L205",
       "_origin": "ast",
       "id": "src_server_services_traps_fireplacetrap_sneeze",
-      "community": 116,
-      "community_name": "CombatantRegistry.luau",
+      "community": 132,
+      "community_name": "TrapService.luau",
       "norm_label": "sneeze()"
     },
     {
@@ -14002,8 +14002,8 @@
       "source_location": "L218",
       "_origin": "ast",
       "id": "src_server_services_traps_fireplacetrap_sweep",
-      "community": 58,
-      "community_name": "WindowTrap.luau",
+      "community": 132,
+      "community_name": "TrapService.luau",
       "norm_label": "sweep()"
     },
     {
@@ -14013,8 +14013,8 @@
       "source_location": "L242",
       "_origin": "ast",
       "id": "src_server_services_traps_fireplacetrap_fireplacetrap_trigger",
-      "community": 116,
-      "community_name": "CombatantRegistry.luau",
+      "community": 132,
+      "community_name": "TrapService.luau",
       "norm_label": "fireplacetrap.trigger()"
     },
     {
@@ -14057,8 +14057,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_server_services_traps_rugtrap",
-      "community": 132,
-      "community_name": "TrapService.luau",
+      "community": 4,
+      "community_name": "CombatantRegistry.getRoot",
       "norm_label": "rugtrap.luau"
     },
     {
@@ -14068,8 +14068,8 @@
       "source_location": "L83",
       "_origin": "ast",
       "id": "src_server_services_traps_rugtrap_cellkey",
-      "community": 132,
-      "community_name": "TrapService.luau",
+      "community": 4,
+      "community_name": "CombatantRegistry.getRoot",
       "norm_label": "cellkey()"
     },
     {
@@ -14079,8 +14079,8 @@
       "source_location": "L87",
       "_origin": "ast",
       "id": "src_server_services_traps_rugtrap_newpart",
-      "community": 132,
-      "community_name": "TrapService.luau",
+      "community": 4,
+      "community_name": "CombatantRegistry.getRoot",
       "norm_label": "newpart()"
     },
     {
@@ -14090,8 +14090,8 @@
       "source_location": "L105",
       "_origin": "ast",
       "id": "src_server_services_traps_rugtrap_isstanding",
-      "community": 132,
-      "community_name": "TrapService.luau",
+      "community": 4,
+      "community_name": "CombatantRegistry.getRoot",
       "norm_label": "isstanding()"
     },
     {
@@ -14101,8 +14101,8 @@
       "source_location": "L112",
       "_origin": "ast",
       "id": "src_server_services_traps_rugtrap_syncfringe",
-      "community": 132,
-      "community_name": "TrapService.luau",
+      "community": 4,
+      "community_name": "CombatantRegistry.getRoot",
       "norm_label": "syncfringe()"
     },
     {
@@ -14112,8 +14112,8 @@
       "source_location": "L124",
       "_origin": "ast",
       "id": "src_server_services_traps_rugtrap_synccell",
-      "community": 132,
-      "community_name": "TrapService.luau",
+      "community": 4,
+      "community_name": "CombatantRegistry.getRoot",
       "norm_label": "synccell()"
     },
     {
@@ -14123,8 +14123,8 @@
       "source_location": "L132",
       "_origin": "ast",
       "id": "src_server_services_traps_rugtrap_bindblock",
-      "community": 132,
-      "community_name": "TrapService.luau",
+      "community": 4,
+      "community_name": "CombatantRegistry.getRoot",
       "norm_label": "bindblock()"
     },
     {
@@ -14134,8 +14134,8 @@
       "source_location": "L144",
       "_origin": "ast",
       "id": "src_server_services_traps_rugtrap_blockcell",
-      "community": 132,
-      "community_name": "TrapService.luau",
+      "community": 4,
+      "community_name": "CombatantRegistry.getRoot",
       "norm_label": "blockcell()"
     },
     {
@@ -14145,8 +14145,8 @@
       "source_location": "L156",
       "_origin": "ast",
       "id": "src_server_services_traps_rugtrap_buildrug",
-      "community": 132,
-      "community_name": "TrapService.luau",
+      "community": 4,
+      "community_name": "CombatantRegistry.getRoot",
       "norm_label": "buildrug()"
     },
     {
@@ -14156,8 +14156,8 @@
       "source_location": "L242",
       "_origin": "ast",
       "id": "src_server_services_traps_rugtrap_onblockadded",
-      "community": 132,
-      "community_name": "TrapService.luau",
+      "community": 4,
+      "community_name": "CombatantRegistry.getRoot",
       "norm_label": "onblockadded()"
     },
     {
@@ -14167,8 +14167,8 @@
       "source_location": "L261",
       "_origin": "ast",
       "id": "src_server_services_traps_rugtrap_rugtrap_build",
-      "community": 132,
-      "community_name": "TrapService.luau",
+      "community": 4,
+      "community_name": "CombatantRegistry.getRoot",
       "norm_label": "rugtrap.build()"
     },
     {
@@ -14189,8 +14189,8 @@
       "source_location": "L293",
       "_origin": "ast",
       "id": "src_server_services_traps_rugtrap_isonrug",
-      "community": 132,
-      "community_name": "TrapService.luau",
+      "community": 4,
+      "community_name": "CombatantRegistry.getRoot",
       "norm_label": "isonrug()"
     },
     {
@@ -14200,8 +14200,8 @@
       "source_location": "L311",
       "_origin": "ast",
       "id": "src_server_services_traps_rugtrap_rugtrap_trigger",
-      "community": 132,
-      "community_name": "TrapService.luau",
+      "community": 4,
+      "community_name": "CombatantRegistry.getRoot",
       "norm_label": "rugtrap.trigger()"
     },
     {
@@ -14211,8 +14211,8 @@
       "source_location": "L331",
       "_origin": "ast",
       "id": "src_server_services_traps_rugtrap_rugtrap_restore",
-      "community": 132,
-      "community_name": "TrapService.luau",
+      "community": 4,
+      "community_name": "CombatantRegistry.getRoot",
       "norm_label": "rugtrap.restore()"
     },
     {
@@ -14223,7 +14223,7 @@
       "_origin": "ast",
       "id": "src_server_services_traps_trapblocks",
       "community": 58,
-      "community_name": "WindowTrap.luau",
+      "community_name": "ArenaService.luau",
       "norm_label": "trapblocks.luau"
     },
     {
@@ -14234,7 +14234,7 @@
       "_origin": "ast",
       "id": "src_server_services_traps_trapblocks_trapblocks_targetroot",
       "community": 58,
-      "community_name": "WindowTrap.luau",
+      "community_name": "ArenaService.luau",
       "norm_label": "trapblocks.targetroot()"
     },
     {
@@ -14245,7 +14245,7 @@
       "_origin": "ast",
       "id": "src_server_services_traps_trapblocks_trapblocks_isstandingon",
       "community": 58,
-      "community_name": "WindowTrap.luau",
+      "community_name": "ArenaService.luau",
       "norm_label": "trapblocks.isstandingon()"
     },
     {
@@ -14256,7 +14256,7 @@
       "_origin": "ast",
       "id": "src_server_services_traps_trapblocks_trapblocks_intactnear",
       "community": 58,
-      "community_name": "WindowTrap.luau",
+      "community_name": "ArenaService.luau",
       "norm_label": "trapblocks.intactnear()"
     },
     {
@@ -14267,7 +14267,7 @@
       "_origin": "ast",
       "id": "src_server_services_traps_trapblocks_trapblocks_drop",
       "community": 58,
-      "community_name": "WindowTrap.luau",
+      "community_name": "ArenaService.luau",
       "norm_label": "trapblocks.drop()"
     },
     {
@@ -14278,7 +14278,7 @@
       "_origin": "ast",
       "id": "src_server_services_traps_trapblocks_trapblocks_pushaway",
       "community": 58,
-      "community_name": "WindowTrap.luau",
+      "community_name": "ArenaService.luau",
       "norm_label": "trapblocks.pushaway()"
     },
     {
@@ -14289,7 +14289,7 @@
       "_origin": "ast",
       "id": "src_server_services_traps_windowtrap",
       "community": 58,
-      "community_name": "WindowTrap.luau",
+      "community_name": "ArenaService.luau",
       "norm_label": "windowtrap.luau"
     },
     {
@@ -14300,7 +14300,7 @@
       "_origin": "ast",
       "id": "src_server_services_traps_windowtrap_sethidden",
       "community": 58,
-      "community_name": "WindowTrap.luau",
+      "community_name": "ArenaService.luau",
       "norm_label": "sethidden()"
     },
     {
@@ -14311,7 +14311,7 @@
       "_origin": "ast",
       "id": "src_server_services_traps_windowtrap_windowparts",
       "community": 58,
-      "community_name": "WindowTrap.luau",
+      "community_name": "ArenaService.luau",
       "norm_label": "windowparts()"
     },
     {
@@ -14322,7 +14322,7 @@
       "_origin": "ast",
       "id": "src_server_services_traps_windowtrap_boards",
       "community": 58,
-      "community_name": "WindowTrap.luau",
+      "community_name": "ArenaService.luau",
       "norm_label": "boards()"
     },
     {
@@ -14333,7 +14333,7 @@
       "_origin": "ast",
       "id": "src_server_services_traps_windowtrap_setbroken",
       "community": 58,
-      "community_name": "WindowTrap.luau",
+      "community_name": "ArenaService.luau",
       "norm_label": "setbroken()"
     },
     {
@@ -14344,7 +14344,7 @@
       "_origin": "ast",
       "id": "src_server_services_traps_windowtrap_setboarded",
       "community": 58,
-      "community_name": "WindowTrap.luau",
+      "community_name": "ArenaService.luau",
       "norm_label": "setboarded()"
     },
     {
@@ -14355,7 +14355,7 @@
       "_origin": "ast",
       "id": "src_server_services_traps_windowtrap_gustat",
       "community": 58,
-      "community_name": "WindowTrap.luau",
+      "community_name": "ArenaService.luau",
       "norm_label": "gustat()"
     },
     {
@@ -14366,7 +14366,7 @@
       "_origin": "ast",
       "id": "src_server_services_traps_windowtrap_pushplayers",
       "community": 58,
-      "community_name": "WindowTrap.luau",
+      "community_name": "ArenaService.luau",
       "norm_label": "pushplayers()"
     },
     {
@@ -14377,7 +14377,7 @@
       "_origin": "ast",
       "id": "src_server_services_traps_windowtrap_looseblocks",
       "community": 58,
-      "community_name": "WindowTrap.luau",
+      "community_name": "ArenaService.luau",
       "norm_label": "looseblocks()"
     },
     {
@@ -14388,7 +14388,7 @@
       "_origin": "ast",
       "id": "src_server_services_traps_windowtrap_windowtrap_describe",
       "community": 58,
-      "community_name": "WindowTrap.luau",
+      "community_name": "ArenaService.luau",
       "norm_label": "windowtrap.describe()"
     },
     {
@@ -14399,7 +14399,7 @@
       "_origin": "ast",
       "id": "src_server_services_traps_windowtrap_curtaincolorof",
       "community": 58,
-      "community_name": "WindowTrap.luau",
+      "community_name": "ArenaService.luau",
       "norm_label": "curtaincolorof()"
     },
     {
@@ -14410,7 +14410,7 @@
       "_origin": "ast",
       "id": "src_server_services_traps_windowtrap_setvariant",
       "community": 58,
-      "community_name": "WindowTrap.luau",
+      "community_name": "ArenaService.luau",
       "norm_label": "setvariant()"
     },
     {
@@ -14421,7 +14421,7 @@
       "_origin": "ast",
       "id": "src_server_services_traps_windowtrap_rollvariant",
       "community": 58,
-      "community_name": "WindowTrap.luau",
+      "community_name": "ArenaService.luau",
       "norm_label": "rollvariant()"
     },
     {
@@ -14432,7 +14432,7 @@
       "_origin": "ast",
       "id": "src_server_services_traps_windowtrap_gust",
       "community": 58,
-      "community_name": "WindowTrap.luau",
+      "community_name": "ArenaService.luau",
       "norm_label": "gust()"
     },
     {
@@ -14443,7 +14443,7 @@
       "_origin": "ast",
       "id": "src_server_services_traps_windowtrap_pigeons",
       "community": 58,
-      "community_name": "WindowTrap.luau",
+      "community_name": "ArenaService.luau",
       "norm_label": "pigeons()"
     },
     {
@@ -14454,7 +14454,7 @@
       "_origin": "ast",
       "id": "src_server_services_traps_windowtrap_steprains",
       "community": 58,
-      "community_name": "WindowTrap.luau",
+      "community_name": "ArenaService.luau",
       "norm_label": "steprains()"
     },
     {
@@ -14465,7 +14465,7 @@
       "_origin": "ast",
       "id": "src_server_services_traps_windowtrap_startrain",
       "community": 58,
-      "community_name": "WindowTrap.luau",
+      "community_name": "ArenaService.luau",
       "norm_label": "startrain()"
     },
     {
@@ -14476,7 +14476,7 @@
       "_origin": "ast",
       "id": "src_server_services_traps_windowtrap_windowtrap_trigger",
       "community": 58,
-      "community_name": "WindowTrap.luau",
+      "community_name": "ArenaService.luau",
       "norm_label": "windowtrap.trigger()"
     },
     {
@@ -14487,7 +14487,7 @@
       "_origin": "ast",
       "id": "src_server_services_traps_windowtrap_windowtrap_restore",
       "community": 58,
-      "community_name": "WindowTrap.luau",
+      "community_name": "ArenaService.luau",
       "norm_label": "windowtrap.restore()"
     },
     {
@@ -14498,7 +14498,7 @@
       "_origin": "ast",
       "id": "src_server_services_traps_windowtrap_windowtrap_roundreset",
       "community": 58,
-      "community_name": "WindowTrap.luau",
+      "community_name": "ArenaService.luau",
       "norm_label": "windowtrap.roundreset()"
     },
     {
@@ -15190,8 +15190,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_shared_modules_buildtargeting",
-      "community": 112,
-      "community_name": "PuffadorService.luau",
+      "community": 131,
+      "community_name": "BuildTargeting.luau",
       "norm_label": "buildtargeting.luau"
     },
     {
@@ -15201,8 +15201,8 @@
       "source_location": "L30",
       "_origin": "ast",
       "id": "src_shared_modules_buildtargeting_gridorigin",
-      "community": 112,
-      "community_name": "PuffadorService.luau",
+      "community": 131,
+      "community_name": "BuildTargeting.luau",
       "norm_label": "gridorigin()"
     },
     {
@@ -15212,8 +15212,8 @@
       "source_location": "L37",
       "_origin": "ast",
       "id": "src_shared_modules_buildtargeting_buildtargeting_cellcenter",
-      "community": 112,
-      "community_name": "PuffadorService.luau",
+      "community": 131,
+      "community_name": "BuildTargeting.luau",
       "norm_label": "buildtargeting.cellcenter()"
     },
     {
@@ -15223,8 +15223,8 @@
       "source_location": "L43",
       "_origin": "ast",
       "id": "src_shared_modules_buildtargeting_buildtargeting_cellat",
-      "community": 112,
-      "community_name": "PuffadorService.luau",
+      "community": 131,
+      "community_name": "BuildTargeting.luau",
       "norm_label": "buildtargeting.cellat()"
     },
     {
@@ -15234,8 +15234,8 @@
       "source_location": "L56",
       "_origin": "ast",
       "id": "src_shared_modules_buildtargeting_buildtargeting_findtarget",
-      "community": 112,
-      "community_name": "PuffadorService.luau",
+      "community": 131,
+      "community_name": "BuildTargeting.luau",
       "norm_label": "buildtargeting.findtarget()"
     },
     {
@@ -15366,7 +15366,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_shared_modules_levelcurve",
-      "community": 126,
+      "community": 129,
       "community_name": "LevelCurve.luau",
       "norm_label": "levelcurve.luau"
     },
@@ -15377,7 +15377,7 @@
       "source_location": "L21",
       "_origin": "ast",
       "id": "src_shared_modules_levelcurve_levelcurve_xpfornextlevel",
-      "community": 126,
+      "community": 129,
       "community_name": "LevelCurve.luau",
       "norm_label": "levelcurve.xpfornextlevel()"
     },
@@ -15388,7 +15388,7 @@
       "source_location": "L26",
       "_origin": "ast",
       "id": "src_shared_modules_levelcurve_levelcurve_totalxpforlevel",
-      "community": 126,
+      "community": 129,
       "community_name": "LevelCurve.luau",
       "norm_label": "levelcurve.totalxpforlevel()"
     },
@@ -15399,7 +15399,7 @@
       "source_location": "L36",
       "_origin": "ast",
       "id": "src_shared_modules_levelcurve_levelcurve_maxxp",
-      "community": 126,
+      "community": 129,
       "community_name": "LevelCurve.luau",
       "norm_label": "levelcurve.maxxp()"
     },
@@ -15410,7 +15410,7 @@
       "source_location": "L40",
       "_origin": "ast",
       "id": "src_shared_modules_levelcurve_levelcurve_progress",
-      "community": 126,
+      "community": 129,
       "community_name": "LevelCurve.luau",
       "norm_label": "levelcurve.progress()"
     },
@@ -15421,7 +15421,7 @@
       "source_location": "L55",
       "_origin": "ast",
       "id": "src_shared_modules_levelcurve_levelcurve_levelforxp",
-      "community": 126,
+      "community": 129,
       "community_name": "LevelCurve.luau",
       "norm_label": "levelcurve.levelforxp()"
     },
@@ -15653,7 +15653,7 @@
       "_origin": "ast",
       "id": "src_shared_modules_slipperyground",
       "community": 58,
-      "community_name": "WindowTrap.luau",
+      "community_name": "ArenaService.luau",
       "norm_label": "slipperyground.luau"
     },
     {
@@ -15664,7 +15664,7 @@
       "_origin": "ast",
       "id": "src_shared_modules_slipperyground_slipperyground_new",
       "community": 58,
-      "community_name": "WindowTrap.luau",
+      "community_name": "ArenaService.luau",
       "norm_label": "slipperyground.new()"
     },
     {
@@ -15675,7 +15675,7 @@
       "_origin": "ast",
       "id": "src_shared_modules_slipperyground_ensureconstraint",
       "community": 58,
-      "community_name": "WindowTrap.luau",
+      "community_name": "ArenaService.luau",
       "norm_label": "ensureconstraint()"
     },
     {
@@ -15686,7 +15686,7 @@
       "_origin": "ast",
       "id": "src_shared_modules_slipperyground_pause",
       "community": 58,
-      "community_name": "WindowTrap.luau",
+      "community_name": "ArenaService.luau",
       "norm_label": "pause()"
     },
     {
@@ -15697,7 +15697,7 @@
       "_origin": "ast",
       "id": "src_shared_modules_slipperyground_slipperyground_step",
       "community": 58,
-      "community_name": "WindowTrap.luau",
+      "community_name": "ArenaService.luau",
       "norm_label": "slipperyground.step()"
     },
     {
@@ -15708,7 +15708,7 @@
       "_origin": "ast",
       "id": "src_shared_modules_slipperyground_slipperyground_release",
       "community": 58,
-      "community_name": "WindowTrap.luau",
+      "community_name": "ArenaService.luau",
       "norm_label": "slipperyground.release()"
     },
     {
@@ -15730,7 +15730,7 @@
       "_origin": "ast",
       "id": "src_shared_modules_windowgeometry",
       "community": 58,
-      "community_name": "WindowTrap.luau",
+      "community_name": "ArenaService.luau",
       "norm_label": "windowgeometry.luau"
     },
     {
@@ -15740,8 +15740,8 @@
       "source_location": "L29",
       "_origin": "ast",
       "id": "src_shared_modules_windowgeometry_windowgeometry_frameof",
-      "community": 106,
-      "community_name": "WindowTrapFx.new",
+      "community": 58,
+      "community_name": "ArenaService.luau",
       "norm_label": "windowgeometry.frameof()"
     },
     {
@@ -15752,7 +15752,7 @@
       "_origin": "ast",
       "id": "src_shared_modules_windowgeometry_windowgeometry_local3",
       "community": 58,
-      "community_name": "WindowTrap.luau",
+      "community_name": "ArenaService.luau",
       "norm_label": "windowgeometry.local3()"
     },
     {
@@ -15763,7 +15763,7 @@
       "_origin": "ast",
       "id": "src_shared_modules_windowgeometry_windowgeometry_inpigeonlane",
       "community": 58,
-      "community_name": "WindowTrap.luau",
+      "community_name": "ArenaService.luau",
       "norm_label": "windowgeometry.inpigeonlane()"
     },
     {
@@ -15774,7 +15774,7 @@
       "_origin": "ast",
       "id": "src_shared_modules_windowgeometry_windowgeometry_inrain",
       "community": 58,
-      "community_name": "WindowTrap.luau",
+      "community_name": "ArenaService.luau",
       "norm_label": "windowgeometry.inrain()"
     },
     {
@@ -15785,7 +15785,7 @@
       "_origin": "ast",
       "id": "src_shared_modules_windowgeometry_windowgeometry_variantof",
       "community": 58,
-      "community_name": "WindowTrap.luau",
+      "community_name": "ArenaService.luau",
       "norm_label": "windowgeometry.variantof()"
     },
     {
@@ -16147,8 +16147,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "tests_referralrules_spec",
-      "community": 121,
-      "community_name": "ReferralService.luau",
+      "community": 128,
+      "community_name": "ReferralRules.spec.luau",
       "norm_label": "referralrules.spec.luau"
     },
     {
@@ -16158,8 +16158,8 @@
       "source_location": "L9",
       "_origin": "ast",
       "id": "tests_referralrules_spec_check",
-      "community": 121,
-      "community_name": "ReferralService.luau",
+      "community": 128,
+      "community_name": "ReferralRules.spec.luau",
       "norm_label": "check()"
     },
     {
@@ -16169,8 +16169,8 @@
       "source_location": "L31",
       "_origin": "ast",
       "id": "tests_referralrules_spec_range",
-      "community": 121,
-      "community_name": "ReferralService.luau",
+      "community": 128,
+      "community_name": "ReferralRules.spec.luau",
       "norm_label": "range()"
     },
     {
@@ -16628,7 +16628,7 @@
       "label": "Painel administrativo seguro",
       "file_type": "document",
       "source_file": "README.md",
-      "source_location": "L396",
+      "source_location": "L402",
       "_origin": "ast",
       "id": "readme_painel_administrativo_seguro",
       "community": 17,
@@ -16639,7 +16639,7 @@
       "label": "Pr\u00e9dio fechado com dois pisos",
       "file_type": "document",
       "source_file": "README.md",
-      "source_location": "L426",
+      "source_location": "L432",
       "_origin": "ast",
       "id": "readme_pr\u00e9dio_fechado_com_dois_pisos",
       "community": 17,
@@ -16650,7 +16650,7 @@
       "label": "Regras do core (Fase 1, entrega 1.1)",
       "file_type": "document",
       "source_file": "README.md",
-      "source_location": "L434",
+      "source_location": "L440",
       "_origin": "ast",
       "id": "readme_regras_do_core_fase_1_entrega_1_1",
       "community": 17,
@@ -16661,7 +16661,7 @@
       "label": "Controles e mira (Fase 1, entrega 1.5)",
       "file_type": "document",
       "source_file": "README.md",
-      "source_location": "L444",
+      "source_location": "L450",
       "_origin": "ast",
       "id": "readme_controles_e_mira_fase_1_entrega_1_5",
       "community": 17,
@@ -16672,7 +16672,7 @@
       "label": "Telemetria (Fase 1, entrega 1.4)",
       "file_type": "document",
       "source_file": "README.md",
-      "source_location": "L457",
+      "source_location": "L463",
       "_origin": "ast",
       "id": "readme_telemetria_fase_1_entrega_1_4",
       "community": 17,
@@ -16683,7 +16683,7 @@
       "label": "P\u00f3s-partida (Fase 1, entrega 1.3)",
       "file_type": "document",
       "source_file": "README.md",
-      "source_location": "L477",
+      "source_location": "L483",
       "_origin": "ast",
       "id": "readme_p\u00f3s_partida_fase_1_entrega_1_3",
       "community": 17,
@@ -16694,7 +16694,7 @@
       "label": "Notifica\u00e7\u00f5es (Fase 1, entrega 1.2)",
       "file_type": "document",
       "source_file": "README.md",
-      "source_location": "L489",
+      "source_location": "L495",
       "_origin": "ast",
       "id": "readme_notifica\u00e7\u00f5es_fase_1_entrega_1_2",
       "community": 17,
@@ -16705,7 +16705,7 @@
       "label": "Corredores secretos e quadros (Fase 2, entrega 2.1)",
       "file_type": "document",
       "source_file": "README.md",
-      "source_location": "L517",
+      "source_location": "L523",
       "_origin": "ast",
       "id": "readme_corredores_secretos_e_quadros_fase_2_entrega_2_1",
       "community": 17,
@@ -16716,7 +16716,7 @@
       "label": "Bar\u00e3o e Tocas Seguras (Fase 2, entrega 2.2)",
       "file_type": "document",
       "source_file": "README.md",
-      "source_location": "L526",
+      "source_location": "L532",
       "_origin": "ast",
       "id": "readme_bar\u00e3o_e_tocas_seguras_fase_2_entrega_2_2",
       "community": 17,
@@ -16727,7 +16727,7 @@
       "label": "Bar\u00e3o maior, animado e com t\u00fanel entre os corredores (Fase 4, ajuste p\u00f3s-4.5)",
       "file_type": "document",
       "source_file": "README.md",
-      "source_location": "L537",
+      "source_location": "L543",
       "_origin": "ast",
       "id": "readme_bar\u00e3o_maior_animado_e_com_t\u00fanel_entre_os_corredores_fase_4_ajuste_p\u00f3s_4_5",
       "community": 17,
@@ -16738,7 +16738,7 @@
       "label": "Puffador menor (Fase 4, ajuste p\u00f3s-4.5)",
       "file_type": "document",
       "source_file": "README.md",
-      "source_location": "L582",
+      "source_location": "L588",
       "_origin": "ast",
       "id": "readme_puffador_menor_fase_4_ajuste_p\u00f3s_4_5",
       "community": 17,
@@ -16749,7 +16749,7 @@
       "label": "Puffdex empolgante \u2014 Camada A (Fase 4, ajuste p\u00f3s-4.5)",
       "file_type": "document",
       "source_file": "README.md",
-      "source_location": "L586",
+      "source_location": "L592",
       "_origin": "ast",
       "id": "readme_puffdex_empolgante_camada_a_fase_4_ajuste_p\u00f3s_4_5",
       "community": 17,
@@ -16760,7 +16760,7 @@
       "label": "Disparos desenhados no cliente (Fase 4, ajuste p\u00f3s-4.5)",
       "file_type": "document",
       "source_file": "README.md",
-      "source_location": "L608",
+      "source_location": "L614",
       "_origin": "ast",
       "id": "readme_disparos_desenhados_no_cliente_fase_4_ajuste_p\u00f3s_4_5",
       "community": 17,
@@ -16771,7 +16771,7 @@
       "label": "Embarque e aquecimento no mirante (Fase 4, ajuste p\u00f3s-4.5)",
       "file_type": "document",
       "source_file": "README.md",
-      "source_location": "L625",
+      "source_location": "L631",
       "_origin": "ast",
       "id": "readme_embarque_e_aquecimento_no_mirante_fase_4_ajuste_p\u00f3s_4_5",
       "community": 17,
@@ -16782,7 +16782,7 @@
       "label": "Partida isolada do lobby e ajustes de tela (Fase 4, ajuste p\u00f3s-4.5)",
       "file_type": "document",
       "source_file": "README.md",
-      "source_location": "L646",
+      "source_location": "L652",
       "_origin": "ast",
       "id": "readme_partida_isolada_do_lobby_e_ajustes_de_tela_fase_4_ajuste_p\u00f3s_4_5",
       "community": 17,
@@ -16793,7 +16793,7 @@
       "label": "Fila da partida no mirante (Fase 4, ajuste p\u00f3s-4.5)",
       "file_type": "document",
       "source_file": "README.md",
-      "source_location": "L657",
+      "source_location": "L663",
       "_origin": "ast",
       "id": "readme_fila_da_partida_no_mirante_fase_4_ajuste_p\u00f3s_4_5",
       "community": 17,
@@ -16804,7 +16804,7 @@
       "label": "O Casar\u00e3o e alertas fora do centro (Fase 4, ajuste p\u00f3s-4.5)",
       "file_type": "document",
       "source_file": "README.md",
-      "source_location": "L678",
+      "source_location": "L684",
       "_origin": "ast",
       "id": "readme_o_casar\u00e3o_e_alertas_fora_do_centro_fase_4_ajuste_p\u00f3s_4_5",
       "community": 17,
@@ -16815,7 +16815,7 @@
       "label": "Lobby expandido (Fase 4, entrega 4.5)",
       "file_type": "document",
       "source_file": "README.md",
-      "source_location": "L698",
+      "source_location": "L704",
       "_origin": "ast",
       "id": "readme_lobby_expandido_fase_4_entrega_4_5",
       "community": 17,
@@ -16826,7 +16826,7 @@
       "label": "Party e espectador social (Fase 4, entrega 4.4)",
       "file_type": "document",
       "source_file": "README.md",
-      "source_location": "L720",
+      "source_location": "L726",
       "_origin": "ast",
       "id": "readme_party_e_espectador_social_fase_4_entrega_4_4",
       "community": 17,
@@ -16837,7 +16837,7 @@
       "label": "Desafios, retorno di\u00e1rio e conquistas secretas (Fase 4, entrega 4.3)",
       "file_type": "document",
       "source_file": "README.md",
-      "source_location": "L740",
+      "source_location": "L746",
       "_origin": "ast",
       "id": "readme_desafios_retorno_di\u00e1rio_e_conquistas_secretas_fase_4_entrega_4_3",
       "community": 17,
@@ -16848,7 +16848,7 @@
       "label": "Tickets e Puff Machine (Fase 4, entrega 4.2)",
       "file_type": "document",
       "source_file": "README.md",
-      "source_location": "L766",
+      "source_location": "L772",
       "_origin": "ast",
       "id": "readme_tickets_e_puff_machine_fase_4_entrega_4_2",
       "community": 17,
@@ -16859,7 +16859,7 @@
       "label": "Puffdex e primeira cole\u00e7\u00e3o (Fase 4, entrega 4.1)",
       "file_type": "document",
       "source_file": "README.md",
-      "source_location": "L788",
+      "source_location": "L794",
       "_origin": "ast",
       "id": "readme_puffdex_e_primeira_cole\u00e7\u00e3o_fase_4_entrega_4_1",
       "community": 17,
@@ -16870,7 +16870,7 @@
       "label": "Ranking global e Hall da Fama (Fase 3, entrega 3.4)",
       "file_type": "document",
       "source_file": "README.md",
-      "source_location": "L816",
+      "source_location": "L822",
       "_origin": "ast",
       "id": "readme_ranking_global_e_hall_da_fama_fase_3_entrega_3_4",
       "community": 17,
@@ -16881,7 +16881,7 @@
       "label": "Resultado avan\u00e7ado (Fase 3, entrega 3.3)",
       "file_type": "document",
       "source_file": "README.md",
-      "source_location": "L844",
+      "source_location": "L850",
       "_origin": "ast",
       "id": "readme_resultado_avan\u00e7ado_fase_3_entrega_3_3",
       "community": 17,
@@ -16892,7 +16892,7 @@
       "label": "XP, N\u00edvel e Prest\u00edgio (Fase 3, entrega 3.2)",
       "file_type": "document",
       "source_file": "README.md",
-      "source_location": "L863",
+      "source_location": "L869",
       "_origin": "ast",
       "id": "readme_xp_n\u00edvel_e_prest\u00edgio_fase_3_entrega_3_2",
       "community": 17,
@@ -16903,7 +16903,7 @@
       "label": "Perfil persistente (Fase 3, entrega 3.1)",
       "file_type": "document",
       "source_file": "README.md",
-      "source_location": "L900",
+      "source_location": "L906",
       "_origin": "ast",
       "id": "readme_perfil_persistente_fase_3_entrega_3_1",
       "community": 17,
@@ -16914,7 +16914,7 @@
       "label": "Alertas, Momentos Puff e telemetria dos segredos (Fase 2, entrega 2.4)",
       "file_type": "document",
       "source_file": "README.md",
-      "source_location": "L934",
+      "source_location": "L940",
       "_origin": "ast",
       "id": "readme_alertas_momentos_puff_e_telemetria_dos_segredos_fase_2_entrega_2_4",
       "community": 17,
@@ -16925,7 +16925,7 @@
       "label": "O Cofre e o Puffador do Cofre (Fase 2, entrega 2.3)",
       "file_type": "document",
       "source_file": "README.md",
-      "source_location": "L961",
+      "source_location": "L967",
       "_origin": "ast",
       "id": "readme_o_cofre_e_o_puffador_do_cofre_fase_2_entrega_2_3",
       "community": 17,
@@ -16936,7 +16936,7 @@
       "label": "Identidade visual",
       "file_type": "document",
       "source_file": "README.md",
-      "source_location": "L978",
+      "source_location": "L984",
       "_origin": "ast",
       "id": "readme_identidade_visual",
       "community": 17,
@@ -16947,7 +16947,7 @@
       "label": "Artes da loja",
       "file_type": "document",
       "source_file": "README.md",
-      "source_location": "L984",
+      "source_location": "L990",
       "_origin": "ast",
       "id": "readme_artes_da_loja",
       "community": 17,
@@ -18165,6 +18165,204 @@
       "norm_label": "gate para a divulgacao"
     },
     {
+      "label": "FASE_5C_CASARAO_VIVO.md",
+      "file_type": "document",
+      "source_file": "docs/FASE_5C_CASARAO_VIVO.md",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "docs_fase_5c_casarao_vivo",
+      "community": 107,
+      "community_name": "Fase 5C \u2014 Casar\u00e3o Vivo: explorar, descobrir, colecionar",
+      "norm_label": "fase_5c_casarao_vivo.md"
+    },
+    {
+      "label": "Fase 5C \u2014 Casar\u00e3o Vivo: explorar, descobrir, colecionar",
+      "file_type": "document",
+      "source_file": "docs/FASE_5C_CASARAO_VIVO.md",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "docs_fase_5c_casarao_vivo_fase_5c_casar\u00e3o_vivo_explorar_descobrir_colecionar",
+      "community": 107,
+      "community_name": "Fase 5C \u2014 Casar\u00e3o Vivo: explorar, descobrir, colecionar",
+      "norm_label": "fase 5c \u2014 casarao vivo: explorar, descobrir, colecionar"
+    },
+    {
+      "label": "Problema",
+      "file_type": "document",
+      "source_file": "docs/FASE_5C_CASARAO_VIVO.md",
+      "source_location": "L8",
+      "_origin": "ast",
+      "id": "docs_fase_5c_casarao_vivo_problema",
+      "community": 107,
+      "community_name": "Fase 5C \u2014 Casar\u00e3o Vivo: explorar, descobrir, colecionar",
+      "norm_label": "problema"
+    },
+    {
+      "label": "Resultado esperado",
+      "file_type": "document",
+      "source_file": "docs/FASE_5C_CASARAO_VIVO.md",
+      "source_location": "L16",
+      "_origin": "ast",
+      "id": "docs_fase_5c_casarao_vivo_resultado_esperado",
+      "community": 107,
+      "community_name": "Fase 5C \u2014 Casar\u00e3o Vivo: explorar, descobrir, colecionar",
+      "norm_label": "resultado esperado"
+    },
+    {
+      "label": "Princ\u00edpios",
+      "file_type": "document",
+      "source_file": "docs/FASE_5C_CASARAO_VIVO.md",
+      "source_location": "L29",
+      "_origin": "ast",
+      "id": "docs_fase_5c_casarao_vivo_princ\u00edpios",
+      "community": 107,
+      "community_name": "Fase 5C \u2014 Casar\u00e3o Vivo: explorar, descobrir, colecionar",
+      "norm_label": "principios"
+    },
+    {
+      "label": "Escopo",
+      "file_type": "document",
+      "source_file": "docs/FASE_5C_CASARAO_VIVO.md",
+      "source_location": "L41",
+      "_origin": "ast",
+      "id": "docs_fase_5c_casarao_vivo_escopo",
+      "community": 107,
+      "community_name": "Fase 5C \u2014 Casar\u00e3o Vivo: explorar, descobrir, colecionar",
+      "norm_label": "escopo"
+    },
+    {
+      "label": "5C.1 Ficha da Partida, portas e c\u00f4modos novos",
+      "file_type": "document",
+      "source_file": "docs/FASE_5C_CASARAO_VIVO.md",
+      "source_location": "L43",
+      "_origin": "ast",
+      "id": "docs_fase_5c_casarao_vivo_5c_1_ficha_da_partida_portas_e_c\u00f4modos_novos",
+      "community": 107,
+      "community_name": "Fase 5C \u2014 Casar\u00e3o Vivo: explorar, descobrir, colecionar",
+      "norm_label": "5c.1 ficha da partida, portas e comodos novos"
+    },
+    {
+      "label": "5C.2 Rel\u00edquias e o \u00c1lbum do Casar\u00e3o",
+      "file_type": "document",
+      "source_file": "docs/FASE_5C_CASARAO_VIVO.md",
+      "source_location": "L66",
+      "_origin": "ast",
+      "id": "docs_fase_5c_casarao_vivo_5c_2_rel\u00edquias_e_o_\u00e1lbum_do_casar\u00e3o",
+      "community": 107,
+      "community_name": "Fase 5C \u2014 Casar\u00e3o Vivo: explorar, descobrir, colecionar",
+      "norm_label": "5c.2 reliquias e o album do casarao"
+    },
+    {
+      "label": "5C.3 Mist\u00e9rios do Bar\u00e3o",
+      "file_type": "document",
+      "source_file": "docs/FASE_5C_CASARAO_VIVO.md",
+      "source_location": "L78",
+      "_origin": "ast",
+      "id": "docs_fase_5c_casarao_vivo_5c_3_mist\u00e9rios_do_bar\u00e3o",
+      "community": 107,
+      "community_name": "Fase 5C \u2014 Casar\u00e3o Vivo: explorar, descobrir, colecionar",
+      "norm_label": "5c.3 misterios do barao"
+    },
+    {
+      "label": "5C.4 Vida e eventos no Casar\u00e3o",
+      "file_type": "document",
+      "source_file": "docs/FASE_5C_CASARAO_VIVO.md",
+      "source_location": "L89",
+      "_origin": "ast",
+      "id": "docs_fase_5c_casarao_vivo_5c_4_vida_e_eventos_no_casar\u00e3o",
+      "community": 107,
+      "community_name": "Fase 5C \u2014 Casar\u00e3o Vivo: explorar, descobrir, colecionar",
+      "norm_label": "5c.4 vida e eventos no casarao"
+    },
+    {
+      "label": "N\u00fameros iniciais",
+      "file_type": "document",
+      "source_file": "docs/FASE_5C_CASARAO_VIVO.md",
+      "source_location": "L103",
+      "_origin": "ast",
+      "id": "docs_fase_5c_casarao_vivo_n\u00fameros_iniciais",
+      "community": 107,
+      "community_name": "Fase 5C \u2014 Casar\u00e3o Vivo: explorar, descobrir, colecionar",
+      "norm_label": "numeros iniciais"
+    },
+    {
+      "label": "Arquitetura t\u00e9cnica",
+      "file_type": "document",
+      "source_file": "docs/FASE_5C_CASARAO_VIVO.md",
+      "source_location": "L126",
+      "_origin": "ast",
+      "id": "docs_fase_5c_casarao_vivo_arquitetura_t\u00e9cnica",
+      "community": 107,
+      "community_name": "Fase 5C \u2014 Casar\u00e3o Vivo: explorar, descobrir, colecionar",
+      "norm_label": "arquitetura tecnica"
+    },
+    {
+      "label": "Crit\u00e9rios de aceite",
+      "file_type": "document",
+      "source_file": "docs/FASE_5C_CASARAO_VIVO.md",
+      "source_location": "L151",
+      "_origin": "ast",
+      "id": "docs_fase_5c_casarao_vivo_crit\u00e9rios_de_aceite",
+      "community": 107,
+      "community_name": "Fase 5C \u2014 Casar\u00e3o Vivo: explorar, descobrir, colecionar",
+      "norm_label": "criterios de aceite"
+    },
+    {
+      "label": "Testes manuais priorit\u00e1rios",
+      "file_type": "document",
+      "source_file": "docs/FASE_5C_CASARAO_VIVO.md",
+      "source_location": "L166",
+      "_origin": "ast",
+      "id": "docs_fase_5c_casarao_vivo_testes_manuais_priorit\u00e1rios",
+      "community": 107,
+      "community_name": "Fase 5C \u2014 Casar\u00e3o Vivo: explorar, descobrir, colecionar",
+      "norm_label": "testes manuais prioritarios"
+    },
+    {
+      "label": "Perguntas do playtest",
+      "file_type": "document",
+      "source_file": "docs/FASE_5C_CASARAO_VIVO.md",
+      "source_location": "L183",
+      "_origin": "ast",
+      "id": "docs_fase_5c_casarao_vivo_perguntas_do_playtest",
+      "community": 107,
+      "community_name": "Fase 5C \u2014 Casar\u00e3o Vivo: explorar, descobrir, colecionar",
+      "norm_label": "perguntas do playtest"
+    },
+    {
+      "label": "M\u00e9tricas de sucesso",
+      "file_type": "document",
+      "source_file": "docs/FASE_5C_CASARAO_VIVO.md",
+      "source_location": "L194",
+      "_origin": "ast",
+      "id": "docs_fase_5c_casarao_vivo_m\u00e9tricas_de_sucesso",
+      "community": 107,
+      "community_name": "Fase 5C \u2014 Casar\u00e3o Vivo: explorar, descobrir, colecionar",
+      "norm_label": "metricas de sucesso"
+    },
+    {
+      "label": "Ordem dentro da Fase 5",
+      "file_type": "document",
+      "source_file": "docs/FASE_5C_CASARAO_VIVO.md",
+      "source_location": "L203",
+      "_origin": "ast",
+      "id": "docs_fase_5c_casarao_vivo_ordem_dentro_da_fase_5",
+      "community": 107,
+      "community_name": "Fase 5C \u2014 Casar\u00e3o Vivo: explorar, descobrir, colecionar",
+      "norm_label": "ordem dentro da fase 5"
+    },
+    {
+      "label": "Gate para a Fase 6",
+      "file_type": "document",
+      "source_file": "docs/FASE_5C_CASARAO_VIVO.md",
+      "source_location": "L215",
+      "_origin": "ast",
+      "id": "docs_fase_5c_casarao_vivo_gate_para_a_fase_6",
+      "community": 107,
+      "community_name": "Fase 5C \u2014 Casar\u00e3o Vivo: explorar, descobrir, colecionar",
+      "norm_label": "gate para a fase 6"
+    },
+    {
       "label": "FASE_5_PARTIDA_VIVA_CASARAO_REAGE.md",
       "file_type": "document",
       "source_file": "docs/FASE_5_PARTIDA_VIVA_CASARAO_REAGE.md",
@@ -18172,7 +18370,7 @@
       "_origin": "ast",
       "id": "docs_fase_5_partida_viva_casarao_reage",
       "community": 101,
-      "community_name": "Fase 5 \u2014 Partida Viva: o Casar\u00e3o reage",
+      "community_name": "Escopo",
       "norm_label": "fase_5_partida_viva_casarao_reage.md"
     },
     {
@@ -18183,7 +18381,7 @@
       "_origin": "ast",
       "id": "docs_fase_5_partida_viva_casarao_reage_fase_5_partida_viva_o_casar\u00e3o_reage",
       "community": 101,
-      "community_name": "Fase 5 \u2014 Partida Viva: o Casar\u00e3o reage",
+      "community_name": "Escopo",
       "norm_label": "fase 5 \u2014 partida viva: o casarao reage"
     },
     {
@@ -18194,7 +18392,7 @@
       "_origin": "ast",
       "id": "docs_fase_5_partida_viva_casarao_reage_resultado_esperado",
       "community": 101,
-      "community_name": "Fase 5 \u2014 Partida Viva: o Casar\u00e3o reage",
+      "community_name": "Escopo",
       "norm_label": "resultado esperado"
     },
     {
@@ -18205,7 +18403,7 @@
       "_origin": "ast",
       "id": "docs_fase_5_partida_viva_casarao_reage_princ\u00edpios",
       "community": 101,
-      "community_name": "Fase 5 \u2014 Partida Viva: o Casar\u00e3o reage",
+      "community_name": "Escopo",
       "norm_label": "principios"
     },
     {
@@ -18216,7 +18414,7 @@
       "_origin": "ast",
       "id": "docs_fase_5_partida_viva_casarao_reage_escopo",
       "community": 101,
-      "community_name": "Fase 5 \u2014 Partida Viva: o Casar\u00e3o reage",
+      "community_name": "Escopo",
       "norm_label": "escopo"
     },
     {
@@ -18227,7 +18425,7 @@
       "_origin": "ast",
       "id": "docs_fase_5_partida_viva_casarao_reage_5_1_base_das_armadilhas",
       "community": 101,
-      "community_name": "Fase 5 \u2014 Partida Viva: o Casar\u00e3o reage",
+      "community_name": "Escopo",
       "norm_label": "5.1 base das armadilhas"
     },
     {
@@ -18238,7 +18436,7 @@
       "_origin": "ast",
       "id": "docs_fase_5_partida_viva_casarao_reage_5_2_janela_ventania_andar_de_cima",
       "community": 101,
-      "community_name": "Fase 5 \u2014 Partida Viva: o Casar\u00e3o reage",
+      "community_name": "Escopo",
       "norm_label": "5.2 janela ventania (andar de cima)"
     },
     {
@@ -18249,7 +18447,7 @@
       "_origin": "ast",
       "id": "docs_fase_5_partida_viva_casarao_reage_5_3_tapete_puxado_andar_de_baixo",
       "community": 101,
-      "community_name": "Fase 5 \u2014 Partida Viva: o Casar\u00e3o reage",
+      "community_name": "Escopo",
       "norm_label": "5.3 tapete puxado (andar de baixo)"
     },
     {
@@ -18260,7 +18458,7 @@
       "_origin": "ast",
       "id": "docs_fase_5_partida_viva_casarao_reage_5_4_lustre_despencando_andar_de_baixo",
       "community": 101,
-      "community_name": "Fase 5 \u2014 Partida Viva: o Casar\u00e3o reage",
+      "community_name": "Escopo",
       "norm_label": "5.4 lustre despencando (andar de baixo)"
     },
     {
@@ -18271,7 +18469,7 @@
       "_origin": "ast",
       "id": "docs_fase_5_partida_viva_casarao_reage_5_5_lareira_de_fuligem_andar_de_baixo",
       "community": 101,
-      "community_name": "Fase 5 \u2014 Partida Viva: o Casar\u00e3o reage",
+      "community_name": "Escopo",
       "norm_label": "5.5 lareira de fuligem (andar de baixo)"
     },
     {
@@ -18282,7 +18480,7 @@
       "_origin": "ast",
       "id": "docs_fase_5_partida_viva_casarao_reage_5_6_varia\u00e7\u00f5es_das_janelas_pombos_e_chuva",
       "community": 101,
-      "community_name": "Fase 5 \u2014 Partida Viva: o Casar\u00e3o reage",
+      "community_name": "Escopo",
       "norm_label": "5.6 variacoes das janelas: pombos e chuva"
     },
     {
@@ -18293,7 +18491,7 @@
       "_origin": "ast",
       "id": "docs_fase_5_partida_viva_casarao_reage_5_7_caos_final_tempestade",
       "community": 101,
-      "community_name": "Fase 5 \u2014 Partida Viva: o Casar\u00e3o reage",
+      "community_name": "Escopo",
       "norm_label": "5.7 caos final: tempestade"
     },
     {
@@ -18304,73 +18502,84 @@
       "_origin": "ast",
       "id": "docs_fase_5_partida_viva_casarao_reage_5_8_momentos_puff_conquistas_telemetria_e_ajuste",
       "community": 101,
-      "community_name": "Fase 5 \u2014 Partida Viva: o Casar\u00e3o reage",
+      "community_name": "Escopo",
       "norm_label": "5.8 momentos puff, conquistas, telemetria e ajuste"
+    },
+    {
+      "label": "Fase 5C \u2014 Casar\u00e3o Vivo (lobby)",
+      "file_type": "document",
+      "source_file": "docs/FASE_5_PARTIDA_VIVA_CASARAO_REAGE.md",
+      "source_location": "L115",
+      "_origin": "ast",
+      "id": "docs_fase_5_partida_viva_casarao_reage_fase_5c_casar\u00e3o_vivo_lobby",
+      "community": 101,
+      "community_name": "Escopo",
+      "norm_label": "fase 5c \u2014 casarao vivo (lobby)"
     },
     {
       "label": "N\u00fameros iniciais",
       "file_type": "document",
       "source_file": "docs/FASE_5_PARTIDA_VIVA_CASARAO_REAGE.md",
-      "source_location": "L117",
+      "source_location": "L121",
       "_origin": "ast",
       "id": "docs_fase_5_partida_viva_casarao_reage_n\u00fameros_iniciais",
       "community": 101,
-      "community_name": "Fase 5 \u2014 Partida Viva: o Casar\u00e3o reage",
+      "community_name": "Escopo",
       "norm_label": "numeros iniciais"
     },
     {
       "label": "Arquitetura t\u00e9cnica",
       "file_type": "document",
       "source_file": "docs/FASE_5_PARTIDA_VIVA_CASARAO_REAGE.md",
-      "source_location": "L134",
+      "source_location": "L138",
       "_origin": "ast",
       "id": "docs_fase_5_partida_viva_casarao_reage_arquitetura_t\u00e9cnica",
       "community": 101,
-      "community_name": "Fase 5 \u2014 Partida Viva: o Casar\u00e3o reage",
+      "community_name": "Escopo",
       "norm_label": "arquitetura tecnica"
     },
     {
       "label": "Crit\u00e9rios de aceite",
       "file_type": "document",
       "source_file": "docs/FASE_5_PARTIDA_VIVA_CASARAO_REAGE.md",
-      "source_location": "L152",
+      "source_location": "L156",
       "_origin": "ast",
       "id": "docs_fase_5_partida_viva_casarao_reage_crit\u00e9rios_de_aceite",
       "community": 101,
-      "community_name": "Fase 5 \u2014 Partida Viva: o Casar\u00e3o reage",
+      "community_name": "Escopo",
       "norm_label": "criterios de aceite"
     },
     {
       "label": "Testes manuais priorit\u00e1rios",
       "file_type": "document",
       "source_file": "docs/FASE_5_PARTIDA_VIVA_CASARAO_REAGE.md",
-      "source_location": "L167",
+      "source_location": "L171",
       "_origin": "ast",
       "id": "docs_fase_5_partida_viva_casarao_reage_testes_manuais_priorit\u00e1rios",
       "community": 101,
-      "community_name": "Fase 5 \u2014 Partida Viva: o Casar\u00e3o reage",
+      "community_name": "Escopo",
       "norm_label": "testes manuais prioritarios"
     },
     {
       "label": "Perguntas do playtest",
       "file_type": "document",
       "source_file": "docs/FASE_5_PARTIDA_VIVA_CASARAO_REAGE.md",
-      "source_location": "L184",
+      "source_location": "L188",
       "_origin": "ast",
       "id": "docs_fase_5_partida_viva_casarao_reage_perguntas_do_playtest",
       "community": 101,
-      "community_name": "Fase 5 \u2014 Partida Viva: o Casar\u00e3o reage",
+      "community_name": "Escopo",
       "norm_label": "perguntas do playtest"
     },
     {
       "label": "Gate para Fase 6",
       "file_type": "document",
       "source_file": "docs/FASE_5_PARTIDA_VIVA_CASARAO_REAGE.md",
-      "source_location": "L195",
+      "source_location": "L199",
       "_origin": "ast",
       "id": "docs_fase_5_partida_viva_casarao_reage_gate_para_fase_6",
       "community": 101,
-      "community_name": "Fase 5 \u2014 Partida Viva: o Casar\u00e3o reage",
+      "community_name": "Escopo",
       "norm_label": "gate para fase 6"
     },
     {
@@ -19183,15 +19392,26 @@
       "source_location": "L633",
       "_origin": "ast",
       "id": "docs_game_design_25_lobby",
-      "community": 7,
-      "community_name": "BlocoPuff \u2014 Game Design Document",
+      "community": 143,
+      "community_name": "25. Lobby",
       "norm_label": "25. lobby"
+    },
+    {
+      "label": "Casar\u00e3o Vivo (Fase 5C)",
+      "file_type": "document",
+      "source_file": "docs/GAME_DESIGN.md",
+      "source_location": "L653",
+      "_origin": "ast",
+      "id": "docs_game_design_casar\u00e3o_vivo_fase_5c",
+      "community": 143,
+      "community_name": "25. Lobby",
+      "norm_label": "casarao vivo (fase 5c)"
     },
     {
       "label": "26. Social e Party",
       "file_type": "document",
       "source_file": "docs/GAME_DESIGN.md",
-      "source_location": "L655",
+      "source_location": "L670",
       "_origin": "ast",
       "id": "docs_game_design_26_social_e_party",
       "community": 7,
@@ -19202,7 +19422,7 @@
       "label": "27. Trading",
       "file_type": "document",
       "source_file": "docs/GAME_DESIGN.md",
-      "source_location": "L671",
+      "source_location": "L686",
       "_origin": "ast",
       "id": "docs_game_design_27_trading",
       "community": 7,
@@ -19213,7 +19433,7 @@
       "label": "28. Temporadas",
       "file_type": "document",
       "source_file": "docs/GAME_DESIGN.md",
-      "source_location": "L690",
+      "source_location": "L705",
       "_origin": "ast",
       "id": "docs_game_design_28_temporadas",
       "community": 7,
@@ -19224,7 +19444,7 @@
       "label": "29. LiveOps e eventos",
       "file_type": "document",
       "source_file": "docs/GAME_DESIGN.md",
-      "source_location": "L713",
+      "source_location": "L728",
       "_origin": "ast",
       "id": "docs_game_design_29_liveops_e_eventos",
       "community": 41,
@@ -19235,7 +19455,7 @@
       "label": "Eventos administrados",
       "file_type": "document",
       "source_file": "docs/GAME_DESIGN.md",
-      "source_location": "L715",
+      "source_location": "L730",
       "_origin": "ast",
       "id": "docs_game_design_eventos_administrados",
       "community": 41,
@@ -19246,7 +19466,7 @@
       "label": "Eventos globais",
       "file_type": "document",
       "source_file": "docs/GAME_DESIGN.md",
-      "source_location": "L730",
+      "source_location": "L745",
       "_origin": "ast",
       "id": "docs_game_design_eventos_globais",
       "community": 41,
@@ -19257,7 +19477,7 @@
       "label": "Eventos de calend\u00e1rio",
       "file_type": "document",
       "source_file": "docs/GAME_DESIGN.md",
-      "source_location": "L740",
+      "source_location": "L755",
       "_origin": "ast",
       "id": "docs_game_design_eventos_de_calend\u00e1rio",
       "community": 41,
@@ -19268,7 +19488,7 @@
       "label": "Presen\u00e7a de criadores/admins",
       "file_type": "document",
       "source_file": "docs/GAME_DESIGN.md",
-      "source_location": "L751",
+      "source_location": "L766",
       "_origin": "ast",
       "id": "docs_game_design_presen\u00e7a_de_criadores_admins",
       "community": 41,
@@ -19279,7 +19499,7 @@
       "label": "30. Monetiza\u00e7\u00e3o",
       "file_type": "document",
       "source_file": "docs/GAME_DESIGN.md",
-      "source_location": "L757",
+      "source_location": "L772",
       "_origin": "ast",
       "id": "docs_game_design_30_monetiza\u00e7\u00e3o",
       "community": 7,
@@ -19290,7 +19510,7 @@
       "label": "31. Telemetria",
       "file_type": "document",
       "source_file": "docs/GAME_DESIGN.md",
-      "source_location": "L787",
+      "source_location": "L802",
       "_origin": "ast",
       "id": "docs_game_design_31_telemetria",
       "community": 42,
@@ -19301,7 +19521,7 @@
       "label": "Core gameplay",
       "file_type": "document",
       "source_file": "docs/GAME_DESIGN.md",
-      "source_location": "L791",
+      "source_location": "L806",
       "_origin": "ast",
       "id": "docs_game_design_core_gameplay",
       "community": 42,
@@ -19312,7 +19532,7 @@
       "label": "Bar\u00e3o/corredores",
       "file_type": "document",
       "source_file": "docs/GAME_DESIGN.md",
-      "source_location": "L805",
+      "source_location": "L820",
       "_origin": "ast",
       "id": "docs_game_design_bar\u00e3o_corredores",
       "community": 42,
@@ -19323,7 +19543,7 @@
       "label": "Progress\u00e3o",
       "file_type": "document",
       "source_file": "docs/GAME_DESIGN.md",
-      "source_location": "L817",
+      "source_location": "L832",
       "_origin": "ast",
       "id": "docs_game_design_progress\u00e3o",
       "community": 42,
@@ -19334,7 +19554,7 @@
       "label": "Social",
       "file_type": "document",
       "source_file": "docs/GAME_DESIGN.md",
-      "source_location": "L827",
+      "source_location": "L842",
       "_origin": "ast",
       "id": "docs_game_design_social",
       "community": 42,
@@ -19345,7 +19565,7 @@
       "label": "32. Seguran\u00e7a e autoridade",
       "file_type": "document",
       "source_file": "docs/GAME_DESIGN.md",
-      "source_location": "L838",
+      "source_location": "L853",
       "_origin": "ast",
       "id": "docs_game_design_32_seguran\u00e7a_e_autoridade",
       "community": 7,
@@ -19356,7 +19576,7 @@
       "label": "33. Estado t\u00e9cnico existente a preservar",
       "file_type": "document",
       "source_file": "docs/GAME_DESIGN.md",
-      "source_location": "L862",
+      "source_location": "L877",
       "_origin": "ast",
       "id": "docs_game_design_33_estado_t\u00e9cnico_existente_a_preservar",
       "community": 7,
@@ -19367,7 +19587,7 @@
       "label": "34. Ordem estrat\u00e9gica de evolu\u00e7\u00e3o",
       "file_type": "document",
       "source_file": "docs/GAME_DESIGN.md",
-      "source_location": "L880",
+      "source_location": "L895",
       "_origin": "ast",
       "id": "docs_game_design_34_ordem_estrat\u00e9gica_de_evolu\u00e7\u00e3o",
       "community": 7,
@@ -19378,7 +19598,7 @@
       "label": "35. Crit\u00e9rio m\u00e1ximo de decis\u00e3o",
       "file_type": "document",
       "source_file": "docs/GAME_DESIGN.md",
-      "source_location": "L896",
+      "source_location": "L911",
       "_origin": "ast",
       "id": "docs_game_design_35_crit\u00e9rio_m\u00e1ximo_de_decis\u00e3o",
       "community": 7,
@@ -54916,7 +55136,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "README.md",
-      "source_location": "L934",
+      "source_location": "L940",
       "weight": 1.0,
       "_origin": "ast",
       "source": "readme_estado_atual",
@@ -54938,7 +55158,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "README.md",
-      "source_location": "L984",
+      "source_location": "L990",
       "weight": 1.0,
       "_origin": "ast",
       "source": "readme_estado_atual",
@@ -54949,7 +55169,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "README.md",
-      "source_location": "L526",
+      "source_location": "L532",
       "weight": 1.0,
       "_origin": "ast",
       "source": "readme_estado_atual",
@@ -54960,7 +55180,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "README.md",
-      "source_location": "L537",
+      "source_location": "L543",
       "weight": 1.0,
       "_origin": "ast",
       "source": "readme_estado_atual",
@@ -54993,7 +55213,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "README.md",
-      "source_location": "L444",
+      "source_location": "L450",
       "weight": 1.0,
       "_origin": "ast",
       "source": "readme_estado_atual",
@@ -55015,7 +55235,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "README.md",
-      "source_location": "L517",
+      "source_location": "L523",
       "weight": 1.0,
       "_origin": "ast",
       "source": "readme_estado_atual",
@@ -55026,7 +55246,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "README.md",
-      "source_location": "L740",
+      "source_location": "L746",
       "weight": 1.0,
       "_origin": "ast",
       "source": "readme_estado_atual",
@@ -55037,7 +55257,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "README.md",
-      "source_location": "L608",
+      "source_location": "L614",
       "weight": 1.0,
       "_origin": "ast",
       "source": "readme_estado_atual",
@@ -55048,7 +55268,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "README.md",
-      "source_location": "L625",
+      "source_location": "L631",
       "weight": 1.0,
       "_origin": "ast",
       "source": "readme_estado_atual",
@@ -55059,7 +55279,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "README.md",
-      "source_location": "L657",
+      "source_location": "L663",
       "weight": 1.0,
       "_origin": "ast",
       "source": "readme_estado_atual",
@@ -55070,7 +55290,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "README.md",
-      "source_location": "L978",
+      "source_location": "L984",
       "weight": 1.0,
       "_origin": "ast",
       "source": "readme_estado_atual",
@@ -55114,7 +55334,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "README.md",
-      "source_location": "L698",
+      "source_location": "L704",
       "weight": 1.0,
       "_origin": "ast",
       "source": "readme_estado_atual",
@@ -55147,7 +55367,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "README.md",
-      "source_location": "L489",
+      "source_location": "L495",
       "weight": 1.0,
       "_origin": "ast",
       "source": "readme_estado_atual",
@@ -55158,7 +55378,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "README.md",
-      "source_location": "L678",
+      "source_location": "L684",
       "weight": 1.0,
       "_origin": "ast",
       "source": "readme_estado_atual",
@@ -55169,7 +55389,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "README.md",
-      "source_location": "L961",
+      "source_location": "L967",
       "weight": 1.0,
       "_origin": "ast",
       "source": "readme_estado_atual",
@@ -55191,7 +55411,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "README.md",
-      "source_location": "L396",
+      "source_location": "L402",
       "weight": 1.0,
       "_origin": "ast",
       "source": "readme_estado_atual",
@@ -55202,7 +55422,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "README.md",
-      "source_location": "L646",
+      "source_location": "L652",
       "weight": 1.0,
       "_origin": "ast",
       "source": "readme_estado_atual",
@@ -55213,7 +55433,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "README.md",
-      "source_location": "L720",
+      "source_location": "L726",
       "weight": 1.0,
       "_origin": "ast",
       "source": "readme_estado_atual",
@@ -55224,7 +55444,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "README.md",
-      "source_location": "L900",
+      "source_location": "L906",
       "weight": 1.0,
       "_origin": "ast",
       "source": "readme_estado_atual",
@@ -55235,7 +55455,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "README.md",
-      "source_location": "L426",
+      "source_location": "L432",
       "weight": 1.0,
       "_origin": "ast",
       "source": "readme_estado_atual",
@@ -55257,7 +55477,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "README.md",
-      "source_location": "L582",
+      "source_location": "L588",
       "weight": 1.0,
       "_origin": "ast",
       "source": "readme_estado_atual",
@@ -55268,7 +55488,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "README.md",
-      "source_location": "L788",
+      "source_location": "L794",
       "weight": 1.0,
       "_origin": "ast",
       "source": "readme_estado_atual",
@@ -55279,7 +55499,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "README.md",
-      "source_location": "L586",
+      "source_location": "L592",
       "weight": 1.0,
       "_origin": "ast",
       "source": "readme_estado_atual",
@@ -55290,7 +55510,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "README.md",
-      "source_location": "L477",
+      "source_location": "L483",
       "weight": 1.0,
       "_origin": "ast",
       "source": "readme_estado_atual",
@@ -55301,7 +55521,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "README.md",
-      "source_location": "L816",
+      "source_location": "L822",
       "weight": 1.0,
       "_origin": "ast",
       "source": "readme_estado_atual",
@@ -55312,7 +55532,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "README.md",
-      "source_location": "L434",
+      "source_location": "L440",
       "weight": 1.0,
       "_origin": "ast",
       "source": "readme_estado_atual",
@@ -55323,7 +55543,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "README.md",
-      "source_location": "L844",
+      "source_location": "L850",
       "weight": 1.0,
       "_origin": "ast",
       "source": "readme_estado_atual",
@@ -55345,7 +55565,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "README.md",
-      "source_location": "L457",
+      "source_location": "L463",
       "weight": 1.0,
       "_origin": "ast",
       "source": "readme_estado_atual",
@@ -55356,7 +55576,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "README.md",
-      "source_location": "L766",
+      "source_location": "L772",
       "weight": 1.0,
       "_origin": "ast",
       "source": "readme_estado_atual",
@@ -55378,7 +55598,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "README.md",
-      "source_location": "L863",
+      "source_location": "L869",
       "weight": 1.0,
       "_origin": "ast",
       "source": "readme_estado_atual",
@@ -56532,6 +56752,193 @@
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
+      "source_file": "docs/FASE_5C_CASARAO_VIVO.md",
+      "source_location": "L1",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "docs_fase_5c_casarao_vivo",
+      "target": "docs_fase_5c_casarao_vivo_fase_5c_casar\u00e3o_vivo_explorar_descobrir_colecionar",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/FASE_5C_CASARAO_VIVO.md",
+      "source_location": "L126",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "docs_fase_5c_casarao_vivo_fase_5c_casar\u00e3o_vivo_explorar_descobrir_colecionar",
+      "target": "docs_fase_5c_casarao_vivo_arquitetura_t\u00e9cnica",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/FASE_5C_CASARAO_VIVO.md",
+      "source_location": "L151",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "docs_fase_5c_casarao_vivo_fase_5c_casar\u00e3o_vivo_explorar_descobrir_colecionar",
+      "target": "docs_fase_5c_casarao_vivo_crit\u00e9rios_de_aceite",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/FASE_5C_CASARAO_VIVO.md",
+      "source_location": "L41",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "docs_fase_5c_casarao_vivo_fase_5c_casar\u00e3o_vivo_explorar_descobrir_colecionar",
+      "target": "docs_fase_5c_casarao_vivo_escopo",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/FASE_5C_CASARAO_VIVO.md",
+      "source_location": "L215",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "docs_fase_5c_casarao_vivo_fase_5c_casar\u00e3o_vivo_explorar_descobrir_colecionar",
+      "target": "docs_fase_5c_casarao_vivo_gate_para_a_fase_6",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/FASE_5C_CASARAO_VIVO.md",
+      "source_location": "L194",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "docs_fase_5c_casarao_vivo_fase_5c_casar\u00e3o_vivo_explorar_descobrir_colecionar",
+      "target": "docs_fase_5c_casarao_vivo_m\u00e9tricas_de_sucesso",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/FASE_5C_CASARAO_VIVO.md",
+      "source_location": "L103",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "docs_fase_5c_casarao_vivo_fase_5c_casar\u00e3o_vivo_explorar_descobrir_colecionar",
+      "target": "docs_fase_5c_casarao_vivo_n\u00fameros_iniciais",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/FASE_5C_CASARAO_VIVO.md",
+      "source_location": "L203",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "docs_fase_5c_casarao_vivo_fase_5c_casar\u00e3o_vivo_explorar_descobrir_colecionar",
+      "target": "docs_fase_5c_casarao_vivo_ordem_dentro_da_fase_5",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/FASE_5C_CASARAO_VIVO.md",
+      "source_location": "L183",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "docs_fase_5c_casarao_vivo_fase_5c_casar\u00e3o_vivo_explorar_descobrir_colecionar",
+      "target": "docs_fase_5c_casarao_vivo_perguntas_do_playtest",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/FASE_5C_CASARAO_VIVO.md",
+      "source_location": "L29",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "docs_fase_5c_casarao_vivo_fase_5c_casar\u00e3o_vivo_explorar_descobrir_colecionar",
+      "target": "docs_fase_5c_casarao_vivo_princ\u00edpios",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/FASE_5C_CASARAO_VIVO.md",
+      "source_location": "L8",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "docs_fase_5c_casarao_vivo_fase_5c_casar\u00e3o_vivo_explorar_descobrir_colecionar",
+      "target": "docs_fase_5c_casarao_vivo_problema",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/FASE_5C_CASARAO_VIVO.md",
+      "source_location": "L16",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "docs_fase_5c_casarao_vivo_fase_5c_casar\u00e3o_vivo_explorar_descobrir_colecionar",
+      "target": "docs_fase_5c_casarao_vivo_resultado_esperado",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/FASE_5C_CASARAO_VIVO.md",
+      "source_location": "L166",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "docs_fase_5c_casarao_vivo_fase_5c_casar\u00e3o_vivo_explorar_descobrir_colecionar",
+      "target": "docs_fase_5c_casarao_vivo_testes_manuais_priorit\u00e1rios",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/FASE_5C_CASARAO_VIVO.md",
+      "source_location": "L43",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "docs_fase_5c_casarao_vivo_escopo",
+      "target": "docs_fase_5c_casarao_vivo_5c_1_ficha_da_partida_portas_e_c\u00f4modos_novos",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/FASE_5C_CASARAO_VIVO.md",
+      "source_location": "L66",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "docs_fase_5c_casarao_vivo_escopo",
+      "target": "docs_fase_5c_casarao_vivo_5c_2_rel\u00edquias_e_o_\u00e1lbum_do_casar\u00e3o",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/FASE_5C_CASARAO_VIVO.md",
+      "source_location": "L78",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "docs_fase_5c_casarao_vivo_escopo",
+      "target": "docs_fase_5c_casarao_vivo_5c_3_mist\u00e9rios_do_bar\u00e3o",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/FASE_5C_CASARAO_VIVO.md",
+      "source_location": "L89",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "docs_fase_5c_casarao_vivo_escopo",
+      "target": "docs_fase_5c_casarao_vivo_5c_4_vida_e_eventos_no_casar\u00e3o",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
       "source_file": "docs/FASE_5_PARTIDA_VIVA_CASARAO_REAGE.md",
       "source_location": "L1",
       "weight": 1.0,
@@ -56544,7 +56951,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "docs/FASE_5_PARTIDA_VIVA_CASARAO_REAGE.md",
-      "source_location": "L134",
+      "source_location": "L138",
       "weight": 1.0,
       "_origin": "ast",
       "source": "docs_fase_5_partida_viva_casarao_reage_fase_5_partida_viva_o_casar\u00e3o_reage",
@@ -56555,7 +56962,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "docs/FASE_5_PARTIDA_VIVA_CASARAO_REAGE.md",
-      "source_location": "L152",
+      "source_location": "L156",
       "weight": 1.0,
       "_origin": "ast",
       "source": "docs_fase_5_partida_viva_casarao_reage_fase_5_partida_viva_o_casar\u00e3o_reage",
@@ -56577,7 +56984,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "docs/FASE_5_PARTIDA_VIVA_CASARAO_REAGE.md",
-      "source_location": "L195",
+      "source_location": "L199",
       "weight": 1.0,
       "_origin": "ast",
       "source": "docs_fase_5_partida_viva_casarao_reage_fase_5_partida_viva_o_casar\u00e3o_reage",
@@ -56588,7 +56995,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "docs/FASE_5_PARTIDA_VIVA_CASARAO_REAGE.md",
-      "source_location": "L117",
+      "source_location": "L121",
       "weight": 1.0,
       "_origin": "ast",
       "source": "docs_fase_5_partida_viva_casarao_reage_fase_5_partida_viva_o_casar\u00e3o_reage",
@@ -56599,7 +57006,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "docs/FASE_5_PARTIDA_VIVA_CASARAO_REAGE.md",
-      "source_location": "L184",
+      "source_location": "L188",
       "weight": 1.0,
       "_origin": "ast",
       "source": "docs_fase_5_partida_viva_casarao_reage_fase_5_partida_viva_o_casar\u00e3o_reage",
@@ -56632,7 +57039,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "docs/FASE_5_PARTIDA_VIVA_CASARAO_REAGE.md",
-      "source_location": "L167",
+      "source_location": "L171",
       "weight": 1.0,
       "_origin": "ast",
       "source": "docs_fase_5_partida_viva_casarao_reage_fase_5_partida_viva_o_casar\u00e3o_reage",
@@ -56725,6 +57132,17 @@
       "_origin": "ast",
       "source": "docs_fase_5_partida_viva_casarao_reage_escopo",
       "target": "docs_fase_5_partida_viva_casarao_reage_5_8_momentos_puff_conquistas_telemetria_e_ajuste",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/FASE_5_PARTIDA_VIVA_CASARAO_REAGE.md",
+      "source_location": "L115",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "docs_fase_5_partida_viva_casarao_reage_escopo",
+      "target": "docs_fase_5_partida_viva_casarao_reage_fase_5c_casar\u00e3o_vivo_lobby",
       "confidence_score": 1.0
     },
     {
@@ -57160,7 +57578,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "docs/GAME_DESIGN.md",
-      "source_location": "L655",
+      "source_location": "L670",
       "weight": 1.0,
       "_origin": "ast",
       "source": "docs_game_design_blocopuff_game_design_document",
@@ -57171,7 +57589,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "docs/GAME_DESIGN.md",
-      "source_location": "L671",
+      "source_location": "L686",
       "weight": 1.0,
       "_origin": "ast",
       "source": "docs_game_design_blocopuff_game_design_document",
@@ -57182,7 +57600,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "docs/GAME_DESIGN.md",
-      "source_location": "L690",
+      "source_location": "L705",
       "weight": 1.0,
       "_origin": "ast",
       "source": "docs_game_design_blocopuff_game_design_document",
@@ -57193,7 +57611,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "docs/GAME_DESIGN.md",
-      "source_location": "L713",
+      "source_location": "L728",
       "weight": 1.0,
       "_origin": "ast",
       "source": "docs_game_design_blocopuff_game_design_document",
@@ -57215,7 +57633,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "docs/GAME_DESIGN.md",
-      "source_location": "L757",
+      "source_location": "L772",
       "weight": 1.0,
       "_origin": "ast",
       "source": "docs_game_design_blocopuff_game_design_document",
@@ -57226,7 +57644,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "docs/GAME_DESIGN.md",
-      "source_location": "L787",
+      "source_location": "L802",
       "weight": 1.0,
       "_origin": "ast",
       "source": "docs_game_design_blocopuff_game_design_document",
@@ -57237,7 +57655,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "docs/GAME_DESIGN.md",
-      "source_location": "L838",
+      "source_location": "L853",
       "weight": 1.0,
       "_origin": "ast",
       "source": "docs_game_design_blocopuff_game_design_document",
@@ -57248,7 +57666,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "docs/GAME_DESIGN.md",
-      "source_location": "L862",
+      "source_location": "L877",
       "weight": 1.0,
       "_origin": "ast",
       "source": "docs_game_design_blocopuff_game_design_document",
@@ -57259,7 +57677,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "docs/GAME_DESIGN.md",
-      "source_location": "L880",
+      "source_location": "L895",
       "weight": 1.0,
       "_origin": "ast",
       "source": "docs_game_design_blocopuff_game_design_document",
@@ -57270,7 +57688,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "docs/GAME_DESIGN.md",
-      "source_location": "L896",
+      "source_location": "L911",
       "weight": 1.0,
       "_origin": "ast",
       "source": "docs_game_design_blocopuff_game_design_document",
@@ -57633,22 +58051,11 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "docs/GAME_DESIGN.md",
-      "source_location": "L715",
+      "source_location": "L653",
       "weight": 1.0,
       "_origin": "ast",
-      "source": "docs_game_design_29_liveops_e_eventos",
-      "target": "docs_game_design_eventos_administrados",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "docs/GAME_DESIGN.md",
-      "source_location": "L740",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "docs_game_design_29_liveops_e_eventos",
-      "target": "docs_game_design_eventos_de_calend\u00e1rio",
+      "source": "docs_game_design_25_lobby",
+      "target": "docs_game_design_casar\u00e3o_vivo_fase_5c",
       "confidence_score": 1.0
     },
     {
@@ -57659,6 +58066,28 @@
       "weight": 1.0,
       "_origin": "ast",
       "source": "docs_game_design_29_liveops_e_eventos",
+      "target": "docs_game_design_eventos_administrados",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/GAME_DESIGN.md",
+      "source_location": "L755",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "docs_game_design_29_liveops_e_eventos",
+      "target": "docs_game_design_eventos_de_calend\u00e1rio",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/GAME_DESIGN.md",
+      "source_location": "L745",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "docs_game_design_29_liveops_e_eventos",
       "target": "docs_game_design_eventos_globais",
       "confidence_score": 1.0
     },
@@ -57666,7 +58095,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "docs/GAME_DESIGN.md",
-      "source_location": "L751",
+      "source_location": "L766",
       "weight": 1.0,
       "_origin": "ast",
       "source": "docs_game_design_29_liveops_e_eventos",
@@ -57677,7 +58106,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "docs/GAME_DESIGN.md",
-      "source_location": "L805",
+      "source_location": "L820",
       "weight": 1.0,
       "_origin": "ast",
       "source": "docs_game_design_31_telemetria",
@@ -57688,7 +58117,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "docs/GAME_DESIGN.md",
-      "source_location": "L791",
+      "source_location": "L806",
       "weight": 1.0,
       "_origin": "ast",
       "source": "docs_game_design_31_telemetria",
@@ -57699,7 +58128,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "docs/GAME_DESIGN.md",
-      "source_location": "L817",
+      "source_location": "L832",
       "weight": 1.0,
       "_origin": "ast",
       "source": "docs_game_design_31_telemetria",
@@ -57710,7 +58139,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "docs/GAME_DESIGN.md",
-      "source_location": "L827",
+      "source_location": "L842",
       "weight": 1.0,
       "_origin": "ast",
       "source": "docs_game_design_31_telemetria",
@@ -57763,5 +58192,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "23fe072b70e49fd822f17a9974ce2c215c22ed93"
+  "built_at_commit": "855bd42af7d52583e2a03a812ed9f37a664ad2c4"
 }

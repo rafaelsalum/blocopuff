@@ -112,6 +112,10 @@ Soma-se ao Caos Final de hoje, em que blocos piscam em vermelho e caem:
 - **Telemetria:** acionamentos por tipo, distância do disparo, vítimas, derrubadas causadas, tempo até a primeira armadilha e quantas armadilhas são acionadas na Tempestade.
 - **Ajuste:** números finais definidos no playtest (ver a tabela abaixo).
 
+### Fase 5C — Casarão Vivo (lobby)
+
+Junto com as armadilhas da partida, a Fase 5 ganha uma frente no lobby: explorar, descobrir e colecionar no Casarão enquanto se espera a partida. O escopo está em `docs/FASE_5C_CASARAO_VIVO.md`. Ordem sugerida: 5.7, depois 5C.1 a 5C.4, e por último a 5.8, que passa a cobrir também os Momentos Puff, as conquistas e a telemetria do Casarão Vivo.
+
 ---
 
 ## Números iniciais
