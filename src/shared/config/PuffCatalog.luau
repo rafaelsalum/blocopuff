@@ -3,7 +3,8 @@
 -- Primeira coleção do Puffdex. Conjunto enxuto em quatro raridades:
 --   * 14 conquistados jogando (nível ou façanhas), com um Lendário do
 --     Barão (Fase 4.1);
---   * 8 exclusivos da Puff Machine (Fase 4.2).
+--   * 8 exclusivos da Puff Machine (Fase 4.2);
+--   * 1 de quem completa o Álbum do Casarão (Fase 5C.2).
 -- Nada aqui dá vantagem: só muda as cores do disparo.
 --
 -- Para acrescentar um Puff: nova entrada em ENTRIES com um `id` NOVO (ids
@@ -286,6 +287,18 @@ local ENTRIES: { PuffDefinition } = {
 		hint = "Sai na Puff Machine",
 		lore = "Risca a arena de ponta a ponta.",
 		style = style(rgb(255, 255, 235), rgb(255, 150, 60), rgb(255, 230, 160), rgb(255, 250, 210), "Flames"),
+		tradable = false,
+	},
+	-- Exclusivo do Álbum do Casarão (5C.2): completar as 40 relíquias.
+	{
+		id = "explorador",
+		name = "Puff Explorador",
+		rarity = "Legendary",
+		origin = "Album",
+		unlock = { kind = "Album" },
+		hint = "Complete o Álbum do Casarão",
+		lore = "Conhece cada cantinho do Casarão.",
+		style = style(rgb(255, 225, 160), rgb(150, 100, 60), rgb(255, 210, 130), rgb(255, 240, 190), "Confetti"),
 		tradable = false,
 	},
 }

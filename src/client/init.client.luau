@@ -37,6 +37,7 @@ local LeaderboardController = require(script.controllers.LeaderboardController)
 local PuffdexController = require(script.controllers.PuffdexController)
 local PuffMachineController = require(script.controllers.PuffMachineController)
 local ChallengesController = require(script.controllers.ChallengesController)
+local RelicController = require(script.controllers.RelicController)
 local PartyController = require(script.controllers.PartyController)
 local ReactionController = require(script.controllers.ReactionController)
 local LobbyStationsController = require(script.controllers.LobbyStationsController)
@@ -225,6 +226,14 @@ local challengesOk, challengesErr = pcall(function()
 end)
 if not challengesOk then
 	warn(string.format("[BlocoPuff] Failed to start challenges controller: %s", tostring(challengesErr)))
+end
+
+-- Relíquias e Álbum do Casarão (5C.2).
+local relicsOk, relicsErr = pcall(function()
+	RelicController.start()
+end)
+if not relicsOk then
+	warn(string.format("[BlocoPuff] Failed to start relic controller: %s", tostring(relicsErr)))
 end
 
 local partyOk, partyErr = pcall(function()

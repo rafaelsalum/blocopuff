@@ -51,6 +51,7 @@ local RewardRules = require(script.Parent.Parent.data.RewardRules)
 local DailyRules = require(script.Parent.Parent.data.DailyRules)
 local OnboardingRules = require(script.Parent.Parent.data.OnboardingRules)
 local SecretCatalog = require(ReplicatedStorage.Shared.config.SecretCatalog)
+local RelicCatalog = require(ReplicatedStorage.Shared.config.RelicCatalog)
 local ProgressionConfig = require(ReplicatedStorage.Shared.config.ProgressionConfig)
 local LevelCurve = require(ReplicatedStorage.Shared.modules.LevelCurve)
 local BotConfig = require(ReplicatedStorage.Shared.config.BotConfig)
@@ -71,6 +72,7 @@ export type Events = {
 	dailyReward: DailyReward?,
 	completedChallenges: { string }?,
 	newSecrets: { string }?,
+	relicEvent: ProfileTypes.RelicEvent?,
 }
 
 -- XP calculado pelo RoundService para a rodada (ver XpCalculator).
@@ -172,6 +174,13 @@ local function snapshotOf(entry: Entry, award: XpAward?, events: Events?): Profi
 			table.insert(secrets, { id = definition.id, obtainedAt = obtainedAt })
 		end
 	end
+	local relics: { ProfileTypes.RelicState } = {}
+	for _, id in ipairs(RelicCatalog.allIds()) do
+		local obtainedAt = profile.relics[id]
+		if obtainedAt ~= nil then
+			table.insert(relics, { id = id, obtainedAt = obtainedAt })
+		end
+	end
 	local challenges = {}
 	for _, state in ipairs(profile.challenges.list) do
 		table.insert(challenges, table.clone(state))
@@ -190,11 +199,15 @@ local function snapshotOf(entry: Entry, award: XpAward?, events: Events?): Profi
 		challenges = challenges,
 		nextResetAt = DailyRules.nextResetAt(now()),
 		secrets = secrets,
+		relics = relics,
+		dailyRelicDay = profile.dailyRelicDay,
+		dailyRelicCount = profile.dailyRelicCount,
 		award = award,
 		newPuffs = if events ~= nil then nonEmpty(events.newPuffs) else nil,
 		dailyReward = if events ~= nil then events.dailyReward else nil,
 		completedChallenges = if events ~= nil then nonEmpty(events.completedChallenges) else nil,
 		newSecrets = if events ~= nil then nonEmpty(events.newSecrets) else nil,
+		relicEvent = if events ~= nil then events.relicEvent else nil,
 	}
 end
 

@@ -67,6 +67,7 @@ local ORIGIN_LABELS: { [PuffOrigin]: string } = {
 	Level = Lang.t("Nível"),
 	Feat = Lang.t("Façanha"),
 	Machine = Lang.t("Puff Machine"),
+	Album = Lang.t("Álbum do Casarão"),
 }
 
 local PuffdexView = {}

@@ -244,6 +244,22 @@ local CATALOGS: { { path: string, texts: (string) -> { string } } } = {
 		end,
 	},
 	{
+		path = "src/shared/config/RelicCatalog.luau",
+		texts = function(source)
+			local texts = fieldValues(source, { "name", "title", "AlbumTitle", "DailyTitle", "DailyName" })
+			for _, literal in literalArgs(source, "relic") do
+				-- O primeiro literal de cada chamada é o id (sem espaço nem acento).
+				if string.find(literal, "[%s\128-\255]") ~= nil then
+					table.insert(texts, literal)
+				end
+			end
+			for literal in string.gmatch(source, 'return "([^"]*)"') do
+				table.insert(texts, literal)
+			end
+			return texts
+		end,
+	},
+	{
 		path = "src/shared/modules/PuffEffects.luau",
 		texts = function(source)
 			return fieldValues(source, { "label" })

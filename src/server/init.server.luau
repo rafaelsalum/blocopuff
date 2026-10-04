@@ -45,6 +45,7 @@ local ReferralService = require(script.services.ReferralService)
 local OnboardingService = require(script.services.OnboardingService)
 local DashService = require(script.services.DashService)
 local PianoService = require(script.services.PianoService)
+local RelicService = require(script.services.RelicService)
 
 local WORLD_NAME = "BlocoPuffWorld"
 local GENERATED_BY_ATTRIBUTE = "GeneratedBy"
@@ -222,6 +223,15 @@ end
 local pianoOk, pianoFailure = pcall(PianoService.start)
 if not pianoOk then
 	warn(string.format("[BlocoPuff] Piano unavailable: %s", tostring(pianoFailure)))
+end
+
+-- Relíquias e Álbum do Casarão (5C.2). Depois das estações e da ala leste
+-- (as relíquias se acomodam em cima dos móveis). Opcional.
+local relicsOk, relicsFailure = pcall(RelicService.start, world)
+if relicsOk then
+	print("[BlocoPuff] Mansion relics ready")
+else
+	warn(string.format("[BlocoPuff] Mansion relics unavailable: %s", tostring(relicsFailure)))
 end
 
 -- Party (entra junto nas partidas) e reações de quem está assistindo.

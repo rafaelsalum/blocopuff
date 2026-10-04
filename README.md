@@ -292,6 +292,25 @@ Seção **TESTES DA PARTIDA** no painel admin. Vale só para o servidor atual e 
 - **Testar de verdade:** só com o jogo publicado. O Roblox só preenche quem convidou em convites reais, e o Studio pode não ter acesso ao DataStore e ao MessagingService. Os banners de recompensa da página do convite são configurados no Creator Hub (Engagement > Referral Rewards), com o jogo publicado há pelo menos 1 dia.
 - **Testes:** `lune run tests/ReferralRules.spec`.
 
+### Relíquias e Álbum do Casarão (Fase 5C, entrega 5C.2)
+
+- **Relíquias** (`RelicService`, catálogo em `config/RelicCatalog`, regras em `data/RelicRules`): 40 objetos pequenos, 5 em cada um de 8 cômodos (Salão Principal, Salão da Coleção, Jardim do Barão, Ponto de Encontro, Biblioteca, Sala de Música, Sótão e Porão). São bonequinhos Puff, moedas, chaves, retratos e peças de xadrez (`RelicModels`).
+  - Cada relíquia tem um brilho fraco e o prompt **"Pegar"**. O servidor confere a distância e limita a frequência antes de entregar.
+  - **Lugar de cada uma:** o catálogo diz um ponto do cômodo, e o servidor (`RelicSpots`) acomoda a relíquia em cima do que houver ali, no piso ou num móvel baixo. Se o ponto cair dentro de um móvel alto, de uma parede ou no vão de uma escada, tenta pontos vizinhos.
+  - **Quem já pegou** vê só o contorno vazio, sem brilho e sem prompt (só para ele, `RelicController`).
+- **Recompensas:**
+  - 1 🎟 por relíquia;
+  - **cômodo completo:** +5 🎟 e um título (Anfitrião, Colecionador, Amigo do Barão, Detetive, Bibliotecário, Maestro, Rato de Sótão, Guardião do Porão);
+  - **álbum completo:** o título Explorador do Casarão e o **Puff Explorador** (Lendário, exclusivo, não sai na Puff Machine; origem "Álbum do Casarão" no Puffdex).
+- **Relíquia do Dia:** uma estrela dourada aparece num esconderijo sorteado do dia (12 esconderijos, nunca o mesmo de ontem, igual em todos os servidores) e muda de lugar na virada do dia. Vale 2 🎟, uma vez por dia. Ao juntar 30, ganha +20 🎟 e o título Caçador de Relíquias.
+- **Álbum** (`AlbumView`, botão 📜 no cartão do perfil): uma página por cômodo com as 5 relíquias. As que faltam aparecem como "❔" com uma dica curta. Tem também a página da Relíquia do Dia, os títulos ganhos e o prêmio do álbum.
+- **Títulos:** aparecem no Álbum e no painel PERFIL do cartão, que mostra o melhor título ganho. Não são equipáveis.
+- **Avisos e sons:** relíquia encontrada, cômodo completo, álbum completo e Relíquia do Dia. Os sons reaproveitam o desbloqueio do Puffdex e a subida de nível.
+- **Perfil:** campos `relics` (id e data), `dailyRelicDay` e `dailyRelicCount`. São opcionais, sem nova versão. A guarda de gravação nunca perde relíquias e nunca diminui a contagem da Relíquia do Dia.
+- **Telemetria:** `RelicFound`, `RoomSetCompleted`, `AlbumCompleted`, `DailyRelicFound`, `AlbumOpened` e as entradas de tickets `Relic` e `DailyRelic`.
+- **Opcional:** se a colocação das relíquias falhar, o servidor sobe mesmo assim.
+- **Testes:** `lune run tests/RelicRules.spec` e `lune run tests/ProfileGuard.spec`.
+
 ### Ala leste do Casarão: Biblioteca, Sala de Música, Sótão e Porão (Fase 5C, entrega 5C.1, parte 2)
 
 - **Ala nova** a leste do Casarão (`MansionWing`, geometria em `MansionWingLayout`, medidas em `MansionWingConfig`):

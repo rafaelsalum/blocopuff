@@ -52,6 +52,23 @@ export type SecretState = {
 	obtainedAt: number,
 }
 
+-- Relíquia do Casarão que o jogador já pegou (5C.2).
+export type RelicState = {
+	id: string,
+	obtainedAt: number,
+}
+
+-- Relíquia recém-pegada (para comemorar). `relicId` nil = Relíquia do Dia.
+export type RelicEvent = {
+	relicId: string?,
+	tickets: number,
+	roomCompleted: boolean,
+	albumCompleted: boolean,
+	-- Relíquia do Dia: total já pegas e se completou a coleção agora.
+	dailyCount: number,
+	dailyGoal: boolean,
+}
+
 -- XP de uma rodada, por fonte (para o pós-partida e o aviso de nível).
 export type XpLine = {
 	source: string,
@@ -90,10 +107,16 @@ export type ProfileSnapshot = {
 	challenges: { ChallengeState },
 	nextResetAt: number,
 	secrets: { SecretState },
+	-- Relíquias do álbum e a Relíquia do Dia (dia do jogo em que pegou a
+	-- última e quantas no total).
+	relics: { RelicState },
+	dailyRelicDay: number,
+	dailyRelicCount: number,
 	-- Eventos desta atualização (para comemorar uma vez só).
 	dailyReward: DailyReward?,
 	completedChallenges: { string }?,
 	newSecrets: { string }?,
+	relicEvent: RelicEvent?,
 	-- Presente só na atualização logo depois de uma rodada.
 	award: XpAward?,
 	-- Puffs recém-desbloqueados nesta atualização (para comemorar).

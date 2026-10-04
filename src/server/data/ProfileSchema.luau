@@ -18,6 +18,7 @@ local RewardConfig = require(ReplicatedStorage.Shared.config.RewardConfig)
 local PuffInventory = require(script.Parent.PuffInventory)
 local DailyRules = require(script.Parent.DailyRules)
 local SecretCatalog = require(ReplicatedStorage.Shared.config.SecretCatalog)
+local RelicCatalog = require(ReplicatedStorage.Shared.config.RelicCatalog)
 
 type ProfileStats = ProfileTypes.ProfileStats
 type Inventory = PuffInventory.Inventory
@@ -69,6 +70,12 @@ export type Profile = {
 	-- 2 com bots). Opcionais, sem versão.
 	onboardingSteps: number,
 	firstMatchKind: number,
+	-- Relíquias do Casarão (5C.2): id → os.time() em que pegou, e a
+	-- Relíquia do Dia (último dia em que pegou e quantas no total).
+	-- Opcionais, sem versão.
+	relics: { [string]: number },
+	dailyRelicDay: number,
+	dailyRelicCount: number,
 	appliedRounds: { string },
 	createdAt: number,
 	updatedAt: number,
@@ -142,6 +149,9 @@ function ProfileSchema.default(now: number): Profile
 		referralDayCount = 0,
 		onboardingSteps = 0,
 		firstMatchKind = 0,
+		relics = {},
+		dailyRelicDay = 0,
+		dailyRelicCount = 0,
 		appliedRounds = {},
 		createdAt = now,
 		updatedAt = now,
@@ -206,18 +216,27 @@ local MIGRATIONS: { [number]: (data: { [string]: any }) -> { [string]: any } } =
 	end,
 }
 
-local function readSecrets(raw: unknown, now: number): { [string]: number }
+-- Mapa id → data (conquistas secretas e relíquias).
+local function readDatedIds(raw: unknown, now: number, maxIdLength: number): { [string]: number }
 	local secrets: { [string]: number } = {}
 	if typeof(raw) ~= "table" then
 		return secrets
 	end
 	for id, value in pairs(raw :: { [unknown]: unknown }) do
 		-- Ids desconhecidos são mantidos (conquista de uma versão futura).
-		if typeof(id) == "string" and #id <= SecretCatalog.MaxIdLength then
+		if typeof(id) == "string" and #id <= maxIdLength then
 			secrets[id] = if typeof(value) == "number" and value == value then math.max(0, math.floor(value)) else now
 		end
 	end
 	return secrets
+end
+
+local function readSecrets(raw: unknown, now: number): { [string]: number }
+	return readDatedIds(raw, now, SecretCatalog.MaxIdLength)
+end
+
+local function readRelics(raw: unknown, now: number): { [string]: number }
+	return readDatedIds(raw, now, RelicCatalog.MaxIdLength)
 end
 
 -- Datas gravadas antes da correção do teto ficaram presas em exatamente
@@ -309,6 +328,9 @@ function ProfileSchema.fromStored(raw: unknown, now: number): (Profile, boolean)
 		profile.daily = DailyRules.readDaily(data.daily)
 		profile.challenges = DailyRules.readChallenges(data.challenges)
 		profile.secrets = readSecrets(data.secrets, now)
+		profile.relics = readRelics(data.relics, now)
+		profile.dailyRelicDay = cleanNumber(data.dailyRelicDay, 0)
+		profile.dailyRelicCount = cleanNumber(data.dailyRelicCount, 0)
 		profile.session = readSession(data.session)
 		return profile, true
 	end
@@ -352,6 +374,9 @@ function ProfileSchema.fromStored(raw: unknown, now: number): (Profile, boolean)
 		referralDayCount = cleanNumber(data.referralDayCount, 0),
 		onboardingSteps = cleanNumber(data.onboardingSteps, 0),
 		firstMatchKind = math.min(cleanNumber(data.firstMatchKind, 0), 2),
+		relics = readRelics(data.relics, now),
+		dailyRelicDay = cleanNumber(data.dailyRelicDay, 0),
+		dailyRelicCount = cleanNumber(data.dailyRelicCount, 0),
 		appliedRounds = readAppliedRounds(data.appliedRounds),
 		createdAt = repairedCreatedAt(cleanLarge(data.createdAt, now), puffs, secrets, now),
 		updatedAt = repairedTime(cleanLarge(data.updatedAt, now), now),
@@ -460,6 +485,9 @@ function ProfileSchema.toStored(profile: Profile): { [string]: any }
 		referralDayCount = profile.referralDayCount,
 		onboardingSteps = profile.onboardingSteps,
 		firstMatchKind = profile.firstMatchKind,
+		relics = table.clone(profile.relics),
+		dailyRelicDay = profile.dailyRelicDay,
+		dailyRelicCount = profile.dailyRelicCount,
 		appliedRounds = table.clone(profile.appliedRounds),
 		createdAt = profile.createdAt,
 		updatedAt = profile.updatedAt,

@@ -11,6 +11,7 @@ local RunService = game:GetService("RunService")
 local PuffCatalog = require(ReplicatedStorage.Shared.config.PuffCatalog)
 local DailyConfig = require(ReplicatedStorage.Shared.config.DailyConfig)
 local SecretCatalog = require(ReplicatedStorage.Shared.config.SecretCatalog)
+local RelicCatalog = require(ReplicatedStorage.Shared.config.RelicCatalog)
 local PuffadorConstants = require(ReplicatedStorage.Shared.modules.PuffadorConstants)
 local ProfileTypes = require(ReplicatedStorage.Shared.types.ProfileTypes)
 local PuffTypes = require(ReplicatedStorage.Shared.types.PuffTypes)
@@ -24,6 +25,8 @@ type ChallengeState = ProfileTypes.ChallengeState
 type DailyState = ProfileTypes.DailyState
 type DailyReward = ProfileTypes.DailyReward
 type SecretState = ProfileTypes.SecretState
+type RelicState = ProfileTypes.RelicState
+type RelicEvent = ProfileTypes.RelicEvent
 
 local WAIT_TIMEOUT = 15
 
@@ -174,6 +177,42 @@ local function parseSecrets(raw: unknown): { SecretState }
 	return list
 end
 
+-- Só relíquias do catálogo, sem repetidas.
+local function parseRelics(raw: unknown): { RelicState }
+	local list: { RelicState } = {}
+	if typeof(raw) ~= "table" then
+		return list
+	end
+	local seen: { [string]: boolean } = {}
+	local limit = #RelicCatalog.allIds()
+	for index, item in ipairs(raw :: { any }) do
+		if index > limit then
+			break
+		end
+		if typeof(item) == "table" and RelicCatalog.get(item.id) ~= nil and not seen[item.id] then
+			seen[item.id] = true
+			table.insert(list, { id = item.id, obtainedAt = readNumber(item.obtainedAt) })
+		end
+	end
+	return list
+end
+
+local function parseRelicEvent(raw: unknown): RelicEvent?
+	if typeof(raw) ~= "table" then
+		return nil
+	end
+	local data = raw :: { [string]: any }
+	local relicId = if RelicCatalog.get(data.relicId) ~= nil then data.relicId :: string else nil
+	return {
+		relicId = relicId,
+		tickets = readNumber(data.tickets),
+		roomCompleted = relicId ~= nil and data.roomCompleted == true,
+		albumCompleted = relicId ~= nil and data.albumCompleted == true,
+		dailyCount = readNumber(data.dailyCount),
+		dailyGoal = relicId == nil and data.dailyGoal == true,
+	}
+end
+
 -- Lista de ids válidos (desafios ou segredos) para os eventos.
 local function parseIds(raw: unknown, isValid: (id: unknown) -> boolean, limit: number): { string }?
 	if typeof(raw) ~= "table" then
@@ -217,6 +256,10 @@ local function parse(raw: unknown): ProfileSnapshot?
 		challenges = parseChallenges(data.challenges),
 		nextResetAt = readNumber(data.nextResetAt),
 		secrets = parseSecrets(data.secrets),
+		relics = parseRelics(data.relics),
+		dailyRelicDay = readNumber(data.dailyRelicDay),
+		dailyRelicCount = readNumber(data.dailyRelicCount),
+		relicEvent = parseRelicEvent(data.relicEvent),
 		dailyReward = parseDailyReward(data.dailyReward),
 		completedChallenges = parseIds(data.completedChallenges, isChallengeId, #DailyConfig.Tiers),
 		newSecrets = parseIds(data.newSecrets, function(id)

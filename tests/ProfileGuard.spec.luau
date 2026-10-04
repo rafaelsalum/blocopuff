@@ -176,6 +176,17 @@ do
 	check("restored record is a copy", stored.puffs.neon.count == 2)
 end
 
+-- Relíquias (5C.2): nenhuma some e a contagem do dia nunca cai.
+do
+	local stored = profile({ relics = { biblioteca_chave = 7 }, dailyRelicDay = 20, dailyRelicCount = 5 })
+	local merged, anomalies = ProfileGuard.mergeForSave(stored, profile({ relics = { musica_puff = 9 }, dailyRelicDay = 3, dailyRelicCount = 1 }))
+	check("relics are restored", merged.relics.biblioteca_chave == 7 and merged.relics.musica_puff == 9)
+	check("daily relic count never drops", merged.dailyRelicCount == 5 and merged.dailyRelicDay == 20)
+	check("relic anomalies reported", table.find(anomalies, "relics+1") ~= nil and table.find(anomalies, "dailyRelics") ~= nil)
+	local fresh, none = ProfileGuard.mergeForSave(stored, profile({ relics = { biblioteca_chave = 7, musica_puff = 9 }, dailyRelicDay = 21, dailyRelicCount = 6 }))
+	check("normal relic save has no anomalies", #none == 0 and fresh.dailyRelicCount == 6)
+end
+
 -- Contagem de Puffs.
 check("countPuffs", ProfileGuard.countPuffs(profile()) == 2)
 check("countPuffs nil", ProfileGuard.countPuffs(nil) == 0)

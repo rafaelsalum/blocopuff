@@ -3,7 +3,8 @@
 -- Cartão de perfil no canto superior esquerdo do lobby: nível (e prestígio),
 -- barra de XP e um botão que abre as estatísticas da carreira. Embaixo, uma
 -- fileira de atalhos: 🏆 ranking global, ✨ Puffdex, 🎰 Puff Machine (com o
--- saldo de tickets), 📋 desafios e 👥 Party. Some durante a partida (o HUD
+-- saldo de tickets), 📋 desafios, 📜 Álbum do Casarão, 👥 Party e 💌
+-- convite. O painel PERFIL mostra o título do Álbum (o melhor ganho). Some durante a partida (o HUD
 -- de combate usa esse canto). Só visual.
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -12,6 +13,7 @@ local TweenService = game:GetService("TweenService")
 local Lang = require(ReplicatedStorage.Shared.i18n.Lang)
 local LevelCurve = require(ReplicatedStorage.Shared.modules.LevelCurve)
 local ProfileTypes = require(ReplicatedStorage.Shared.types.ProfileTypes)
+local RelicCatalog = require(ReplicatedStorage.Shared.config.RelicCatalog)
 local ResponsiveScale = require(script.Parent.ResponsiveScale)
 local UiKit = require(script.Parent.UiKit)
 local UiTheme = require(script.Parent.UiTheme)
@@ -28,7 +30,7 @@ export type ProfileCardViewHandle = {
 }
 
 local GUI_NAME = "BlocoPuffProfileCard"
-local CARD_SIZE = Vector2.new(236, 66)
+local CARD_SIZE = Vector2.new(266, 66)
 local SHORTCUT_GAP = 4
 local SHORTCUT_HEIGHT = 44
 local SHORTCUT_Y = CARD_SIZE.Y + 6
@@ -68,7 +70,8 @@ end
 -- `onRanking`: abre o painel RANKING (botão 🏆 ao lado do cartão).
 -- `onPuffdex`: abre o PUFFDEX (botão ✨). `onMachine`: abre a PUFF MACHINE (🎰).
 -- `onChallenges`: abre os DESAFIOS (📋). `onParty`: abre a PARTY (👥).
--- `onInvite`: convida amigos com recompensa (💌).
+-- `onInvite`: convida amigos com recompensa (💌). `onAlbum`: abre o ÁLBUM
+-- DO CASARÃO (📜).
 function ProfileCardView.new(
 	playerGui: PlayerGui,
 	onRanking: () -> (),
@@ -76,7 +79,8 @@ function ProfileCardView.new(
 	onMachine: () -> (),
 	onChallenges: () -> (),
 	onParty: () -> (),
-	onInvite: () -> ()
+	onInvite: () -> (),
+	onAlbum: () -> ()
 ): ProfileCardViewHandle
 	local screenGui = UiTheme.createScreenGui(GUI_NAME, playerGui, 12)
 
@@ -165,6 +169,7 @@ function ProfileCardView.new(
 		{ name = "PuffdexButton", text = "✨", variant = "Primary", action = onPuffdex },
 		{ name = "MachineButton", text = "🎰", variant = "Gold", action = onMachine },
 		{ name = "ChallengesButton", text = "📋", variant = "Success", action = onChallenges },
+		{ name = "AlbumButton", text = "📜", variant = "Gold", action = onAlbum },
 		{ name = "PartyButton", text = "👥", variant = "Primary", action = onParty },
 		{ name = "InviteButton", text = "💌", variant = "Success", action = onInvite },
 	}
@@ -227,7 +232,7 @@ function ProfileCardView.new(
 	UiTheme.addCorner(ticketBadge, 999)
 
 	-- Painel das estatísticas (abre ao lado do cartão).
-	local statsHeight = 20 + (#STAT_ROWS * (STAT_ROW_HEIGHT + STAT_ROW_GAP)) + NOTICE_HEIGHT
+	local statsHeight = 20 + ((#STAT_ROWS + 1) * (STAT_ROW_HEIGHT + STAT_ROW_GAP)) + NOTICE_HEIGHT
 	local stats = Instance.new("Frame")
 	stats.Name = "Stats"
 	stats.Position = UDim2.fromOffset(CARD_SIZE.X + STATS_GAP, 0)
@@ -248,6 +253,15 @@ function ProfileCardView.new(
 	layout.Padding = UDim.new(0, STAT_ROW_GAP)
 	layout.Parent = list
 
+	-- Título do Álbum do Casarão (o melhor ganho), no alto do painel.
+	local titleLine = UiTheme.createLabel(list, "RelicTitle", "", UiTheme.Fonts.BodyBold, STAT_TEXT_SIZE, UiTheme.Colors.Gold)
+	titleLine.LayoutOrder = 0
+	titleLine.Size = UDim2.new(1, 0, 0, STAT_ROW_HEIGHT)
+	titleLine.TextWrapped = false
+	titleLine.TextScaled = true
+	UiTheme.addTextConstraint(titleLine, 11, STAT_TEXT_SIZE)
+	titleLine.TextXAlignment = Enum.TextXAlignment.Left
+	titleLine.ZIndex = 3
 	local valueLabels: { [string]: TextLabel } = {}
 	for index, row in ipairs(STAT_ROWS) do
 		local line = Instance.new("Frame")
@@ -313,6 +327,12 @@ function ProfileCardView.new(
 			end
 		end
 		pendingDot.Visible = pending
+		local relics: { [string]: boolean } = {}
+		for _, state in ipairs(snapshot.relics) do
+			relics[state.id] = true
+		end
+		local titles = RelicCatalog.titlesFor(relics, snapshot.dailyRelicCount)
+		titleLine.Text = if #titles > 0 then Lang.t("🏅 %s", Lang.t(titles[1])) else Lang.t("🏅 Sem título ainda (veja o 📜 Álbum)")
 		notice.Visible = not snapshot.saved
 		notice.Text = Lang.t("Progresso desta sessão não está sendo salvo")
 	end

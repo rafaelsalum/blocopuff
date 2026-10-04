@@ -20,8 +20,8 @@
     "semantic_hash": ""
   },
   "src/client/init.client.luau": {
-    "mtime": 1791150813.9043732,
-    "ast_hash": "3bb2ff5b957a12034635a8e166bbfadd",
+    "mtime": 1791152967.0203197,
+    "ast_hash": "5fef2077f68d1db5b1cb212b64996aeb",
     "semantic_hash": ""
   },
   "src/client/ui/CrosshairView.luau": {
@@ -45,8 +45,8 @@
     "semantic_hash": ""
   },
   "src/server/init.server.luau": {
-    "mtime": 1791151262.9990723,
-    "ast_hash": "1601c36abe50306986f678396369805c",
+    "mtime": 1791152816.2986743,
+    "ast_hash": "60259c2a47c19dc313c6d5d1421346e4",
     "semantic_hash": ""
   },
   "src/server/services/ArenaService.luau": {
@@ -125,8 +125,8 @@
     "semantic_hash": ""
   },
   "README.md": {
-    "mtime": 1791151285.3395903,
-    "ast_hash": "d5f09ffb61c3226b5e18e2d98862d23c",
+    "mtime": 1791153208.432802,
+    "ast_hash": "bebb82aeff25905aa4b3472c6887c6db",
     "semantic_hash": ""
   },
   "src/client/controllers/CombatCameraController.luau": {
@@ -425,8 +425,8 @@
     "semantic_hash": ""
   },
   "src/client/controllers/ProfileController.luau": {
-    "mtime": 1790561984.099474,
-    "ast_hash": "3f93ad1c76ff37141f237b602dd9bc41",
+    "mtime": 1791153300.794694,
+    "ast_hash": "9b67787a923ec86b562d6488f1ff8e8e",
     "semantic_hash": ""
   },
   "src/server/config/ProfileConfig.luau": {
@@ -435,13 +435,13 @@
     "semantic_hash": ""
   },
   "src/server/data/ProfileSchema.luau": {
-    "mtime": 1790963263.1241932,
-    "ast_hash": "4672034ff587f3fff152cee18d756770",
+    "mtime": 1791152639.5860734,
+    "ast_hash": "9aa51e57f8d19de30a7f26976dad9f34",
     "semantic_hash": ""
   },
   "src/server/services/PlayerDataService.luau": {
-    "mtime": 1790962866.9420323,
-    "ast_hash": "5195cfe93d51814a315f9fdbac04971a",
+    "mtime": 1791152672.9628031,
+    "ast_hash": "9b15f332a9a9b67cccb164457dd6876e",
     "semantic_hash": ""
   },
   "src/server/services/RoundStatsService.luau": {
@@ -450,18 +450,18 @@
     "semantic_hash": ""
   },
   "src/shared/types/ProfileTypes.luau": {
-    "mtime": 1790953528.029093,
-    "ast_hash": "bac3f55f5e9cb62886a346daf7a37e9d",
+    "mtime": 1791152669.7115252,
+    "ast_hash": "712ab0fa871741f5543e9e2a5fce21b6",
     "semantic_hash": ""
   },
   "src/client/controllers/ProgressionController.luau": {
-    "mtime": 1791150232.1527948,
-    "ast_hash": "a26c3dba0d4c1ad9cc677b8f253aa9cf",
+    "mtime": 1791152962.2917573,
+    "ast_hash": "14826f5256625b2c340d2550417d2d7c",
     "semantic_hash": ""
   },
   "src/client/ui/ProfileCardView.luau": {
-    "mtime": 1791125320.005104,
-    "ast_hash": "01572cb4d48fc14b690b69f1953d9eed",
+    "mtime": 1791153300.7952023,
+    "ast_hash": "78a324630dc83a3899b53a442c8bb59a",
     "semantic_hash": ""
   },
   "src/server/data/XpCalculator.luau": {
@@ -515,28 +515,28 @@
     "semantic_hash": ""
   },
   "src/client/ui/PuffdexView.luau": {
-    "mtime": 1791150232.151304,
-    "ast_hash": "3cfcd510607246077206513204739300",
+    "mtime": 1791152685.0908751,
+    "ast_hash": "5493152071d1f3ae088d6bdd02c3eaec",
     "semantic_hash": ""
   },
   "src/server/data/PuffInventory.luau": {
-    "mtime": 1790560791.6900702,
-    "ast_hash": "73122eefbabe5d68230e88615857c072",
+    "mtime": 1791152685.0906212,
+    "ast_hash": "64a4ee7736c58ac5664fd68324fef451",
     "semantic_hash": ""
   },
   "src/server/services/PuffdexService.luau": {
-    "mtime": 1790562073.6929278,
-    "ast_hash": "85ce51ce00e5585ca656d96c8bb975ed",
+    "mtime": 1791152945.8117185,
+    "ast_hash": "4738d5c974f479794df148e90d56b763",
     "semantic_hash": ""
   },
   "src/shared/config/PuffCatalog.luau": {
-    "mtime": 1790732433.9460578,
-    "ast_hash": "dc0d0d3457f012b78fe2e054c8cc9eaf",
+    "mtime": 1791152685.0900857,
+    "ast_hash": "4cfb327791eb9a12ecd755191bdfad29",
     "semantic_hash": ""
   },
   "src/shared/types/PuffTypes.luau": {
-    "mtime": 1790732433.9429703,
-    "ast_hash": "84c45d3d42c9dfe3026bf23df70623ae",
+    "mtime": 1791152685.0897095,
+    "ast_hash": "7a4047b29a63e1bc715dd45d5bb5b259",
     "semantic_hash": ""
   },
   "src/client/controllers/PuffMachineController.luau": {
@@ -975,13 +975,13 @@
     "semantic_hash": ""
   },
   "src/server/data/ProfileGuard.luau": {
-    "mtime": 1790743434.1507223,
-    "ast_hash": "38aca9512f1182e63acee9c40a881a35",
+    "mtime": 1791152647.5686266,
+    "ast_hash": "78301e0fd1cfa6dd022efd9c93562a3e",
     "semantic_hash": ""
   },
   "tests/ProfileGuard.spec.luau": {
-    "mtime": 1790743477.1052628,
-    "ast_hash": "d40f8fdb7c77b89d63faebcfb8a8803a",
+    "mtime": 1791152656.8487365,
+    "ast_hash": "ac45eb3cfb6828fb5ddb24f83a4b6bba",
     "semantic_hash": ""
   },
   "tools/profile-recovery/recovery.luau": {
@@ -1305,8 +1305,8 @@
     "semantic_hash": ""
   },
   "tests/Locale.spec.luau": {
-    "mtime": 1791136247.8641222,
-    "ast_hash": "fa525bc5989eec44cb08f02fcd5d3948",
+    "mtime": 1791152998.9411745,
+    "ast_hash": "1650af9aa8db87b8c299ebb8a6c06451",
     "semantic_hash": ""
   },
   "docs/FASE_5C_CASARAO_VIVO.md": {
@@ -1362,6 +1362,51 @@
   "src/shared/modules/MansionWingLayout.luau": {
     "mtime": 1791151262.998761,
     "ast_hash": "769ce84132727014438951b4d71af652",
+    "semantic_hash": ""
+  },
+  "src/client/controllers/RelicController.luau": {
+    "mtime": 1791153300.7944283,
+    "ast_hash": "0df3df1b500ecee1be5560ac7c466190",
+    "semantic_hash": ""
+  },
+  "src/client/ui/AlbumView.luau": {
+    "mtime": 1791152896.2292564,
+    "ast_hash": "5e638ca397192abf63a690722ea0a831",
+    "semantic_hash": ""
+  },
+  "src/server/data/RelicRules.luau": {
+    "mtime": 1791152604.0407872,
+    "ast_hash": "3442a8de8620247c734355004e880f08",
+    "semantic_hash": ""
+  },
+  "src/server/services/RelicModels.luau": {
+    "mtime": 1791153300.793335,
+    "ast_hash": "72d4879f5e13a3b21c6a64fef533d828",
+    "semantic_hash": ""
+  },
+  "src/server/services/RelicService.luau": {
+    "mtime": 1791153946.4488776,
+    "ast_hash": "c0334ede3957467c8a541e02422be6e4",
+    "semantic_hash": ""
+  },
+  "src/server/services/RelicSpots.luau": {
+    "mtime": 1791153934.3536954,
+    "ast_hash": "420d5a1104e7eb7ce8b80177d4a32364",
+    "semantic_hash": ""
+  },
+  "src/shared/config/RelicCatalog.luau": {
+    "mtime": 1791152578.3276517,
+    "ast_hash": "0bf2ba56870707e39dd9be9a306ab170",
+    "semantic_hash": ""
+  },
+  "src/shared/i18n/en/Relics.luau": {
+    "mtime": 1791152992.721182,
+    "ast_hash": "6ececed6c53630ff7dec1e8b9a3d2df2",
+    "semantic_hash": ""
+  },
+  "tests/RelicRules.spec.luau": {
+    "mtime": 1791152624.1009429,
+    "ast_hash": "1d1a82b6a3da515229afbc2747ebafbd",
     "semantic_hash": ""
   }
 }

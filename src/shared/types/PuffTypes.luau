@@ -6,15 +6,17 @@
 
 export type PuffRarity = "Common" | "Rare" | "Epic" | "Legendary"
 
--- De onde o Puff veio. "Machine" fica reservado para a Puff Machine (4.2).
-export type PuffOrigin = "Starter" | "Level" | "Feat" | "Machine"
+-- De onde o Puff veio. "Machine" fica reservado para a Puff Machine (4.2) e
+-- "Album" para quem completa o Álbum do Casarão (5C.2).
+export type PuffOrigin = "Starter" | "Level" | "Feat" | "Machine" | "Album"
 
 -- Como desbloquear:
 --   Starter: todo mundo começa com ele.
 --   Level:   chegar ao nível `target`.
 --   Stat:    chegar a `target` na estatística `stat` do perfil.
 --   Machine: só pela Puff Machine (4.2).
-export type PuffUnlockKind = "Starter" | "Level" | "Stat" | "Machine"
+--   Album:   só completando o Álbum do Casarão (5C.2).
+export type PuffUnlockKind = "Starter" | "Level" | "Stat" | "Machine" | "Album"
 
 export type PuffUnlockRule = {
 	kind: PuffUnlockKind,
@@ -64,7 +66,7 @@ export type OwnedPuff = {
 
 local PuffTypes = {
 	Rarities = table.freeze({ "Common", "Rare", "Epic", "Legendary" } :: { PuffRarity }),
-	Origins = table.freeze({ "Starter", "Level", "Feat", "Machine" } :: { PuffOrigin }),
+	Origins = table.freeze({ "Starter", "Level", "Feat", "Machine", "Album" } :: { PuffOrigin }),
 }
 
 return table.freeze(PuffTypes)

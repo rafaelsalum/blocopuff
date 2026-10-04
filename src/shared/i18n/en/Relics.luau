@@ -1,0 +1,116 @@
+--!strict
+
+-- Inglês das Relíquias e do Álbum do Casarão (Fase 5C.2): cômodos, títulos,
+-- nomes das relíquias, pistas, o Álbum e os avisos (chave: o texto em
+-- português do código). "Pegar" já está em World.
+
+return table.freeze({
+	-- Cômodos
+	["Salão Principal"] = "Grand Hall",
+	["Salão da Coleção"] = "Collection Hall",
+	["Jardim do Barão"] = "Baron's Garden",
+	["Ponto de Encontro"] = "Meeting Point",
+	["Biblioteca"] = "Library",
+	["Sala de Música"] = "Music Room",
+	["Sótão"] = "Attic",
+	["Porão"] = "Cellar",
+
+	-- Títulos
+	["Anfitrião"] = "Host",
+	["Colecionador"] = "Collector",
+	["Amigo do Barão"] = "Baron's Friend",
+	["Detetive"] = "Detective",
+	["Bibliotecário"] = "Librarian",
+	["Maestro"] = "Maestro",
+	["Rato de Sótão"] = "Attic Mouse",
+	["Guardião do Porão"] = "Cellar Keeper",
+	["Explorador do Casarão"] = "Mansion Explorer",
+	["Caçador de Relíquias"] = "Relic Hunter",
+
+	-- Pistas
+	["Num cantinho do cômodo"] = "In a corner of the room",
+	["Junto a uma parede"] = "Along a wall",
+	["Longe das paredes"] = "Away from the walls",
+
+	-- Relíquias
+	["Puff Dourado"] = "Golden Puff",
+	["Moeda do Barão"] = "Baron's Coin",
+	["Retrato da Vovó Puff"] = "Grandma Puff's Portrait",
+	["Chave do Salão"] = "Hall Key",
+	["Rei de Xadrez"] = "Chess King",
+	["Puff de Cristal"] = "Crystal Puff",
+	["Moeda Rara"] = "Rare Coin",
+	["Retrato do Fundador"] = "Founder's Portrait",
+	["Chave da Vitrine"] = "Showcase Key",
+	["Torre de Xadrez"] = "Chess Rook",
+	["Puff de Jardim"] = "Garden Puff",
+	["Moeda Enterrada"] = "Buried Coin",
+	["Retrato do Barão Filhote"] = "Baby Baron's Portrait",
+	["Chave do Portão"] = "Gate Key",
+	["Cavalo de Xadrez"] = "Chess Knight",
+	["Puff Detetive"] = "Detective Puff",
+	["Moeda da Sorte"] = "Lucky Coin",
+	["Retrato da Turma"] = "Group Portrait",
+	["Chave do Cofre Velho"] = "Old Safe Key",
+	["Bispo de Xadrez"] = "Chess Bishop",
+	["Puff Leitor"] = "Bookworm Puff",
+	["Moeda Esquecida"] = "Forgotten Coin",
+	["Retrato do Escritor"] = "Writer's Portrait",
+	["Chave de Latão"] = "Brass Key",
+	["Rainha de Xadrez"] = "Chess Queen",
+	["Puff Cantor"] = "Singer Puff",
+	["Moeda do Gramofone"] = "Gramophone Coin",
+	["Retrato da Pianista"] = "Pianist's Portrait",
+	["Chave de Afinar"] = "Tuning Key",
+	["Peão Musical"] = "Musical Pawn",
+	["Puff Empoeirado"] = "Dusty Puff",
+	["Moeda Antiga"] = "Ancient Coin",
+	["Retrato Rachado"] = "Cracked Portrait",
+	["Chave Enferrujada"] = "Rusty Key",
+	["Rei de Madeira"] = "Wooden King",
+	["Puff Fantasma"] = "Ghost Puff",
+	["Moeda Perdida"] = "Lost Coin",
+	["Retrato Mofado"] = "Moldy Portrait",
+	["Chave do Barril"] = "Barrel Key",
+	["Torre de Pedra"] = "Stone Rook",
+	["Relíquia do Dia"] = "Relic of the Day",
+
+	-- Puff do Álbum
+	["Puff Explorador"] = "Explorer Puff",
+	["Complete o Álbum do Casarão"] = "Complete the Mansion Album",
+	["Conhece cada cantinho do Casarão."] = "Knows every corner of the Mansion.",
+	["Álbum do Casarão"] = "Mansion Album",
+
+	-- Álbum
+	["📜 ÁLBUM DO CASARÃO"] = "📜 MANSION ALBUM",
+	["%d/%d relíquias"] = "%d/%d relics",
+	["🌟 RELÍQUIA DO DIA"] = "🌟 RELIC OF THE DAY",
+	["Todo dia uma relíquia especial aparece num lugar diferente do Casarão. Ache e pegue!"] = "Every day a special relic shows up in a different spot of the Mansion. Find it and grab it!",
+	["+%d 🎟 por relíquia · ao juntar %d: título %s e +%d 🎟"] = "+%d 🎟 per relic · collect %d: %s title and +%d 🎟",
+	["🏅 Título ganho: %s"] = "🏅 Title earned: %s",
+	["🔒 Complete o cômodo: título %s e +%d 🎟"] = "🔒 Complete the room: %s title and +%d 🎟",
+	["Encontrada!"] = "Found!",
+	["✓ A de hoje já é sua!"] = "✓ Today's is already yours!",
+	["Hoje: procure pelo Casarão!"] = "Today: search the Mansion!",
+	["Relíquias do Dia: %d de %d"] = "Relics of the Day: %d of %d",
+	["🌟 Relíquia do Dia  %d/%d"] = "🌟 Relic of the Day  %d/%d",
+	["🏅 Seus títulos: %s"] = "🏅 Your titles: %s",
+	["🏅 Complete um cômodo para ganhar seu primeiro título."] = "🏅 Complete a room to earn your first title.",
+	["📖 Álbum completo! Você ganhou o %s."] = "📖 Album complete! You earned the %s.",
+	["📖 Complete as %d relíquias: %s e o título %s."] = "📖 Complete all %d relics: %s and the %s title.",
+
+	-- Perfil
+	["🏅 %s"] = "🏅 %s",
+	["🏅 Sem título ainda (veja o 📜 Álbum)"] = "🏅 No title yet (see the 📜 Album)",
+
+	-- Avisos
+	["RELÍQUIA DO DIA!"] = "RELIC OF THE DAY!",
+	["Relíquias do Dia: %d de %d · +%d 🎟"] = "Relics of the Day: %d of %d · +%d 🎟",
+	["NOVO TÍTULO!"] = "NEW TITLE!",
+	["RELÍQUIA ENCONTRADA!"] = "RELIC FOUND!",
+	["%s · %s %d/%d · +%d 🎟"] = "%s · %s %d/%d · +%d 🎟",
+	["CÔMODO COMPLETO!"] = "ROOM COMPLETE!",
+	["Título: %s · +%d 🎟"] = "Title: %s · +%d 🎟",
+	["ÁLBUM COMPLETO!"] = "ALBUM COMPLETE!",
+	["Título: %s"] = "Title: %s",
+})

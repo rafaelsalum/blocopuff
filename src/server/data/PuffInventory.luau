@@ -104,7 +104,7 @@ function PuffInventory.grantUnlocks(inventory: Inventory, stats: { [string]: num
 	local granted: { string } = {}
 	local result: Inventory? = nil
 	for _, entry in ipairs(PuffCatalog.all()) do
-		if inventory[entry.id] == nil and entry.unlock.kind ~= "Machine" and PuffCatalog.meetsRule(entry, stats, level) then
+		if inventory[entry.id] == nil and entry.unlock.kind ~= "Machine" and entry.unlock.kind ~= "Album" and PuffCatalog.meetsRule(entry, stats, level) then
 			local updated = result or table.clone(inventory)
 			updated[entry.id] = {
 				obtainedAt = now,
