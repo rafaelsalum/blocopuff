@@ -30,6 +30,12 @@ local TrapConstants = table.freeze({
 	WindowCurtainNames = table.freeze({ "CurtainL", "CurtainR" }),
 	WindowBoardPrefix = "Board",
 
+	-- Janela: variação da rodada (TrapConfig.WindowVariant) e, na Chuva,
+	-- até quando o chão em frente fica escorregadio
+	-- (Workspace:GetServerTimeNow).
+	WindowVariantAttribute = "WindowVariant",
+	WindowRainUntilAttribute = "WindowRainUntil",
+
 	-- Tapete: direção do puxão (no alvo, a franja) e, em cada pedaço do
 	-- tapete, a distância até a franja ao longo do puxão.
 	RugPullAttribute = "RugPull",

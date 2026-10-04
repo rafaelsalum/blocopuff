@@ -272,6 +272,28 @@ Seção **TESTES DA PARTIDA** no painel admin. Vale só para o servidor atual e 
 - **Testar de verdade:** só com o jogo publicado. O Roblox só preenche quem convidou em convites reais, e o Studio pode não ter acesso ao DataStore e ao MessagingService. Os banners de recompensa da página do convite são configurados no Creator Hub (Engagement > Referral Rewards), com o jogo publicado há pelo menos 1 dia.
 - **Testes:** `lune run tests/ReferralRules.spec`.
 
+### Variações das janelas: Pombos e Chuva (Fase 5, entrega 5.6)
+
+- **Sorteio por rodada:** cada janela do andar de cima sorteia uma variação no começo de cada rodada. A cortina tem uma cor por variação, para dar para ver de longe qual janela faz o quê.
+  - Ventania, 60%, cortina vermelha.
+  - Pombos, 20%, cortina bege.
+  - Chuva, 20%, cortina azul.
+  - Pesos e cores ficam em `TrapConfig.Window.Variants`. A distância mínima, o aviso, a recarga e os usos são os da janela.
+- **Pombos:**
+  - Um bando de 9 pombos entra pela janela e atravessa uma faixa reta de 40 × 6 studs em 1,6 s.
+  - Quem está no trecho da faixa onde o bando passa leva esbarrões leves: 0,3× o empurrão do disparo, até 3, um a cada 0,25 s, com crédito para quem atirou.
+  - O cliente desenha o voo pelo relógio do servidor, então os esbarrões batem com a passagem do bando.
+- **Chuva:**
+  - O chão em frente à janela (12 × 12 studs) fica molhado e escorregadio por 5 s.
+  - Com pouca tração (`RainGrip`), a velocidade só chega aos poucos à que o jogador quer andar. Fica difícil frear e mudar de direção, e quem passa por cima de um buraco cai.
+  - O servidor publica até quando chove (atributo `WindowRainUntil`). Quem simula o personagem aplica o escorregão (`SlipperyGround`): o próprio cliente para o jogador (`SlipperyController`) e o servidor para os bots.
+  - Empurrão, escorregão do tapete e impulso têm prioridade, e no ar nada muda.
+  - Quem está na chuva fica marcado como empurrado por quem atirou, sem tirar o crédito de quem empurrou antes.
+  - Aparecem chuva e poça no chão enquanto durar, inclusive para quem entra no meio.
+- **Geometria compartilhada** (`WindowGeometry`): o ponto da janela no piso, a faixa dos pombos e a área da chuva, iguais no servidor e no cliente.
+- **Telemetria:** `TrapTriggered`, `TrapAffected` e `TrapSupportLost` registram a variação junto (`Window.Gust`, `Window.Pigeons`, `Window.Rain`).
+- **Sons provisórios**, embutidos no Roblox: o bater de asas e a chuva.
+
 ### Modais do lobby maiores e mais fáceis de tocar
 
 - **Ranking, Puffdex, Puff Machine, Desafios e Party** agora crescem até quase a tela toda: 95% da largura e 96% da altura da área segura. O limite de escala vai de 0,5× a 1,5× (`ResponsiveScale.fit` / `ResponsiveScale.Modal`). Antes ficavam presos entre 0,55× e 1×.

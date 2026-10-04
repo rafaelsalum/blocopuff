@@ -10,8 +10,12 @@ local GameConfig = require(script.Parent.Parent.config.GameConfig)
 
 local MAX_SPEED = 200
 local PUSH_NAME = "BlocoPuffKnockback"
+-- Anexo do chão escorregadio da Chuva (SlipperyGround).
+local SLIP_NAME = "BlocoPuffSlip"
 
 local CharacterImpulse = {}
+
+CharacterImpulse.SlipName = SLIP_NAME
 
 local function clampSpeed(velocity: Vector3): Vector3
 	if velocity.Magnitude > MAX_SPEED then
@@ -22,6 +26,13 @@ end
 
 -- Troca o empurrão em andamento (se houver) por um novo anexo.
 local function freshAttachment(root: BasePart): Attachment
+	-- O empurrão manda já neste quadro: o escorregão da Chuva se desliga
+	-- (o SlipperyGround religa quando o empurrão acabar).
+	local slip = root:FindFirstChild(SLIP_NAME)
+	local slipConstraint = if slip ~= nil then slip:FindFirstChildOfClass("LinearVelocity") else nil
+	if slipConstraint ~= nil then
+		slipConstraint.Enabled = false
+	end
 	local existing = root:FindFirstChild(PUSH_NAME)
 	if existing ~= nil then
 		existing:Destroy()

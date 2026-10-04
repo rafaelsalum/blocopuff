@@ -22,6 +22,7 @@ local MusicController = require(script.controllers.MusicController)
 local VaultController = require(script.controllers.VaultController)
 local KnockbackController = require(script.controllers.KnockbackController)
 local TrapVisualController = require(script.controllers.TrapVisualController)
+local SlipperyController = require(script.controllers.SlipperyController)
 local ResultsController = require(script.controllers.ResultsController)
 local TelemetryController = require(script.controllers.TelemetryController)
 local SecretPassageController = require(script.controllers.SecretPassageController)
@@ -120,6 +121,14 @@ local trapsOk, trapsErr = pcall(function()
 end)
 if not trapsOk then
 	warn(string.format("[BlocoPuff] Failed to start mansion trap effects: %s", tostring(trapsErr)))
+end
+
+-- Chão molhado da Chuva (janelas): pouca tração no próprio personagem.
+local slipperyOk, slipperyErr = pcall(function()
+	SlipperyController.start()
+end)
+if not slipperyOk then
+	warn(string.format("[BlocoPuff] Failed to start slippery ground: %s", tostring(slipperyErr)))
 end
 
 local resultsOk, resultsErr = pcall(function()

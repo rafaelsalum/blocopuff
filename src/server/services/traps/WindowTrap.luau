@@ -1,20 +1,33 @@
 --!strict
 
--- Janela Ventania (Fase 5, entrega 5.2). Ao fim do aviso, o vidro estoura,
--- uma rajada entra num cone para dentro da arena (forte perto da janela,
--- fraca no fim do cone) e os blocos encostados na parede, debaixo da
--- janela, piscam e caem. Depois a janela fica aberta e, no fim da recarga,
--- é pregada com tábuas. Quem atirou nunca é empurrado; quedas contam como
--- derrubada dele (KnockbackService).
+-- Janela-armadilha (Fase 5). Cada janela sorteia, a cada rodada, uma
+-- variação (a cortina muda de cor para dar para ver de longe):
+--   * Ventania (5.2, a mais comum): o vidro estoura, uma rajada entra num
+--     cone para dentro da arena (forte perto da janela, fraca no fim do
+--     cone) e os blocos encostados na parede, debaixo da janela, piscam e
+--     caem;
+--   * Pombos (5.6): um bando entra e atravessa a arena numa faixa reta;
+--     quem está na faixa quando o bando passa leva esbarrões leves (até 3);
+--   * Chuva (5.6): o chão em frente à janela fica escorregadio por alguns
+--     segundos (pouca tração: difícil frear e mudar de direção).
+-- Depois a janela fica aberta e, no fim da recarga, é pregada com tábuas.
+-- Quem atirou nunca é afetado; quedas contam como derrubada dele
+-- (KnockbackService).
 --
--- O servidor só muda o que importa para todos (vidro, tábuas, blocos e
--- empurrões); o TrapVisualController desenha trincas, cortinas, confete de
--- vidro e vento a partir dos atributos.
+-- O servidor só muda o que importa para todos (vidro, tábuas, cortinas,
+-- blocos, empurrões e até quando chove); o TrapVisualController desenha
+-- trincas, cortinas, vidro, vento, pombos e chuva a partir dos atributos.
+-- O escorregão da Chuva é aplicado por quem simula o personagem
+-- (SlipperyController no cliente; aqui, só para os bots).
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local ArenaConstants = require(ReplicatedStorage.Shared.modules.ArenaConstants)
-local BuildingLayout = require(ReplicatedStorage.Shared.modules.BuildingLayout)
+local RunService = game:GetService("RunService")
+local Workspace = game:GetService("Workspace")
+
+local SlipperyGround = require(ReplicatedStorage.Shared.modules.SlipperyGround)
+local WindowGeometry = require(ReplicatedStorage.Shared.modules.WindowGeometry)
 local GameConfig = require(ReplicatedStorage.Shared.config.GameConfig)
 local TrapConfig = require(ReplicatedStorage.Shared.config.TrapConfig)
 local TrapConstants = require(ReplicatedStorage.Shared.modules.TrapConstants)
@@ -28,12 +41,21 @@ type Combatant = CombatantRegistry.Combatant
 local CONFIG = TrapConfig.Window
 local MULLION_NAMES = { "MullionV", "MullionH" }
 
-type Frame = {
-	-- Ponto no piso, junto da parede, bem embaixo da janela.
-	base: Vector3,
-	inward: Vector3,
-	along: Vector3,
-	floor: number,
+type Frame = WindowGeometry.Frame
+type WindowVariant = TrapConfig.WindowVariant
+
+-- Conferência da faixa dos pombos e do chão molhado (s).
+local SWEEP_INTERVAL = 0.05
+-- De quanto em quanto tempo quem está no chão molhado fica marcado como
+-- empurrado por quem atirou (quedas ali contam como derrubada dele).
+local RAIN_CREDIT_INTERVAL = 0.5
+
+type Rain = {
+	frame: Frame,
+	endsAt: number,
+	shooter: Combatant?,
+	isCurrent: () -> boolean,
+	lastCredit: number,
 }
 
 local WindowTrap = {}
@@ -96,26 +118,6 @@ local function setBoarded(glass: BasePart, boarded: boolean)
 	end
 end
 
-local function frameOf(glass: BasePart): Frame?
-	local floor = glass:GetAttribute(TrapConstants.FloorAttribute)
-	local inwardValue = glass:GetAttribute(TrapConstants.InwardAttribute)
-	if typeof(floor) ~= "number" or typeof(inwardValue) ~= "Vector3" then
-		return nil
-	end
-	local flat = Vector3.new(inwardValue.X, 0, inwardValue.Z)
-	if flat.Magnitude < 1e-3 then
-		return nil
-	end
-	local inward = flat.Unit
-	local floorY = BuildingLayout.getFloorSurfaceY(GameConfig.Arena, floor)
-	return {
-		base = Vector3.new(glass.Position.X, floorY, glass.Position.Z),
-		inward = inward,
-		along = inward:Cross(Vector3.yAxis),
-		floor = floor,
-	}
-end
-
 -- Força da rajada em `position` (múltiplo do empurrão do disparo; 0 = fora
 -- do cone) e o lado em que a pessoa está (-1 a 1, para abrir o vento).
 local function gustAt(frame: Frame, position: Vector3): (number, number)
@@ -173,7 +175,197 @@ local function looseBlocks(frame: Frame): { Part }
 	return blocks
 end
 
--- Efeito ao fim do aviso. Devolve quantos jogadores a rajada empurrou.
+-- Nome na telemetria: a variação junto (Window.Gust, Window.Pigeons...).
+function WindowTrap.describe(glass: BasePart): string
+	return `{TrapConstants.Window}.{WindowGeometry.variantOf(glass)}`
+end
+
+-- Janelas conhecidas (para sortear as variações a cada rodada).
+local knownGlasses: { [BasePart]: boolean } = setmetatable({}, { __mode = "k" }) :: any
+local random = Random.new()
+local activeRains: { [BasePart]: Rain } = {}
+local slipStates: { [Model]: SlipperyGround.State } = setmetatable({}, { __mode = "k" }) :: any
+local rainConnection: RBXScriptConnection? = nil
+local RAIN_WARN_INTERVAL = 5
+local lastRainWarnAt = -math.huge
+
+local function curtainColorOf(variant: WindowVariant): Color3?
+	for _, entry in ipairs(CONFIG.Variants) do
+		if entry.variant == variant then
+			return entry.curtainColor
+		end
+	end
+	return nil
+end
+
+local function setVariant(glass: BasePart, variant: WindowVariant)
+	glass:SetAttribute(TrapConstants.WindowVariantAttribute, variant)
+	local color = curtainColorOf(variant)
+	if color ~= nil then
+		for _, curtain in ipairs(windowParts(glass, TrapConstants.WindowCurtainNames)) do
+			curtain.Color = color
+		end
+	end
+end
+
+local function rollVariant(): WindowVariant
+	local total = 0
+	for _, entry in ipairs(CONFIG.Variants) do
+		total += math.max(0, entry.weight)
+	end
+	local pick = random:NextNumber(0, total)
+	for _, entry in ipairs(CONFIG.Variants) do
+		pick -= math.max(0, entry.weight)
+		if pick <= 0 then
+			return entry.variant
+		end
+	end
+	return "Gust"
+end
+
+-- Ventania: rajada e blocos soltos. Devolve quantos empurrou.
+local function gust(frame: Frame, shooter: Combatant?, isCurrent: () -> boolean): number
+	local affected = pushPlayers(frame, shooter)
+	TrapBlocks.drop(looseBlocks(frame), shooter, CONFIG.LooseBlockDelay, isCurrent)
+	return affected
+end
+
+-- Pombos: o bando atravessa a faixa em PigeonFlightTime (o cliente desenha
+-- o voo pelo mesmo relógio). Quem está no trecho da faixa onde o bando
+-- está leva esbarrões. Devolve quantos estavam na faixa no começo.
+local function pigeons(frame: Frame, shooter: Combatant?, isCurrent: () -> boolean): number
+	local knockback = GameConfig.Knockback
+	local bumps: { [number]: number } = {}
+	local lastBump: { [number]: number } = {}
+	local startedAt = os.clock()
+	local function sweep()
+		local now = os.clock()
+		local progress = math.clamp((now - startedAt) / CONFIG.PigeonFlightTime, 0, 1)
+		local head = progress * (CONFIG.PigeonLaneLength + CONFIG.PigeonFlockLength)
+		local tail = head - CONFIG.PigeonFlockLength
+		for _, combatant in ipairs(CombatantRegistry.all()) do
+			local root = TrapBlocks.targetRoot(combatant, shooter)
+			local count = bumps[combatant.id] or 0
+			local last = lastBump[combatant.id]
+			if root ~= nil and count < CONFIG.PigeonMaxBumps and (last == nil or now - last >= CONFIG.PigeonBumpInterval) then
+				local depth = WindowGeometry.local3(frame, root.Position)
+				if WindowGeometry.inPigeonLane(frame, root.Position) and depth >= tail and depth <= head then
+					local side = random:NextNumber(-0.35, 0.35)
+					local direction = (frame.inward + (frame.along * side)).Unit
+					local velocity = (direction * knockback.HorizontalSpeed * CONFIG.PigeonBumpMultiplier)
+						+ Vector3.new(0, knockback.VerticalSpeed * CONFIG.PigeonBumpLift, 0)
+					if KnockbackService.push(shooter, combatant, velocity) then
+						bumps[combatant.id] = count + 1
+						lastBump[combatant.id] = now
+					end
+				end
+			end
+		end
+	end
+	local inLane = 0
+	for _, combatant in ipairs(CombatantRegistry.all()) do
+		local root = TrapBlocks.targetRoot(combatant, shooter)
+		if root ~= nil and WindowGeometry.inPigeonLane(frame, root.Position) then
+			inLane += 1
+		end
+	end
+	task.spawn(function()
+		while os.clock() - startedAt <= CONFIG.PigeonFlightTime and isCurrent() do
+			local ok, failure = pcall(sweep)
+			if not ok then
+				warn(`[BlocoPuff] Pigeon bumps failed: {failure}`)
+				return
+			end
+			task.wait(SWEEP_INTERVAL)
+		end
+	end)
+	return inLane
+end
+
+-- Chão molhado: escorregão dos bots (os jogadores aplicam no próprio
+-- cliente) e crédito de quem atirou para quem está nele.
+local function stepRains(dt: number)
+	local now = os.clock()
+	for glass, entry in pairs(activeRains) do
+		if now >= entry.endsAt or not entry.isCurrent() then
+			activeRains[glass] = nil
+		end
+	end
+	for _, bot in ipairs(CombatantRegistry.getBots()) do
+		local model = bot.model
+		local root = CombatantRegistry.getRoot(bot)
+		local humanoid = CombatantRegistry.getHumanoid(bot)
+		if model ~= nil and root ~= nil and humanoid ~= nil then
+			local slippery = false
+			for _, entry in pairs(activeRains) do
+				if WindowGeometry.inRain(entry.frame, root.Position) then
+					slippery = true
+					break
+				end
+			end
+			local state = slipStates[model]
+			if slippery and state == nil then
+				state = SlipperyGround.new()
+				slipStates[model] = state
+			end
+			if state ~= nil then
+				SlipperyGround.step(state, root, humanoid, dt, slippery, CONFIG.RainGrip)
+			end
+		end
+	end
+	for _, entry in pairs(activeRains) do
+		local shooter = entry.shooter
+		if shooter ~= nil and CombatantRegistry.isPresent(shooter) and now - entry.lastCredit >= RAIN_CREDIT_INTERVAL then
+			entry.lastCredit = now
+			for _, combatant in ipairs(CombatantRegistry.all()) do
+				local root = TrapBlocks.targetRoot(combatant, shooter)
+				-- Não tira o crédito de quem empurrou por último.
+				local recent = KnockbackService.getRecentAttacker(combatant)
+				if root ~= nil and (recent == nil or recent == shooter) and WindowGeometry.inRain(entry.frame, root.Position) then
+					KnockbackService.markAttacker(combatant, shooter)
+				end
+			end
+		end
+	end
+	if next(activeRains) == nil then
+		for model, state in pairs(slipStates) do
+			SlipperyGround.release(state)
+			slipStates[model] = nil
+		end
+		local connection = rainConnection
+		if connection ~= nil then
+			connection:Disconnect()
+			rainConnection = nil
+		end
+	end
+end
+
+-- Chuva: o chão em frente fica escorregadio por RainDuration. Devolve
+-- quantos estavam nele no começo.
+local function startRain(glass: BasePart, frame: Frame, shooter: Combatant?, isCurrent: () -> boolean): number
+	glass:SetAttribute(TrapConstants.WindowRainUntilAttribute, Workspace:GetServerTimeNow() + CONFIG.RainDuration)
+	activeRains[glass] = { frame = frame, endsAt = os.clock() + CONFIG.RainDuration, shooter = shooter, isCurrent = isCurrent, lastCredit = 0 }
+	if rainConnection == nil then
+		rainConnection = RunService.Heartbeat:Connect(function(dt: number)
+			local ok, failure = pcall(stepRains, dt)
+			if not ok and os.clock() - lastRainWarnAt >= RAIN_WARN_INTERVAL then
+				lastRainWarnAt = os.clock()
+				warn(`[BlocoPuff] Rain step failed: {failure}`)
+			end
+		end)
+	end
+	local wet = 0
+	for _, combatant in ipairs(CombatantRegistry.all()) do
+		local root = TrapBlocks.targetRoot(combatant, shooter)
+		if root ~= nil and WindowGeometry.inRain(frame, root.Position) then
+			wet += 1
+		end
+	end
+	return wet
+end
+
+-- Efeito ao fim do aviso, conforme a variação da rodada. Devolve quantos
+-- jogadores foram atingidos.
 function WindowTrap.trigger(glass: BasePart, shooter: Combatant?, isCurrent: () -> boolean): number
 	setBroken(glass, true)
 	task.delay(CONFIG.RechargeTime * (1 - CONFIG.BoardedFraction), function()
@@ -181,20 +373,41 @@ function WindowTrap.trigger(glass: BasePart, shooter: Combatant?, isCurrent: () 
 			setBoarded(glass, true)
 		end
 	end)
-	local frame = frameOf(glass)
+	local frame = WindowGeometry.frameOf(glass)
 	if frame == nil then
 		warn(`[BlocoPuff] Window trap {glass:GetFullName()} has no floor/inward attributes`)
 		return 0
 	end
-	local affected = pushPlayers(frame, shooter)
-	TrapBlocks.drop(looseBlocks(frame), shooter, CONFIG.LooseBlockDelay, isCurrent)
-	return affected
+	local variant = WindowGeometry.variantOf(glass)
+	if variant == "Pigeons" then
+		return pigeons(frame, shooter, isCurrent)
+	elseif variant == "Rain" then
+		return startRain(glass, frame, shooter, isCurrent)
+	end
+	return gust(frame, shooter, isCurrent)
 end
 
--- Vidro inteiro, sem tábuas.
+-- Vidro inteiro, sem tábuas e sem chuva. A primeira vez, sorteia a
+-- variação.
 function WindowTrap.restore(glass: BasePart)
 	setBoarded(glass, false)
 	setBroken(glass, false)
+	glass:SetAttribute(TrapConstants.WindowRainUntilAttribute, nil)
+	activeRains[glass] = nil
+	if not knownGlasses[glass] then
+		knownGlasses[glass] = true
+		setVariant(glass, rollVariant())
+	end
+end
+
+-- Começo e fim de rodada: cada janela sorteia a variação de novo.
+function WindowTrap.roundReset()
+	table.clear(activeRains)
+	for glass in pairs(knownGlasses) do
+		if glass.Parent ~= nil then
+			setVariant(glass, rollVariant())
+		end
+	end
 end
 
 return table.freeze(WindowTrap)

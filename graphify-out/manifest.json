@@ -20,8 +20,8 @@
     "semantic_hash": ""
   },
   "src/client/init.client.luau": {
-    "mtime": 1791035414.9833665,
-    "ast_hash": "8f901a58c9ed56846d2db28c301de19c",
+    "mtime": 1791119521.271593,
+    "ast_hash": "fa9db8835329b15868c149722cf82233",
     "semantic_hash": ""
   },
   "src/client/ui/CrosshairView.luau": {
@@ -125,8 +125,8 @@
     "semantic_hash": ""
   },
   "README.md": {
-    "mtime": 1791113706.8949068,
-    "ast_hash": "cb824584cf099399de6d9665ebe47435",
+    "mtime": 1791119821.8236501,
+    "ast_hash": "e3c6077a6aaaed6e5df9f1942e80e666",
     "semantic_hash": ""
   },
   "src/client/controllers/CombatCameraController.luau": {
@@ -1010,28 +1010,28 @@
     "semantic_hash": ""
   },
   "src/client/effects/WindowTrapFx.luau": {
-    "mtime": 1790913078.3595927,
-    "ast_hash": "765c61898a1354233a5d6c29e1a2de65",
+    "mtime": 1791119572.8874617,
+    "ast_hash": "cc7e80711d7bd6144bc063ac382700bd",
     "semantic_hash": ""
   },
   "src/server/services/TrapService.luau": {
-    "mtime": 1791047683.542662,
-    "ast_hash": "8f1bb3d0d906d608bcd44e679abb7b6f",
+    "mtime": 1791119791.49317,
+    "ast_hash": "f6cf6d02a7cabe1a75e2be0caad415ec",
     "semantic_hash": ""
   },
   "src/server/services/traps/WindowTrap.luau": {
-    "mtime": 1791046616.6955473,
-    "ast_hash": "6c726dd1375057026d650fd1d6811c2c",
+    "mtime": 1791119783.2095625,
+    "ast_hash": "b6b5023eb29803c0900384635c9d85b2",
     "semantic_hash": ""
   },
   "src/shared/config/TrapConfig.luau": {
-    "mtime": 1791047627.48839,
-    "ast_hash": "fec5459ee40af5b374a35ac1439932aa",
+    "mtime": 1791119408.590475,
+    "ast_hash": "7f9b5737499a564f963997861bd080f3",
     "semantic_hash": ""
   },
   "src/shared/modules/TrapConstants.luau": {
-    "mtime": 1791047615.8484137,
-    "ast_hash": "ba2266e518eb39ef6b4c6ec9f62e6c10",
+    "mtime": 1791119408.5908723,
+    "ast_hash": "8d66d9427942a3f6e89e6f8b808b2fff",
     "semantic_hash": ""
   },
   "src/client/effects/RugTrapFx.luau": {
@@ -1105,8 +1105,8 @@
     "semantic_hash": ""
   },
   "src/shared/modules/CharacterImpulse.luau": {
-    "mtime": 1791034025.051266,
-    "ast_hash": "94257505026577b8c6f8fcced2d38bfe",
+    "mtime": 1791119783.2106767,
+    "ast_hash": "ff17a39c533d7fedabea40b69eccb861",
     "semantic_hash": ""
   },
   "tests/BotFillRules.spec.luau": {
@@ -1242,6 +1242,21 @@
   "src/server/services/traps/FireplaceTrap.luau": {
     "mtime": 1791047969.235283,
     "ast_hash": "6b23602cd5c4af21716dc19715eef2fb",
+    "semantic_hash": ""
+  },
+  "src/client/controllers/SlipperyController.luau": {
+    "mtime": 1791119807.6779377,
+    "ast_hash": "0271fb5ce11ef65244cf2ceaf5fcb725",
+    "semantic_hash": ""
+  },
+  "src/shared/modules/SlipperyGround.luau": {
+    "mtime": 1791119783.2100956,
+    "ast_hash": "7f33e997353c4e192214c7d5ca8f6fde",
+    "semantic_hash": ""
+  },
+  "src/shared/modules/WindowGeometry.luau": {
+    "mtime": 1791119434.9821246,
+    "ast_hash": "7abbe9ad220a4c834d20a1c11118d2df",
     "semantic_hash": ""
   }
 }

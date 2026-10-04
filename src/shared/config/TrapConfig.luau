@@ -16,8 +16,19 @@ export type TrapRules = {
 	UsesPerRound: number,
 }
 
--- Janela Ventania (5.2).
+-- Variação de uma janela, sorteada por rodada (5.6): Ventania (5.2),
+-- Pombos ou Chuva. A cortina tem uma cor por variação.
+export type WindowVariant = "Gust" | "Pigeons" | "Rain"
+
+export type VariantWeight = {
+	variant: WindowVariant,
+	weight: number,
+	curtainColor: Color3,
+}
+
+-- Janela Ventania (5.2) e as variações Pombos e Chuva (5.6).
 export type WindowConfig = TrapRules & {
+	Variants: { VariantWeight },
 	-- Cone da rajada, medido no piso a partir da parede da janela.
 	ConeLength: number,
 	ConeHalfAngle: number,
@@ -44,6 +55,31 @@ export type WindowConfig = TrapRules & {
 	CrackSoundId: string,
 	ShatterSoundId: string,
 	GustSoundId: string,
+	-- Pombos: o bando atravessa uma faixa reta (comprimento e largura, a
+	-- partir da janela) em PigeonFlightTime segundos; o bando ocupa
+	-- PigeonFlockLength studs da faixa. Quem está na faixa leva esbarrões
+	-- leves (até PigeonMaxBumps, um a cada PigeonBumpInterval).
+	PigeonLaneLength: number,
+	PigeonLaneWidth: number,
+	PigeonLaneHeight: number,
+	PigeonFlightTime: number,
+	PigeonFlockLength: number,
+	PigeonCount: number,
+	PigeonBumpMultiplier: number,
+	PigeonBumpLift: number,
+	PigeonMaxBumps: number,
+	PigeonBumpInterval: number,
+	FlapSoundId: string,
+	-- Chuva: o chão em frente à janela (RainLength para dentro, RainWidth de
+	-- largura) fica escorregadio por RainDuration segundos. RainGrip é a
+	-- tração (quanto da velocidade desejada o personagem alcança por
+	-- segundo; andar normal é instantâneo).
+	RainLength: number,
+	RainWidth: number,
+	RainHeight: number,
+	RainDuration: number,
+	RainGrip: number,
+	RainSoundId: string,
 }
 
 -- Tapete Puxado (5.3): onde fica cada tapete do térreo, em células da grade
@@ -141,6 +177,12 @@ export type TrapConfig = {
 }
 
 local Window: WindowConfig = table.freeze({
+	-- A Ventania é a mais comum.
+	Variants = table.freeze({
+		table.freeze({ variant = "Gust" :: WindowVariant, weight = 60, curtainColor = Color3.fromRGB(150, 45, 60) }),
+		table.freeze({ variant = "Pigeons" :: WindowVariant, weight = 20, curtainColor = Color3.fromRGB(205, 190, 150) }),
+		table.freeze({ variant = "Rain" :: WindowVariant, weight = 20, curtainColor = Color3.fromRGB(55, 95, 160) }),
+	}),
 	MinDistance = 25,
 	WarningTime = 0.7,
 	RechargeTime = 25,
@@ -161,6 +203,23 @@ local Window: WindowConfig = table.freeze({
 	-- Sons que vêm com o Roblox (o antigo swoosh.wav não carrega mais).
 	-- Para um "whoosh" de verdade, troque por um áudio do Creator Store.
 	GustSoundId = "rbxasset://sounds/action_get_up.mp3",
+	PigeonLaneLength = 40,
+	PigeonLaneWidth = 6,
+	PigeonLaneHeight = 8,
+	PigeonFlightTime = 1.6,
+	PigeonFlockLength = 8,
+	PigeonCount = 9,
+	PigeonBumpMultiplier = 0.3,
+	PigeonBumpLift = 0.25,
+	PigeonMaxBumps = 3,
+	PigeonBumpInterval = 0.25,
+	FlapSoundId = "rbxasset://sounds/clickfast.wav",
+	RainLength = 12,
+	RainWidth = 12,
+	RainHeight = 7,
+	RainDuration = 5,
+	RainGrip = 1.5,
+	RainSoundId = "rbxasset://sounds/action_swim.mp3",
 })
 
 local Rug: RugConfig = table.freeze({

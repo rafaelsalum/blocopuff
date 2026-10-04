@@ -1,13 +1,15 @@
 --!strict
 
--- Desenho da Janela Ventania num cliente (Fase 5, 5.2). Lê os atributos
--- que o servidor põe no vidro (TrapConstants) e mostra:
+-- Desenho das janelas-armadilha num cliente (Fase 5, 5.2 e 5.6). Lê os
+-- atributos que o servidor põe no vidro (TrapConstants) e mostra:
 --   * pronta: um brilho leve no vidro (dá para atirar);
 --   * trinca (tiro de perto): estalo e rachaduras que somem;
---   * aviso: rachaduras, vidro tremendo, cortinas inflando e vento rasteiro
---     no chão, no caminho da rajada;
---   * rajada: confete de vidro, vento entrando e cortinas batendo até a
---     janela ser pregada com tábuas.
+--   * aviso: rachaduras, vidro tremendo e cortinas inflando; na Ventania,
+--     vento rasteiro no chão; nos Pombos, penas; na Chuva, respingos;
+--   * efeito: confete de vidro e cortinas batendo até a janela ser
+--     pregada com tábuas; na Ventania, o vento entrando; nos Pombos, o
+--     bando atravessando a faixa (no mesmo relógio dos esbarrões do
+--     servidor); na Chuva, chuva e poça no chão molhado enquanto durar.
 -- O vidro some e as tábuas aparecem pelo servidor (vale para todos, mesmo
 -- quem chega depois); aqui só ficam os efeitos passageiros. Nada colide nem
 -- participa de raycasts.
@@ -19,6 +21,7 @@ local BuildingLayout = require(ReplicatedStorage.Shared.modules.BuildingLayout)
 local GameConfig = require(ReplicatedStorage.Shared.config.GameConfig)
 local TrapConfig = require(ReplicatedStorage.Shared.config.TrapConfig)
 local TrapConstants = require(ReplicatedStorage.Shared.modules.TrapConstants)
+local WindowGeometry = require(ReplicatedStorage.Shared.modules.WindowGeometry)
 local TrapFxUtil = require(script.Parent.TrapFxUtil)
 
 local CONFIG = TrapConfig.Window
@@ -38,6 +41,17 @@ local CURTAIN_FLAP_SPEED = 9
 local CURTAIN_EASE = 8
 local FLOOR_STREAK_HEIGHT = 0.6
 local CURTAIN_REST_EPSILON = math.rad(0.5)
+local PIGEON_BODY = Color3.fromRGB(125, 128, 140)
+local PIGEON_HEAD = Color3.fromRGB(80, 95, 110)
+local PIGEON_WING = Color3.fromRGB(205, 205, 212)
+local PIGEON_MIN_HEIGHT = 2.6
+local PIGEON_EXTRA_HEIGHT = 2.6
+local PIGEON_FLAP_SPEED = 26
+local PIGEON_FLAP = math.rad(55)
+local PIGEON_FADE = 0.4
+local RAIN_COLOR = Color3.fromRGB(170, 205, 255)
+local PUDDLE_COLOR = Color3.fromRGB(70, 120, 190)
+local PUDDLE_TRANSPARENCY = 0.55
 
 export type Handle = {
 	update: (dt: number) -> (),
@@ -49,6 +63,35 @@ type Curtain = {
 	rest: CFrame,
 	angle: number,
 }
+
+type Pigeon = {
+	body: BasePart,
+	head: BasePart,
+	wings: { BasePart },
+	-- Atraso dentro do bando (studs atrás da frente), lado e altura.
+	behind: number,
+	lateral: number,
+	height: number,
+	phase: number,
+}
+
+local function newPiece(parent: Instance, name: string, size: Vector3, color: Color3, shape: Enum.PartType?): Part
+	local part = Instance.new("Part")
+	part.Name = name
+	part.Anchored = true
+	part.CanCollide = false
+	part.CanQuery = false
+	part.CanTouch = false
+	part.CastShadow = false
+	part.Material = Enum.Material.SmoothPlastic
+	part.Color = color
+	part.Size = size
+	if shape ~= nil then
+		part.Shape = shape
+	end
+	part.Parent = parent
+	return part
+end
 
 local WindowTrapFx = {}
 
@@ -103,6 +146,65 @@ function WindowTrapFx.new(glass: BasePart, effectsFolder: Folder): Handle
 	local crackSound = TrapFxUtil.newSound(anchor, CONFIG.CrackSoundId, 0.7, 0.8)
 	local shatterSound = TrapFxUtil.newSound(anchor, CONFIG.ShatterSoundId, 1.7, 1)
 	local gustSound = TrapFxUtil.newSound(anchor, CONFIG.GustSoundId, 0.6, 1)
+	local flapSound = TrapFxUtil.newSound(anchor, CONFIG.FlapSoundId, 1.6, 0.9)
+	local rainSound = TrapFxUtil.newSound(anchor, CONFIG.RainSoundId, 0.8, 0.9)
+	rainSound.Looped = true
+
+	-- Penas (aviso e saída dos Pombos) e respingos (aviso da Chuva).
+	local feathers = TrapFxUtil.newEmitter(glassPoint, SPARKLE_TEXTURE, PIGEON_WING)
+	feathers.LightEmission = 0
+	feathers.Rate = 12
+	feathers.Lifetime = NumberRange.new(0.8, 1.4)
+	feathers.Size = NumberSequence.new(0.35, 0.2)
+	feathers.Speed = NumberRange.new(2, 6)
+	feathers.SpreadAngle = Vector2.new(60, 60)
+	feathers.Acceleration = Vector3.new(0, -6, 0)
+	feathers.RotSpeed = NumberRange.new(-200, 200)
+	feathers.EmissionDirection = Enum.NormalId.Front
+	local drizzle = TrapFxUtil.newEmitter(glassPoint, SPARKLE_TEXTURE, RAIN_COLOR)
+	drizzle.Rate = 25
+	drizzle.Lifetime = NumberRange.new(0.4, 0.7)
+	drizzle.Size = NumberSequence.new(0.18, 0.08)
+	drizzle.Speed = NumberRange.new(6, 12)
+	drizzle.SpreadAngle = Vector2.new(30, 30)
+	drizzle.Acceleration = Vector3.new(0, -50, 0)
+	drizzle.EmissionDirection = Enum.NormalId.Front
+
+	-- Chuva: um volume em cima do chão molhado e a poça (só neste cliente).
+	local frame = WindowGeometry.frameOf(glass)
+	local rainCloud: Part? = nil
+	local rainFall: ParticleEmitter? = nil
+	local puddle: Part? = nil
+	if frame ~= nil then
+		local middle = frame.base + (frame.inward * (CONFIG.RainLength / 2))
+		local facing = CFrame.lookAt(middle, middle + frame.inward)
+		local cloudPart = TrapFxUtil.newAnchor(effectsFolder, "WindowRain", facing + Vector3.new(0, CONFIG.RainHeight, 0))
+		cloudPart.Size = Vector3.new(CONFIG.RainWidth, 0.2, CONFIG.RainLength)
+		local fall = Instance.new("ParticleEmitter")
+		fall.Texture = SPARKLE_TEXTURE
+		fall.Color = ColorSequence.new(RAIN_COLOR)
+		fall.LightEmission = 0.3
+		fall.Shape = Enum.ParticleEmitterShape.Box
+		fall.ShapeStyle = Enum.ParticleEmitterShapeStyle.Volume
+		fall.EmissionDirection = Enum.NormalId.Bottom
+		fall.Rate = 140
+		fall.Lifetime = NumberRange.new(0.18, 0.26)
+		fall.Speed = NumberRange.new(30, 40)
+		fall.Size = NumberSequence.new(0.14, 0.08)
+		fall.Enabled = false
+		fall.Parent = cloudPart
+		rainCloud = cloudPart
+		rainFall = fall
+		local puddlePart = newPiece(effectsFolder, "WindowPuddle", Vector3.new(CONFIG.RainWidth, 0.05, CONFIG.RainLength), PUDDLE_COLOR)
+		puddlePart.Material = Enum.Material.Glass
+		puddlePart.Transparency = 1
+		puddlePart.CFrame = facing + Vector3.new(0, 0.06, 0)
+		puddle = puddlePart
+	end
+
+	-- Bando de pombos (criado a cada acionamento, some no fim do voo).
+	local flock: { Pigeon } = {}
+	local flockFolder: Folder? = nil
 
 	local curtains: { Curtain } = {}
 	if model ~= nil then
@@ -156,6 +258,42 @@ function WindowTrapFx.new(glass: BasePart, effectsFolder: Folder): Handle
 		crackHideAt = if duration ~= nil then clock + duration else math.huge
 	end
 
+	local function clearFlock()
+		if flockFolder ~= nil then
+			flockFolder:Destroy()
+			flockFolder = nil
+		end
+		table.clear(flock)
+	end
+
+	local function spawnFlock()
+		clearFlock()
+		local folder = Instance.new("Folder")
+		folder.Name = "Pigeons"
+		folder.Parent = effectsFolder
+		flockFolder = folder
+		local halfWidth = CONFIG.PigeonLaneWidth / 2
+		for index = 1, CONFIG.PigeonCount do
+			local body = newPiece(folder, "Body", Vector3.new(0.7, 0.6, 1.1), PIGEON_BODY)
+			local head = newPiece(folder, "Head", Vector3.new(0.5, 0.5, 0.5), PIGEON_HEAD, Enum.PartType.Ball)
+			local wings = {
+				newPiece(folder, "WingL", Vector3.new(1, 0.08, 0.6), PIGEON_WING),
+				newPiece(folder, "WingR", Vector3.new(1, 0.08, 0.6), PIGEON_WING),
+			}
+			table.insert(flock, {
+				body = body,
+				head = head,
+				wings = wings,
+				behind = random:NextNumber(0, CONFIG.PigeonFlockLength),
+				lateral = random:NextNumber(-halfWidth, halfWidth) * 0.85,
+				height = PIGEON_MIN_HEIGHT + random:NextNumber(0, PIGEON_EXTRA_HEIGHT),
+				phase = random:NextNumber(0, math.pi * 2) + index,
+			})
+		end
+	end
+
+	local variant = WindowGeometry.variantOf(glass)
+
 	local function stateAge(): number
 		local at = glass:GetAttribute(TrapConstants.StateAtAttribute)
 		return if typeof(at) == "number" then Workspace:GetServerTimeNow() - at else math.huge
@@ -175,8 +313,11 @@ function WindowTrapFx.new(glass: BasePart, effectsFolder: Folder): Handle
 
 	-- `silent`: estado de quem acabou de chegar (mostra, sem som nem quebra).
 	local function applyState(previous: unknown, silent: boolean)
+		local warning = state == TrapConstants.Warning
 		sparkle.Enabled = state == TrapConstants.Ready
-		streaks.Enabled = state == TrapConstants.Warning
+		streaks.Enabled = warning and variant == "Gust"
+		feathers.Enabled = warning and variant == "Pigeons"
+		drizzle.Enabled = warning and variant == "Rain"
 		if state == TrapConstants.Warning then
 			showCracks(CRACK_LINES_WARNING, nil)
 			if not silent then
@@ -190,13 +331,20 @@ function WindowTrapFx.new(glass: BasePart, effectsFolder: Folder): Handle
 			glass.CFrame = restGlass
 			if not silent and previous == TrapConstants.Warning and stateAge() < REPLAY_WINDOW then
 				shards:Emit(45)
-				gust:Emit(70)
 				shatterSound:Play()
-				gustSound:Play()
+				if variant == "Gust" then
+					gust:Emit(70)
+					gustSound:Play()
+				elseif variant == "Pigeons" then
+					feathers:Emit(30)
+					flapSound:Play()
+					spawnFlock()
+				end
 				openSince = clock
 			end
 		else
 			clearCracks()
+			clearFlock()
 			glass.CFrame = restGlass
 			openSince = nil
 		end
@@ -219,12 +367,75 @@ function WindowTrapFx.new(glass: BasePart, effectsFolder: Folder): Handle
 
 	table.insert(connections, glass:GetAttributeChangedSignal(TrapConstants.StateAttribute):Connect(onState))
 	table.insert(connections, glass:GetAttributeChangedSignal(TrapConstants.CracksAttribute):Connect(onCracks))
+	table.insert(connections, glass:GetAttributeChangedSignal(TrapConstants.WindowVariantAttribute):Connect(function()
+		variant = WindowGeometry.variantOf(glass)
+	end))
 	applyState(nil, true)
 
 	local handle = {} :: Handle
 
+	-- Bando no mesmo relógio do servidor: a frente sai da janela e anda
+	-- a faixa toda em PigeonFlightTime.
+	local function updateFlock()
+		if #flock == 0 or frame == nil then
+			return
+		end
+		local age = stateAge()
+		local total = CONFIG.PigeonFlightTime + PIGEON_FADE
+		if state ~= TrapConstants.Recharging or age > total then
+			clearFlock()
+			return
+		end
+		local progress = math.clamp(age / CONFIG.PigeonFlightTime, 0, 1)
+		local head = progress * (CONFIG.PigeonLaneLength + CONFIG.PigeonFlockLength)
+		local fade = math.clamp((age - CONFIG.PigeonFlightTime) / PIGEON_FADE, 0, 1)
+		for _, pigeon in ipairs(flock) do
+			local depth = head - pigeon.behind
+			local hidden = depth < -0.5 or fade >= 1
+			local bob = math.sin((clock * 6) + pigeon.phase) * 0.25
+			local position = frame.base + (frame.inward * depth) + (frame.along * pigeon.lateral) + Vector3.new(0, pigeon.height + bob, 0)
+			local bodyFrame = CFrame.lookAt(position, position + frame.inward)
+			local transparency = if hidden then 1 else fade
+			pigeon.body.CFrame = bodyFrame
+			pigeon.body.Transparency = transparency
+			pigeon.head.CFrame = bodyFrame * CFrame.new(0, 0.3, -0.65)
+			pigeon.head.Transparency = transparency
+			local flap = math.sin((clock * PIGEON_FLAP_SPEED) + pigeon.phase) * PIGEON_FLAP
+			for side, wing in ipairs(pigeon.wings) do
+				local sign = if side == 1 then -1 else 1
+				wing.CFrame = bodyFrame * CFrame.new(sign * 0.3, 0.15, 0) * CFrame.Angles(0, 0, sign * flap) * CFrame.new(sign * 0.5, 0, 0)
+				wing.Transparency = transparency
+			end
+		end
+	end
+
+	-- Chuva enquanto o servidor disser (vale para quem chega depois).
+	local raining = false
+	local function updateRain()
+		local rainUntil = glass:GetAttribute(TrapConstants.WindowRainUntilAttribute)
+		local now = Workspace:GetServerTimeNow()
+		local active = typeof(rainUntil) == "number" and now < rainUntil
+		if active == raining then
+			return
+		end
+		raining = active
+		if rainFall ~= nil then
+			rainFall.Enabled = active
+		end
+		if puddle ~= nil then
+			puddle.Transparency = if active then PUDDLE_TRANSPARENCY else 1
+		end
+		if active then
+			rainSound:Play()
+		else
+			rainSound:Stop()
+		end
+	end
+
 	handle.update = function(dt: number)
 		clock += dt
+		updateFlock()
+		updateRain()
 		if clock >= crackHideAt then
 			clearCracks()
 			crackHideAt = math.huge
@@ -271,6 +482,14 @@ function WindowTrapFx.new(glass: BasePart, effectsFolder: Folder): Handle
 		glass.CFrame = restGlass
 		for _, curtain in ipairs(curtains) do
 			curtain.part.CFrame = curtain.rest
+		end
+		clearFlock()
+		rainSound:Stop()
+		if rainCloud ~= nil then
+			rainCloud:Destroy()
+		end
+		if puddle ~= nil then
+			puddle:Destroy()
 		end
 		anchor:Destroy()
 	end

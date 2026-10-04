@@ -51,6 +51,8 @@ type Behavior = {
 	dependentOn: ((block: Part) -> BasePart?)?,
 	-- Limpa o que o tipo guarda por rodada (rostos sujos da lareira).
 	roundReset: (() -> ())?,
+	-- Nome na telemetria, quando o tipo tem variações (Window.Pigeons).
+	describe: ((part: BasePart) -> string)?,
 }
 
 type Trap = {
@@ -179,6 +181,17 @@ local function finishRecharge(trap: Trap, token: number)
 	end
 end
 
+local function telemetryKind(trap: Trap): string
+	local describe = trap.behavior.describe
+	if describe ~= nil then
+		local ok, name = pcall(describe, trap.part)
+		if ok and typeof(name) == "string" then
+			return name
+		end
+	end
+	return trap.kind
+end
+
 -- Telemetria só existe para jogadores.
 local function logEvent(shooter: Combatant?, name: string, value: number, kind: string, id: string)
 	local player = if shooter ~= nil then shooter.player else nil
@@ -211,7 +224,7 @@ local function fire(trap: Trap, shooter: Combatant?, token: number, forced: bool
 	if not ok then
 		warn(`[BlocoPuff] Trap {trap.kind} failed: {result}`)
 	end
-	logEvent(shooter, "TrapAffected", if ok then result else 0, trap.kind, trap.id)
+	logEvent(shooter, "TrapAffected", if ok then result else 0, telemetryKind(trap), trap.id)
 	task.delay(trap.behavior.rules.RechargeTime, finishRecharge, trap, token)
 end
 
@@ -235,7 +248,7 @@ local function onSurfaceHit(shooter: Combatant, instance: Instance, _position: V
 		crack(trap)
 		return
 	end
-	logEvent(shooter, "TrapTriggered", math.floor(distance), trap.kind, trap.id)
+	logEvent(shooter, "TrapTriggered", math.floor(distance), telemetryKind(trap), trap.id)
 	arm(trap, shooter, false)
 end
 
@@ -250,7 +263,7 @@ local function onBlockDestroyed(block: Part, by: Combatant?)
 		local part = if find ~= nil then find(block) else nil
 		local trap = if part ~= nil then traps[part] else nil
 		if trap ~= nil and trap.state == TrapConstants.Ready then
-			logEvent(by, "TrapSupportLost", 1, trap.kind, trap.id)
+			logEvent(by, "TrapSupportLost", 1, telemetryKind(trap), trap.id)
 			arm(trap, by, true)
 		elseif trap ~= nil and trap.state == TrapConstants.Warning then
 			-- Já está caindo por um tiro: o crédito continua com quem atirou.
