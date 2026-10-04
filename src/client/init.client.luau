@@ -24,6 +24,7 @@ local KnockbackController = require(script.controllers.KnockbackController)
 local TrapVisualController = require(script.controllers.TrapVisualController)
 local SlipperyController = require(script.controllers.SlipperyController)
 local MansionDoorController = require(script.controllers.MansionDoorController)
+local AtticController = require(script.controllers.AtticController)
 local ResultsController = require(script.controllers.ResultsController)
 local TelemetryController = require(script.controllers.TelemetryController)
 local SecretPassageController = require(script.controllers.SecretPassageController)
@@ -139,6 +140,14 @@ local mansionDoorOk, mansionDoorErr = pcall(function()
 end)
 if not mansionDoorOk then
 	warn(string.format("[BlocoPuff] Failed to start mansion doors: %s", tostring(mansionDoorErr)))
+end
+
+-- Sótão escuro: lanterna na mão de quem está lá.
+local atticOk, atticErr = pcall(function()
+	AtticController.start()
+end)
+if not atticOk then
+	warn(string.format("[BlocoPuff] Failed to start attic lanterns: %s", tostring(atticErr)))
 end
 
 local resultsOk, resultsErr = pcall(function()

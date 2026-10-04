@@ -44,6 +44,7 @@ local MatchTestControls = require(script.services.MatchTestControls)
 local ReferralService = require(script.services.ReferralService)
 local OnboardingService = require(script.services.OnboardingService)
 local DashService = require(script.services.DashService)
+local PianoService = require(script.services.PianoService)
 
 local WORLD_NAME = "BlocoPuffWorld"
 local GENERATED_BY_ATTRIBUTE = "GeneratedBy"
@@ -215,6 +216,12 @@ if stationsOk then
 	print("[BlocoPuff] Lobby stations and training range ready")
 else
 	warn(string.format("[BlocoPuff] Lobby stations unavailable: %s", tostring(stationsFailure)))
+end
+
+-- Piano tocável da Sala de Música (ala leste do Casarão).
+local pianoOk, pianoFailure = pcall(PianoService.start)
+if not pianoOk then
+	warn(string.format("[BlocoPuff] Piano unavailable: %s", tostring(pianoFailure)))
 end
 
 -- Party (entra junto nas partidas) e reações de quem está assistindo.

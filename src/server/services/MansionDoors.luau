@@ -1,6 +1,7 @@
 --!strict
 
--- Portas duplas de madeira nos arcos das divisórias do Casarão (Fase 5C.1).
+-- Portas duplas de madeira nos vãos do Casarão (Fase 5C.1): os arcos das
+-- divisórias dos salões e as portas da ala leste (MansionWingLayout).
 -- O servidor só monta as peças paradas (fechadas, sem colisão nem toque):
 -- quem abre, fecha e toca os sons é o MansionDoorController, em cada
 -- cliente. Cada porta é um Model com a tag MansionConfig.Door.Tag e a normal
@@ -11,9 +12,11 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local MansionConfig = require(ReplicatedStorage.Shared.config.MansionConfig)
 local MansionLayout = require(ReplicatedStorage.Shared.modules.MansionLayout)
+local MansionWingLayout = require(ReplicatedStorage.Shared.modules.MansionWingLayout)
 local BuildingDecor = require(script.Parent.BuildingDecor)
 
 type Mansion = MansionLayout.Mansion
+type Doorway = MansionWingLayout.Doorway
 
 local CONFIG = MansionConfig.Door
 -- Folga entre as folhas e o batente, e acima do piso.
@@ -61,31 +64,44 @@ local function createLeaf(door: Model, name: string, hinge: Vector3, outward: Ve
 	leaf.Parent = door
 end
 
--- Porta dupla centrada em `center` (no piso), na parede com normal `normal`.
-local function createDoor(parent: Instance, name: string, center: Vector3, along: Vector3, normal: Vector3)
+-- Porta dupla no vão `doorway` (centro no piso, no meio da parede).
+local function createDoor(parent: Instance, doorway: Doorway)
 	local door = Instance.new("Model")
-	door.Name = name
-	door:SetAttribute(CONFIG.NormalAttribute, normal)
-	local halfSpan = MansionConfig.ArchWidth / 2 - GAP / 2
+	door.Name = doorway.name
+	door:SetAttribute(CONFIG.NormalAttribute, doorway.normal)
+	local halfSpan = doorway.size.X / 2 - GAP / 2
 	local width = halfSpan - GAP
-	local height = MansionConfig.ArchHeight - GAP * 3
-	createLeaf(door, "LeftLeaf", center - along * halfSpan, along, normal, width, height)
-	createLeaf(door, "RightLeaf", center + along * halfSpan, -along, normal, width, height)
+	local height = doorway.size.Y - GAP * 3
+	local along = doorway.along
+	createLeaf(door, "LeftLeaf", doorway.center - along * halfSpan, along, doorway.normal, width, height)
+	createLeaf(door, "RightLeaf", doorway.center + along * halfSpan, -along, doorway.normal, width, height)
 	door.Parent = parent
 	CollectionService:AddTag(door, CONFIG.Tag)
 end
 
--- Uma porta em cada arco das divisórias.
-function MansionDoors.build(parent: Instance, mansion: Mansion)
+-- Os arcos das divisórias dos salões, como vãos de porta.
+function MansionDoors.partitionDoorways(mansion: Mansion): { Doorway }
+	local size = Vector2.new(MansionConfig.ArchWidth, MansionConfig.ArchHeight)
+	local doorways: { Doorway } = {}
 	for _, partition in ipairs(mansion.partitions) do
 		for index, offset in ipairs(partition.arches) do
-			local name = `{partition.name}Door{index}`
-			if partition.axis == "X" then
-				createDoor(parent, name, Vector3.new(offset, mansion.floorY, partition.fixed), Vector3.xAxis, Vector3.zAxis)
-			else
-				createDoor(parent, name, Vector3.new(partition.fixed, mansion.floorY, offset), Vector3.zAxis, Vector3.xAxis)
-			end
+			local alongX = partition.axis == "X"
+			table.insert(doorways, {
+				name = `{partition.name}Door{index}`,
+				center = if alongX then Vector3.new(offset, mansion.floorY, partition.fixed) else Vector3.new(partition.fixed, mansion.floorY, offset),
+				along = if alongX then Vector3.xAxis else Vector3.zAxis,
+				normal = if alongX then Vector3.zAxis else Vector3.xAxis,
+				size = size,
+			})
 		end
+	end
+	return doorways
+end
+
+-- Uma porta dupla em cada vão.
+function MansionDoors.build(parent: Instance, doorways: { Doorway })
+	for _, doorway in ipairs(doorways) do
+		createDoor(parent, doorway)
 	end
 end
 

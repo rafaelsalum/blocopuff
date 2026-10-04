@@ -97,8 +97,8 @@ function FireplaceTrapFx.new(mouth: BasePart, effectsFolder: Folder): Handle
 	cloud.Lifetime = NumberRange.new(CLOUD_LIFETIME * 0.8, CLOUD_LIFETIME)
 	cloud.Drag = 1
 
-	local coughSound = TrapFxUtil.newSound(holder, CONFIG.CoughSoundId, 1.4, 0.8)
-	local puffSound = TrapFxUtil.newSound(holder, CONFIG.PuffSoundId, 0.6, 1)
+	local coughSound = TrapFxUtil.newSound(holder, CONFIG.CoughSoundId, 1.2, 0.8)
+	local puffSound = TrapFxUtil.newSound(holder, CONFIG.PuffSoundId, 0.9, 1)
 
 	local state = mouth:GetAttribute(TrapConstants.StateAttribute)
 	local cracks = mouth:GetAttribute(TrapConstants.CracksAttribute)

@@ -108,17 +108,17 @@ end
 local function createSounds(handle: Part, variant: Variant)
 	local shotSound = Instance.new("Sound")
 	shotSound.Name = PuffadorConstants.ShotSoundName
-	shotSound.SoundId = "rbxasset://sounds/electronicpingshort.wav"
+	shotSound.SoundId = "rbxassetid://9117660626"
 	shotSound.Volume = if variant == "Super" then 0.7 else 0.55
-	shotSound.PlaybackSpeed = if variant == "Super" then 0.62 else 0.82
+	shotSound.PlaybackSpeed = if variant == "Super" then 0.8 else 1
 	shotSound.RollOffMaxDistance = 70
 	shotSound.Parent = handle
 
 	local hitSound = Instance.new("Sound")
 	hitSound.Name = PuffadorConstants.HitSoundName
-	hitSound.SoundId = "rbxasset://sounds/button.wav"
+	hitSound.SoundId = "rbxassetid://112273997485926"
 	hitSound.Volume = 0.5
-	hitSound.PlaybackSpeed = if variant == "Super" then 1.05 else 1.25
+	hitSound.PlaybackSpeed = if variant == "Super" then 0.85 else 1
 	hitSound.RollOffMaxDistance = 45
 	hitSound.Parent = handle
 end

@@ -80,8 +80,8 @@ function RugTrapFx.new(fringe: BasePart, effectsFolder: Folder): Handle
 	dust.Speed = NumberRange.new(4, 8)
 	dust.SpreadAngle = Vector2.new(70, 70)
 	dust.EmissionDirection = Enum.NormalId.Top
-	local stretchSound = TrapFxUtil.newSound(anchor, CONFIG.StretchSoundId, 1.3, 0.6)
-	local pullSound = TrapFxUtil.newSound(anchor, CONFIG.PullSoundId, 0.9, 1)
+	local stretchSound = TrapFxUtil.newSound(anchor, CONFIG.StretchSoundId, 1, 0.6)
+	local pullSound = TrapFxUtil.newSound(anchor, CONFIG.PullSoundId, 1, 1)
 
 	local random = Random.new()
 	local clock = 0

@@ -57,7 +57,7 @@ local PANEL_SIZE = Vector2.new(840, 470)
 local DETAIL_WIDTH = 260
 local CARD_SIZE = Vector2.new(118, 122)
 local LOCKED_COLOR = Color3.fromRGB(40, 32, 66)
-local UNLOCK_SOUND = "rbxasset://sounds/electronicpingshort.wav"
+local UNLOCK_SOUND = "rbxassetid://138190748214493"
 -- Intervalo entre as comemorações quando chegam vários Puffs novos.
 local CELEBRATE_STAGGER = 0.25
 local CARD_FX_INTERVAL = 1 / 30
@@ -500,7 +500,7 @@ function PuffdexView.new(playerGui: PlayerGui, onEquip: (id: string) -> (), onOp
 					if screenGui.Enabled and screenGui.Parent ~= nil then
 						celebrated[id] = true
 						item.fx.celebrate()
-						playUnlockSound(1.2 + (PuffCatalog.rarity(definition.rarity).order * 0.1))
+						playUnlockSound(0.95 + (PuffCatalog.rarity(definition.rarity).order * 0.05))
 					end
 				end)
 			end

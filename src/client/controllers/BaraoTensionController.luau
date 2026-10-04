@@ -30,7 +30,7 @@ local chaseToken = 0
 local function thump(volume: number)
 	local sound = Instance.new("Sound")
 	sound.SoundId = GameConfig.Barao.TensionSoundId
-	sound.PlaybackSpeed = 0.55
+	sound.PlaybackSpeed = 1
 	sound.Volume = volume
 	sound.Parent = SoundService
 	sound.Ended:Once(function()

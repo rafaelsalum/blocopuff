@@ -6,8 +6,7 @@
 
 -- Portas duplas nos arcos do Casarão (Fase 5C.1). Abrem sozinhas quando
 -- alguém chega perto (só no cliente: não seguram ninguém) com rangido e
--- batem ao fechar. Sons provisórios do próprio Roblox; para trocar por
--- sons da Creator Store, basta pôr o "rbxassetid://..." aqui.
+-- batem ao fechar. Sons da Creator Store (gratuitos).
 export type DoorConfig = {
 	Tag: string,
 	-- No Model de cada folha: CFrame da dobradiça (eixo vertical).
@@ -98,10 +97,10 @@ local MansionConfig: MansionConfig = {
 		Color = Color3.fromRGB(92, 56, 34),
 		PanelColor = Color3.fromRGB(66, 38, 22),
 		KnobColor = Color3.fromRGB(255, 209, 102),
-		CreakSoundId = "rbxasset://sounds/clickfast.wav",
-		CreakSpeed = 0.35,
-		SlamSoundId = "rbxasset://sounds/action_jump_land.mp3",
-		SlamSpeed = 0.7,
+		CreakSoundId = "rbxassetid://9120839174",
+		CreakSpeed = 1,
+		SlamSoundId = "rbxassetid://111763202035471",
+		SlamSpeed = 1,
 		SoundVolume = 0.8,
 		SoundRange = 60,
 	}),

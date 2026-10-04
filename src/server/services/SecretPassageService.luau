@@ -42,8 +42,8 @@ local HANDLER_KEY = "SecretPassages"
 local PAINTING_TAG = "RevealPainting"
 local GLOW_COLOR = Color3.fromRGB(255, 206, 90)
 local REVEAL_TIME = 0.8
-local SOUND_REVEAL = "rbxasset://sounds/electronicpingshort.wav"
-local SOUND_WRONG = "rbxasset://sounds/clickfast.wav"
+local SOUND_REVEAL = "rbxassetid://118315466257318"
+local SOUND_WRONG = "rbxassetid://85047859986879"
 local WRONG_COOLDOWN = 0.6
 
 local SecretPassageService = {}
@@ -176,7 +176,7 @@ local function reveal(floor: number, discoverer: Player)
 	for _, entrance in ipairs(entrances) do
 		if entrance.floor == floor then
 			setEntranceRevealed(entrance, true, true)
-			playSound(entrance.soundAnchor, SOUND_REVEAL, 1.5, 0.8)
+			playSound(entrance.soundAnchor, SOUND_REVEAL, 1, 0.8)
 		end
 	end
 	local secretRemote = remote
@@ -215,7 +215,7 @@ local function onSurfaceHit(combatant: CombatantRegistry.Combatant, instance: In
 	end
 	lastWrong[shooter] = now
 	if instance:IsA("BasePart") then
-		playSound(instance, SOUND_WRONG, 0.6, 0.7)
+		playSound(instance, SOUND_WRONG, 1, 0.5)
 	end
 	local secretRemote = remote
 	if secretRemote ~= nil then

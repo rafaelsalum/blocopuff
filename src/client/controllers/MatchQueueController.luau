@@ -28,12 +28,11 @@ local T = Lang.t
 
 local WAIT_TIMEOUT = 15
 local TRAMPOLINE_TAG = "PuffTrampoline"
-local JOIN_SOUND = "rbxasset://sounds/electronicpingshort.wav"
-local BEEP_SOUND = "rbxasset://sounds/button.wav"
+local JOIN_SOUND = "rbxassetid://103516326607012"
+local BEEP_SOUND = "rbxassetid://117751546358455"
+local TRAMPOLINE_SOUND = "rbxassetid://127855700916139"
 local FINAL_BEEPS = 3
-local BELL_SOUND = "rbxasset://sounds/electronicpingshort.wav"
-local BELL_RINGS = 3
-local BELL_GAP = 0.22
+local BELL_SOUND = "rbxassetid://9113421646"
 -- O "saiu da fila" logo depois de a ficha expirar já foi dito.
 local EXPIRED_QUIET = 2
 
@@ -77,14 +76,9 @@ local function playSound(soundId: string, speed: number, volume: number)
 	sound:Play()
 end
 
--- Sino do chamado: três toques graves.
+-- Sino do chamado.
 local function ringBell()
-	task.spawn(function()
-		for ring = 1, BELL_RINGS do
-			playSound(BELL_SOUND, 0.55 + ring * 0.05, 0.9)
-			task.wait(BELL_GAP)
-		end
-	end)
+	playSound(BELL_SOUND, 1, 0.9)
 end
 
 local function onMessage(kind: unknown, value: unknown)
@@ -126,7 +120,7 @@ local function announce(previous: QueueStatus, status: QueueStatus)
 			banner("queue-state", "🚪", T("VOCÊ SAIU DA FILA"), T("Aperte JOGAR quando quiser jogar"), "Info", "Normal", 2.5)
 		end
 	elseif previous == "Out" then
-		playSound(JOIN_SOUND, 1.5, 0.6)
+		playSound(JOIN_SOUND, 1, 0.6)
 		if status == "Ticket" then
 			banner("queue-state", "🎟", T("VOCÊ PEGOU A FICHA!"), T("Explore o Casarão: avisamos %d s antes da partida", seconds), "Gold", "Normal", 4)
 		elseif status == "Party" then
@@ -210,7 +204,7 @@ local function connectTrampoline(player: Player, pad: Instance)
 		lastBounce = clock
 		local velocity = root.AssemblyLinearVelocity
 		root.AssemblyLinearVelocity = Vector3.new(velocity.X, QueueConfig.TrampolineVelocity, velocity.Z)
-		playSound(JOIN_SOUND, 0.8, 0.4)
+		playSound(TRAMPOLINE_SOUND, 1, 0.4)
 	end)
 end
 

@@ -101,3 +101,24 @@ Já são sons de verdade e ficam como estão: a música de fundo (`GameConfig.Mu
 | 40 | Página do Diário encontrada | `paper page flip` |
 | 41 | Fantasminha passando | `cute ghost whoosh` |
 | 42 | Porta trancada (chave/nível) | `door locked handle rattle` |
+
+## Sons aplicados (escolhidos na Creator Store)
+
+Todos são gratuitos, foram testados no Studio e já estão no código. Preferência pela biblioteca ProSoundEffects ("(SFX)"). Ficaram de fora cópias de outros jogos, que correm risco de remoção por direitos autorais.
+
+| # | ID | # | ID | # | ID |
+|---|---|---|---|---|---|
+| 1 | 9120839174 | 13 | 9113763589 | 25 | 118315466257318 |
+| 2 | 111763202035471 | 14 | 100922696429381 | 26 | 85047859986879 |
+| 3 | 9113421646 | 15 | 9125577419 | 27 | 9117660626 |
+| 4 | 103516326607012 | 16 | 9125640290 | 28 | 112273997485926 |
+| 5 | 117751546358455 | 17 | 128530189877904 | 29 | 127183292018512 |
+| 6 | 133541517744065 | 18 | 9113125102 | 30 | 9113263649 |
+| 7 | 132535085898211 | 19 | 139459003161851 | 31 | 123582256549202 |
+| 8 | 110536638811166 | 20 | 80586503367690 | 32 | 120925282182940 |
+| 9 | 9113444620 | 21 | 92357564819100 + 127855700916139 | 33 | 88442833509532 |
+| 10 | 13039198193 | 22 | 9125544264 (toca 2,5 s) | 34 | 112485797063762 |
+| 11 | 9113838965 | 23 | 9118901593 | 35 | 138190748214493 |
+| 12 | 9125714630 | 24 | 7757282096 | 36 | 84872960927850 |
+
+Trampolim do aquecimento: 127855700916139 (boing). Para trocar um som, basta mudar o ID no arquivo indicado na tabela de cima.

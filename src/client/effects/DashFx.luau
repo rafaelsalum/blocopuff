@@ -15,7 +15,7 @@ local TrapFxUtil = require(script.Parent.TrapFxUtil)
 
 local PUFF_COUNT = 14
 local LIFETIME = 0.6
-local SOUND_ID = "rbxasset://sounds/action_get_up.mp3"
+local SOUND_ID = "rbxassetid://127183292018512"
 
 local DashFx = {}
 
@@ -47,7 +47,7 @@ function DashFx.play(character: Model?)
 	puff.EmissionDirection = Enum.NormalId.Back
 	puff:Emit(PUFF_COUNT)
 
-	local sound = TrapFxUtil.newSound(root, SOUND_ID, 1.5, 0.5)
+	local sound = TrapFxUtil.newSound(root, SOUND_ID, 1, 0.5)
 	sound:Play()
 	Debris:AddItem(attachment, LIFETIME + 0.2)
 	Debris:AddItem(sound, 1)

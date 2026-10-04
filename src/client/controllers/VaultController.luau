@@ -22,8 +22,9 @@ type Tone = NotificationManager.Tone
 
 local T = Lang.t
 local WAIT_TIMEOUT = 15
-local CHIME_SOUND = "rbxasset://sounds/electronicpingshort.wav"
-local SUPER_SOUND = "rbxasset://sounds/button.wav"
+local CHIME_SOUND = "rbxassetid://123582256549202"
+local ALARM_SECONDS = 2.5
+local SUPER_SOUND = "rbxassetid://84872960927850"
 
 local VaultController = {}
 
@@ -62,12 +63,17 @@ local function playSound(soundId: string, speed: number, volume: number, delaySe
 	end)
 end
 
--- Alarme curto de três toques alternados, audível em qualquer lugar do mapa.
+-- Alarme curto (campainha de emergência), audível em qualquer lugar do
+-- mapa: o som é longo, então para depois de ALARM_SECONDS.
 local function playAlarm()
-	local soundId = GameConfig.SecretRoom.AlertSoundId
-	for index = 0, 5 do
-		playSound(soundId, if index % 2 == 0 then 1.35 else 0.95, 0.8, index * 0.22)
-	end
+	local sound = Instance.new("Sound")
+	sound.SoundId = GameConfig.SecretRoom.AlertSoundId
+	sound.Volume = 0.7
+	sound.Parent = SoundService
+	sound:Play()
+	task.delay(ALARM_SECONDS, function()
+		sound:Destroy()
+	end)
 end
 
 local function isLocalUser(userId: unknown): boolean
@@ -86,8 +92,8 @@ local function onVaultEvent(kind: unknown, first: unknown, second: unknown)
 	end
 
 	if kind == "Unlocked" then
-		playSound(CHIME_SOUND, 1.6, 0.6)
-		playSound(CHIME_SOUND, 2, 0.6, 0.18)
+		playSound(CHIME_SOUND, 1, 0.6)
+		playSound(CHIME_SOUND, 1.25, 0.6, 0.18)
 		banner("🐶", T("O BARÃO ACORDOU!"), T("E o cofre destrancou: porta dourada no andar de baixo"), "Gold", 5, "Critical", "vault-unlocked")
 	elseif kind == "Opened" then
 		playAlarm()
@@ -97,7 +103,7 @@ local function onVaultEvent(kind: unknown, first: unknown, second: unknown)
 			banner("🚨", T("COFRE ABERTO!"), T("%s abriu o cofre. O Barão ficou bravo!", asText(first)), "Danger", 5, "Critical", "vault-opened")
 		end
 	elseif kind == "SuperTaken" then
-		playSound(SUPER_SOUND, 0.8, 0.8)
+		playSound(SUPER_SOUND, 1, 0.8)
 		if isLocalUser(second) then
 			banner("⚡", T("COFRE CONQUISTADO!"), T("Puffador do Cofre: 2 blocos por Puff. Q, Y ou 🧱 troca para Construir"), "Gold", 5, "High", "vault-super")
 		else

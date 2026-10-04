@@ -10,6 +10,9 @@ return table.freeze({
 	["👥 PONTO DE ENCONTRO"] = "👥 MEETING POINT",
 	["🐶 JARDIM DO BARÃO"] = "🐶 BARON'S GARDEN",
 	["🏠 SALÃO PRINCIPAL"] = "🏠 GRAND HALL",
+	["📚 BIBLIOTECA"] = "📚 LIBRARY",
+	["🪜 ESCADARIA"] = "🪜 STAIRCASE",
+	["🎹 SALA DE MÚSICA"] = "🎹 MUSIC ROOM",
 	["🎯 TREINO"] = "🎯 TRAINING",
 
 	-- Passagens secretas

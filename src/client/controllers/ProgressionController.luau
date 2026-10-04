@@ -25,26 +25,21 @@ type ProfileSnapshot = ProfileTypes.ProfileSnapshot
 type XpAward = ProfileTypes.XpAward
 
 local WAIT_TIMEOUT = 15
-local LEVEL_UP_SOUND = "rbxasset://sounds/electronicpingshort.wav"
+local LEVEL_UP_SOUND = "rbxassetid://112485797063762"
 
 local ProgressionController = {}
 
 local started = false
 
 local function playLevelUp()
-	for index, speed in ipairs({ 1, 1.25, 1.5, 2 }) do
-		task.delay((index - 1) * 0.1, function()
-			local sound = Instance.new("Sound")
-			sound.SoundId = LEVEL_UP_SOUND
-			sound.PlaybackSpeed = speed
-			sound.Volume = 0.6
-			sound.Parent = SoundService
-			sound.Ended:Once(function()
-				sound:Destroy()
-			end)
-			sound:Play()
-		end)
-	end
+	local sound = Instance.new("Sound")
+	sound.SoundId = LEVEL_UP_SOUND
+	sound.Volume = 0.6
+	sound.Parent = SoundService
+	sound.Ended:Once(function()
+		sound:Destroy()
+	end)
+	sound:Play()
 end
 
 -- O XP da rodada aparece no painel de pós-partida; aqui fica só a

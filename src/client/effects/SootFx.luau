@@ -176,7 +176,7 @@ local function track(instance: Instance, effectsFolder: Folder)
 		puff.EmissionDirection = Enum.NormalId.Front
 		entry.dust = dust
 		entry.puff = puff
-		entry.sound = TrapFxUtil.newSound(point, CONFIG.SneezeSoundId, 1.6, 0.9)
+		entry.sound = TrapFxUtil.newSound(point, CONFIG.SneezeSoundId, 1.1, 0.9)
 	end
 	tracked[model] = entry
 

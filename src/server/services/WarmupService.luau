@@ -36,7 +36,7 @@ local TRAMPOLINE_TAG = "PuffTrampoline"
 local CHECK_INTERVAL = 0.25
 local BALLOON_SIZE = 2.2
 local TOP_SCORES = 3
-local POP_SOUND = "rbxasset://sounds/electronicpingshort.wav"
+local POP_SOUND = "rbxassetid://9113263649"
 local BALLOON_COLORS = {
 	Color3.fromRGB(255, 160, 200),
 	Color3.fromRGB(150, 220, 255),
@@ -169,7 +169,7 @@ local function onSurfaceHit(combatant: CombatantRegistry.Combatant, instance: In
 	local sound = Instance.new("Sound")
 	sound.SoundId = POP_SOUND
 	sound.Volume = 0.5
-	sound.PlaybackSpeed = rng:NextNumber(1.4, 1.7)
+	sound.PlaybackSpeed = rng:NextNumber(0.9, 1.15)
 	sound.Parent = folder
 	sound.Ended:Once(function()
 		sound:Destroy()

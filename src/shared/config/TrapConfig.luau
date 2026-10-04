@@ -198,11 +198,11 @@ local Window: WindowConfig = table.freeze({
 	LooseBlocksAlong = 6,
 	LooseBlockDelay = 1,
 	BoardedFraction = 0.3,
-	CrackSoundId = "rbxasset://sounds/clickfast.wav",
-	ShatterSoundId = "rbxasset://sounds/action_jump_land.mp3",
+	CrackSoundId = "rbxassetid://133541517744065",
+	ShatterSoundId = "rbxassetid://132535085898211",
 	-- Sons que vêm com o Roblox (o antigo swoosh.wav não carrega mais).
 	-- Para um "whoosh" de verdade, troque por um áudio do Creator Store.
-	GustSoundId = "rbxasset://sounds/action_get_up.mp3",
+	GustSoundId = "rbxassetid://110536638811166",
 	PigeonLaneLength = 40,
 	PigeonLaneWidth = 6,
 	PigeonLaneHeight = 8,
@@ -213,13 +213,13 @@ local Window: WindowConfig = table.freeze({
 	PigeonBumpLift = 0.25,
 	PigeonMaxBumps = 3,
 	PigeonBumpInterval = 0.25,
-	FlapSoundId = "rbxasset://sounds/clickfast.wav",
+	FlapSoundId = "rbxassetid://9113444620",
 	RainLength = 12,
 	RainWidth = 12,
 	RainHeight = 7,
 	RainDuration = 5,
 	RainGrip = 1.5,
-	RainSoundId = "rbxasset://sounds/action_swim.mp3",
+	RainSoundId = "rbxassetid://13039198193",
 })
 
 local Rug: RugConfig = table.freeze({
@@ -253,8 +253,8 @@ local Rug: RugConfig = table.freeze({
 	SlideDuration = 0.45,
 	StandHeight = 6,
 	FringeColor = Color3.fromRGB(240, 226, 190),
-	StretchSoundId = "rbxasset://sounds/action_get_up.mp3",
-	PullSoundId = "rbxasset://sounds/action_get_up.mp3",
+	StretchSoundId = "rbxassetid://9113838965",
+	PullSoundId = "rbxassetid://9125714630",
 })
 
 local Chandelier: ChandelierConfig = table.freeze({
@@ -277,8 +277,8 @@ local Chandelier: ChandelierConfig = table.freeze({
 	ImpactLift = 0.6,
 	HoleRadius = 6.5,
 	HoleDelay = 0.6,
-	CreakSoundId = "rbxasset://sounds/clickfast.wav",
-	CrashSoundId = "rbxasset://sounds/action_jump_land.mp3",
+	CreakSoundId = "rbxassetid://9113763589",
+	CrashSoundId = "rbxassetid://100922696429381",
 })
 
 local Fireplace: FireplaceConfig = table.freeze({
@@ -299,9 +299,9 @@ local Fireplace: FireplaceConfig = table.freeze({
 	SneezeLift = 0.5,
 	SneezeCooldown = 1.5,
 	BlurTime = 1.5,
-	CoughSoundId = "rbxasset://sounds/action_jump_land.mp3",
-	PuffSoundId = "rbxasset://sounds/action_get_up.mp3",
-	SneezeSoundId = "rbxasset://sounds/ouch.ogg",
+	CoughSoundId = "rbxassetid://9125577419",
+	PuffSoundId = "rbxassetid://9125640290",
+	SneezeSoundId = "rbxassetid://128530189877904",
 })
 
 local TrapConfig: TrapConfig = table.freeze({

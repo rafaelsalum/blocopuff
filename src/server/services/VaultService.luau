@@ -35,8 +35,8 @@ local GENERATED_BY_ATTRIBUTE = "GeneratedBy"
 local SERVICE_NAME = "VaultService"
 local LOCKED_FEEDBACK_COOLDOWN = 1.5
 local HOLDER_GLOW = Color3.fromRGB(255, 200, 70)
-local SOUND_LOCKED = "rbxasset://sounds/clickfast.wav"
-local SOUND_OPEN = "rbxasset://sounds/action_get_up.mp3"
+local SOUND_LOCKED = "rbxassetid://9118901593"
+local SOUND_OPEN = "rbxassetid://7757282096"
 local SPIN_SPEED = 1.6
 
 local VaultService = {}
@@ -177,7 +177,7 @@ local function openVault(door: DoorProps, player: Player)
 	door.prompt.Enabled = false
 	VaultProps.setOpen(door, true, true)
 	VaultProps.setGlow(door, false)
-	VaultProps.playSound(door, SOUND_OPEN, 0.8, 0.8)
+	VaultProps.playSound(door, SOUND_OPEN, 1, 0.8)
 	local token = roundToken
 	VaultProps.startAlarm(door, function()
 		return roundToken == token and roundActive
@@ -208,7 +208,7 @@ local function onDoorTriggered(door: DoorProps, player: Player)
 		return
 	end
 	lastLockedFeedback[player] = now
-	VaultProps.playSound(door, SOUND_LOCKED, 0.7, 0.9)
+	VaultProps.playSound(door, SOUND_LOCKED, 1, 0.9)
 	fireTo(player, "Locked", unlocked)
 end
 

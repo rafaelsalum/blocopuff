@@ -32,7 +32,7 @@ local FIXED_TARGETS = 6
 local CHECK_INTERVAL = 0.25
 local TARGET_COLOR = Color3.fromRGB(255, 93, 115)
 local TARGET_HIT_COLOR = Color3.fromRGB(255, 209, 102)
-local HIT_SOUND = "rbxasset://sounds/electronicpingshort.wav"
+local HIT_SOUND = "rbxassetid://123582256549202"
 
 type Session = {
 	startedAt: number,
@@ -140,7 +140,7 @@ local function onSurfaceHit(combatant: CombatantRegistry.Combatant, instance: In
 	local sound = Instance.new("Sound")
 	sound.SoundId = HIT_SOUND
 	sound.Volume = 0.4
-	sound.PlaybackSpeed = 1.3
+	sound.PlaybackSpeed = 1
 	sound.Parent = target
 	sound.Ended:Once(function()
 		sound:Destroy()

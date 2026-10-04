@@ -292,6 +292,25 @@ Seção **TESTES DA PARTIDA** no painel admin. Vale só para o servidor atual e 
 - **Testar de verdade:** só com o jogo publicado. O Roblox só preenche quem convidou em convites reais, e o Studio pode não ter acesso ao DataStore e ao MessagingService. Os banners de recompensa da página do convite são configurados no Creator Hub (Engagement > Referral Rewards), com o jogo publicado há pelo menos 1 dia.
 - **Testes:** `lune run tests/ReferralRules.spec`.
 
+### Ala leste do Casarão: Biblioteca, Sala de Música, Sótão e Porão (Fase 5C, entrega 5C.1, parte 2)
+
+- **Ala nova** a leste do Casarão (`MansionWing`, geometria em `MansionWingLayout`, medidas em `MansionWingConfig`):
+  - **Biblioteca** (norte): porta para o Salão da Coleção, estantes altas, escada de rodinhas e canto de leitura. Tem um livro vermelho "errado" (`WrongBook`), reservado para a passagem secreta da 5C.3.
+  - **Hall da Escadaria** (meio): porta para o Jardim do Barão, escada que sobe ao Sótão e escada que desce ao Porão.
+  - **Sala de Música** (sul): piano tocável, sofás, gramofone e partituras.
+  - **Sótão** (em cima, a ala inteira): escuro, com baús, móveis cobertos por lençóis e teias.
+  - **Porão** (embaixo): barris, adega, goteiras com som e a entrada fechada do túnel (`CellarTunnel`, reservada para a 5C.3).
+- **Portas:** todas as portas da ala usam as mesmas portas automáticas com som da parte 1, um pouco menores que os arcos. Cada lado tem uma placa dizendo para onde a porta leva.
+- **Escadas:** os degraus são de verdade e têm uma rampa invisível por cima, para subir liso no celular. Há guarda-corpos nos lados abertos e em volta dos buracos.
+- **Piano** (`PianoService`): clicar ou tocar numa tecla toca a nota para todos por perto. São 13 teclas, de Dó a Dó, com os sustenidos, e a tecla afunda um pouco a cada nota. Há intervalo mínimo por tecla e por jogador.
+- **Lanterna do Sótão** (`AtticController`, só no cliente): quem está no Sótão (jogadores e bots) fica com uma lanterna acesa na mão, e a sua tela escurece um pouco enquanto você está lá.
+- **Ala opcional:** se a construção dela falhar, o servidor sobe mesmo assim e a parede leste do Casarão fica fechada.
+
+### Sons
+
+- Os sons provisórios do Roblox foram trocados por sons gratuitos da Creator Store, todos testados no Studio. A lista com os IDs está em `docs/SONS_PARA_PESQUISAR.md`.
+- Sequências que montavam uma melodia com o som provisório (subir de nível, segredo, sino da ficha, alarme do cofre) viraram um único som.
+
 ### Ficha da Partida e portas do Casarão (Fase 5C, entrega 5C.1, parte 1)
 
 - **Ficha da Partida:** quem entra no mirante ou aperta JOGAR fica na fila e pega a ficha. Com ela, dá para sair do mirante e explorar o Casarão sem perder a vaga. O JOGAR não teletransporta mais: a ficha vem ali mesmo.

@@ -16,10 +16,13 @@ local GameConfig = require(ReplicatedStorage.Shared.config.GameConfig)
 local MansionConfig = require(ReplicatedStorage.Shared.config.MansionConfig)
 local BuildingLayout = require(ReplicatedStorage.Shared.modules.BuildingLayout)
 local MansionLayout = require(ReplicatedStorage.Shared.modules.MansionLayout)
+local MansionWingLayout = require(ReplicatedStorage.Shared.modules.MansionWingLayout)
 local Lang = require(ReplicatedStorage.Shared.i18n.Lang)
 local BuildingDecor = require(script.Parent.BuildingDecor)
 local LobbyService = require(script.Parent.LobbyService)
 local MansionDoors = require(script.Parent.MansionDoors)
+local MansionPlaque = require(script.Parent.MansionPlaque)
+local MansionWing = require(script.Parent.MansionWing)
 local WallBuilder = require(script.Parent.WallBuilder)
 
 type BuildingConfig = GameConfig.BuildingConfig
@@ -27,6 +30,7 @@ type Box = WallBuilder.Box
 type DoorGap = BuildingDecor.DoorGap
 type Mansion = MansionLayout.Mansion
 type ReservedArea = LobbyService.ReservedArea
+type Doorway = MansionWingLayout.Doorway
 
 -- Vão numa face de parede (porta ou arco), com placa opcional por cima.
 type Opening = {
@@ -52,8 +56,7 @@ local DECOR_SEED = 2024
 local BEAM_SIZE = 1.2
 local BEAM_SPACING = 14
 local CHANDELIER_DROP = 6
-local PLAQUE_SIZE = Vector2.new(11, 1.8)
-local PLAQUE_DISTANCE = 70
+local PLAQUE_DISTANCE = MansionPlaque.MaxDistance
 local STATUE_COLOR = Color3.fromRGB(255, 209, 102)
 local GRASS_COLOR = Color3.fromRGB(88, 148, 80)
 
@@ -76,10 +79,30 @@ local function box(minX: number, minY: number, minZ: number, maxX: number, maxY:
 	return { min = Vector3.new(minX, minY, minZ), max = Vector3.new(maxX, maxY, maxZ) }
 end
 
+-- Portas da parede leste do Casarão para a ala nova.
+local function eastDoorways(): { Doorway }
+	local list: { Doorway } = {}
+	for _, doorway in ipairs(MansionWingLayout.get().doorways) do
+		if doorway.normal == Vector3.xAxis then
+			table.insert(list, doorway)
+		end
+	end
+	return list
+end
+
+local function eastDoorway(name: string): Doorway
+	for _, doorway in ipairs(eastDoorways()) do
+		if doorway.name == name then
+			return doorway
+		end
+	end
+	error(`Unknown wing doorway {name}`)
+end
+
 -- Piso, teto e paredes externas. A oeste, a parede leste do prédio da arena
 -- já fecha o trecho da galeria; aqui só entram as pontas e o pedaço acima
 -- do telhado do prédio (o Casarão tem pé-direito mais alto).
-local function createShell(parent: Instance, mansion: Mansion, building: BuildingConfig)
+local function createShell(parent: Instance, mansion: Mansion, building: BuildingConfig, withWing: boolean)
 	local t = building.WallThickness
 	local floorY = mansion.floorY
 	local topY = mansion.ceilingY
@@ -93,7 +116,13 @@ local function createShell(parent: Instance, mansion: Mansion, building: Buildin
 	WallBuilder.createBox(parent, "MansionCeiling", box(westMinX, topY, mansion.minZ - t, mansion.maxX + t, topY + 1, mansion.maxZ + t), MansionConfig.CeilingColor, Enum.Material.Plaster)
 	WallBuilder.createBox(parent, "MansionWallNorth", box(westMinX, floorY - 1, mansion.minZ - t, mansion.maxX + t, topY, mansion.minZ), wallColor, Enum.Material.Plaster)
 	WallBuilder.createBox(parent, "MansionWallSouth", box(westMinX, floorY - 1, mansion.maxZ, mansion.maxX + t, topY, mansion.maxZ + t), wallColor, Enum.Material.Plaster)
-	WallBuilder.createBox(parent, "MansionWallEast", box(mansion.maxX, floorY - 1, mansion.minZ, mansion.maxX + t, topY, mansion.maxZ), wallColor, Enum.Material.Plaster)
+	-- Parede leste com as portas para a ala nova (MansionWingLayout).
+	local eastHoles: { Box } = {}
+	for _, doorway in ipairs(if withWing then eastDoorways() else {}) do
+		local point = Vector3.new(mansion.maxX, floorY, doorway.center.Z)
+		table.insert(eastHoles, WallBuilder.hole(point, Vector3.new(-1, 0, 0), Vector3.zAxis, t, doorway.size))
+	end
+	WallBuilder.createWallWithHoles(parent, "MansionWallEast", box(mansion.maxX, floorY - 1, mansion.minZ, mansion.maxX + t, topY, mansion.maxZ), eastHoles, wallColor, Enum.Material.Plaster)
 	WallBuilder.createBox(parent, "MansionWallWestNorth", box(westMinX, floorY - 1, mansion.minZ, mansion.minX, topY, buildingMinZ), wallColor, Enum.Material.Plaster)
 	WallBuilder.createBox(parent, "MansionWallWestSouth", box(westMinX, floorY - 1, buildingMaxZ, mansion.minX, topY, mansion.maxZ), wallColor, Enum.Material.Plaster)
 	WallBuilder.createBox(parent, "MansionWallWestUpper", box(westMinX, bounds.ceilingY + t, buildingMinZ, mansion.minX, topY, buildingMaxZ), wallColor, Enum.Material.Plaster)
@@ -126,30 +155,6 @@ local function createPartitions(parent: Instance, mansion: Mansion)
 	end
 end
 
--- Placa de madeira com o nome da sala, presa à parede acima de um vão.
-local function createPlaque(parent: Instance, name: string, cframe: CFrame, text: string, style: BuildingConfig)
-	local plaque = BuildingDecor.createPart(parent, name, Vector3.new(PLAQUE_SIZE.X, PLAQUE_SIZE.Y, 0.3), cframe, style.FrameColor, { material = Enum.Material.Wood })
-	local gui = Instance.new("SurfaceGui")
-	gui.Face = Enum.NormalId.Front
-	gui.SizingMode = Enum.SurfaceGuiSizingMode.PixelsPerStud
-	gui.PixelsPerStud = 40
-	gui.MaxDistance = PLAQUE_DISTANCE
-	gui.LightInfluence = 0
-	gui.Parent = plaque
-	local label = Instance.new("TextLabel")
-	label.Size = UDim2.fromScale(1, 1)
-	label.BackgroundTransparency = 1
-	label.Font = Enum.Font.FredokaOne
-	label.Text = text
-	label.TextColor3 = STATUE_COLOR
-	label.TextScaled = true
-	label.Parent = gui
-	local padding = Instance.new("UIPadding")
-	padding.PaddingTop = UDim.new(0.12, 0)
-	padding.PaddingBottom = UDim.new(0.12, 0)
-	padding.Parent = label
-end
-
 -- Papel de parede, lambri e quadros de uma face, recortados em volta dos vãos.
 local function decorateFace(parent: Instance, mansion: Mansion, face: Face, style: BuildingConfig, rng: Random)
 	local origin = Vector3.new((face.a.X + face.b.X) / 2, 0, (face.a.Z + face.b.Z) / 2)
@@ -171,7 +176,7 @@ local function decorateFace(parent: Instance, mansion: Mansion, face: Face, styl
 			local label = opening.label
 			if label ~= nil then
 				local position = origin + (along * offset) + (face.inward * 0.55) + Vector3.new(0, mansion.floorY + opening.size.Y + 2.6, 0)
-				createPlaque(parent, `{face.name}Plaque`, CFrame.fromMatrix(position, along, Vector3.yAxis), label, style)
+				MansionPlaque.create(parent, `{face.name}Plaque`, CFrame.fromMatrix(position, along, Vector3.yAxis), label, style)
 			end
 		end
 	end
@@ -189,7 +194,7 @@ end
 
 -- Todas as faces internas, sala por sala, com os vãos e as placas que dizem
 -- para onde cada passagem leva.
-local function getFaces(mansion: Mansion): { Face }
+local function getFaces(mansion: Mansion, withWing: boolean): { Face }
 	local colors = MansionConfig.WallpaperColors
 	local rooms = mansion.rooms
 	local hall = rooms.GrandHall
@@ -215,6 +220,13 @@ local function getFaces(mansion: Mansion): { Face }
 	end
 	local function opening(x: number, z: number, size: Vector2, label: string?): Opening
 		return { point = at(x, z), size = size, label = label }
+	end
+
+	-- Portas para a ala nova, com a placa do lado do Casarão.
+	local function wingOpening(name: string): Opening
+		local doorway = eastDoorway(name)
+		local label = doorway.labelNegative
+		return opening(mansion.maxX, doorway.center.Z, doorway.size, if label ~= nil then Lang.t(label) else nil)
 	end
 
 	local passages: { Opening } = {}
@@ -245,7 +257,7 @@ local function getFaces(mansion: Mansion): { Face }
 		-- Salão da Coleção (norte)
 		{ name = "CollectionNorth", a = at(x0, z0), b = at(x1, z0), inward = toSouth, color = colors.Collection, openings = {} },
 		{ name = "CollectionWest", a = at(x0, z0), b = at(x0, north - half), inward = toEast, color = colors.Collection, openings = {} },
-		{ name = "CollectionEast", a = at(x1, z0), b = at(x1, north - half), inward = toWest, color = colors.Collection, openings = {} },
+		{ name = "CollectionEast", a = at(x1, z0), b = at(x1, north - half), inward = toWest, color = colors.Collection, openings = if withWing then { wingOpening("LibraryDoor") } else {} },
 		{ name = "CollectionSouth", a = at(x0, north - half), b = at(x1, north - half), inward = toNorth, color = colors.Collection, openings = {
 			opening(leftArch, north, arch, Lang.t("🏠 SALÃO PRINCIPAL")),
 			opening(rightArch, north, arch, Lang.t("🐶 JARDIM DO BARÃO")),
@@ -254,7 +266,7 @@ local function getFaces(mansion: Mansion): { Face }
 		{ name = "GardenWest", a = at(hallEast + half, north + half), b = at(hallEast + half, south - half), inward = toEast, color = colors.Garden, openings = {
 			opening(hallEast, mansion.center.Z, arch, Lang.t("🏠 SALÃO PRINCIPAL")),
 		} },
-		{ name = "GardenEast", a = at(x1, north + half), b = at(x1, south - half), inward = toWest, color = colors.Garden, openings = {} },
+		{ name = "GardenEast", a = at(x1, north + half), b = at(x1, south - half), inward = toWest, color = colors.Garden, openings = if withWing then { wingOpening("StairHallDoor") } else {} },
 		{ name = "GardenNorth", a = at(hallEast + half, north + half), b = at(x1, north + half), inward = toSouth, color = colors.Garden, openings = {
 			opening(rightArch, north, arch, Lang.t("✨ SALÃO DA COLEÇÃO")),
 		} },
@@ -428,10 +440,16 @@ function MansionService.create(worldRoot: Model, building: BuildingConfig): Mode
 	model:SetAttribute(GENERATED_BY_ATTRIBUTE, SERVICE_NAME)
 
 	local rng = Random.new(DECOR_SEED)
-	createShell(model, mansion, building)
+	-- A ala leste é opcional: uma falha nela não impede o servidor de subir.
+	-- Sem ela, a parede leste fica fechada (sem portas para o vazio).
+	local wingOk, wingFailure = pcall(MansionWing.build, model, building)
+	if not wingOk then
+		warn(`[BlocoPuff] Mansion east wing unavailable: {wingFailure}`)
+	end
+	createShell(model, mansion, building, wingOk)
 	createPartitions(model, mansion)
-	MansionDoors.build(model, mansion)
-	for _, face in ipairs(getFaces(mansion)) do
+	MansionDoors.build(model, MansionDoors.partitionDoorways(mansion))
+	for _, face in ipairs(getFaces(mansion, wingOk)) do
 		decorateFace(model, mansion, face, building, rng)
 	end
 	createCeiling(model, mansion, building)

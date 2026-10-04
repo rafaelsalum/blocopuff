@@ -13,7 +13,7 @@ local Lang = require(ReplicatedStorage.Shared.i18n.Lang)
 local NotificationManager = require(script.Parent.Parent.notifications.NotificationManager)
 
 local WAIT_TIMEOUT = 15
-local CHIME = "rbxasset://sounds/electronicpingshort.wav"
+local CHIME = "rbxassetid://118315466257318"
 
 local SecretPassageController = {}
 
@@ -31,19 +31,14 @@ local function floorName(floor: unknown): string
 end
 
 local function playChime()
-	for index, speed in ipairs({ 1.2, 1.5, 1.8 }) do
-		task.delay((index - 1) * 0.12, function()
-			local sound = Instance.new("Sound")
-			sound.SoundId = CHIME
-			sound.PlaybackSpeed = speed
-			sound.Volume = 0.55
-			sound.Parent = SoundService
-			sound.Ended:Once(function()
-				sound:Destroy()
-			end)
-			sound:Play()
-		end)
-	end
+	local sound = Instance.new("Sound")
+	sound.SoundId = CHIME
+	sound.Volume = 0.55
+	sound.Parent = SoundService
+	sound.Ended:Once(function()
+		sound:Destroy()
+	end)
+	sound:Play()
 end
 
 local function onEvent(kind: unknown, floor: unknown, name: unknown, userId: unknown)

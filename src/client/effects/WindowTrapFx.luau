@@ -143,11 +143,11 @@ function WindowTrapFx.new(glass: BasePart, effectsFolder: Folder): Handle
 	gust.SpreadAngle = Vector2.new(CONFIG.ConeHalfAngle, CONFIG.ConeHalfAngle * 0.6)
 	gust.EmissionDirection = Enum.NormalId.Front
 
-	local crackSound = TrapFxUtil.newSound(anchor, CONFIG.CrackSoundId, 0.7, 0.8)
-	local shatterSound = TrapFxUtil.newSound(anchor, CONFIG.ShatterSoundId, 1.7, 1)
-	local gustSound = TrapFxUtil.newSound(anchor, CONFIG.GustSoundId, 0.6, 1)
-	local flapSound = TrapFxUtil.newSound(anchor, CONFIG.FlapSoundId, 1.6, 0.9)
-	local rainSound = TrapFxUtil.newSound(anchor, CONFIG.RainSoundId, 0.8, 0.9)
+	local crackSound = TrapFxUtil.newSound(anchor, CONFIG.CrackSoundId, 1, 0.8)
+	local shatterSound = TrapFxUtil.newSound(anchor, CONFIG.ShatterSoundId, 1, 1)
+	local gustSound = TrapFxUtil.newSound(anchor, CONFIG.GustSoundId, 1, 1)
+	local flapSound = TrapFxUtil.newSound(anchor, CONFIG.FlapSoundId, 1, 0.9)
+	local rainSound = TrapFxUtil.newSound(anchor, CONFIG.RainSoundId, 1, 0.7)
 	rainSound.Looped = true
 
 	-- Penas (aviso e saída dos Pombos) e respingos (aviso da Chuva).

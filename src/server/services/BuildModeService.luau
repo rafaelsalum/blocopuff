@@ -31,7 +31,7 @@ type Cell = BuildTargeting.Cell
 -- impede) e altura extra acima do bloco (pés de quem está caindo no buraco).
 local OCCUPANCY_INSET = 0.4
 local OCCUPANCY_HEADROOM = 5
-local SOUND_BUILD = "rbxasset://sounds/electronicpingshort.wav"
+local SOUND_BUILD = "rbxassetid://120925282182940"
 
 local BuildModeService = {}
 
@@ -83,7 +83,7 @@ local function playBuildSound(position: Vector3)
 	anchor.Parent = Workspace.Terrain
 	local sound = Instance.new("Sound")
 	sound.SoundId = SOUND_BUILD
-	sound.PlaybackSpeed = 0.7
+	sound.PlaybackSpeed = 1
 	sound.Volume = 0.8
 	sound.RollOffMaxDistance = 90
 	sound.Parent = anchor

@@ -121,8 +121,8 @@ function ChandelierTrapFx.new(hitbox: BasePart, effectsFolder: Folder): Handle
 	dust.SpreadAngle = Vector2.new(85, 85)
 	dust.EmissionDirection = Enum.NormalId.Top
 
-	local creakSound = TrapFxUtil.newSound(holder, CONFIG.CreakSoundId, 0.6, 0.8)
-	local crashSound = TrapFxUtil.newSound(holder, CONFIG.CrashSoundId, 0.7, 1)
+	local creakSound = TrapFxUtil.newSound(holder, CONFIG.CreakSoundId, 0.9, 0.8)
+	local crashSound = TrapFxUtil.newSound(holder, CONFIG.CrashSoundId, 0.85, 1)
 	crashSound.RollOffMaxDistance = 220
 
 	local shadow = Instance.new("Part")
