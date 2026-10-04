@@ -38,6 +38,10 @@ export type StateAttributeNames = {
 	-- Na fila da partida (no mirante ou com alguém da Party lá), escrito
 	-- pelo MatchQueueService.
 	PlayerInMatchQueue: string,
+	-- Onde está a vaga na fila (Fase 5C.1): "" (fora), "Mirante" (no
+	-- mirante), "Ticket" (com a Ficha da Partida, passeando) ou "Party" (só
+	-- pela Party). Escrito pelo MatchQueueService.
+	PlayerQueuePlace: string,
 	-- No Model do corpo de um bot RoboPuff (Fase 5B): id negativo dele. O
 	-- corpo também leva a tag BotTag (CollectionService).
 	BotId: string,
@@ -76,6 +80,7 @@ local StateAttributeNames: StateAttributeNames = {
 	PlayerEquippedPuff = "EquippedPuff",
 	PlayerPartyId = "PartyId",
 	PlayerInMatchQueue = "InMatchQueue",
+	PlayerQueuePlace = "QueuePlace",
 	BotId = "BotId",
 	BotTag = "RoboPuff",
 	LastDashAt = "LastDashAt",

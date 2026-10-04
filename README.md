@@ -292,6 +292,20 @@ Seção **TESTES DA PARTIDA** no painel admin. Vale só para o servidor atual e 
 - **Testar de verdade:** só com o jogo publicado. O Roblox só preenche quem convidou em convites reais, e o Studio pode não ter acesso ao DataStore e ao MessagingService. Os banners de recompensa da página do convite são configurados no Creator Hub (Engagement > Referral Rewards), com o jogo publicado há pelo menos 1 dia.
 - **Testes:** `lune run tests/ReferralRules.spec`.
 
+### Ficha da Partida e portas do Casarão (Fase 5C, entrega 5C.1, parte 1)
+
+- **Ficha da Partida:** quem entra no mirante ou aperta JOGAR fica na fila e pega a ficha. Com ela, dá para sair do mirante e explorar o Casarão sem perder a vaga. O JOGAR não teletransporta mais: a ficha vem ali mesmo.
+- **Chamado:** faltando 15 s para a partida (`QueueConfig.TicketCallSeconds`), quem está fora do mirante ouve um sino e vê o aviso "SUA PARTIDA COMEÇA EM 15 s!". Na hora, vai para a arena de onde estiver.
+- **Sair da fila:** o botão SAIR DA FILA (no lugar do JOGAR) devolve a ficha. Quem está na fila só pela Party vê o aviso de que a Party ainda segura a vaga.
+- **AFK:** parado (sem andar 2 studs na horizontal) fora do mirante por 3 min (`TicketAfkSeconds`), a ficha volta, com o aviso "SUA FICHA VOLTOU".
+- **Etiqueta do HUD:** mostra "🎟 FICHA 1/2" para quem está passeando, com o tempo da contagem.
+- **Atributos:** `InMatchQueue` (na fila) e `QueuePlace` ("", "Mirante", "Ticket" ou "Party").
+- **Seleção:** o `RoundService` escala quem tem vaga (`MatchQueueService.hasPlace`: mirante ou ficha, mais a Party). O aquecimento continua só no mirante.
+- **Telemetria:** `QueueJoinButton`, `QueueLeaveButton` e `QueueTicketExpired`.
+- **Portas:** portas duplas de madeira em todos os arcos das divisórias (`MansionDoors`, no servidor). Elas abrem sozinhas quando alguém chega perto, girando para o lado oposto de quem chegou, com rangido, e fecham batendo quando todos saem.
+  - A animação é só no cliente (`MansionDoorController`). As folhas não têm colisão, então não seguram nem empurram ninguém.
+  - Medidas, cores e sons ficam em `MansionConfig.Door`. Os sons são provisórios, do próprio Roblox.
+
 ### Variações das janelas: Pombos e Chuva (Fase 5, entrega 5.6)
 
 - **Sorteio por rodada:** cada janela do andar de cima sorteia uma variação no começo de cada rodada. A cortina tem uma cor por variação, para dar para ver de longe qual janela faz o quê.

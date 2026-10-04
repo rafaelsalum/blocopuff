@@ -23,6 +23,7 @@ local VaultController = require(script.controllers.VaultController)
 local KnockbackController = require(script.controllers.KnockbackController)
 local TrapVisualController = require(script.controllers.TrapVisualController)
 local SlipperyController = require(script.controllers.SlipperyController)
+local MansionDoorController = require(script.controllers.MansionDoorController)
 local ResultsController = require(script.controllers.ResultsController)
 local TelemetryController = require(script.controllers.TelemetryController)
 local SecretPassageController = require(script.controllers.SecretPassageController)
@@ -130,6 +131,14 @@ local slipperyOk, slipperyErr = pcall(function()
 end)
 if not slipperyOk then
 	warn(string.format("[BlocoPuff] Failed to start slippery ground: %s", tostring(slipperyErr)))
+end
+
+-- Portas do Casarão: abrem e fecham sozinhas, com som.
+local mansionDoorOk, mansionDoorErr = pcall(function()
+	MansionDoorController.start()
+end)
+if not mansionDoorOk then
+	warn(string.format("[BlocoPuff] Failed to start mansion doors: %s", tostring(mansionDoorErr)))
 end
 
 local resultsOk, resultsErr = pcall(function()

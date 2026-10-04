@@ -19,6 +19,7 @@ local MansionLayout = require(ReplicatedStorage.Shared.modules.MansionLayout)
 local Lang = require(ReplicatedStorage.Shared.i18n.Lang)
 local BuildingDecor = require(script.Parent.BuildingDecor)
 local LobbyService = require(script.Parent.LobbyService)
+local MansionDoors = require(script.Parent.MansionDoors)
 local WallBuilder = require(script.Parent.WallBuilder)
 
 type BuildingConfig = GameConfig.BuildingConfig
@@ -429,6 +430,7 @@ function MansionService.create(worldRoot: Model, building: BuildingConfig): Mode
 	local rng = Random.new(DECOR_SEED)
 	createShell(model, mansion, building)
 	createPartitions(model, mansion)
+	MansionDoors.build(model, mansion)
 	for _, face in ipairs(getFaces(mansion)) do
 		decorateFace(model, mansion, face, building, rng)
 	end

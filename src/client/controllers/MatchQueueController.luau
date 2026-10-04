@@ -2,9 +2,11 @@
 
 -- Fila da partida no cliente. Quem está na fila é decidido no servidor
 -- (MatchQueueService, atributo "InMatchQueue"); aqui só o retorno:
---   * aviso ao entrar ("✅ Você está na fila!") e ao sair do mirante;
+--   * avisos da Ficha da Partida (Fase 5C.1): ao entrar na fila, ao sair do
+--     mirante com a ficha, quando ela volta por ficar parado e o chamado
+--     com sino faltando 15 s para quem está passeando;
 --   * aviso quando o embarque fecha e bipes no "3, 2, 1" da contagem;
---   * botão JOGAR do HUD (pede ao servidor para ir ao mirante);
+--   * botões JOGAR e SAIR DA FILA do HUD (pedem a ficha / devolvem);
 --   * "sozinho na fila" vira uma faixa sugerindo chamar amigos;
 --   * impulso dos trampolins do aquecimento (tag "PuffTrampoline"): a
 --     física do personagem é do cliente, então o impulso é aplicado aqui.
@@ -29,6 +31,13 @@ local TRAMPOLINE_TAG = "PuffTrampoline"
 local JOIN_SOUND = "rbxasset://sounds/electronicpingshort.wav"
 local BEEP_SOUND = "rbxasset://sounds/button.wav"
 local FINAL_BEEPS = 3
+local BELL_SOUND = "rbxasset://sounds/electronicpingshort.wav"
+local BELL_RINGS = 3
+local BELL_GAP = 0.22
+-- O "saiu da fila" logo depois de a ficha expirar já foi dito.
+local EXPIRED_QUIET = 2
+
+type QueueStatus = "Out" | "Mirante" | "Ticket" | "Party"
 
 type Priority = NotificationManager.Priority
 type Tone = NotificationManager.Tone
@@ -38,6 +47,7 @@ local MatchQueueController = {}
 local started = false
 local remote: RemoteEvent? = nil
 local lastBounce = 0
+local lastExpired = -math.huge
 
 local function banner(key: string, icon: string, title: string, subtitle: string, tone: Tone, priority: Priority, duration: number)
 	NotificationManager.notify({
@@ -67,9 +77,28 @@ local function playSound(soundId: string, speed: number, volume: number)
 	sound:Play()
 end
 
-local function onMessage(kind: unknown)
-	if kind == "Lonely" then
-		banner("queue-lonely", "👥", T("CHAME UM AMIGO"), T("A partida começa com 2 no mirante. Convide pela Party!"), "Info", "Low", 5)
+-- Sino do chamado: três toques graves.
+local function ringBell()
+	task.spawn(function()
+		for ring = 1, BELL_RINGS do
+			playSound(BELL_SOUND, 0.55 + ring * 0.05, 0.9)
+			task.wait(BELL_GAP)
+		end
+	end)
+end
+
+local function onMessage(kind: unknown, value: unknown)
+	if kind == "TicketCall" then
+		local seconds = if typeof(value) == "number" then math.max(1, math.floor(value)) else QueueConfig.TicketCallSeconds
+		ringBell()
+		banner("queue-call", "⚔️", T("SUA PARTIDA COMEÇA EM %d s!", seconds), T("Você vai para a arena sozinho, pode continuar onde está"), "Gold", "High", 4)
+	elseif kind == "TicketExpired" then
+		lastExpired = os.clock()
+		banner("queue-state", "💤", T("SUA FICHA VOLTOU"), T("Você ficou parado muito tempo. Aperte JOGAR para voltar à fila"), "Info", "Normal", 4)
+	elseif kind == "StillInParty" then
+		banner("queue-state", "👥", T("SUA PARTY AINDA ESTÁ NA FILA"), T("Você joga junto com ela. Para sair, saia da Party"), "Info", "Normal", 4)
+	elseif kind == "Lonely" then
+		banner("queue-lonely", "👥", T("CHAME UM AMIGO"), T("A partida começa com 2 na fila. Convide pela Party!"), "Info", "Low", 5)
 	elseif kind == "BotsArriving" then
 		banner("queue-bots", "🤖", T("ROBOPUFFS CHEGANDO!"), T("Eles completam a partida. Chame um amigo para jogar junto!"), "Info", "Normal", 4)
 	elseif kind == "GatesClosed" then
@@ -79,26 +108,64 @@ local function onMessage(kind: unknown)
 	end
 end
 
--- Entrar e sair do mirante. Quem está numa partida (inclusive eliminado)
--- não recebe esses avisos: a entrada e a saída da fila ali são automáticas.
+local function readStatus(player: Player): QueueStatus
+	if player:GetAttribute(StateAttributeNames.PlayerInMatchQueue) ~= true then
+		return "Out"
+	end
+	local place = player:GetAttribute(StateAttributeNames.PlayerQueuePlace)
+	if place == "Ticket" or place == "Party" then
+		return place
+	end
+	return "Mirante"
+end
+
+local function announce(previous: QueueStatus, status: QueueStatus)
+	local seconds = QueueConfig.TicketCallSeconds
+	if status == "Out" then
+		if os.clock() - lastExpired > EXPIRED_QUIET then
+			banner("queue-state", "🚪", T("VOCÊ SAIU DA FILA"), T("Aperte JOGAR quando quiser jogar"), "Info", "Normal", 2.5)
+		end
+	elseif previous == "Out" then
+		playSound(JOIN_SOUND, 1.5, 0.6)
+		if status == "Ticket" then
+			banner("queue-state", "🎟", T("VOCÊ PEGOU A FICHA!"), T("Explore o Casarão: avisamos %d s antes da partida", seconds), "Gold", "Normal", 4)
+		elseif status == "Party" then
+			banner("queue-state", "👥", T("NA FILA COM A PARTY!"), T("Sua Party guardou a vaga. Explore à vontade"), "Gold", "Normal", 4)
+		else
+			banner("queue-state", "✅", T("VOCÊ ESTÁ NA FILA!"), T("Pode explorar o Casarão: a ficha guarda sua vaga"), "Gold", "Normal", 4)
+		end
+	elseif previous == "Mirante" and status == "Ticket" then
+		banner("queue-state", "🎟", T("FICHA GUARDADA"), T("Explore à vontade: avisamos %d s antes da partida", seconds), "Info", "Normal", 3)
+	end
+end
+
+-- Entrar e sair da fila. Quem está numa partida (inclusive eliminado) não
+-- recebe esses avisos: a entrada e a saída da fila ali são automáticas. Os
+-- dois atributos mudam juntos; a leitura fica para o fim do quadro.
 local function watchQueue(player: Player)
-	local wasQueued = player:GetAttribute(StateAttributeNames.PlayerInMatchQueue) == true
-	player:GetAttributeChangedSignal(StateAttributeNames.PlayerInMatchQueue):Connect(function()
-		local queued = player:GetAttribute(StateAttributeNames.PlayerInMatchQueue) == true
-		if queued == wasQueued then
+	local previous = readStatus(player)
+	local pending = false
+	local function evaluate()
+		pending = false
+		local status = readStatus(player)
+		if status == previous then
 			return
 		end
-		wasQueued = queued
+		local before = previous
+		previous = status
 		if player:GetAttribute(StateAttributeNames.PlayerIsParticipant) == true then
 			return
 		end
-		if queued then
-			playSound(JOIN_SOUND, 1.5, 0.6)
-			banner("queue-state", "✅", T("VOCÊ ESTÁ NA FILA!"), T("Fique no mirante. Para sair, é só voltar pela porta"), "Gold", "Normal", 3)
-		else
-			banner("queue-state", "🚪", T("VOCÊ SAIU DA FILA"), T("Volte ao mirante quando quiser jogar"), "Info", "Normal", 2.5)
+		announce(before, status)
+	end
+	local function schedule()
+		if not pending then
+			pending = true
+			task.defer(evaluate)
 		end
-	end)
+	end
+	player:GetAttributeChangedSignal(StateAttributeNames.PlayerInMatchQueue):Connect(schedule)
+	player:GetAttributeChangedSignal(StateAttributeNames.PlayerQueuePlace):Connect(schedule)
 end
 
 -- Bipes no "3, 2, 1" para quem está na fila.
@@ -148,11 +215,19 @@ local function connectTrampoline(player: Player, pad: Instance)
 end
 
 -- Botão JOGAR: o servidor valida (fora da partida, vivo, embarque aberto)
--- e leva ao mirante.
+-- e entrega a Ficha da Partida ali mesmo.
 function MatchQueueController.join()
 	local currentRemote = remote
 	if currentRemote ~= nil then
 		currentRemote:FireServer("Join")
+	end
+end
+
+-- Botão SAIR DA FILA: devolve a ficha.
+function MatchQueueController.leave()
+	local currentRemote = remote
+	if currentRemote ~= nil then
+		currentRemote:FireServer("Leave")
 	end
 end
 

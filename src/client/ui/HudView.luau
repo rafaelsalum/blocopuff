@@ -8,12 +8,13 @@ local CombatHudView = require(script.Parent.CombatHudView)
 local RoundHudView = require(script.Parent.RoundHudView)
 
 type RoundHudMode = RoundHudView.RoundHudMode
+export type QueueStatus = RoundHudView.QueueStatus
 type LivesState = CombatHudView.LivesState
 
 export type HudViewHandle = {
 	setRoundMode: (mode: RoundHudMode) -> (),
 	setCountdown: (text: string) -> (),
-	setQueue: (title: string, subtitle: string, inQueue: boolean) -> (),
+	setQueue: (title: string, subtitle: string, status: QueueStatus) -> (),
 	setCombatVisible: (visible: boolean) -> (),
 	setCombatTimer: (text: string) -> (),
 	setCombatParticipants: (count: number) -> (),
@@ -26,9 +27,9 @@ export type HudViewHandle = {
 
 local HudView = {}
 
--- `onJoin`: botão JOGAR da etiqueta da fila (leva ao mirante).
-function HudView.new(playerGui: PlayerGui, onJoin: () -> ()): HudViewHandle
-	local roundHud = RoundHudView.new(playerGui, onJoin)
+-- `onJoin`/`onLeave`: botões JOGAR e SAIR DA FILA da etiqueta da fila.
+function HudView.new(playerGui: PlayerGui, onJoin: () -> (), onLeave: () -> ()): HudViewHandle
+	local roundHud = RoundHudView.new(playerGui, onJoin, onLeave)
 	local combatHud = CombatHudView.new(playerGui)
 
 	local handle = {} :: HudViewHandle

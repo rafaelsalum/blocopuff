@@ -2,8 +2,9 @@
 
 -- HUD da espera no lobby, no canto superior direito (o centro da tela fica
 -- livre para o Casarão): a etiqueta da fila da partida ("🏟 FILA 1/2"), o
--- botão JOGAR (leva ao mirante) para quem está fora da fila e, na contagem,
--- o cronômetro logo acima da etiqueta.
+-- botão JOGAR (entrega a Ficha da Partida) para quem está fora da fila, o
+-- SAIR DA FILA para quem passeia com a ficha e, na contagem, o cronômetro
+-- logo acima da etiqueta.
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TweenService = game:GetService("TweenService")
@@ -18,12 +19,15 @@ local T = Lang.t
 type ResponsiveScaleHandle = ResponsiveScale.ResponsiveScaleHandle
 
 export type RoundHudMode = "Hidden" | "Waiting" | "Countdown"
+-- Fora da fila, no mirante, com a Ficha da Partida ou só pela Party.
+export type QueueStatus = "Out" | "Mirante" | "Ticket" | "Party"
 
 export type RoundHudViewHandle = {
 	setMode: (mode: RoundHudMode) -> (),
 	setCountdown: (text: string) -> (),
-	-- `inQueue` pinta a etiqueta de verde e esconde o botão JOGAR.
-	setQueue: (title: string, subtitle: string, inQueue: boolean) -> (),
+	-- Na fila a etiqueta fica verde; o botão é JOGAR fora dela, SAIR DA
+	-- FILA com a ficha e some nos outros casos.
+	setQueue: (title: string, subtitle: string, status: QueueStatus) -> (),
 	destroy: () -> (),
 }
 
@@ -87,7 +91,7 @@ local function createAnimationGroup(
 	return responsiveRoot, animationGroup, animationScale, responsiveHandle
 end
 
-function RoundHudView.new(playerGui: PlayerGui, onJoin: () -> ()): RoundHudViewHandle
+function RoundHudView.new(playerGui: PlayerGui, onJoin: () -> (), onLeave: () -> ()): RoundHudViewHandle
 	local screenGui = UiTheme.createScreenGui(GUI_NAME, playerGui, 10)
 
 	local queueRoot, queueGroup, queueScale, queueResponsive = createAnimationGroup(
@@ -130,7 +134,14 @@ function RoundHudView.new(playerGui: PlayerGui, onJoin: () -> ()): RoundHudViewH
 		textSize = 16,
 		zIndex = 2,
 	})
-	joinButton.button.Activated:Connect(onJoin)
+	local currentStatus: QueueStatus? = nil
+	joinButton.button.Activated:Connect(function()
+		if currentStatus == "Ticket" then
+			onLeave()
+		elseif currentStatus == "Out" then
+			onJoin()
+		end
+	end)
 
 	local countdownRoot, countdownGroup, countdownScale, countdownResponsive = createAnimationGroup(
 		screenGui,
@@ -195,7 +206,6 @@ function RoundHudView.new(playerGui: PlayerGui, onJoin: () -> ()): RoundHudViewH
 	UiTheme.addTextOutline(countdownLabel, 2.5)
 
 	local currentMode: RoundHudMode = "Hidden"
-	local currentInQueue: boolean? = nil
 
 	local function popIn(root: Frame, scale: UIScale)
 		root.Visible = true
@@ -227,14 +237,21 @@ function RoundHudView.new(playerGui: PlayerGui, onJoin: () -> ()): RoundHudViewH
 		end
 	end
 
-	handle.setQueue = function(title: string, subtitle: string, inQueue: boolean)
+	handle.setQueue = function(title: string, subtitle: string, status: QueueStatus)
 		queueTitle.Text = title
 		queueSubtitle.Text = subtitle
-		if inQueue == currentInQueue then
+		if status == currentStatus then
 			return
 		end
-		currentInQueue = inQueue
-		joinButton.root.Visible = not inQueue
+		local wasInQueue = currentStatus ~= nil and currentStatus ~= "Out"
+		currentStatus = status
+		local inQueue = status ~= "Out"
+		joinButton.root.Visible = status == "Out" or status == "Ticket"
+		joinButton.setText(if status == "Ticket" then T("🚪 SAIR DA FILA") else T("🏟 JOGAR"))
+		joinButton.setVariant(if status == "Ticket" then "Neutral" else "Success")
+		if inQueue == wasInQueue then
+			return
+		end
 		local color = if inQueue then UiTheme.Colors.Green else UiTheme.Colors.Brand
 		queueTitle.TextColor3 = if inQueue then UiTheme.Colors.Green else UiTheme.Colors.Gold
 		if queueGradient ~= nil then

@@ -19,6 +19,7 @@ local T = Lang.t
 
 type RoundState = RoundTypes.RoundState
 type HudViewHandle = HudView.HudViewHandle
+type QueueStatus = HudView.QueueStatus
 type Priority = NotificationManager.Priority
 
 local STATE_WAIT_TIMEOUT = 10
@@ -49,6 +50,7 @@ local cached = {
 	finalChaos = false,
 	hasSecondChance = false,
 	inMatchQueue = false,
+	queuePlace = "",
 }
 
 local function readRoundState(instance: Instance): RoundState
@@ -104,24 +106,48 @@ local function getQueueMessage(): string
 	return T("Você participa da próxima rodada")
 end
 
+-- Onde está a vaga do jogador (atributo "QueuePlace").
+local function queueStatus(): QueueStatus
+	if not cached.inMatchQueue then
+		return "Out"
+	end
+	local place = cached.queuePlace
+	if place == "Ticket" then
+		return "Ticket"
+	elseif place == "Party" then
+		return "Party"
+	end
+	return "Mirante"
+end
+
 -- Etiqueta da fila (canto superior direito) na espera e na contagem.
 local function renderQueue(currentView: HudViewHandle, counting: boolean)
 	local count = math.max(0, math.floor(cached.participantCount))
 	local minimum = math.max(1, math.floor(cached.minimumPlayers))
-	if cached.inMatchQueue then
+	local status = queueStatus()
+	if status ~= "Out" then
+		local roaming = status ~= "Mirante"
 		local subtitle: string
 		if cached.roundsUntilTurn >= 2 then
 			subtitle = getQueueMessage()
 		elseif counting then
-			subtitle = T("%d na fila · fique no mirante", count)
+			subtitle = if roaming then T("Partida em %d s · avisamos antes", math.max(0, math.floor(cached.timeRemaining))) else T("%d na fila · fique no mirante", count)
+		elseif roaming then
+			subtitle = T("Explore o Casarão: avisamos antes")
 		else
 			local missing = math.max(0, minimum - count)
 			subtitle = if missing == 1 then T("Falta 1 jogador para começar") else T("Faltam %d jogadores para começar", missing)
 		end
-		currentView.setQueue(if counting then T("✅ VOCÊ ESTÁ NA FILA") else T("🏟 NA FILA  %d/%d", count, minimum), subtitle, true)
+		local title: string
+		if roaming then
+			title = T("🎟 FICHA  %d/%d", count, minimum)
+		else
+			title = if counting then T("✅ VOCÊ ESTÁ NA FILA") else T("🏟 NA FILA  %d/%d", count, minimum)
+		end
+		currentView.setQueue(title, subtitle, status)
 	else
 		local title = if counting then T("🏟 %d NA FILA", count) else T("🏟 FILA  %d/%d", count, minimum)
-		currentView.setQueue(title, T("Vá ao mirante para jogar"), false)
+		currentView.setQueue(title, T("Aperte JOGAR e explore enquanto espera"), status)
 	end
 end
 
@@ -189,8 +215,8 @@ local function renderLobbyDuringMatch(currentView: HudViewHandle)
 	currentView.setRoundMode("Waiting")
 	currentView.setQueue(
 		T("⚔️ PARTIDA EM ANDAMENTO"),
-		if cached.inMatchQueue then T("Você está na fila da próxima") else T("Vá ao mirante para jogar a próxima"),
-		cached.inMatchQueue
+		if cached.inMatchQueue then T("Você está na fila da próxima") else T("Aperte JOGAR para a próxima"),
+		queueStatus()
 	)
 	currentView.setCombatVisible(false)
 	currentView.setTimerDanger(false)
@@ -345,7 +371,7 @@ function HudController.start()
 	end
 
 	NotificationManager.init(playerGuiInstance)
-	view = HudView.new(playerGuiInstance, MatchQueueController.join)
+	view = HudView.new(playerGuiInstance, MatchQueueController.join, MatchQueueController.leave)
 
 	local function refreshFromContainer()
 		cached.roundState = readRoundState(containerInstance)
@@ -372,6 +398,7 @@ function HudController.start()
 		)
 		cached.hasSecondChance = readBooleanAttribute(localPlayer, StateAttributeNames.PlayerHasSecondChance)
 		cached.inMatchQueue = readBooleanAttribute(localPlayer, StateAttributeNames.PlayerInMatchQueue)
+		cached.queuePlace = readStringAttribute(localPlayer, StateAttributeNames.PlayerQueuePlace)
 	end
 
 	refreshFromContainer()
@@ -406,6 +433,7 @@ function HudController.start()
 		StateAttributeNames.PlayerRoundBlocksDestroyed,
 		StateAttributeNames.PlayerHasSecondChance,
 		StateAttributeNames.PlayerInMatchQueue,
+		StateAttributeNames.PlayerQueuePlace,
 	}
 	for _, attributeName in ipairs(playerAttributeNames) do
 		connectAttribute(localPlayer, attributeName, function()

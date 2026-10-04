@@ -196,11 +196,12 @@ end
 -- conectados, seleciona a partir da frente da fila e manda quem acabou de
 -- jogar para o fim dela, dando prioridade a quem ainda está esperando.
 -- Parties entram inteiras; se não couberem, esperam na frente da fila e
--- são avisadas (PartySelection). Só joga quem está no mirante (ou tem
--- alguém da Party lá); os demais seguem passeando e mantêm a posição.
+-- são avisadas (PartySelection). Só joga quem está na fila (no mirante, com
+-- a Ficha da Partida ou com alguém da Party assim); os demais seguem
+-- passeando e mantêm a posição.
 local function selectParticipants(): { Player }
 	MatchQueueService.refresh()
-	local selected, waiting, deferredParties = PartySelection.select(rotationQueue, PartyService.groupOf, GameConfig.MaximumPlayers, MatchQueueService.isInZone)
+	local selected, waiting, deferredParties = PartySelection.select(rotationQueue, PartyService.groupOf, GameConfig.MaximumPlayers, MatchQueueService.hasPlace)
 	rotationQueue = waiting
 	publishQueuePositions()
 	PartyService.roundSelected(selected, deferredParties)

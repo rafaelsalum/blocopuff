@@ -113,7 +113,7 @@ local function footerText(container: Instance, player: Player): string
 	local roundsUntilTurn = asNumber(player:GetAttribute(StateAttributeNames.PlayerRoundsUntilTurn)) or 0
 	local inQueue = player:GetAttribute(StateAttributeNames.PlayerInMatchQueue) == true
 	local queueNote = if not inQueue
-		then T("Fique no mirante para jogar a próxima")
+		then T("Aperte JOGAR para jogar a próxima")
 		elseif roundsUntilTurn >= 2 then T("Você entra em %d rodadas", roundsUntilTurn)
 		else T("Você está na fila da próxima")
 

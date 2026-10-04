@@ -5,6 +5,28 @@
 
 return table.freeze({
 	-- FILA E EMBARQUE (Queue)
+	-- FICHA DA PARTIDA (Fase 5C.1)
+	["Partida em %d s · avisamos antes"] = "Match in %d s · we'll call you",
+	["Explore o Casarão: avisamos antes"] = "Explore the Mansion: we'll call you",
+	["🎟 FICHA  %d/%d"] = "🎟 TICKET  %d/%d",
+	["Aperte JOGAR e explore enquanto espera"] = "Press PLAY and explore while you wait",
+	["Aperte JOGAR para a próxima"] = "Press PLAY for the next one",
+	["Aperte JOGAR para jogar a próxima"] = "Press PLAY to join the next one",
+	["🚪 SAIR DA FILA"] = "🚪 LEAVE QUEUE",
+	["SUA PARTIDA COMEÇA EM %d s!"] = "YOUR MATCH STARTS IN %d s!",
+	["Você vai para a arena sozinho, pode continuar onde está"] = "You'll be taken to the arena, stay where you are",
+	["SUA FICHA VOLTOU"] = "YOUR TICKET EXPIRED",
+	["Você ficou parado muito tempo. Aperte JOGAR para voltar à fila"] = "You stood still too long. Press PLAY to rejoin the queue",
+	["Aperte JOGAR quando quiser jogar"] = "Press PLAY whenever you want to play",
+	["VOCÊ PEGOU A FICHA!"] = "YOU GOT A TICKET!",
+	["Explore o Casarão: avisamos %d s antes da partida"] = "Explore the Mansion: we'll call you %d s before the match",
+	["NA FILA COM A PARTY!"] = "IN QUEUE WITH YOUR PARTY!",
+	["Sua Party guardou a vaga. Explore à vontade"] = "Your Party saved your spot. Explore freely",
+	["Pode explorar o Casarão: a ficha guarda sua vaga"] = "Feel free to explore the Mansion: your ticket saves your spot",
+	["FICHA GUARDADA"] = "TICKET SAVED",
+	["SUA PARTY AINDA ESTÁ NA FILA"] = "YOUR PARTY IS STILL IN THE QUEUE",
+	["Você joga junto com ela. Para sair, saia da Party"] = "You play together. To leave, leave the Party",
+	["Explore à vontade: avisamos %d s antes da partida"] = "Explore freely: we'll call you %d s before the match",
 	["Sua vez chega em %d rodadas"] = "Your turn comes in %d rounds",
 	["Você participa da próxima rodada"] = "You play in the next round",
 	["%d na fila · fique no mirante"] = "%d in queue · stay at the lookout",
@@ -23,7 +45,7 @@ return table.freeze({
 
 	-- NOTIFICAÇÕES DE FILA (Queue Notifications)
 	["CHAME UM AMIGO"] = "CALL A FRIEND",
-	["A partida começa com 2 no mirante. Convide pela Party!"] = "The match starts with 2 at the lookout. Invite via Party!",
+	["A partida começa com 2 na fila. Convide pela Party!"] = "The match starts with 2 in the queue. Invite via Party!",
 	["ROBOPUFFS CHEGANDO!"] = "ROBO PUFFS ARRIVING!",
 	["Eles completam a partida. Chame um amigo para jogar junto!"] = "They complete the match. Call a friend to play with!",
 	["EMBARQUE ENCERRADO!"] = "BOARDING CLOSED!",
