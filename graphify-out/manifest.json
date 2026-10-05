@@ -125,8 +125,8 @@
     "semantic_hash": ""
   },
   "README.md": {
-    "mtime": 1791158634.9548492,
-    "ast_hash": "6e4fb3b57b21892977fbf055fd19e7bf",
+    "mtime": 1791159444.7416024,
+    "ast_hash": "0f8e9ccdae9f8633e6888fbdbb4247ae",
     "semantic_hash": ""
   },
   "src/client/controllers/CombatCameraController.luau": {
@@ -430,8 +430,8 @@
     "semantic_hash": ""
   },
   "src/server/config/ProfileConfig.luau": {
-    "mtime": 1790742986.8355482,
-    "ast_hash": "e8366022cf6262dbafefe30e28eace7e",
+    "mtime": 1791159308.6735976,
+    "ast_hash": "df2d18d64ab1a6d582b888d890994f16",
     "semantic_hash": ""
   },
   "src/server/data/ProfileSchema.luau": {
@@ -440,8 +440,8 @@
     "semantic_hash": ""
   },
   "src/server/services/PlayerDataService.luau": {
-    "mtime": 1791155868.323505,
-    "ast_hash": "366597c01c0a6601f6c97ef61ad84443",
+    "mtime": 1791159412.6050808,
+    "ast_hash": "6586307b2650be64c5e944bce168c77b",
     "semantic_hash": ""
   },
   "src/server/services/RoundStatsService.luau": {
@@ -455,8 +455,8 @@
     "semantic_hash": ""
   },
   "src/client/controllers/ProgressionController.luau": {
-    "mtime": 1791152962.2917573,
-    "ast_hash": "14826f5256625b2c340d2550417d2d7c",
+    "mtime": 1791159412.6053064,
+    "ast_hash": "9996766e82267cda1b3f356e55e091e3",
     "semantic_hash": ""
   },
   "src/client/ui/ProfileCardView.luau": {
@@ -1280,8 +1280,8 @@
     "semantic_hash": ""
   },
   "src/shared/i18n/en/Collection.luau": {
-    "mtime": 1791158319.5845633,
-    "ast_hash": "ea82886efbb5e2769c39ced82e9f817e",
+    "mtime": 1791159326.5501544,
+    "ast_hash": "a8674ce47088ddfddfc23c4e91c9629e",
     "semantic_hash": ""
   },
   "src/shared/i18n/en/Match.luau": {

@@ -353,6 +353,9 @@ RelicCatalog.Rewards = REWARDS
 RelicCatalog.Tag = "Relic"
 RelicCatalog.DailyTag = "DailyRelic"
 RelicCatalog.IdAttribute = "RelicId"
+-- Pasta em ReplicatedStorage com uma miniatura 3D de cada relíquia (o
+-- Álbum mostra a foto delas).
+RelicCatalog.IconsFolder = "RelicIcons"
 RelicCatalog.DayAttribute = "RelicDay"
 RelicCatalog.DailyName = "Relíquia do Dia"
 -- Puff exclusivo de quem completa o álbum (ver PuffCatalog).

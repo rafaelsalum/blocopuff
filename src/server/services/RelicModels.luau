@@ -237,6 +237,16 @@ local function addSparkles(hitbox: BasePart, daily: boolean)
 	sparkles.Parent = hitbox
 end
 
+-- Só a parte visível da relíquia (sem caixa de toque, prompt nem
+-- faíscas), para a miniatura do Álbum.
+function RelicModels.icon(parent: Instance, name: string, shape: Shape, color: Color3): Model
+	local model = Instance.new("Model")
+	model.Name = name
+	buildVisual(model, shape, CFrame.identity, color)
+	model.Parent = parent
+	return model
+end
+
 -- Monta a relíquia com a base em `base` (no topo da superfície onde está).
 -- `name` aparece no prompt (o cliente traduz). Atributos e etiqueta entram
 -- antes de ir para o mundo (o cliente sempre vê os dois juntos). Pode

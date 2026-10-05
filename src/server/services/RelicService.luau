@@ -348,6 +348,28 @@ local function placeDaily(parent: Folder, day: number)
 	warn("[BlocoPuff] Daily relic has no free spot")
 end
 
+-- Miniaturas 3D de todas as relíquias (álbum e temporadas) para as fotos do
+-- Álbum. Montadas de uma vez e só então publicadas (o cliente vê a pasta
+-- completa).
+local function publishIcons()
+	if ReplicatedStorage:FindFirstChild(RelicCatalog.IconsFolder) ~= nil then
+		return
+	end
+	local icons = Instance.new("Folder")
+	icons.Name = RelicCatalog.IconsFolder
+	for _, relicId in ipairs(RelicCatalog.everyId()) do
+		local definition = RelicCatalog.get(relicId)
+		if definition ~= nil then
+			-- Uma miniatura com problema não leva as outras junto.
+			local ok, err = pcall(RelicModels.icon, icons, relicId, definition.shape, color(definition.color))
+			if not ok then
+				warn(`[BlocoPuff] Relic icon {relicId} failed: {err}`)
+			end
+		end
+	end
+	icons.Parent = ReplicatedStorage
+end
+
 local function createFolder(worldRoot: Model): Folder
 	local existing = worldRoot:FindFirstChild(FOLDER_NAME)
 	if existing ~= nil then
@@ -381,6 +403,10 @@ function RelicService.start(worldRoot: Model)
 	-- Fora do caminho da inicialização: carregar as malhas pode demorar.
 	task.spawn(function()
 		RelicModels.preload()
+		local iconsOk, iconsErr = pcall(publishIcons)
+		if not iconsOk then
+			warn(`[BlocoPuff] Relic icons failed: {iconsErr}`)
+		end
 		local ok, err = pcall(function()
 			placeRelics(parent)
 			refreshSeasons(parent)
