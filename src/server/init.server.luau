@@ -45,6 +45,7 @@ local ReferralService = require(script.services.ReferralService)
 local OnboardingService = require(script.services.OnboardingService)
 local DashService = require(script.services.DashService)
 local PianoService = require(script.services.PianoService)
+local MysteryService = require(script.services.MysteryService)
 local RelicService = require(script.services.RelicService)
 
 local WORLD_NAME = "BlocoPuffWorld"
@@ -223,6 +224,15 @@ end
 local pianoOk, pianoFailure = pcall(PianoService.start)
 if not pianoOk then
 	warn(string.format("[BlocoPuff] Piano unavailable: %s", tostring(pianoFailure)))
+end
+
+-- Mistérios do Barão (5C.3): pistas e quebra-cabeças no Casarão. Antes das
+-- relíquias (elas se escondem em volta dos móveis novos). Opcional.
+local mysteryOk, mysteryFailure = pcall(MysteryService.start, world, PuffadorService.getRemotesFolder())
+if mysteryOk then
+	print("[BlocoPuff] Baron's mysteries ready")
+else
+	warn(string.format("[BlocoPuff] Baron's mysteries unavailable: %s", tostring(mysteryFailure)))
 end
 
 -- Relíquias e Álbum do Casarão (5C.2). Depois das estações e da ala leste

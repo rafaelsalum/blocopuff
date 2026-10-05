@@ -292,9 +292,25 @@ Seção **TESTES DA PARTIDA** no painel admin. Vale só para o servidor atual e 
 - **Testar de verdade:** só com o jogo publicado. O Roblox só preenche quem convidou em convites reais, e o Studio pode não ter acesso ao DataStore e ao MessagingService. Os banners de recompensa da página do convite são configurados no Creator Hub (Engagement > Referral Rewards), com o jogo publicado há pelo menos 1 dia.
 - **Testes:** `lune run tests/ReferralRules.spec`.
 
+### Mistérios do Barão (Fase 5C, entrega 5C.3, parte 2)
+
+Quatro quebra-cabeças no Casarão. As pistas ficam espalhadas pelos cômodos, e várias páginas do Diário apontam para elas. **Cada servidor sorteia as próprias respostas** (`MysteryRules.generate`), então a solução não vaza de um servidor para outro.
+
+- **⏰ Relógio da Torre** (parede leste do Sótão, parado em 12:00): a hora certa está pintada num quadro de cavalete no Salão Principal. A tela tem um mostrador com setas de horas e minutos (de 15 em 15).
+- **🕯️ Velas do Salão:** 4 velas coloridas perto da porta norte do Salão. A ordem certa para acender é a das cores dos vitrais acima da porta. As velas nunca ficam na mesma ordem dos vitrais. A tela manda a tentativa sozinha depois do 4º toque.
+- **🎹 Música da Vovó:** a partitura fica num pedestal do Sótão, com 5 notas. As teclas brancas do piano da Sala de Música ganharam os nomes das notas. O piano não tem tela: o servidor ouve as notas (`PianoService.onNote`) e resolve quando as últimas notas tocadas são a música. Como a partitura só diz o nome da nota, o Dó grave e o agudo valem igual.
+- **🔒 Cofrinho do Porão:** 3 rodas de números. Cada número está num cavalete com a posição (1º, 2º e 3º): Biblioteca, Sala de Música e Sótão.
+- **Recompensas:** +5 🎟 por mistério, uma vez por jogador. Resolver os 4 dá mais +10 🎟 e o título **Mestre dos Mistérios**, que aparece no Álbum e no cartão de perfil. Quem já resolveu vê o cenário mudado só na própria tela: velas acesas, cofrinho aberto com moedas e o relógio da torre na hora certa.
+- **Segurança:** o cliente só manda a tentativa (remote `Mystery`). O servidor confere a resposta, e só aceita no lobby, perto da pista e com 1 s entre tentativas. Errar mostra "Não foi dessa vez… tente de novo!". Contra chute em massa, a cada 5 erros seguidos o mistério trava por 30 s, e a trava cresce a cada vez (60 s, 90 s…). No piano, uma pausa de mais de 3 s entre notas recomeça a música, e só contam as notas de quem está perto dele.
+- **Perfil:** campo `mysteries` (id → data). É opcional e não exige nova versão.
+- **Telemetria:** `PuzzleSolved` (com a contagem, o id e "All" ao completar) e a entrada de tickets `Mystery` na economia nativa.
+- **Código:** `config/MysteryConfig`, `data/MysteryRules` (regras puras), `services/MysteryProps` (cenário), `services/MysteryService`, `ui/MysteryView`, `controllers/MysteryController` e o mostrador `modules/ClockFace`.
+- **Studio:** quando um teste anterior para sem liberar o perfil, a trava que ele deixou é assumida na hora. Isso só acontece no Studio, que usa um save próprio (`_studio`).
+- **Testes:** `lune run tests/MysteryRules.spec`.
+
 ### Diário do Barão (Fase 5C, entrega 5C.3, parte 1)
 
-Escopo em `docs/FASE_5C_CASARAO_VIVO.md`. A 5C.3 sai em três partes: o Diário (esta), os quebra-cabeças e as salas secretas.
+Escopo em `docs/FASE_5C_CASARAO_VIVO.md`. A 5C.3 sai em três partes: o Diário (esta), os quebra-cabeças (Mistérios do Barão) e as salas secretas.
 
 - **10 páginas escondidas** pelo Casarão (Salão Principal, Salão da Coleção, Jardim, Ponto de Encontro, Sala de Música, Biblioteca, Sótão e Porão), em pergaminhos da Creator Store (malha 481311795). O Barão conta, em primeira pessoa, como chegou ao Casarão, quem era o Vovô Puff e onde estão os mistérios. Várias páginas trazem pistas dos quebra-cabeças: hora do relógio da torre, ordem das velas, partitura do piano, código do cofrinho, túnel e a estante que é porta.
 - **Mesma mecânica das relíquias:** grupo `Diary` no `RelicCatalog` (`diary = true`, forma `Page`, campo `text`), escondido pelo `RelicSpots`, pego pelo prompt e salvo em `profile.relics`. As páginas **não contam** para as 40 do Álbum nem para o Puff Explorador.

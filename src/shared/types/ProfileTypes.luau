@@ -112,6 +112,8 @@ export type ProfileSnapshot = {
 	relics: { RelicState },
 	dailyRelicDay: number,
 	dailyRelicCount: number,
+	-- Mistérios do Barão já resolvidos (ids do MysteryConfig).
+	mysteries: { string },
 	-- Eventos desta atualização (para comemorar uma vez só).
 	dailyReward: DailyReward?,
 	completedChallenges: { string }?,

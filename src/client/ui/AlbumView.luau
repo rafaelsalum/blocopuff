@@ -11,6 +11,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TweenService = game:GetService("TweenService")
 
 local Lang = require(ReplicatedStorage.Shared.i18n.Lang)
+local MysteryConfig = require(ReplicatedStorage.Shared.config.MysteryConfig)
 local PuffCatalog = require(ReplicatedStorage.Shared.config.PuffCatalog)
 local RelicCatalog = require(ReplicatedStorage.Shared.config.RelicCatalog)
 local ProfileTypes = require(ReplicatedStorage.Shared.types.ProfileTypes)
@@ -500,6 +501,9 @@ function AlbumView.new(playerGui: PlayerGui, onOpened: () -> ()): AlbumViewHandl
 		end
 
 		local titles = RelicCatalog.titlesFor(owned, snapshot.dailyRelicCount)
+		if MysteryConfig.allSolved(snapshot.mysteries) then
+			table.insert(titles, MysteryConfig.AllTitle)
+		end
 		local translated: { string } = {}
 		for _, text in ipairs(titles) do
 			table.insert(translated, Lang.t(text))

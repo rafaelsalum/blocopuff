@@ -6,7 +6,8 @@
 -- ser gravado (os dois no formato do DataStore) e devolve o que gravar:
 -- `outgoing`, com de volta tudo o que `stored` tinha a mais.
 --   * Puffs: todo Puff gravado continua; `count` fica com o maior valor.
---   * Conquistas secretas e relíquias: toda gravada continua.
+--   * Conquistas secretas, relíquias e mistérios resolvidos: todo gravado
+--     continua.
 --   * Relíquia do Dia: a contagem e o último dia nunca caem.
 --   * Estatísticas, nível, XP e prestígio: ficam com o maior valor (o XP só
 --     pode cair quando o prestígio sobe, que zera o nível de propósito).
@@ -127,6 +128,12 @@ function ProfileGuard.mergeForSave(stored: unknown, outgoing: Data): (Data, { st
 	merged.relics = relics
 	if restoredRelics > 0 then
 		table.insert(anomalies, `relics+{restoredRelics}`)
+	end
+
+	local mysteries, restoredMysteries = mergeSecrets(old.mysteries, outgoing.mysteries)
+	merged.mysteries = mysteries
+	if restoredMysteries > 0 then
+		table.insert(anomalies, `mysteries+{restoredMysteries}`)
 	end
 
 	if numberOr(old.dailyRelicCount, 0) > numberOr(outgoing.dailyRelicCount, 0) then

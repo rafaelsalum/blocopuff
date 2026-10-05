@@ -266,6 +266,26 @@ local CATALOGS: { { path: string, texts: (string) -> { string } } } = {
 		end,
 	},
 	{
+		path = "src/shared/config/MysteryConfig.luau",
+		texts = function(source)
+			return fieldValues(source, { "name", "hint", "AllTitle" })
+		end,
+	},
+	{
+		path = "src/server/services/MysteryProps.luau",
+		texts = function(source)
+			-- Em prompt(peça, id, ação, objeto) o primeiro literal é o id.
+			local texts = {}
+			for _, literal in literalArgs(source, "prompt") do
+				if string.find(literal, "[%s\128-\255]") ~= nil then
+					table.insert(texts, literal)
+				end
+			end
+			table.insert(texts, "♪ Música da Vovó ♪")
+			return texts
+		end,
+	},
+	{
 		path = "src/shared/modules/PuffEffects.luau",
 		texts = function(source)
 			return fieldValues(source, { "label" })

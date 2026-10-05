@@ -36,6 +36,7 @@ export type PuffadorConstantsModule = {
 	ReferralRemoteName: string,
 	DashRemoteName: string,
 	PuffShotsRemoteName: string,
+	MysteryRemoteName: string,
 
 	OwnerUserIdAttribute: string,
 	RoundIdAttribute: string,
@@ -79,6 +80,8 @@ local PuffadorConstants: PuffadorConstantsModule = {
 	DashRemoteName = "Dash",
 	-- Servidor → clientes: disparos para desenhar (ProjectileService).
 	PuffShotsRemoteName = "PuffShots",
+	-- Mistérios do Barão (5C.3): tentativas e respostas.
+	MysteryRemoteName = "Mystery",
 
 	OwnerUserIdAttribute = "OwnerUserId",
 	RoundIdAttribute = StateAttributeNames.RoundId,

@@ -51,6 +51,7 @@ local RewardRules = require(script.Parent.Parent.data.RewardRules)
 local DailyRules = require(script.Parent.Parent.data.DailyRules)
 local OnboardingRules = require(script.Parent.Parent.data.OnboardingRules)
 local SecretCatalog = require(ReplicatedStorage.Shared.config.SecretCatalog)
+local MysteryConfig = require(ReplicatedStorage.Shared.config.MysteryConfig)
 local RelicCatalog = require(ReplicatedStorage.Shared.config.RelicCatalog)
 local ProgressionConfig = require(ReplicatedStorage.Shared.config.ProgressionConfig)
 local LevelCurve = require(ReplicatedStorage.Shared.modules.LevelCurve)
@@ -118,7 +119,9 @@ type PendingRound = {
 export type ProfileListener = (player: Player, snapshot: ProfileSnapshot) -> ()
 export type Updater = (profile: Profile, canSave: boolean) -> (Profile?, Events?)
 
-local SESSION_ID = if game.JobId ~= "" then game.JobId else `studio-{HttpService:GenerateGUID(false)}`
+local IS_STUDIO = RunService:IsStudio()
+local STUDIO_PREFIX = "studio-"
+local SESSION_ID = if game.JobId ~= "" then game.JobId else `{STUDIO_PREFIX}{HttpService:GenerateGUID(false)}`
 local BIND_TO_CLOSE_TIMEOUT = 25
 local REQUEST_COOLDOWN = 3
 local MAX_ROUND_KEY_LENGTH = 80
@@ -184,6 +187,12 @@ local function snapshotOf(entry: Entry, award: XpAward?, events: Events?): Profi
 			table.insert(relics, { id = id, obtainedAt = obtainedAt })
 		end
 	end
+	local mysteries: { string } = {}
+	for _, id in ipairs(MysteryConfig.Ids) do
+		if profile.mysteries[id] ~= nil then
+			table.insert(mysteries, id)
+		end
+	end
 	local challenges = {}
 	for _, state in ipairs(profile.challenges.list) do
 		table.insert(challenges, table.clone(state))
@@ -205,6 +214,7 @@ local function snapshotOf(entry: Entry, award: XpAward?, events: Events?): Profi
 		relics = relics,
 		dailyRelicDay = profile.dailyRelicDay,
 		dailyRelicCount = profile.dailyRelicCount,
+		mysteries = mysteries,
 		award = award,
 		newPuffs = if events ~= nil then nonEmpty(events.newPuffs) else nil,
 		dailyReward = if events ~= nil then events.dailyReward else nil,
@@ -504,7 +514,10 @@ local function tryLoad(key: string, lockId: string, seed: { [string]: any }?): (
 				return nil
 			end
 			local session = profile.session
-			if session ~= nil and session.jobId ~= lockId and now() - session.lockedAt < ProfileConfig.SessionLockTimeout then
+			-- No Studio (save próprio), a trava de outra sessão do Studio é de
+			-- um teste que parou sem liberar: assume na hora.
+			local studioLeftover = IS_STUDIO and session ~= nil and string.sub(session.jobId, 1, #STUDIO_PREFIX) == STUDIO_PREFIX
+			if session ~= nil and session.jobId ~= lockId and not studioLeftover and now() - session.lockedAt < ProfileConfig.SessionLockTimeout then
 				outcome = "Locked"
 				loaded = nil
 				return nil

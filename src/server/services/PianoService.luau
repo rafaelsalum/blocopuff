@@ -22,6 +22,8 @@ local PianoService = {}
 local started = false
 local lastKey: { [BasePart]: number } = {}
 local lastPlayer: { [Player]: number } = {}
+-- Quem quer saber das notas tocadas (Mistérios do Barão: a música da Vovó).
+local noteListeners: { (player: Player, semitone: number) -> () } = {}
 
 local function press(key: BasePart, player: Player)
 	local clock = os.clock()
@@ -47,6 +49,9 @@ local function press(key: BasePart, player: Player)
 	current.PlaybackSpeed = 2 ^ (semitone / 12)
 	current.TimePosition = 0
 	current:Play()
+	for _, listener in ipairs(noteListeners) do
+		task.spawn(listener, player, semitone)
+	end
 	local rest = key:GetAttribute("RestCFrame")
 	if typeof(rest) ~= "CFrame" then
 		rest = key.CFrame
@@ -75,6 +80,11 @@ local function connectKey(instance: Instance)
 	key.Destroying:Connect(function()
 		lastKey[key] = nil
 	end)
+end
+
+-- Avisa `listener` a cada nota tocada (quem tocou e o meio tom).
+function PianoService.onNote(listener: (player: Player, semitone: number) -> ())
+	table.insert(noteListeners, listener)
 end
 
 function PianoService.start()
