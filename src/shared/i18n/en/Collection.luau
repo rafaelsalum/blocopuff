@@ -106,6 +106,11 @@ return table.freeze({
 	["A máquina engasgou. Tente de novo!"] = "The machine got stuck. Try again!",
 	["%s · repetido, +%d 🎟"] = "%s · duplicate, +%d 🎟",
 	["%s · NOVO!"] = "%s · NEW!",
+	["CONTINUAR"] = "CONTINUE",
+	["Repetido · +%d 🎟"] = "Duplicate · +%d 🎟",
+	["✨ NOVO!"] = "✨ NEW!",
+	["LENDÁRIO NA PUFF MACHINE!"] = "LEGENDARY FROM THE PUFF MACHINE!",
+	["%s tirou o %s!"] = "%s pulled the %s!",
 
 	-- LobbyStationsService.luau (Puff Machine sign)
 	["Tickets viram Puffs"] = "Tickets become Puffs",

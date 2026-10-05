@@ -5,7 +5,8 @@
 --   "Opened"       → telemetria de abertura.
 -- Respostas ao cliente: ("Result", MachineResult, pedido) ou ("Failed",
 -- motivo, pedido). `pedido` é o número que o cliente mandou, devolvido para
--- ele saber a qual giro a resposta pertence.
+-- ele saber a qual giro a resposta pertence. Lendário novo vira aviso
+-- para os outros jogadores: ("Announce", { name, userId, puffId }).
 --
 -- Tudo é decidido aqui e no PlayerDataService: saldo, sorteio (Random do
 -- servidor), garantia de Épico e devolução de repetidos. Só no lobby (quem
@@ -40,6 +41,8 @@ export type MachineResult = {
 type MachineFailure = "NotLoaded" | "NotSaved" | "NoTickets" | "Empty"
 
 local OPENED_COOLDOWN = 5
+-- Intervalo mínimo entre avisos de Lendário do mesmo jogador.
+local ANNOUNCE_COOLDOWN = 30
 local MAX_REQUEST_ID = 1e9
 
 local PuffMachineService = {}
@@ -48,6 +51,7 @@ local started = false
 local rng = Random.new()
 local lastPull: { [Player]: number } = {}
 local lastOpened: { [Player]: number } = {}
+local lastAnnounce: { [Player]: number } = {}
 
 local function isCompeting(player: Player): boolean
 	return player:GetAttribute(StateAttributeNames.PlayerIsParticipant) == true
@@ -120,6 +124,31 @@ local function readRequestId(value: unknown): number
 	return 0
 end
 
+-- Os outros jogadores do servidor ficam sabendo de um Lendário novo (quem
+-- tirou já tem a revelação na máquina). Repetido não avisa, e cada jogador
+-- avisa no máximo uma vez a cada ANNOUNCE_COOLDOWN.
+local function announceLegendary(remote: RemoteEvent, player: Player, result: MachineResult)
+	if result.duplicate then
+		return
+	end
+	local definition = PuffCatalog.get(result.puffId)
+	if definition == nil or definition.rarity ~= "Legendary" then
+		return
+	end
+	local clock = os.clock()
+	local last = lastAnnounce[player]
+	if last ~= nil and clock - last < ANNOUNCE_COOLDOWN then
+		return
+	end
+	lastAnnounce[player] = clock
+	local payload = { name = player.DisplayName, userId = player.UserId, puffId = definition.id }
+	for _, other in ipairs(Players:GetPlayers()) do
+		if other ~= player then
+			remote:FireClient(other, "Announce", payload)
+		end
+	end
+end
+
 local function onRequest(remote: RemoteEvent, player: Player, action: unknown, requestValue: unknown)
 	if action == "Pull" then
 		local requestId = readRequestId(requestValue)
@@ -139,6 +168,7 @@ local function onRequest(remote: RemoteEvent, player: Player, action: unknown, r
 		local result, failure = pull(player)
 		if result ~= nil then
 			remote:FireClient(player, "Result", result, requestId)
+			announceLegendary(remote, player, result)
 		else
 			remote:FireClient(player, "Failed", failure, requestId)
 		end
@@ -168,6 +198,7 @@ function PuffMachineService.start(remotesFolder: Folder)
 	Players.PlayerRemoving:Connect(function(player: Player)
 		lastPull[player] = nil
 		lastOpened[player] = nil
+		lastAnnounce[player] = nil
 	end)
 end
 

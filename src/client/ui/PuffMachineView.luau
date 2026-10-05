@@ -2,17 +2,19 @@
 
 -- Painel PUFF MACHINE (Fase 4.2): saldo de tickets, botão GIRAR, tabela de
 -- chances sempre visível, contador da garantia de Épico e a revelação
--- animada do Puff sorteado. Só visual: o sorteio é do servidor; aqui a
--- cápsula gira até a resposta chegar (com um tempo mínimo de suspense).
+-- animada do Puff sorteado. Só visual: o sorteio é do servidor; aqui o
+-- carrossel de Puffs gira até a resposta chegar (com um tempo mínimo de
+-- suspense), freia no sorteado e a cápsula estoura revelando o cartão.
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local TweenService = game:GetService("TweenService")
 
 local PuffCatalog = require(ReplicatedStorage.Shared.config.PuffCatalog)
 local Lang = require(ReplicatedStorage.Shared.i18n.Lang)
 local RewardConfig = require(ReplicatedStorage.Shared.config.RewardConfig)
 local ProfileTypes = require(ReplicatedStorage.Shared.types.ProfileTypes)
 local PuffTypes = require(ReplicatedStorage.Shared.types.PuffTypes)
+local PuffMachineCarousel = require(script.Parent.PuffMachineCarousel)
+local PuffMachineReveal = require(script.Parent.PuffMachineReveal)
 local ResponsiveScale = require(script.Parent.ResponsiveScale)
 local UiKit = require(script.Parent.UiKit)
 local UiTheme = require(script.Parent.UiTheme)
@@ -47,9 +49,8 @@ local PANEL_SIZE = Vector2.new(780, 450)
 local CABINET_WIDTH = 310
 local ODDS_ROW = 36
 local MIN_SPIN_TIME = RewardConfig.MachineRevealTime
-local SPIN_STEP = 0.08
 local SPIN_TIMEOUT = 8
-local IDLE_COLOR = Color3.fromRGB(60, 48, 100)
+local REVEAL_Z = 30
 
 local PuffMachineView = {}
 
@@ -119,25 +120,8 @@ function PuffMachineView.new(
 	UiTheme.addGradient(cabinet, UiTheme.Colors.BrandDeep, UiTheme.Colors.Panel, 90)
 	UiTheme.addStroke(cabinet, UiTheme.Colors.Gold, 2.5)
 
-	local capsule = Instance.new("Frame")
-	capsule.Name = "Capsule"
-	capsule.AnchorPoint = Vector2.new(0.5, 0)
-	capsule.Position = UDim2.new(0.5, 0, 0, 14)
-	capsule.Size = UDim2.fromOffset(116, 116)
-	capsule.BackgroundColor3 = UiTheme.Colors.White
-	capsule.ZIndex = 4
-	capsule.Parent = cabinet
-	UiTheme.addCorner(capsule, 999)
-	UiTheme.addStroke(capsule, UiTheme.Colors.Outline, 3)
-	local capsuleGradient = UiTheme.addGradient(capsule, IDLE_COLOR, IDLE_COLOR, 45)
-	local capsuleScale = Instance.new("UIScale")
-	capsuleScale.Parent = capsule
-	local capsuleMark = UiTheme.createLabel(capsule, "Mark", "?", UiTheme.Fonts.Display, 50, UiTheme.Colors.InkSoft)
-	capsuleMark.Size = UDim2.fromScale(1, 1)
-	capsuleMark.ZIndex = 5
-
 	local resultName = UiTheme.createLabel(cabinet, "ResultName", Lang.t("Gire para ganhar um Puff!"), UiTheme.Fonts.Display, 22, UiTheme.Colors.Ink)
-	resultName.Position = UDim2.fromOffset(10, 136)
+	resultName.Position = UDim2.fromOffset(10, 146)
 	resultName.Size = UDim2.new(1, -20, 0, 28)
 	resultName.TextScaled = true
 	resultName.ZIndex = 4
@@ -145,12 +129,12 @@ function PuffMachineView.new(
 	UiTheme.addTextOutline(resultName, 1.5)
 
 	local resultInfo = UiTheme.createLabel(cabinet, "ResultInfo", "", UiTheme.Fonts.BodyBold, 16, UiTheme.Colors.InkSoft)
-	resultInfo.Position = UDim2.fromOffset(10, 164)
+	resultInfo.Position = UDim2.fromOffset(10, 174)
 	resultInfo.Size = UDim2.new(1, -20, 0, 22)
 	resultInfo.ZIndex = 4
 
 	local balance = UiTheme.createLabel(cabinet, "Balance", "🎟 0", UiTheme.Fonts.Display, 26, UiTheme.Colors.Gold)
-	balance.Position = UDim2.fromOffset(10, 188)
+	balance.Position = UDim2.fromOffset(10, 198)
 	balance.Size = UDim2.new(1, -20, 0, 32)
 	balance.ZIndex = 4
 	UiTheme.addTextOutline(balance, 2)
@@ -252,21 +236,16 @@ function PuffMachineView.new(
 	footer.ZIndex = 3
 
 	local pool = machinePuffs()
+	local carousel = PuffMachineCarousel.new(cabinet, 4, pool)
+	local revealFx = PuffMachineReveal.new(card, REVEAL_Z)
 	local tickets = 0
 	local ownedIds: { [string]: boolean } = {}
 	local spinning = false
 	local spinToken = 0
 	local spinStartedAt = 0
-
-	local function setCapsule(definition: PuffDefinition?)
-		if definition == nil then
-			capsuleGradient.Color = ColorSequence.new(IDLE_COLOR, IDLE_COLOR)
-			capsuleMark.Visible = true
-		else
-			capsuleGradient.Color = ColorSequence.new(definition.style.trailStart, definition.style.trailEnd)
-			capsuleMark.Visible = false
-		end
-	end
+	-- Resposta aceita (esperando o suspense ou freando): o limite de tempo
+	-- do giro não corta mais.
+	local landing = false
 
 	local function refreshButton()
 		if spinning then
@@ -304,8 +283,8 @@ function PuffMachineView.new(
 
 	local function stopSpin()
 		spinning = false
+		landing = false
 		spinToken += 1
-		capsule.Rotation = 0
 		refreshButton()
 	end
 
@@ -319,58 +298,68 @@ function PuffMachineView.new(
 		resultName.TextColor3 = UiTheme.Colors.Ink
 		resultInfo.Text = ""
 		refreshButton()
-		task.spawn(function()
-			local step = 0
-			while spinning and spinToken == token do
-				step += 1
-				setCapsule(pool[(step % #pool) + 1])
-				capsule.Rotation = if step % 2 == 0 then 6 else -6
-				if step % 3 == 0 then
-					UiKit.playClick(1 + (step % 5) * 0.08)
-				end
-				if os.clock() - spinStartedAt > SPIN_TIMEOUT then
-					stopSpin()
-					setCapsule(nil)
-					resultName.Text = Lang.t("A máquina engasgou. Tente de novo!")
-					return
-				end
-				task.wait(SPIN_STEP)
+		carousel.spin()
+		task.delay(SPIN_TIMEOUT, function()
+			if spinning and not landing and spinToken == token then
+				stopSpin()
+				carousel.stop()
+				resultName.Text = Lang.t("A máquina engasgou. Tente de novo!")
 			end
 		end)
 	end
 
 	local handle = {} :: PuffMachineViewHandle
 
-	handle.showResult = function(reveal: MachineReveal)
-		local definition = PuffCatalog.get(reveal.puffId)
+	-- Carrossel parado no sorteado: escreve o resultado na máquina e estoura
+	-- a cápsula por cima do painel.
+	local function showLanded(definition: PuffDefinition, result: MachineReveal)
+		local rarityInfo = PuffCatalog.rarity(definition.rarity)
+		resultName.Text = Lang.t(definition.name)
+		resultName.TextColor3 = rarityInfo.color
+		resultInfo.Text = if result.duplicate
+			then Lang.t("%s · repetido, +%d 🎟", Lang.t(rarityInfo.label), result.refund)
+			else Lang.t("%s · NOVO!", Lang.t(rarityInfo.label))
+		puffdexButton.root.Visible = true
+		if screenGui.Enabled then
+			revealFx.play(definition, result.duplicate, result.refund)
+		end
+	end
+
+	handle.showResult = function(result: MachineReveal)
+		local definition = PuffCatalog.get(result.puffId)
 		if definition == nil then
 			stopSpin()
+			carousel.stop()
 			return
 		end
+		-- Chegou depois do limite de tempo: o Puff já é do jogador, então
+		-- mostra o resultado direto (sem novo giro).
+		if not spinning then
+			carousel.stop()
+			showLanded(definition, result)
+			return
+		end
+		landing = true
 		local token = spinToken
-		local wait = math.max(0, MIN_SPIN_TIME - (os.clock() - spinStartedAt))
-		task.delay(wait, function()
+		local delaySeconds = math.max(0, MIN_SPIN_TIME - (os.clock() - spinStartedAt))
+		task.delay(delaySeconds, function()
 			if token ~= spinToken then
 				return
 			end
-			stopSpin()
-			local rarityInfo = PuffCatalog.rarity(definition.rarity)
-			setCapsule(definition)
-			capsuleScale.Scale = 1.35
-			TweenService:Create(capsuleScale, TweenInfo.new(0.45, Enum.EasingStyle.Back), { Scale = 1 }):Play()
-			UiKit.playClick(if definition.rarity == "Legendary" then 2 else 1.5)
-			resultName.Text = Lang.t(definition.name)
-			resultName.TextColor3 = rarityInfo.color
-			resultInfo.Text = if reveal.duplicate
-				then Lang.t("%s · repetido, +%d 🎟", Lang.t(rarityInfo.label), reveal.refund)
-				else Lang.t("%s · NOVO!", Lang.t(rarityInfo.label))
-			puffdexButton.root.Visible = true
+			carousel.land(definition, function()
+				landing = false
+				if token ~= spinToken then
+					return
+				end
+				stopSpin()
+				showLanded(definition, result)
+			end)
 		end)
 	end
 
 	handle.showFailure = function(message: string)
 		stopSpin()
-		setCapsule(nil)
+		carousel.stop()
 		resultName.Text = message
 		resultName.TextColor3 = UiTheme.Colors.Ink
 		resultInfo.Text = ""
@@ -378,12 +367,18 @@ function PuffMachineView.new(
 
 	handle.open = function()
 		screenGui.Enabled = true
+		carousel.setActive(true)
 		responsive.pop(0.9, 0.25)
 		onOpened()
 	end
 
 	handle.close = function()
 		screenGui.Enabled = false
+		carousel.setActive(false)
+		-- Fechou no meio da freada: termina na hora (sem revelação surpresa
+		-- ao reabrir, e o botão volta a funcionar).
+		carousel.finish()
+		revealFx.hide()
 	end
 
 	handle.isOpen = function(): boolean
@@ -402,6 +397,8 @@ function PuffMachineView.new(
 
 	handle.destroy = function()
 		spinToken += 1
+		carousel.destroy()
+		revealFx.destroy()
 		responsive.destroy()
 		screenGui:Destroy()
 	end

@@ -16,6 +16,7 @@ local StateAttributeNames = require(ReplicatedStorage.Shared.types.StateAttribut
 local PuffMachineView = require(script.Parent.Parent.ui.PuffMachineView)
 local ProfileController = require(script.Parent.ProfileController)
 local PuffdexController = require(script.Parent.PuffdexController)
+local NotificationManager = require(script.Parent.Parent.notifications.NotificationManager)
 
 type PuffMachineViewHandle = PuffMachineView.PuffMachineViewHandle
 type MachineReveal = PuffMachineView.MachineReveal
@@ -51,6 +52,35 @@ local function parseReveal(raw: unknown): MachineReveal?
 	end
 	local refund = if typeof(data.refund) == "number" and data.refund == data.refund then math.clamp(math.floor(data.refund), 0, 99) else 0
 	return { puffId = definition.id, duplicate = data.duplicate == true, refund = refund }
+end
+
+-- Aviso de Lendário de outro jogador (vale para todo o servidor).
+local function onAnnounce(raw: unknown)
+	if typeof(raw) ~= "table" then
+		return
+	end
+	local data = raw :: { [string]: any }
+	local localPlayer = Players.LocalPlayer
+	if localPlayer ~= nil and data.userId == localPlayer.UserId then
+		return
+	end
+	local definition = PuffCatalog.get(data.puffId)
+	if definition == nil or definition.rarity ~= "Legendary" then
+		return
+	end
+	local name = if typeof(data.name) == "string" and #data.name <= 60 then data.name else Lang.t("Alguém")
+	NotificationManager.notify({
+		channel = "Banner",
+		category = "MachineLegendary",
+		priority = "Normal",
+		key = `machine-legendary-{tostring(data.userId)}`,
+		icon = "🌟",
+		title = Lang.t("LENDÁRIO NA PUFF MACHINE!"),
+		subtitle = Lang.t("%s tirou o %s!", name, Lang.t(definition.name)),
+		tone = "Gold",
+		duration = 4,
+		maxWait = 6,
+	})
 end
 
 local function send(action: string, requestId: number?)
@@ -94,6 +124,7 @@ function PuffMachineController.start()
 		warn("[BlocoPuff] Puff Machine controller not started: PlayerGui unavailable")
 		return
 	end
+	NotificationManager.init(playerGui)
 	local newView = PuffMachineView.new(playerGui, function()
 		if remote == nil then
 			local currentView = view
@@ -137,6 +168,10 @@ function PuffMachineController.start()
 		end
 		remote = instance
 		instance.OnClientEvent:Connect(function(kind: unknown, payload: unknown, requestId: unknown)
+			if kind == "Announce" then
+				onAnnounce(payload)
+				return
+			end
 			if requestId ~= lastRequestId then
 				return
 			end

@@ -855,10 +855,16 @@ A galeria (20 × 90 studs) ganhou estações físicas. Cada uma tem um Proximity
 - **Integridade:** o sorteio usa o `Random` do servidor.
   - Conferir o saldo, gastar e guardar o Puff acontecem numa única atualização do perfil (`PlayerDataService.machinePull`), sem pausa entre elas, então não há gasto duplo. O perfil é salvo logo depois.
   - Só gira com o perfil sendo salvo, só no lobby e com intervalo mínimo entre giros (`RewardConfig`).
-- **Revelação:** a cápsula gira pelas cores dos Puffs até a resposta chegar (mínimo de 1,8 s) e revela o Puff com a raridade e "NOVO!" ou "repetido, +2 🎟". O botão VER NO PUFFDEX leva direto ao Puff.
+- **Revelação (refeita):**
+  - **Carrossel:** uma fita de mini cartões de Puffs (cores do rastro, olhinhos e raridade) passa atrás de uma moldura dourada. Parada, anda devagar; no giro, acelera; quando a resposta chega (mínimo de 1,8 s), freia suave e para exatamente no Puff sorteado, com um tique a cada cartão (`PuffMachineCarousel`). Os cartões de enchimento são só enfeite, sorteados no cliente pelas chances da tabela.
+  - **Cápsula:** a tela escurece, a cápsula na cor da raridade treme cada vez mais forte e estoura (clarão, confete e som). Depois aparece o cartão do Puff com a prévia animada do Puffdex, o nome, a frase, "✨ NOVO!" ou "Repetido · +2 🎟", e o botão CONTINUAR (`PuffMachineReveal`).
+  - **Épico e Lendário:** raios girando atrás do cartão, fundo mais escuro, tremida mais longa, mais confete e fanfarra própria.
+  - **Aviso de Lendário:** quando alguém tira um Lendário **novo**, os outros jogadores do servidor veem a faixa "LENDÁRIO NA PUFF MACHINE!". No máximo um aviso a cada 30 s por jogador.
+  - Resposta atrasada (depois do limite do giro) mostra o Puff direto. Fechar o painel no meio da freada termina o giro na hora.
+  - O botão VER NO PUFFDEX leva direto ao Puff.
 - **Perfil v4:** passa a guardar `tickets`, `ticketsEarned`, `ticketsSpent`, `machinePulls` e `machinePity`. A migração v3 → v4 é automática.
 - **Telemetria:** entradas e saídas de tickets na economia nativa (inclusive a devolução de repetidos), `PuffMachineOpened`, `PuffMachinePull` (Puff, raridade, novo ou repetido) e `PuffUnlocked` com origem `Machine`.
-- **Código:** `RewardConfig`, `data/RewardRules`, `PuffMachineService` e `PlayerDataService.machinePull`. No cliente, `PuffMachineController` e `PuffMachineView`.
+- **Código:** `RewardConfig`, `data/RewardRules`, `PuffMachineService` e `PlayerDataService.machinePull`. No cliente, `PuffMachineController`, `PuffMachineView`, `PuffMachineCarousel` e `PuffMachineReveal`.
 
 ### Puffdex e primeira coleção (Fase 4, entrega 4.1)
 
