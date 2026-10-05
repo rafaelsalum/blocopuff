@@ -191,6 +191,25 @@ local function notify(key: string, icon: string, title: string, subtitle: string
 	})
 end
 
+-- Página do Diário: aviso curto e a leitura aberta na hora.
+local function celebratePage(definition: RelicCatalog.RelicDefinition, diary: RelicCatalog.RelicGroup, count: number, completed: boolean)
+	notify(
+		`page-{definition.id}`,
+		"📖",
+		Lang.t("PÁGINA DO DIÁRIO!"),
+		Lang.t("%s · %d/%d · +%d 🎟", Lang.t(definition.name), count, #diary.relics, RelicCatalog.Rewards.RelicTickets),
+		"Normal"
+	)
+	if completed then
+		notify("page-diary-complete", "🏅", Lang.t("DIÁRIO COMPLETO!"), Lang.t("Título: %s · +%d 🎟", Lang.t(diary.title), diary.tickets), "High")
+	end
+	playSound(if completed then COMPLETE_SOUND else FOUND_SOUND)
+	local current = view
+	if current ~= nil then
+		current.readPage(definition.id)
+	end
+end
+
 local function celebrate(event: RelicEvent)
 	local relicId = event.relicId
 	if relicId == nil then
@@ -214,6 +233,10 @@ local function celebrate(event: RelicEvent)
 		return
 	end
 	local count = RelicCatalog.roomCount(owned, room.id)
+	if room.diary then
+		celebratePage(definition, room, count, event.roomCompleted)
+		return
+	end
 	notify(
 		`relic-{relicId}`,
 		"📜",

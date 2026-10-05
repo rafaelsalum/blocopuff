@@ -28,6 +28,7 @@ export type Shape =
 	| "Compass"
 	| "Potion"
 	| "Pumpkin"
+	| "Page"
 	| "Daily"
 
 -- Malha da Creator Store: tamanho final (maior lado, studs), rotação para
@@ -62,6 +63,8 @@ local MESHES: { [string]: MeshSpec } = {
 	Book = { meshId = "rbxassetid://7992794295", textureId = "rbxassetid://7992794384", size = 1.2, rotation = CFrame.identity, material = Enum.Material.Fabric, tinted = false },
 	Compass = { meshId = "rbxassetid://3532235172", size = 1, rotation = CFrame.identity, material = Enum.Material.Metal, tinted = true },
 	Potion = { meshId = "rbxassetid://10441758680", size = 1, rotation = CFrame.identity, material = Enum.Material.Glass, tinted = true },
+	-- Pergaminho enrolado (páginas do Diário do Barão), deitado.
+	Page = { meshId = "rbxassetid://481311795", textureId = "rbxassetid://481311806", size = 1.3, rotation = CFrame.identity, material = Enum.Material.Fabric, tinted = false },
 }
 
 RelicModels.HitboxName = "Hitbox"
@@ -194,6 +197,8 @@ local function buildSimple(model: Model, shape: Shape, base: CFrame, color: Colo
 	elseif shape == "Key" then
 		piece(model, "Shaft", Enum.PartType.Block, Vector3.new(0.16, 0.16, 1), base * CFrame.new(0, 0.1, 0.1), color, Enum.Material.Metal)
 		piece(model, "Bow", Enum.PartType.Cylinder, Vector3.new(0.16, 0.55, 0.55), base * CFrame.new(0, 0.1, -0.6) * UPRIGHT, color, Enum.Material.Metal)
+	elseif shape == "Page" then
+		piece(model, "Roll", Enum.PartType.Cylinder, Vector3.new(1.2, 0.3, 0.3), base * CFrame.new(0, 0.15, 0), color, Enum.Material.Fabric)
 	elseif shape == "Book" then
 		piece(model, "Cover", Enum.PartType.Block, Vector3.new(1, 0.3, 0.75), base * CFrame.new(0, 0.15, 0), color, Enum.Material.Fabric)
 	else

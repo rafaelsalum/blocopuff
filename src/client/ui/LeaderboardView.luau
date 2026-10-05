@@ -86,7 +86,7 @@ function LeaderboardView.new(playerGui: PlayerGui, onTab: (categoryId: string) -
 
 	local closeButton = UiKit.createButton(card, {
 		name = "Close",
-		text = "✕",
+		text = "X",
 		variant = "Neutral",
 		size = UDim2.fromOffset(56, 48),
 		position = UDim2.new(1, -14, 0, 10),

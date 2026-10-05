@@ -292,6 +292,18 @@ Seção **TESTES DA PARTIDA** no painel admin. Vale só para o servidor atual e 
 - **Testar de verdade:** só com o jogo publicado. O Roblox só preenche quem convidou em convites reais, e o Studio pode não ter acesso ao DataStore e ao MessagingService. Os banners de recompensa da página do convite são configurados no Creator Hub (Engagement > Referral Rewards), com o jogo publicado há pelo menos 1 dia.
 - **Testes:** `lune run tests/ReferralRules.spec`.
 
+### Diário do Barão (Fase 5C, entrega 5C.3, parte 1)
+
+Escopo em `docs/FASE_5C_CASARAO_VIVO.md`. A 5C.3 sai em três partes: o Diário (esta), os quebra-cabeças e as salas secretas.
+
+- **10 páginas escondidas** pelo Casarão (Salão Principal, Salão da Coleção, Jardim, Ponto de Encontro, Sala de Música, Biblioteca, Sótão e Porão), em pergaminhos da Creator Store (malha 481311795). O Barão conta, em primeira pessoa, como chegou ao Casarão, quem era o Vovô Puff e onde estão os mistérios. Várias páginas trazem pistas dos quebra-cabeças: hora do relógio da torre, ordem das velas, partitura do piano, código do cofrinho, túnel e a estante que é porta.
+- **Mesma mecânica das relíquias:** grupo `Diary` no `RelicCatalog` (`diary = true`, forma `Page`, campo `text`), escondido pelo `RelicSpots`, pego pelo prompt e salvo em `profile.relics`. As páginas **não contam** para as 40 do Álbum nem para o Puff Explorador.
+- **Pegar uma página:** faixa "📖 PÁGINA DO DIÁRIO!" com a contagem, +1 🎟, e a leitura abre na hora (`DiaryPageView`): folha de pergaminho, letra de mão (Kalam), assinatura do Barão e setas para as outras páginas já encontradas.
+- **Aba "📖 Diário do Barão"** no Álbum (a primeira): fotos 3D dos pergaminhos. Tocar numa página encontrada abre a leitura; as que faltam mostram a silhueta e a pista.
+- **Completar as 10:** título **Confidente do Barão** e +10 🎟. A última página revela o Gabinete do Vovô, que abre na parte 3.
+- **Telemetria:** `PageFound` e `DiaryCompleted`. `AlbumOpened` passa a contar só as relíquias do Álbum.
+- **Botões de fechar:** o "✕" não aparecia nas fontes do Roblox. Todos os painéis agora usam "X".
+
 ### Relíquias e Álbum do Casarão (Fase 5C, entrega 5C.2)
 
 - **Relíquias** (`RelicService`, catálogo em `config/RelicCatalog`, regras em `data/RelicRules`): 40 objetos pequenos, 5 em cada um de 8 cômodos (Salão Principal, Salão da Coleção, Jardim do Barão, Ponto de Encontro, Biblioteca, Sala de Música, Sótão e Porão).

@@ -253,6 +253,12 @@ local CATALOGS: { { path: string, texts: (string) -> { string } } } = {
 					table.insert(texts, literal)
 				end
 			end
+			-- Páginas do Diário: título, cômodo, âncora, pista e texto.
+			for _, literal in literalArgs(source, "page") do
+				if string.find(literal, "[%s\128-\255]") ~= nil then
+					table.insert(texts, literal)
+				end
+			end
 			for literal in string.gmatch(source, 'return "([^"]*)"') do
 				table.insert(texts, literal)
 			end

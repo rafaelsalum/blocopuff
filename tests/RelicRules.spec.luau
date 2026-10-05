@@ -135,6 +135,31 @@ check("daily spot never repeats the day before", repeated == 0)
 check("daily spot uses every hiding place", distinct == spots)
 check("daily spot is deterministic", RelicRules.dailySpotIndex(20000, spots) == RelicRules.dailySpotIndex(20000, spots))
 
+-- Diário do Barão (Fase 5C.3): fora do Álbum, salvo como as relíquias.
+local diary = RelicCatalog.diary()
+local diaryIds = RelicCatalog.groupIds(diary.id)
+check("diary has ten pages", #diary.relics == 10 and diary.diary)
+local outsideAlbum, inEveryId, withText = true, true, true
+for _, definition in ipairs(diary.relics) do
+	outsideAlbum = outsideAlbum and table.find(allIds, definition.id) == nil
+	inEveryId = inEveryId and table.find(RelicCatalog.everyId(), definition.id) ~= nil
+	withText = withText and definition.text ~= "" and definition.shape == "Page"
+end
+check("diary pages stay out of the album", outsideAlbum)
+check("diary pages are saved like relics", inEveryId)
+check("every diary page has text", withText)
+check("diary is a group, not a room", RelicCatalog.group(diary.id) ~= nil and RelicCatalog.room(diary.id) == nil)
+local ninePages: { [string]: number } = {}
+for index = 1, 9 do
+	ninePages[diaryIds[index]] = 1
+end
+local lastPages, lastOutcome = RelicRules.collect(ninePages, diaryIds[10], diaryIds, allIds, rewards, diary.tickets, 5)
+check("last page completes the diary", lastPages ~= nil and lastOutcome ~= nil and lastOutcome.roomCompleted)
+check("last page never completes the album", lastOutcome ~= nil and not lastOutcome.albumCompleted)
+check("last page pays the diary bonus", lastOutcome ~= nil and lastOutcome.tickets == rewards.RelicTickets + diary.tickets)
+check("diary title once complete", lastPages ~= nil and table.find(RelicCatalog.titlesFor(lastPages, 0), diary.title) ~= nil)
+check("no diary title before", table.find(RelicCatalog.titlesFor(ninePages, 0), diary.title) == nil)
+
 print(`{passed} passed, {failures} failed`)
 if failures > 0 then
 	error("RelicRules tests failed")

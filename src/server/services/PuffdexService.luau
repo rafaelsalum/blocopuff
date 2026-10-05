@@ -95,7 +95,16 @@ local function onRequest(player: Player, action: unknown, payload: unknown)
 			return
 		end
 		local snapshot = PlayerDataService.getSnapshot(player)
-		local relics = if snapshot ~= nil then #snapshot.relics else 0
+		-- Só as relíquias do Álbum (temporadas e Diário ficam de fora).
+		local relics = 0
+		if snapshot ~= nil then
+			local albumIds = RelicCatalog.allIds()
+			for _, state in ipairs(snapshot.relics) do
+				if table.find(albumIds, state.id) ~= nil then
+					relics += 1
+				end
+			end
+		end
 		TelemetryService.lobbyEvent(player, "AlbumOpened", relics, `Of{#RelicCatalog.allIds()}`)
 	end
 end

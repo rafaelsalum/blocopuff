@@ -125,8 +125,8 @@
     "semantic_hash": ""
   },
   "README.md": {
-    "mtime": 1791159444.7416024,
-    "ast_hash": "0f8e9ccdae9f8633e6888fbdbb4247ae",
+    "mtime": 1791159851.0214138,
+    "ast_hash": "466972fcf3d61135e24405ebc91be8e1",
     "semantic_hash": ""
   },
   "src/client/controllers/CombatCameraController.luau": {
@@ -1370,8 +1370,8 @@
     "semantic_hash": ""
   },
   "src/client/ui/AlbumView.luau": {
-    "mtime": 1791156340.4721434,
-    "ast_hash": "80158a3176bff21a0fb35f7dc95afc42",
+    "mtime": 1791159842.1223304,
+    "ast_hash": "84c840267a49f2c5ee5addab4c842dfb",
     "semantic_hash": ""
   },
   "src/server/data/RelicRules.luau": {
@@ -1380,13 +1380,13 @@
     "semantic_hash": ""
   },
   "src/server/services/RelicModels.luau": {
-    "mtime": 1791156324.7756994,
-    "ast_hash": "120f62be0bccabcb1a6484fd11365125",
+    "mtime": 1791159670.010456,
+    "ast_hash": "7fa4347b7ffe7849c061544ebd668f0b",
     "semantic_hash": ""
   },
   "src/server/services/RelicService.luau": {
-    "mtime": 1791156340.4714813,
-    "ast_hash": "938faf536f2882e179bfb830b763af14",
+    "mtime": 1791159835.2365513,
+    "ast_hash": "bf046df2f5ed1258784bb05218a0ca91",
     "semantic_hash": ""
   },
   "src/server/services/RelicSpots.luau": {
@@ -1395,8 +1395,8 @@
     "semantic_hash": ""
   },
   "src/shared/config/RelicCatalog.luau": {
-    "mtime": 1791156340.472947,
-    "ast_hash": "d39774a7f741de3cf9ec490135598e5f",
+    "mtime": 1791159670.010093,
+    "ast_hash": "35f4b74831914054d1e675fd3d4463df",
     "semantic_hash": ""
   },
   "src/shared/i18n/en/Relics.luau": {

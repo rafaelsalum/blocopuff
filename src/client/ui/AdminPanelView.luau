@@ -252,7 +252,7 @@ function AdminPanelView.new(playerGui: PlayerGui, callbacks: AdminPanelCallbacks
 
 	local closeButton = UiKit.createButton(header, {
 		name = "CloseButton",
-		text = "✕",
+		text = "X",
 		variant = "Danger",
 		size = UDim2.fromOffset(46, 50),
 		position = UDim2.new(1, -14, 0.5, 0),

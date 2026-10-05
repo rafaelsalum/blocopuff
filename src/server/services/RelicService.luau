@@ -158,9 +158,15 @@ local function grantRelic(player: Player, relicId: string)
 	if not granted or result == nil or not saved then
 		return
 	end
-	TelemetryService.lobbyEvent(player, "RelicFound", result.total, relicId, group.id)
+	if group.diary then
+		TelemetryService.lobbyEvent(player, "PageFound", result.roomCount, relicId, group.id)
+	else
+		TelemetryService.lobbyEvent(player, "RelicFound", result.total, relicId, group.id)
+	end
 	TelemetryService.ticketsEarned(player, before, balance, "Relic")
-	if result.roomCompleted and group.season then
+	if result.roomCompleted and group.diary then
+		TelemetryService.lobbyEvent(player, "DiaryCompleted", result.roomCount, group.id)
+	elseif result.roomCompleted and group.season then
 		TelemetryService.lobbyEvent(player, "SeasonCompleted", result.roomCount, group.id)
 	elseif result.roomCompleted then
 		TelemetryService.lobbyEvent(player, "RoomSetCompleted", rooms, group.id)
@@ -285,6 +291,7 @@ local function placeRelics(parent: Folder)
 	for _, room in ipairs(RelicCatalog.rooms()) do
 		placeGroup(parent, index, room, nil)
 	end
+	placeGroup(parent, index, RelicCatalog.diary(), nil)
 end
 
 -- Coloca as temporadas que entraram no ar (e as relíquias que ainda não

@@ -7,6 +7,11 @@
 -- de esconderijo a cada dia e tem coleção própria. As Temporadas trazem
 -- páginas novas por tempo limitado (o álbum nunca "acaba").
 --
+-- Diário do Barão (Fase 5C.3): 10 páginas escondidas pelo Casarão, que
+-- contam a história do Barão e do Vovô Puff e dão as pistas dos mistérios.
+-- Usam a mesma mecânica das relíquias (esconderijo, prompt, perfil), mas
+-- não contam para o Álbum: têm aba e leitura próprias.
+--
 -- Cada relíquia diz o MÓVEL onde fica (`anchor`, nome das peças do móvel;
 -- `nth` escolhe entre móveis repetidos, como barris e baús) e o servidor
 -- (RelicSpots) acha o canto mais escondido em volta dele. `u`/`v` (fração
@@ -30,6 +35,7 @@ export type RelicShape =
 	| "Compass"
 	| "Potion"
 	| "Pumpkin"
+	| "Page"
 
 export type RelicDefinition = {
 	id: string,
@@ -47,6 +53,8 @@ export type RelicDefinition = {
 	nth: number?,
 	u: number,
 	v: number,
+	-- Texto da página do Diário ("" nas relíquias).
+	text: string,
 }
 
 export type RelicGroup = {
@@ -62,6 +70,8 @@ export type RelicGroup = {
 	season: boolean,
 	startsAt: number,
 	endsAt: number,
+	-- Diário do Barão (fora do Álbum de relíquias).
+	diary: boolean,
 }
 
 export type DailySpot = {
@@ -107,11 +117,17 @@ type Entry = {
 	hint: string,
 	u: number,
 	v: number,
+	text: string?,
 }
 
 -- `room` vazio: o cômodo da página (relíquias do álbum).
 local function relic(id: string, name: string, shape: RelicShape, color: { number }, anchor: string, nth: number?, hint: string, u: number, v: number, room: string?): Entry
 	return { id = id, name = name, shape = shape, color = color, room = room or "", anchor = anchor, nth = nth, hint = hint, u = u, v = v }
+end
+
+-- Página do Diário do Barão: título, esconderijo e o texto da página.
+local function page(id: string, name: string, room: string, anchor: string, nth: number?, hint: string, u: number, v: number, text: string): Entry
+	return { id = id, name = name, shape = "Page", color = IVORY, room = room, anchor = anchor, nth = nth, hint = hint, u = u, v = v, text = text }
 end
 
 type GroupEntry = {
@@ -259,6 +275,28 @@ local SEASONS: { GroupEntry } = {
 	},
 }
 
+-- Diário do Barão, escrito pelo próprio Barão. As páginas podem ser
+-- achadas em qualquer ordem; a leitura segue a numeração.
+local DIARY: GroupEntry = {
+	id = "Diary",
+	name = "Diário do Barão",
+	emoji = "📖",
+	title = "Confidente do Barão",
+	tickets = 10,
+	relics = {
+		page("diario_01", "A Noite da Chuva", "GrandHall", "HallPlant3", nil, "Perto da porta, entre as folhas do Salão", 0.75, 0.85, "Eu era só um vira-lata caramelo, molhado de chuva, quando o Vovô Puff abriu a porta do Casarão. Ele me deu um cobertor, um osso e um nome: Barão. Desde então, esta casa também é minha."),
+		page("diario_02", "O Relógio da Torre", "Collection", "Pedestal7", nil, "Entre os pedestais do meio", 0.5, 0.5, "Todo dia o Vovô subia para acertar o relógio da torre. Ele dizia: 'a hora certa está pintada num quadro do Salão. Quem souber ler, sabe a hora de abrir'."),
+		page("diario_03", "A Chegada dos Puffs", "Garden", "GardenPlant2", nil, "Debaixo de um vaso do jardim", 0.2, 0.2, "Um dia a campainha não parou mais: eram Puffs! Puffs redondos, Puffs que brilham, Puffs que soltam faísca. O Vovô abriu o salão para todos, e o Casarão nunca mais ficou quieto."),
+		page("diario_04", "Os Vitrais", "Meeting", "ChallengeBoard", nil, "Atrás de onde se leem os desafios", 0.9, 0.2, "Nas noites de festa, o Vovô acendia as velas do Salão Principal sempre na mesma ordem: a ordem das cores dos vitrais. Ele dizia que assim a casa sorria."),
+		page("diario_05", "A Música da Vovó", "Music", "Piano", nil, "Embaixo de onde a Vovó tocava", 0.9, 0.1, "A Vovó Puff tocava piano todas as tardes. A música preferida dela ficou escrita numa partitura, que eu escondi no Sótão para ninguém amassar."),
+		page("diario_06", "O Cofrinho", "Library", "NorthShelf3", nil, "Entre as estantes do norte", 0.5, 0.05, "O Vovô guardou um cofrinho no Porão. O código tem três números, e cada número está num quadro diferente. Eu não sei ler números. Só sei farejar biscoito."),
+		page("diario_07", "O Túnel", "Cellar", "CellarTunnel", nil, "Na entrada do túnel fechado", 0.9, 0.05, "Uma noite ouvi um barulho lá no fundo do túnel do Porão. O Vovô fechou a passagem e piscou para mim: 'o tesouro fica seguro lá atrás, Barão'."),
+		page("diario_08", "A Viagem", "Attic", "SheetCovered", 4, "Sob o lençol mais esquecido", 0.6, 0.2, "Um dia o Vovô Puff partiu numa viagem bem longa e me deixou cuidando de tudo. Por isso eu corro atrás de quem invade os corredores: é o meu trabalho!"),
+		page("diario_09", "Carinho Atrás da Orelha", "Cellar", "Barrel", 3, "Entre os barris, com cheiro de uva", 0.4, 0.6, "Hoje o Casarão vive cheio de Puffs de novo. Eu finjo que sou bravo, mas, cá entre nós, adoro um carinho atrás da orelha. Não conte para ninguém."),
+		page("diario_10", "A Estante", "Library", "EastShelf2", nil, "Na estante do leste que parece diferente", 0.95, 0.5, "O último segredo: na Biblioteca, uma das estantes não guarda livros, guarda uma porta. O Gabinete do Vovô fica atrás dela. Só quem leu este diário inteiro sabe empurrar."),
+	},
+}
+
 -- Esconderijos da Relíquia do Dia (um por dia, sorteado).
 local DAILY_SPOTS: { DailySpot } = {
 	{ room = "GrandHall", anchor = "HallPlant1", u = 0.7, v = 0.2 },
@@ -290,7 +328,7 @@ local groupsById: { [string]: RelicGroup } = {}
 local albumIds: { string } = {}
 local everyId: { string } = {}
 
-local function freezeGroup(entry: GroupEntry, season: boolean): RelicGroup
+local function freezeGroup(entry: GroupEntry, season: boolean, diary: boolean?): RelicGroup
 	assert(groupsById[entry.id] == nil, `Duplicated relic group {entry.id}`)
 	local frozen: { RelicDefinition } = {}
 	for _, item in ipairs(entry.relics) do
@@ -310,11 +348,12 @@ local function freezeGroup(entry: GroupEntry, season: boolean): RelicGroup
 			nth = item.nth,
 			u = item.u,
 			v = item.v,
+			text = item.text or "",
 		})
 		byId[item.id] = definition
 		table.insert(frozen, definition)
 		table.insert(everyId, item.id)
-		if not season then
+		if not season and not diary then
 			table.insert(albumIds, item.id)
 		end
 	end
@@ -328,6 +367,7 @@ local function freezeGroup(entry: GroupEntry, season: boolean): RelicGroup
 		season = season,
 		startsAt = entry.startsAt or 0,
 		endsAt = entry.endsAt or 0,
+		diary = diary == true,
 	})
 	groupsById[entry.id] = group
 	return group
@@ -342,6 +382,7 @@ for _, entry in ipairs(SEASONS) do
 	assert((entry.startsAt or 0) < (entry.endsAt or 0), `Season {entry.id} needs startsAt < endsAt`)
 	table.insert(seasons, freezeGroup(entry, true))
 end
+local diary = freezeGroup(DIARY, false, true)
 for index, spot in ipairs(DAILY_SPOTS) do
 	DAILY_SPOTS[index] = table.freeze(spot)
 end
@@ -373,7 +414,12 @@ function RelicCatalog.seasons(): { RelicGroup }
 	return seasons
 end
 
--- Qualquer página (cômodo ou temporada).
+-- Diário do Barão (as 10 páginas, na ordem de leitura).
+function RelicCatalog.diary(): RelicGroup
+	return diary
+end
+
+-- Qualquer página (cômodo, temporada ou o Diário).
 function RelicCatalog.group(id: unknown): RelicGroup?
 	if typeof(id) ~= "string" then
 		return nil
@@ -384,7 +430,7 @@ end
 -- Mantido para quem só lida com cômodos.
 function RelicCatalog.room(id: unknown): RelicGroup?
 	local group = RelicCatalog.group(id)
-	return if group ~= nil and not group.season then group else nil
+	return if group ~= nil and not group.season and not group.diary then group else nil
 end
 
 function RelicCatalog.get(id: unknown): RelicDefinition?
@@ -399,7 +445,7 @@ function RelicCatalog.allIds(): { string }
 	return albumIds
 end
 
--- Todos os ids (álbum e temporadas).
+-- Todos os ids (álbum, temporadas e páginas do Diário).
 function RelicCatalog.everyId(): { string }
 	return everyId
 end
@@ -444,7 +490,7 @@ end
 RelicCatalog.roomCount = RelicCatalog.groupCount
 
 -- Títulos ganhos, do mais importante para o menos: álbum completo, coleção
--- da Relíquia do Dia, temporadas e os cômodos completos.
+-- da Relíquia do Dia, Diário, temporadas e os cômodos completos.
 function RelicCatalog.titlesFor(owned: { [string]: any }, dailyCount: number): { string }
 	local titles: { string } = {}
 	local total = 0
@@ -459,7 +505,7 @@ function RelicCatalog.titlesFor(owned: { [string]: any }, dailyCount: number): {
 	if dailyCount >= REWARDS.DailyGoal then
 		table.insert(titles, RelicCatalog.DailyTitle)
 	end
-	for _, list in ipairs({ seasons, rooms }) do
+	for _, list in ipairs({ { diary }, seasons, rooms }) do
 		for _, group in ipairs(list) do
 			if RelicCatalog.groupCount(owned, group.id) == #group.relics then
 				table.insert(titles, group.title)

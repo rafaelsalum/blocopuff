@@ -4,7 +4,8 @@
 -- (foto 3D de cada uma; as que faltam aparecem só como silhueta escura,
 -- com uma pista em charada), o título de
 -- cada cômodo, as páginas das Temporadas (por tempo limitado), a página da
--- Relíquia do Dia e os títulos ganhos. Só visual: tudo vem do perfil.
+-- Relíquia do Dia, o Diário do Barão (tocar numa página encontrada abre a
+-- leitura) e os títulos ganhos. Só visual: tudo vem do perfil.
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TweenService = game:GetService("TweenService")
@@ -13,6 +14,7 @@ local Lang = require(ReplicatedStorage.Shared.i18n.Lang)
 local PuffCatalog = require(ReplicatedStorage.Shared.config.PuffCatalog)
 local RelicCatalog = require(ReplicatedStorage.Shared.config.RelicCatalog)
 local ProfileTypes = require(ReplicatedStorage.Shared.types.ProfileTypes)
+local DiaryPageView = require(script.Parent.DiaryPageView)
 local ResponsiveScale = require(script.Parent.ResponsiveScale)
 local UiKit = require(script.Parent.UiKit)
 local UiTheme = require(script.Parent.UiTheme)
@@ -26,6 +28,8 @@ export type AlbumViewHandle = {
 	isOpen: () -> boolean,
 	-- `foundToday`: já pegou a Relíquia do Dia de hoje (nil = não se sabe).
 	setProfile: (snapshot: ProfileSnapshot, foundToday: boolean?) -> (),
+	-- Abre a leitura de uma página do Diário (já encontrada).
+	readPage: (relicId: string) -> (),
 	destroy: () -> (),
 }
 
@@ -39,6 +43,9 @@ type RelicCard = {
 	shownId: string?,
 	name: TextLabel,
 	hint: TextLabel,
+	-- Toque na carta (só nas páginas do Diário já encontradas).
+	read: TextButton,
+	relicId: string?,
 }
 
 local GUI_NAME = "BlocoPuffAlbum"
@@ -70,6 +77,7 @@ local SHAPE_ICONS: { [string]: string } = {
 	Compass = "🧭",
 	Potion = "🧪",
 	Pumpkin = "🎃",
+	Page = "📜",
 }
 -- Páginas com pelo menos 5 cartas por linha; temporadas maiores usam duas.
 local CARDS_PER_ROW = 5
@@ -126,7 +134,7 @@ function AlbumView.new(playerGui: PlayerGui, onOpened: () -> ()): AlbumViewHandl
 
 	local closeButton = UiKit.createButton(card, {
 		name = "Close",
-		text = "✕",
+		text = "X",
 		variant = "Neutral",
 		size = UDim2.fromOffset(56, 48),
 		position = UDim2.new(1, -14, 0, 10),
@@ -135,9 +143,10 @@ function AlbumView.new(playerGui: PlayerGui, onOpened: () -> ()): AlbumViewHandl
 		zIndex = 4,
 	})
 
-	-- Abas (com rolagem): as temporadas, os cômodos e a Relíquia do Dia.
+	-- Abas (com rolagem): o Diário, as temporadas, os cômodos e a Relíquia
+	-- do Dia.
 	local rooms = RelicCatalog.rooms()
-	local pages: { RelicRoom } = {}
+	local pages: { RelicRoom } = { RelicCatalog.diary() }
 	-- Temporadas (só aparecem depois de começar; encerradas continuam).
 	for _, season in ipairs(RelicCatalog.seasons()) do
 		table.insert(pages, season)
@@ -193,6 +202,9 @@ function AlbumView.new(playerGui: PlayerGui, onOpened: () -> ()): AlbumViewHandl
 	local pageTitle = label(roomPage, "PageTitle", "", UiTheme.Fonts.Display, 24, UiTheme.Colors.Ink, UDim2.fromOffset(0, 0), UDim2.new(1, 0, 0, 28))
 	UiTheme.addTextOutline(pageTitle, 1.5)
 	local rewardLabel = label(roomPage, "Reward", "", UiTheme.Fonts.BodyBold, 15, UiTheme.Colors.Gold, UDim2.fromOffset(0, 32), UDim2.new(1, 0, 0, 22))
+	-- Leitura das páginas do Diário (definida depois do cache do perfil).
+	local diaryReader = DiaryPageView.new(playerGui)
+	local readPageFor: (relicId: string) -> () = function() end
 	local cardWidth = (PAGE_WIDTH - CARD_GAP * (CARDS_PER_ROW - 1)) / CARDS_PER_ROW
 	local maxCards = CARDS_PER_ROW
 	for _, page in ipairs(pages) do
@@ -237,7 +249,23 @@ function AlbumView.new(playerGui: PlayerGui, onOpened: () -> ()): AlbumViewHandl
 		hint.TextScaled = true
 		hint.ZIndex = 5
 		UiTheme.addTextConstraint(hint, 9, 13)
-		table.insert(cards, { frame = frame, stroke = stroke, icon = icon, photo = photo, camera = camera, model = nil, shownId = nil, name = name, hint = hint })
+		local read = Instance.new("TextButton")
+		read.Name = "Read"
+		read.Size = UDim2.fromScale(1, 1)
+		read.BackgroundTransparency = 1
+		read.Text = ""
+		read.Visible = false
+		read.ZIndex = 6
+		read.Parent = frame
+		local cardItem: RelicCard = { frame = frame, stroke = stroke, icon = icon, photo = photo, camera = camera, model = nil, shownId = nil, name = name, hint = hint, read = read, relicId = nil }
+		read.Activated:Connect(function()
+			local relicId = cardItem.relicId
+			if relicId ~= nil then
+				UiKit.playClick()
+				readPageFor(relicId)
+			end
+		end)
+		table.insert(cards, cardItem)
 	end
 	-- Até 5 relíquias: uma fileira de cartas altas; mais (temporadas): duas
 	-- fileiras de cartas baixas.
@@ -322,6 +350,17 @@ function AlbumView.new(playerGui: PlayerGui, onOpened: () -> ()): AlbumViewHandl
 	dailyReward.TextYAlignment = Enum.TextYAlignment.Top
 
 	local snapshotCache: ProfileSnapshot? = nil
+
+	readPageFor = function(relicId: string)
+		local snapshot = snapshotCache
+		if snapshot == nil then
+			return
+		end
+		local owned = ownedSet(snapshot)
+		if owned[relicId] ~= nil then
+			diaryReader.show(relicId, owned)
+		end
+	end
 	local foundTodayCache: boolean? = nil
 
 	local function roomTabText(room: RelicRoom, count: number): string
@@ -333,6 +372,8 @@ function AlbumView.new(playerGui: PlayerGui, onOpened: () -> ()): AlbumViewHandl
 	local function rewardText(room: RelicRoom, complete: boolean): string
 		if complete then
 			return Lang.t("🏅 Título ganho: %s", Lang.t(room.title))
+		elseif room.diary then
+			return Lang.t("📖 Ache as %d páginas: título %s e +%d 🎟", #room.relics, Lang.t(room.title), room.tickets)
 		elseif not room.season then
 			return Lang.t("🔒 Complete o cômodo: título %s e +%d 🎟", Lang.t(room.title), room.tickets)
 		elseif RelicCatalog.isActive(room, os.time()) then
@@ -391,9 +432,15 @@ function AlbumView.new(playerGui: PlayerGui, onOpened: () -> ()): AlbumViewHandl
 				cardItem.icon.Visible = not photo
 				cardItem.icon.Text = if has then SHAPE_ICONS[definition.shape] or "📜" else "❔"
 				cardItem.icon.TextTransparency = if has then 0 else 0.35
+				local readable = has and room.diary
+				cardItem.relicId = if readable then definition.id else nil
+				cardItem.read.Visible = readable
 				cardItem.name.Text = if has then Lang.t(definition.name) else "???"
 				cardItem.name.TextColor3 = if has then UiTheme.Colors.Gold else UiTheme.Colors.InkSoft
-				cardItem.hint.Text = if has then Lang.t("Encontrada!") else Lang.t(definition.hint)
+				cardItem.hint.Text = if readable
+					then Lang.t("📖 Toque para ler")
+					elseif has then Lang.t("Encontrada!")
+					else Lang.t(definition.hint)
 				cardItem.stroke.Color = if has then UiTheme.Colors.Gold else UiTheme.Colors.Border
 				cardItem.frame.BackgroundColor3 = if has then UiTheme.Colors.SurfaceSoft else UiTheme.Colors.Surface
 			end
@@ -488,6 +535,10 @@ function AlbumView.new(playerGui: PlayerGui, onOpened: () -> ()): AlbumViewHandl
 
 	local handle = {} :: AlbumViewHandle
 
+	handle.readPage = function(relicId: string)
+		readPageFor(relicId)
+	end
+
 	handle.setProfile = function(snapshot: ProfileSnapshot, foundToday: boolean?)
 		snapshotCache = snapshot
 		foundTodayCache = foundToday
@@ -502,6 +553,7 @@ function AlbumView.new(playerGui: PlayerGui, onOpened: () -> ()): AlbumViewHandl
 	end
 
 	handle.close = function()
+		diaryReader.close()
 		screenGui.Enabled = false
 	end
 
@@ -510,6 +562,7 @@ function AlbumView.new(playerGui: PlayerGui, onOpened: () -> ()): AlbumViewHandl
 	end
 
 	handle.destroy = function()
+		diaryReader.destroy()
 		local connection = iconsConnection
 		if connection ~= nil then
 			connection:Disconnect()
