@@ -27,6 +27,9 @@ type XpAward = ProfileTypes.XpAward
 
 local WAIT_TIMEOUT = 15
 local LEVEL_UP_SOUND = "rbxassetid://112485797063762"
+-- Aviso de perfil demorando: depois de quantos segundos e a cada quanto.
+local PROFILE_SLOW_SECONDS = 8
+local PROFILE_NOTICE_EVERY = 15
 
 local ProgressionController = {}
 
@@ -93,6 +96,9 @@ function ProgressionController.start()
 	player:GetAttributeChangedSignal(StateAttributeNames.PlayerIsEliminated):Connect(refreshVisibility)
 
 	local function onProfile(snapshot: ProfileSnapshot)
+		if not hasProfile then
+			NotificationManager.clear("Banner", "ProfileLoading")
+		end
 		hasProfile = true
 		card.setProfile(snapshot)
 		refreshVisibility()
@@ -109,6 +115,28 @@ function ProgressionController.start()
 	if current ~= nil then
 		onProfile(current)
 	end
+
+	-- Perfil demorando (por exemplo, preso em outro servidor que ainda não o
+	-- liberou): avisa, em vez de deixar coleção e menus sumidos sem explicação.
+	task.spawn(function()
+		task.wait(PROFILE_SLOW_SECONDS)
+		while not hasProfile and player.Parent ~= nil do
+			NotificationManager.notify({
+				channel = "Banner",
+				category = "ProfileLoading",
+				priority = "Normal",
+				key = "profile-loading",
+				icon = "⏳",
+				title = Lang.t("Carregando seu perfil…"),
+				subtitle = Lang.t("Se o jogo estiver aberto em outro aparelho, feche lá. Já já ele chega!"),
+				tone = "Info",
+				duration = 6,
+				maxWait = 6,
+			})
+			task.wait(PROFILE_NOTICE_EVERY)
+		end
+		NotificationManager.clear("Banner", "ProfileLoading")
+	end)
 end
 
 return table.freeze(ProgressionController)

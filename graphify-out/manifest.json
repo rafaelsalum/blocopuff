@@ -125,8 +125,8 @@
     "semantic_hash": ""
   },
   "README.md": {
-    "mtime": 1791156340.472651,
-    "ast_hash": "381118b47dfbc974137577031f0c5737",
+    "mtime": 1791158634.9548492,
+    "ast_hash": "6e4fb3b57b21892977fbf055fd19e7bf",
     "semantic_hash": ""
   },
   "src/client/controllers/CombatCameraController.luau": {
@@ -545,8 +545,8 @@
     "semantic_hash": ""
   },
   "src/client/ui/PuffMachineView.luau": {
-    "mtime": 1791158424.5239117,
-    "ast_hash": "dfed97a3005e1fdf246fce9bf55ac46c",
+    "mtime": 1791158587.653511,
+    "ast_hash": "3d852daa5c0a14563ee99b145f8234e2",
     "semantic_hash": ""
   },
   "src/server/data/RewardRules.luau": {
@@ -555,8 +555,8 @@
     "semantic_hash": ""
   },
   "src/server/services/PuffMachineService.luau": {
-    "mtime": 1791158305.6798828,
-    "ast_hash": "b1e32c21de46214cbaeeee51f9078298",
+    "mtime": 1791158596.006155,
+    "ast_hash": "a0b9b54e70169c3daa861cdb7a933eb7",
     "semantic_hash": ""
   },
   "src/shared/config/RewardConfig.luau": {
@@ -1410,13 +1410,13 @@
     "semantic_hash": ""
   },
   "src/client/ui/PuffMachineCarousel.luau": {
-    "mtime": 1791158429.8427474,
-    "ast_hash": "fcade774e812ea0585b6b91faa90f4fb",
+    "mtime": 1791158587.653811,
+    "ast_hash": "35c17132c46d0a9546b96a75d947db4f",
     "semantic_hash": ""
   },
   "src/client/ui/PuffMachineReveal.luau": {
-    "mtime": 1791158258.3878944,
-    "ast_hash": "cb1cf8fa7446579c34b4ed298c996f1b",
+    "mtime": 1791158587.6542833,
+    "ast_hash": "f983b33d2cf1c173be4654542f8f4cf6",
     "semantic_hash": ""
   }
 }

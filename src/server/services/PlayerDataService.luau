@@ -141,6 +141,9 @@ local PlayerDataService = {}
 
 local store: DataStore? = nil
 local backupStore: DataStore? = nil
+-- Só no Studio: o DataStore real, lido (nunca gravado) para começar o
+-- perfil de teste como cópia do perfil de verdade.
+local liveStore: DataStore? = nil
 -- Servidor fechando: para de tentar carregar perfis.
 local closing = false
 local entries: { [Player]: Entry } = {}
@@ -448,8 +451,43 @@ end
 
 type LoadOutcome = "Loaded" | "Locked" | "Future" | "Error"
 
--- Uma tentativa de carregar e travar o perfil.
-local function tryLoad(key: string, lockId: string): (LoadOutcome, Profile?)
+-- Studio: perfil de teste ainda vazio → cópia do perfil real, sem a trava
+-- dele (só leitura do real; nada é gravado lá). Falso quando a leitura
+-- falhou (tentar de novo: senão o perfil de teste nasceria vazio).
+local function studioSeed(key: string): (boolean, { [string]: any }?)
+	local dataStore = store
+	local live = liveStore
+	if dataStore == nil or live == nil then
+		return true, nil
+	end
+	local ok, existing = withRetries(`studio check {key}`, function()
+		return dataStore:GetAsync(key)
+	end)
+	if not ok then
+		return false, nil
+	end
+	if existing ~= nil then
+		return true, nil
+	end
+	local liveOk, stored = withRetries(`studio seed {key}`, function()
+		return live:GetAsync(key)
+	end)
+	if not liveOk then
+		return false, nil
+	end
+	if typeof(stored) ~= "table" then
+		return true, nil
+	end
+	local seed = table.clone(stored :: { [string]: any })
+	seed.session = nil
+	seed.releasedBy = nil
+	print(string.format("[BlocoPuff] Studio profile %s seeded from the live profile", key))
+	return true, seed
+end
+
+-- Uma tentativa de carregar e travar o perfil. `seed` (só Studio) é usado
+-- quando ainda não há nada gravado.
+local function tryLoad(key: string, lockId: string, seed: { [string]: any }?): (LoadOutcome, Profile?)
 	local dataStore = store
 	if dataStore == nil then
 		return "Error", nil
@@ -457,7 +495,8 @@ local function tryLoad(key: string, lockId: string): (LoadOutcome, Profile?)
 	local outcome: LoadOutcome = "Error"
 	local loaded: Profile? = nil
 	local ok = withRetries(`load {key}`, function()
-		dataStore:UpdateAsync(key, function(stored: any)
+		dataStore:UpdateAsync(key, function(current: any)
+			local stored = if current == nil then seed else current
 			local profile, isFuture = ProfileSchema.fromStored(stored, now())
 			if isFuture then
 				outcome = "Future"
@@ -643,12 +682,23 @@ local function load(player: Player)
 	local outcome: LoadOutcome = "Error"
 	local profile: Profile? = nil
 	local attempt = 0
+	local seed: { [string]: any }? = nil
+	local seedReady = liveStore == nil
 	-- Preso em outro servidor ou DataStore com erro: o perfil existe (ou
 	-- pode existir), então continua tentando enquanto o jogador estiver
 	-- aqui. Um perfil vazio no lugar do dele pareceria que tudo sumiu.
 	while store ~= nil and not studioDenied and not closing and player.Parent ~= nil do
 		attempt += 1
-		outcome, profile = tryLoad(key, lockId)
+		if not seedReady then
+			local seedOk, seedData = studioSeed(key)
+			seed = seedData
+			seedReady = seedOk or studioDenied
+		end
+		if seedReady then
+			outcome, profile = tryLoad(key, lockId, seed)
+		else
+			outcome, profile = "Error", nil
+		end
 		if outcome == "Loaded" or outcome == "Future" or studioDenied then
 			break
 		end
@@ -1010,8 +1060,10 @@ function PlayerDataService.start(remotesFolder: Folder?)
 	end
 	started = true
 
+	local isStudio = RunService:IsStudio()
+	local suffix = if isStudio then ProfileConfig.StudioSuffix else ""
 	local ok, result = pcall(function()
-		return DataStoreService:GetDataStore(ProfileConfig.StoreName)
+		return DataStoreService:GetDataStore(ProfileConfig.StoreName .. suffix)
 	end)
 	if ok then
 		store = result
@@ -1019,12 +1071,20 @@ function PlayerDataService.start(remotesFolder: Folder?)
 		warn(string.format("[BlocoPuff] Profiles will not be saved: %s", tostring(result)))
 	end
 	local backupOk, backupResult = pcall(function()
-		return DataStoreService:GetDataStore(ProfileConfig.BackupStoreName)
+		return DataStoreService:GetDataStore(ProfileConfig.BackupStoreName .. suffix)
 	end)
 	if backupOk then
 		backupStore = backupResult
 	else
 		warn(string.format("[BlocoPuff] Profile backups disabled: %s", tostring(backupResult)))
+	end
+	if isStudio then
+		local liveOk, liveResult = pcall(function()
+			return DataStoreService:GetDataStore(ProfileConfig.StoreName)
+		end)
+		if liveOk then
+			liveStore = liveResult
+		end
 	end
 
 	if remotesFolder ~= nil then

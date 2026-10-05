@@ -145,6 +145,7 @@ return table.freeze({
 	["Tickets insuficientes. Jogue mais partidas!"] = "Not enough tickets. Play more matches!",
 	["Seu progresso não está sendo salvo agora. Tente mais tarde."] = "Your progress is not being saved right now. Try again later.",
 	["Carregando seu perfil…"] = "Loading your profile…",
+	["Se o jogo estiver aberto em outro aparelho, feche lá. Já já ele chega!"] = "If the game is open on another device, close it there. It'll be here soon!",
 	["A máquina funciona só no lobby."] = "The machine only works in the lobby.",
 	["A máquina está vazia agora."] = "The machine is empty right now.",
 	["Calma! A máquina está recarregando."] = "Hold on! The machine is reloading.",

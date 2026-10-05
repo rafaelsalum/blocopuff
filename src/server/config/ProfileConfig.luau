@@ -8,6 +8,11 @@ export type ProfileConfig = {
 	-- Cópia de segurança: guarda tudo o que o jogador já teve (só soma) e
 	-- devolve ao perfil principal o que ele tiver perdido.
 	BackupStoreName: string,
+	-- No Studio, perfil e cópia ficam em DataStores próprios (nome + este
+	-- sufixo): um teste no Studio nunca trava o perfil real (quem entrasse
+	-- no jogo publicado ao mesmo tempo ficaria sem perfil até a trava sair).
+	-- Na primeira vez, o perfil de teste começa como cópia do real.
+	StudioSuffix: string,
 	-- A cópia é atualizada a cada BackupInterval s e ao sair.
 	BackupInterval: number,
 	KeyPrefix: string,
@@ -33,6 +38,7 @@ export type ProfileConfig = {
 local ProfileConfig: ProfileConfig = {
 	StoreName = "BlocoPuffProfiles_v1",
 	BackupStoreName = "BlocoPuffProfiles_backup_v1",
+	StudioSuffix = "_studio",
 	BackupInterval = 600,
 	KeyPrefix = "u_",
 	AutosaveInterval = 120,
