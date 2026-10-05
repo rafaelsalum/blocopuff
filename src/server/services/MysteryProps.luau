@@ -1,330 +1,369 @@
 --!strict
 
--- Cenário dos Mistérios do Barão (Fase 5C.3, parte 2), montado com as
--- respostas sorteadas deste servidor:
---   * Salão Principal: vitrais coloridos acima do arco norte, quatro
---     candelabros (cada um com a taça de uma cor) e o quadro de cavalete
---     com a hora certa do relógio;
---   * Sótão: o relógio da torre (parado nas 12h) e a partitura da Vovó;
---   * Biblioteca, Sala de Música e Sótão: um quadro com um dígito do código;
---   * Porão: o cofrinho;
---   * Piano: o nome de cada nota acima das teclas brancas.
+-- Cenário dos Mistérios do Barão (Fase 5C.3, parte 2), montado com os
+-- modelos da Creator Store (MysteryAssets) e as respostas deste servidor:
+--   * Salão Principal: quatro candelabros de ferro à esquerda da porta norte
+--     (velas coloridas), quatro vitrais à direita dela (a ordem certa) e o
+--     quadro com a hora certa na parede oeste;
+--   * Sótão: o relógio de pêndulo (parado nas 12h) e a estante com a
+--     partitura da Vovó;
+--   * Biblioteca, Sala de Música e Sótão: quadros com os dígitos do código;
+--   * Porão: o cofre;
+--   * Piano de cauda: o nome de cada nota acima das teclas.
+-- Sem os modelos, vale o cenário simples (MysteryPropsBasic).
 -- Os nomes começam com "Mystery" (não confundem as âncoras das relíquias).
 -- Tudo de enfeite: quem confere as respostas é o MysteryService.
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
-local ClockFace = require(ReplicatedStorage.Shared.modules.ClockFace)
 local MansionLayout = require(ReplicatedStorage.Shared.modules.MansionLayout)
 local MansionWingLayout = require(ReplicatedStorage.Shared.modules.MansionWingLayout)
 local MansionConfig = require(ReplicatedStorage.Shared.config.MansionConfig)
 local MysteryConfig = require(ReplicatedStorage.Shared.config.MysteryConfig)
-local BuildingDecor = require(script.Parent.BuildingDecor)
+local MysteryAssets = require(script.Parent.MysteryAssets)
+local MysteryPropsBasic = require(script.Parent.MysteryPropsBasic)
 local MysteryRules = require(script.Parent.Parent.data.MysteryRules)
 
 type Answers = MysteryRules.Answers
+export type Built = MysteryPropsBasic.Built
 
-export type Built = {
-	-- Onde cada mistério é resolvido (conferência de distância).
-	anchors: { [string]: Vector3 },
-	-- Áreas para não colocar gente em cima dos móveis novos.
-	reserved: { { center: Vector3, size: Vector3 } },
-}
+local MODELS = { "Candelabra", "StainedWindow", "GrandfatherClock", "Safe", "Frame", "MusicStand" }
 
-local WOOD = Color3.fromRGB(96, 64, 40)
-local DARK_WOOD = Color3.fromRGB(60, 40, 28)
-local BRASS = Color3.fromRGB(196, 160, 80)
-local CANVAS = Color3.fromRGB(236, 226, 200)
-local LEAD = Color3.fromRGB(30, 26, 30)
-local IRON = Color3.fromRGB(58, 60, 66)
-local CANDLE_WAX = Color3.fromRGB(250, 246, 232)
-local FLAME = Color3.fromRGB(255, 170, 60)
-local PIXELS = 60
+-- Tamanhos (o modelo original é 1).
+local CANDELABRA_SCALE = 0.8
+local WINDOW_SCALE = 0.52
+local FRAME_SCALE = 0.8
+local CLOCK_SCALE = 1.2
+local STAND_SCALE = 1
+local SAFE_SCALE = 1
+
+-- Base dos quadros: acima do friso de madeira das paredes (4,3 a 4,7).
+local PAINTING_BOTTOM = 5
+local WINDOW_BOTTOM = 9
+-- Folga entre o fundo do modelo e a parede.
+local WALL_GAP = 0.75
+
+local SAFE_COLOR = Color3.fromRGB(64, 104, 84)
+local LAMP_COLOR = Color3.fromRGB(255, 205, 140)
+-- Velas mais grossas que as do modelo (a cor precisa ser vista de longe).
+local CANDLE_THICKNESS = 1.8
+local FLAME_COLOR = Color3.fromRGB(255, 180, 70)
+local FLAME_SIZE = Vector3.new(0.22, 0.38, 0.22)
+local FLAME_PARTICLE = NumberSequence.new({ NumberSequenceKeypoint.new(0, 0.18), NumberSequenceKeypoint.new(1, 0) })
 
 local MysteryProps = {}
 
-local function part(parent: Instance, name: string, size: Vector3, cframe: CFrame, color: Color3, material: Enum.Material?, shape: Enum.PartType?): Part
-	return BuildingDecor.createPart(parent, name, size, cframe, color, { material = material, shape = shape })
-end
-
-local function surfaceGui(target: BasePart, name: string): SurfaceGui
-	local gui = Instance.new("SurfaceGui")
-	gui.Name = name
-	gui.Face = Enum.NormalId.Front
-	gui.SizingMode = Enum.SurfaceGuiSizingMode.PixelsPerStud
-	gui.PixelsPerStud = PIXELS
-	gui.LightInfluence = 0.4
-	gui.Parent = target
-	return gui
-end
-
-local function text(parent: Instance, name: string, value: string, position: UDim2, size: UDim2, color: Color3): TextLabel
-	local label = Instance.new("TextLabel")
-	label.Name = name
-	label.BackgroundTransparency = 1
-	label.Position = position
-	label.Size = size
-	label.Font = Enum.Font.FredokaOne
-	label.Text = value
-	label.TextColor3 = color
-	label.TextScaled = true
-	label.Parent = parent
-	return label
-end
-
--- Prompt que abre o quebra-cabeça no cliente.
-local function prompt(target: BasePart, id: string, action: string, objectText: string)
-	local proximity = Instance.new("ProximityPrompt")
-	proximity.Name = "MysteryPrompt"
-	proximity.ActionText = action
-	proximity.ObjectText = objectText
-	proximity.HoldDuration = 0
-	proximity.MaxActivationDistance = MysteryConfig.PromptDistance
-	proximity.RequiresLineOfSight = false
-	proximity:SetAttribute(MysteryConfig.PromptAttribute, id)
-	proximity.Parent = target
-end
-
--- Cavalete com uma tela virada para `facing`; devolve a tela (a frente da
--- peça é a face pintada).
-local function easel(parent: Instance, name: string, base: Vector3, facing: Vector3): Part
-	local model = Instance.new("Model")
-	model.Name = name
-	local frame = CFrame.lookAt(base, base + Vector3.new(facing.X, 0, facing.Z))
-	-- Pernas atrás da tela, inclinadas como ela (não cobrem a pintura).
-	for _, side in ipairs({ -1, 1 }) do
-		part(model, "Leg", Vector3.new(0.2, 4.6, 0.2), frame * CFrame.new(side * 1.3, 2.3, 0.1) * CFrame.Angles(math.rad(8), 0, math.rad(side * 6)), WOOD, Enum.Material.Wood)
+local function setParts(root: Instance, apply: (BasePart) -> ())
+	for _, descendant in ipairs(root:GetDescendants()) do
+		if descendant:IsA("BasePart") then
+			apply(descendant)
+		end
 	end
-	part(model, "BackLeg", Vector3.new(0.2, 4.6, 0.2), frame * CFrame.new(0, 2.2, 1) * CFrame.Angles(math.rad(22), 0, 0), WOOD, Enum.Material.Wood)
-	part(model, "Ledge", Vector3.new(3.4, 0.15, 0.5), frame * CFrame.new(0, 2.15, -0.3), WOOD, Enum.Material.Wood)
-	local tilt = frame * CFrame.new(0, 3.65, -0.18) * CFrame.Angles(math.rad(8), 0, 0)
-	part(model, "Frame", Vector3.new(3.6, 3, 0.12), tilt * CFrame.new(0, 0, 0.04), DARK_WOOD, Enum.Material.Wood)
-	local canvas = part(model, "Canvas", Vector3.new(3.3, 2.7, 0.08), tilt, CANVAS, Enum.Material.Fabric)
-	model.Parent = parent
-	return canvas
 end
 
--- Quadro com a hora certa (pista do relógio).
-local function clockPainting(parent: Instance, base: Vector3, facing: Vector3, answers: Answers)
-	local canvas = easel(parent, "MysteryClockPainting", base, facing)
-	local gui = surfaceGui(canvas, "Painting")
-	local sky = Instance.new("Frame")
-	sky.Size = UDim2.fromScale(1, 1)
-	sky.BackgroundColor3 = Color3.fromRGB(70, 90, 140)
-	sky.Parent = gui
-	local holder = Instance.new("Frame")
-	holder.AnchorPoint = Vector2.new(0.5, 0.5)
-	holder.Position = UDim2.fromScale(0.5, 0.5)
-	holder.Size = UDim2.fromScale(0.8, 0.8)
-	holder.BackgroundTransparency = 1
-	holder.Parent = sky
-	local face = ClockFace.draw(holder, 2)
-	ClockFace.set(face, answers.hour, answers.minute)
-end
-
--- Quadro com um dígito do código do cofrinho e a posição dele.
-local function digitPainting(parent: Instance, name: string, base: Vector3, facing: Vector3, position: number, digit: number)
-	local canvas = easel(parent, name, base, facing)
-	local gui = surfaceGui(canvas, "Painting")
-	local background = Instance.new("Frame")
-	background.Size = UDim2.fromScale(1, 1)
-	background.BackgroundColor3 = Color3.fromRGB(120, 40, 50)
-	background.Parent = gui
-	text(background, "Position", `{position}º`, UDim2.fromScale(0.05, 0.04), UDim2.fromScale(0.3, 0.26), Color3.fromRGB(255, 220, 140))
-	text(background, "Digit", tostring(digit), UDim2.fromScale(0.25, 0.12), UDim2.fromScale(0.5, 0.82), Color3.fromRGB(255, 240, 210))
-end
-
--- Vitrais acima do arco norte do Salão (cores na ordem da resposta).
-local function stainedGlass(parent: Instance, answers: Answers)
-	local mansion = MansionLayout.get()
-	local hall = mansion.rooms.GrandHall
-	local half = MansionConfig.PartitionThickness / 2
-	local centerX = (hall.minX + hall.maxX) / 2
-	local z = hall.minZ + half + 0.08
-	-- Acima da placa da porta norte, abaixo das vigas do teto.
-	local y = mansion.floorY + MansionConfig.ArchHeight + 6.7
-	local width, height, gap = 3.2, 4.4, 1
-	local count = #answers.windows
-	local total = count * width + (count - 1) * gap
-	local model = Instance.new("Model")
-	model.Name = "MysteryStainedGlass"
-	part(model, "Frame", Vector3.new(total + 1.2, height + 1.2, 0.1), CFrame.new(centerX, y, z - 0.02), DARK_WOOD, Enum.Material.Wood)
-	for index, colorIndex in ipairs(answers.windows) do
-		local color = MysteryConfig.CandleColors[colorIndex].color
-		local x = centerX - total / 2 + width / 2 + (index - 1) * (width + gap)
-		local glass = part(model, `Window{index}`, Vector3.new(width, height, 0.12), CFrame.new(x, y, z), color:Lerp(Color3.new(0, 0, 0), 0.4), Enum.Material.Neon)
-		glass.Transparency = 0.15
-		part(model, "LeadV", Vector3.new(0.12, height, 0.16), CFrame.new(x, y, z + 0.02), LEAD)
-		part(model, "LeadH", Vector3.new(width, 0.12, 0.16), CFrame.new(x, y + height * 0.15, z + 0.02), LEAD)
+-- Caixa (no espaço do modelo) de uma peça: mínimo e máximo.
+local function localBounds(model: Model, target: BasePart): (Vector3, Vector3)
+	local pivot = model:GetPivot()
+	local half = target.Size / 2
+	local lo = Vector3.new(math.huge, math.huge, math.huge)
+	local hi = -lo
+	for _, x in ipairs({ -1, 1 }) do
+		for _, y in ipairs({ -1, 1 }) do
+			for _, z in ipairs({ -1, 1 }) do
+				local point = pivot:PointToObjectSpace(target.CFrame:PointToWorldSpace(half * Vector3.new(x, y, z)))
+				lo = lo:Min(point)
+				hi = hi:Max(point)
+			end
+		end
 	end
-	model.Parent = parent
+	return lo, hi
 end
 
--- Candelabros encostados na parede norte, a oeste do arco (posições da
+-- Velas na cor da pista (brilhando um pouco, para a cor aparecer com a luz
+-- quente do Salão) e uma chama visível em cada uma, apagada: o cliente de
+-- quem resolveu acende ("FlameTip", fogo e a luz da vela do meio).
+local function dressCandelabra(model: Model, color: Color3)
+	local highest: BasePart? = nil
+	for _, descendant in ipairs(model:GetDescendants()) do
+		if descendant:IsA("BasePart") and descendant.Name == "Candle" then
+			local cframe = descendant.CFrame
+			local size = descendant.Size
+			descendant.Size = Vector3.new(size.X * CANDLE_THICKNESS, size.Y, size.Z * CANDLE_THICKNESS)
+			descendant.CFrame = cframe
+			descendant.Color = color
+			descendant.Material = Enum.Material.Neon
+			descendant.Transparency = 0.1
+		elseif descendant:IsA("BasePart") and descendant.Name == "Flame" then
+			local tip = Instance.new("Part")
+			tip.Name = "FlameTip"
+			tip.Shape = Enum.PartType.Ball
+			tip.Size = FLAME_SIZE
+			tip.CFrame = descendant.CFrame + Vector3.new(0, FLAME_SIZE.Y / 2, 0)
+			tip.Color = FLAME_COLOR
+			tip.Material = Enum.Material.Neon
+			tip.Transparency = 1
+			tip.Anchored = true
+			tip.CanCollide = false
+			tip.CanTouch = false
+			tip.CanQuery = false
+			tip.CastShadow = false
+			tip.Parent = descendant
+			local emitter = descendant:FindFirstChildOfClass("ParticleEmitter")
+			if emitter ~= nil then
+				emitter.Size = FLAME_PARTICLE
+			end
+			local current = highest
+			if current == nil or descendant.Position.Y > current.Position.Y then
+				highest = descendant
+			end
+		end
+	end
+	-- Uma luz por candelabro (a da vela do meio, a mais alta).
+	for _, light in ipairs(model:GetDescendants()) do
+		if light:IsA("PointLight") and light.Parent ~= highest then
+			light:Destroy()
+		elseif light:IsA("PointLight") then
+			light.Range = 10
+			light.Brightness = 1.4
+		end
+	end
+end
+
+-- Luz quente presa em `target`, deslocada `offset` (fora do móvel, para
+-- não ficar tapada por ele).
+local function lamp(target: BasePart, offset: Vector3, range: number, brightness: number)
+	local spot = Instance.new("Attachment")
+	spot.Name = "LampSpot"
+	spot.Position = offset
+	spot.Parent = target
+	local light = Instance.new("PointLight")
+	light.Color = LAMP_COLOR
+	light.Range = range
+	light.Brightness = brightness
+	light.Parent = spot
+end
+
+-- Quatro candelabros encostados na parede norte, a oeste da porta (da
 -- esquerda para a direita de quem olha para o norte). Devolve o centro.
 local function candelabra(parent: Instance, answers: Answers): Vector3
 	local mansion = MansionLayout.get()
 	local hall = mansion.rooms.GrandHall
-	local half = MansionConfig.PartitionThickness / 2
-	local floorY = mansion.floorY
-	local z = hall.minZ + half + 1.6
-	local firstX = hall.minX + 7.6
-	local spacing = 4
+	local wallZ = hall.minZ + MansionConfig.PartitionThickness / 2
+	local z = wallZ + 2.6
+	local firstX = hall.minX + 5.6
+	local spacing = 4.6
 	for index, colorIndex in ipairs(answers.candles) do
-		local base = Vector3.new(firstX + (index - 1) * spacing, floorY, z)
-		local model = Instance.new("Model")
+		local model = MysteryAssets.clone("Candelabra") :: Model
 		model.Name = `MysteryCandle{index}`
 		model:SetAttribute("CandleIndex", index)
 		model:SetAttribute("CandleColor", colorIndex)
-		local upright = CFrame.Angles(0, 0, math.pi / 2)
-		part(model, "Base", Vector3.new(0.4, 2.2, 2.2), CFrame.new(base + Vector3.new(0, 0.2, 0)) * upright, BRASS, Enum.Material.Metal, Enum.PartType.Cylinder)
-		part(model, "Pole", Vector3.new(5.6, 0.4, 0.4), CFrame.new(base + Vector3.new(0, 3.1, 0)) * upright, BRASS, Enum.Material.Metal, Enum.PartType.Cylinder)
-		local cup = part(model, "Cup", Vector3.new(1.4, 1.4, 1.4), CFrame.new(base + Vector3.new(0, 6.2, 0)), MysteryConfig.CandleColors[colorIndex].color, Enum.Material.Glass, Enum.PartType.Ball)
-		cup.Transparency = 0.1
-		part(model, "Candle", Vector3.new(1.5, 0.55, 0.55), CFrame.new(base + Vector3.new(0, 7.4, 0)) * upright, CANDLE_WAX, Enum.Material.SmoothPlastic, Enum.PartType.Cylinder)
-		local flame = part(model, "Flame", Vector3.new(0.4, 0.6, 0.4), CFrame.new(base + Vector3.new(0, 8.4, 0)), FLAME, Enum.Material.Neon, Enum.PartType.Ball)
-		-- Acesa só no cliente de quem resolveu (ou durante a tentativa).
-		flame.Transparency = 1
-		local light = Instance.new("PointLight")
-		light.Name = "Glow"
-		light.Color = FLAME
-		light.Range = 8
-		light.Brightness = 1.4
-		light.Enabled = false
-		light.Parent = flame
-		model.Parent = parent
+		local color = MysteryConfig.CandleColors[colorIndex].color
+		MysteryAssets.place(model, Vector3.new(firstX + (index - 1) * spacing, mansion.floorY, z), Vector3.zAxis, CANDELABRA_SCALE, parent)
+		dressCandelabra(model, color)
 	end
-	local center = Vector3.new(firstX + spacing * (#answers.candles - 1) / 2, floorY, z)
-	local anchor = part(parent, "MysteryCandlesPrompt", Vector3.new(1, 1, 1), CFrame.new(center + Vector3.new(0, 3.5, 0)), WOOD)
-	anchor.Transparency = 1
-	prompt(anchor, "Candles", "Acender as velas", "Velas do Salão")
+	local center = Vector3.new(firstX + spacing * (#answers.candles - 1) / 2, mansion.floorY, z)
+	MysteryAssets.blocker(parent, "MysteryCandlesBlock", Vector3.new(spacing * #answers.candles, 7, 3.4), CFrame.new(center + Vector3.new(0, 3.5, 0)))
+	local anchor = MysteryAssets.blocker(parent, "MysteryCandlesPrompt", Vector3.new(1, 1, 1), CFrame.new(center + Vector3.new(0, 3.5, 2)))
+	anchor.CanCollide = false
+	MysteryPropsBasic.prompt(anchor, "Candles", "Acender as velas", "Velas do Salão")
 	return center
 end
 
--- Relógio da torre: o mostrador fica na parede leste do Sótão, parado nas
--- 12h (cada cliente gira os seus ponteiros ao resolver).
-local function towerClock(parent: Instance): Vector3
+-- Vitrais na parede norte, a leste da porta, nas cores da ordem certa.
+local function stainedGlass(parent: Instance, answers: Answers)
+	local mansion = MansionLayout.get()
+	local hall = mansion.rooms.GrandHall
+	local wallZ = hall.minZ + MansionConfig.PartitionThickness / 2
+	local doorRight = (hall.minX + hall.maxX) / 2 + MansionConfig.ArchWidth / 2
+	local template = MysteryAssets.clone("StainedWindow") :: Model
+	local width = template:GetExtentsSize().X * WINDOW_SCALE
+	template:Destroy()
+	local gap = math.max(0, (hall.maxX - doorRight - #answers.windows * width) / (#answers.windows + 1))
+	for index, colorIndex in ipairs(answers.windows) do
+		local model = MysteryAssets.clone("StainedWindow") :: Model
+		model.Name = `MysteryWindow{index}`
+		local color = MysteryConfig.CandleColors[colorIndex].color
+		local main = model:FindFirstChild("MainGlass", true)
+		if main ~= nil then
+			setParts(main, function(glass: BasePart)
+				glass.Color = color
+				glass.Material = Enum.Material.Neon
+				glass.Transparency = 0.35
+			end)
+		end
+		local x = doorRight + gap * index + width * (index - 0.5)
+		MysteryAssets.place(model, Vector3.new(x, mansion.floorY + WINDOW_BOTTOM, wallZ + 0.25), Vector3.zAxis, WINDOW_SCALE, parent)
+	end
+end
+
+-- Face da tela pelo nome (atributo CanvasFace); Front se não valer.
+local function canvasFace(canvas: BasePart): Enum.NormalId
+	local faceName = canvas:GetAttribute("CanvasFace")
+	for _, item in ipairs(Enum.NormalId:GetEnumItems()) do
+		if item.Name == faceName then
+			return item
+		end
+	end
+	return Enum.NormalId.Front
+end
+
+-- Quadro emoldurado na parede (`wall`: ponto da parede no piso; `facing`:
+-- para dentro do cômodo). Devolve a SurfaceGui da tela (na moldura, se a
+-- tela faltar).
+local function painting(parent: Instance, name: string, wall: Vector3, facing: Vector3): SurfaceGui
+	local model = MysteryAssets.clone("Frame") :: Model
+	model.Name = name
+	local at = wall + facing.Unit * 0.2 + Vector3.new(0, PAINTING_BOTTOM, 0)
+	MysteryAssets.place(model, at, facing, FRAME_SCALE, parent)
+	local canvas = model:FindFirstChild("Canvas", true)
+	if canvas ~= nil and canvas:IsA("BasePart") then
+		return MysteryPropsBasic.surfaceGui(canvas, "Painting", canvasFace(canvas))
+	end
+	warn(`[BlocoPuff] Mystery: frame without Canvas ({name})`)
+	local fallback = MysteryAssets.blocker(model, "Canvas", Vector3.new(4, 4, 0.05), CFrame.lookAt(at, at + facing) * CFrame.new(0, 2.5, -0.1))
+	fallback.CanCollide = false
+	fallback.Transparency = 0
+	return MysteryPropsBasic.surfaceGui(fallback, "Painting")
+end
+
+-- Relógio de pêndulo no Sótão, de costas para a parede leste, parado nas
+-- 12h. Guarda onde ficam os ponteiros e o pêndulo para o cliente girar.
+local function grandfatherClock(parent: Instance): Vector3
 	local wing = MansionWingLayout.get()
-	local center = Vector3.new(wing.maxX - 0.45, wing.atticFloorY + 6.5, 20)
-	local model = Instance.new("Model")
+	local model = MysteryAssets.clone("GrandfatherClock") :: Model
 	model.Name = "MysteryTowerClock"
-	local frame = CFrame.lookAt(center, center - Vector3.xAxis)
-	part(model, "Ring", Vector3.new(0.3, 8.2, 8.2), CFrame.new(center + Vector3.new(0.1, 0, 0)), DARK_WOOD, Enum.Material.Wood, Enum.PartType.Cylinder)
-	local faceBoard = part(model, "Face", Vector3.new(7.2, 7.2, 0.05), frame * CFrame.new(0, 0, -0.1), CANVAS)
-	faceBoard.Transparency = 1
-	local gui = surfaceGui(faceBoard, "Clock")
-	gui.PixelsPerStud = 50
-	ClockFace.draw(gui :: any, 1)
-	-- Engrenagens de enfeite em volta.
-	for index, offset in ipairs({ Vector3.new(0, -5.6, 3.4), Vector3.new(0, 4.8, -4.2), Vector3.new(0, -4.4, -4.6) }) do
-		part(model, `Gear{index}`, Vector3.new(0.25, 1.8, 1.8), CFrame.new(center + offset + Vector3.new(0.1, 0, 0)), BRASS, Enum.Material.Metal, Enum.PartType.Cylinder)
+	-- Medidas antes de girar (no espaço do modelo).
+	local size = model:GetExtentsSize() * CLOCK_SCALE
+	local depth = size.Z
+	local base = Vector3.new(wing.maxX - WALL_GAP - depth / 2, wing.atticFloorY, 20)
+	MysteryAssets.place(model, base, -Vector3.xAxis, CLOCK_SCALE, parent)
+	local center = model:FindFirstChild("HandCenter", true)
+	if center ~= nil and center:IsA("BasePart") then
+		local handFrame = MysteryAssets.frameAt(model, center.Position)
+		model:SetAttribute("HandFrame", handFrame)
+		for _, name in ipairs({ "HourHand", "MinuteHand" }) do
+			local hand = model:FindFirstChild(name, true)
+			if hand ~= nil and hand:IsA("BasePart") then
+				hand:SetAttribute("RestOffset", handFrame:ToObjectSpace(hand.CFrame))
+			end
+		end
 	end
-	local anchor = part(model, "Hitbox", Vector3.new(1, 1, 1), CFrame.new(center - Vector3.new(1.5, 3, 0)), WOOD)
-	anchor.Transparency = 1
-	prompt(anchor, "Clock", "Acertar o relógio", "Relógio da Torre")
-	model.Parent = parent
-	return center
-end
-
--- Partitura da Vovó num suporte, no Sótão.
-local function sheetStand(parent: Instance, answers: Answers)
-	local wing = MansionWingLayout.get()
-	local base = Vector3.new(wing.maxX - 8, wing.atticFloorY, 8)
-	local model = Instance.new("Model")
-	model.Name = "MysterySheetStand"
-	local frame = CFrame.lookAt(base, base - Vector3.xAxis)
-	part(model, "Pole", Vector3.new(0.15, 3.4, 0.15), frame * CFrame.new(0, 1.7, 0), IRON, Enum.Material.Metal)
-	part(model, "Foot", Vector3.new(1.4, 0.12, 1.4), frame * CFrame.new(0, 0.06, 0), IRON, Enum.Material.Metal)
-	local board = part(model, "Sheet", Vector3.new(3.4, 2.2, 0.06), frame * CFrame.new(0, 3.9, 0) * CFrame.Angles(math.rad(18), 0, 0), CANVAS, Enum.Material.Fabric)
-	local gui = surfaceGui(board, "Sheet")
-	local paper = Instance.new("Frame")
-	paper.Size = UDim2.fromScale(1, 1)
-	paper.BackgroundColor3 = CANVAS
-	paper.Parent = gui
-	text(paper, "Title", "♪ Música da Vovó ♪", UDim2.fromScale(0.05, 0.04), UDim2.fromScale(0.9, 0.24), Color3.fromRGB(80, 50, 30))
-	for index = 0, 4 do
-		local line = Instance.new("Frame")
-		line.Position = UDim2.fromScale(0.04, 0.42 + index * 0.1)
-		line.Size = UDim2.new(0.92, 0, 0, 2)
-		line.BackgroundColor3 = Color3.fromRGB(120, 100, 80)
-		line.BorderSizePixel = 0
-		line.Parent = paper
+	local hinge = model:FindFirstChild("PendulumHinge", true)
+	local pendulum = model:FindFirstChild("Pendulum", true)
+	if hinge ~= nil and hinge:IsA("BasePart") and pendulum ~= nil and pendulum:IsA("BasePart") then
+		local swingFrame = MysteryAssets.frameAt(model, hinge.Position)
+		model:SetAttribute("SwingFrame", swingFrame)
+		pendulum:SetAttribute("RestOffset", swingFrame:ToObjectSpace(pendulum.CFrame))
 	end
-	local count = #answers.melody
-	for index, semitone in ipairs(answers.melody) do
-		local name = MysteryConfig.NoteNames[semitone] or "?"
-		text(paper, `Note{index}`, name, UDim2.fromScale(0.04 + (index - 1) * (0.92 / count), 0.44), UDim2.fromScale(0.92 / count, 0.36), Color3.fromRGB(40, 30, 60))
-	end
-	model.Parent = parent
-end
-
--- Nome das notas acima das teclas brancas do piano.
-local function pianoLabels(root: Instance)
-	local piano = root:FindFirstChild("Piano", true)
-	local body = if piano ~= nil then piano:FindFirstChild("Body") else nil
-	if body == nil or not body:IsA("BasePart") then
-		warn("[BlocoPuff] Mystery: piano not found for note labels")
-		return
-	end
-	local keys = #MysteryConfig.WhiteKeys
-	local length = keys * 1.05
-	local front = body.Position - Vector3.new(body.Size.X / 2 + 0.03, 0, 0)
-	local position = Vector3.new(front.X, body.Position.Y + 1.15, body.Position.Z)
-	local strip = part(piano :: Instance, "MysteryNoteStrip", Vector3.new(length, 0.7, 0.05), CFrame.lookAt(position, position - Vector3.xAxis), Color3.fromRGB(40, 30, 28))
-	local gui = surfaceGui(strip, "Notes")
-	for index, semitone in ipairs(MysteryConfig.WhiteKeys) do
-		text(gui :: any, `Note{index}`, MysteryConfig.NoteNames[semitone], UDim2.fromScale((index - 1) / keys, 0), UDim2.fromScale(1 / keys, 1), Color3.fromRGB(255, 236, 190))
-	end
-end
-
--- Cofrinho no Porão, encostado na parede leste.
-local function safe(parent: Instance): Vector3
-	local wing = MansionWingLayout.get()
-	local base = Vector3.new(wing.maxX - 1.6, wing.cellarFloorY, -6)
-	local model = Instance.new("Model")
-	model.Name = "MysterySafe"
-	local box = part(model, "Box", Vector3.new(2.4, 3, 3), CFrame.new(base + Vector3.new(0, 1.5, 0)), IRON, Enum.Material.DiamondPlate)
-	box.CanCollide = true
-	local door = part(model, "Door", Vector3.new(0.12, 2.5, 2.5), CFrame.new(base + Vector3.new(-1.26, 1.5, 0)), Color3.fromRGB(80, 84, 92), Enum.Material.Metal)
-	door:SetAttribute("ClosedCFrame", door.CFrame)
-	part(model, "Dial", Vector3.new(0.12, 0.9, 0.9), CFrame.new(base + Vector3.new(-1.36, 1.8, 0)), BRASS, Enum.Material.Metal, Enum.PartType.Cylinder)
-	part(model, "Handle", Vector3.new(0.12, 0.2, 0.8), CFrame.new(base + Vector3.new(-1.36, 0.9, 0)), BRASS, Enum.Material.Metal)
-	local coins = part(model, "Coins", Vector3.new(0.8, 1.6, 1.6), CFrame.new(base + Vector3.new(0, 0.6, 0)) * CFrame.Angles(0, 0, math.pi / 2), Color3.fromRGB(255, 205, 80), Enum.Material.Metal, Enum.PartType.Cylinder)
-	coins.Transparency = 1
-	-- Luz fraca em cima: o Porão é escuro.
-	local glow = Instance.new("PointLight")
-	glow.Color = Color3.fromRGB(255, 200, 130)
-	glow.Range = 9
-	glow.Brightness = 0.8
-	glow.Parent = box
-	prompt(box, "Safe", "Abrir o cofrinho", "Cofrinho do Porão")
-	model.Parent = parent
+	MysteryAssets.blocker(model, "Block", size, model:GetPivot() * CFrame.new(0, size.Y / 2, 0))
+	local anchor = MysteryAssets.blocker(model, "Hitbox", Vector3.new(1, 1, 1), CFrame.new(base + Vector3.new(-depth / 2 - 1.5, 3, 0)))
+	anchor.CanCollide = false
+	MysteryPropsBasic.prompt(anchor, "Clock", "Acertar o relógio", "Relógio da Torre")
 	return base
 end
 
+-- Estante com a partitura da Vovó, no Sótão.
+local function sheetStand(parent: Instance, answers: Answers)
+	local wing = MansionWingLayout.get()
+	local model = MysteryAssets.clone("MusicStand") :: Model
+	model.Name = "MysterySheetStand"
+	MysteryAssets.place(model, Vector3.new(wing.maxX - 8, wing.atticFloorY, 8), -Vector3.xAxis, STAND_SCALE, parent)
+	local sheet = model:FindFirstChild("Sheet", true)
+	if sheet ~= nil and sheet:IsA("BasePart") then
+		MysteryPropsBasic.paintSheet(MysteryPropsBasic.surfaceGui(sheet, "Sheet"), answers)
+		-- O Sótão é escuro: luz suave na frente da folha.
+		lamp(sheet, Vector3.new(0, 1, -2), 7, 0.8)
+	end
+end
+
+-- Cofre no Porão, de costas para a parede leste. A porta guarda a posição
+-- fechada e a dobradiça (lado -X do modelo); o dinheiro some até abrir.
+local function safe(parent: Instance): Vector3
+	local wing = MansionWingLayout.get()
+	local model = MysteryAssets.clone("Safe") :: Model
+	model.Name = "MysterySafe"
+	local size = model:GetExtentsSize() * SAFE_SCALE
+	local depth = size.Z
+	local base = Vector3.new(wing.maxX - WALL_GAP - depth / 2, wing.cellarFloorY, -6)
+	MysteryAssets.place(model, base, -Vector3.xAxis, SAFE_SCALE, parent)
+	for _, name in ipairs({ "Body", "Door" }) do
+		local metal = model:FindFirstChild(name, true)
+		if metal ~= nil and metal:IsA("BasePart") then
+			metal.Color = SAFE_COLOR
+			metal.Material = Enum.Material.Metal
+		end
+	end
+	local door = model:FindFirstChild("Door", true)
+	if door ~= nil and door:IsA("BasePart") then
+		local lo, hi = localBounds(model, door)
+		local hinge = model:GetPivot() * CFrame.new(lo.X, (lo.Y + hi.Y) / 2, (lo.Z + hi.Z) / 2)
+		door:SetAttribute("ClosedCFrame", door.CFrame)
+		door:SetAttribute("HingeCFrame", hinge)
+		door:SetAttribute("OpenAngle", 100)
+	end
+	local money = model:FindFirstChild("Money", true)
+	if money ~= nil then
+		money.Name = "Coins"
+		if money:IsA("BasePart") then
+			money.Transparency = 1
+		end
+		setParts(money, function(note: BasePart)
+			note.Transparency = 1
+		end)
+	end
+	local box = MysteryAssets.blocker(model, "Block", size, model:GetPivot() * CFrame.new(0, size.Y / 2, 0))
+	-- O Porão é escuro: luz quente na frente do cofre, acima dele.
+	lamp(box, Vector3.new(0, size.Y / 2 + 1, -size.Z / 2 - 1.5), 12, 1.3)
+	MysteryPropsBasic.prompt(box, "Safe", "Abrir o cofrinho", "Cofrinho do Porão")
+	return base
+end
+
+-- Nome das notas no piano: o de cauda já traz a faixa ("NoteStrip"); o
+-- antigo, de armário, ganha a do cenário simples.
+local function pianoLabels(root: Instance)
+	local piano = root:FindFirstChild("Piano", true)
+	local strip = if piano ~= nil then piano:FindFirstChild("NoteStrip", true) else nil
+	if strip ~= nil and strip:IsA("BasePart") then
+		MysteryPropsBasic.paintNotes(MysteryPropsBasic.surfaceGui(strip, "Notes"))
+		return
+	end
+	MysteryPropsBasic.pianoLabels(root)
+end
+
 function MysteryProps.build(parent: Instance, mansionRoot: Instance, answers: Answers): Built
+	if not MysteryAssets.has(MODELS) then
+		return MysteryPropsBasic.build(parent, mansionRoot, answers)
+	end
 	local mansion = MansionLayout.get()
 	local wing = MansionWingLayout.get()
 	local hall = mansion.rooms.GrandHall
+	local library = wing.rooms.Library
+	local music = wing.rooms.Music
 	local reserved: { { center: Vector3, size: Vector3 } } = {}
 
 	stainedGlass(parent, answers)
 	local candles = candelabra(parent, answers)
-	table.insert(reserved, { center = candles, size = Vector3.new(16, 0, 6) })
+	table.insert(reserved, { center = candles, size = Vector3.new(20, 0, 7) })
 
-	-- Quadro do relógio entre as portas da galeria (oeste) do Salão.
-	local clockClue = Vector3.new(hall.minX + 6, mansion.floorY, -11.25)
-	clockPainting(parent, clockClue, Vector3.new(1, 0, 0.3), answers)
-	table.insert(reserved, { center = clockClue, size = Vector3.new(5, 0, 5) })
+	-- Quadro do relógio na parede oeste, entre as portas da galeria.
+	local hallWestX = hall.minX + MansionConfig.PartitionThickness / 2
+	MysteryPropsBasic.paintClock(painting(parent, "MysteryClockPainting", Vector3.new(hallWestX, mansion.floorY, -11.25), Vector3.xAxis), answers)
 
-	local library = wing.rooms.Library
-	local music = wing.rooms.Music
-	digitPainting(parent, "MysteryDigit1", Vector3.new(library.maxX - 6, wing.floorY, library.maxZ - 4), Vector3.new(-1, 0, -0.4), 1, answers.code[1])
-	digitPainting(parent, "MysteryDigit2", Vector3.new(music.maxX - 5, wing.floorY, music.minZ + 4), Vector3.new(-1, 0, 0.4), 2, answers.code[2])
-	digitPainting(parent, "MysteryDigit3", Vector3.new(wing.minX + 6, wing.atticFloorY, 44), Vector3.new(1, 0, -0.3), 3, answers.code[3])
+	-- Dígitos do cofre: parede sul da Biblioteca, norte da Sala de Música e
+	-- oeste do Sótão.
+	local digits = {
+		{ wall = Vector3.new(library.maxX - 9, wing.floorY, library.maxZ - WALL_GAP), facing = -Vector3.zAxis },
+		{ wall = Vector3.new(music.maxX - 9, wing.floorY, music.minZ + WALL_GAP), facing = Vector3.zAxis },
+		{ wall = Vector3.new(wing.minX + WALL_GAP, wing.atticFloorY, 44), facing = Vector3.xAxis },
+	}
+	for index, spot in ipairs(digits) do
+		MysteryPropsBasic.paintDigit(painting(parent, `MysteryDigit{index}`, spot.wall, spot.facing), index, answers.code[index])
+	end
 
-	local clock = towerClock(parent)
+	local clock = grandfatherClock(parent)
+	table.insert(reserved, { center = clock, size = Vector3.new(6, 0, 6) })
 	sheetStand(parent, answers)
+	table.insert(reserved, { center = Vector3.new(wing.maxX - 8, wing.atticFloorY, 8), size = Vector3.new(4, 0, 4) })
 	pianoLabels(mansionRoot)
 	local safeAt = safe(parent)
 

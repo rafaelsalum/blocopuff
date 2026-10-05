@@ -13,6 +13,7 @@ local MansionConfig = require(ReplicatedStorage.Shared.config.MansionConfig)
 local MansionWingConfig = require(ReplicatedStorage.Shared.config.MansionWingConfig)
 local MansionWingLayout = require(ReplicatedStorage.Shared.modules.MansionWingLayout)
 local BuildingDecor = require(script.Parent.BuildingDecor)
+local MysteryAssets = require(script.Parent.MysteryAssets)
 
 type BuildingConfig = GameConfig.BuildingConfig
 type Wing = MansionWingLayout.Wing
@@ -35,6 +36,13 @@ local BRASS = Color3.fromRGB(214, 170, 80)
 -- Notas do piano: Dó a Dó (teclas brancas) e os sustenidos (pretas).
 local WHITE_KEYS = { 0, 2, 4, 5, 7, 9, 11, 12 }
 local BLACK_KEYS = { { after = 1, semitone = 1 }, { after = 2, semitone = 3 }, { after = 4, semitone = 6 }, { after = 5, semitone = 8 }, { after = 6, semitone = 10 } }
+-- Piano de cauda (modelo da Creator Store, em MysteryAssets).
+local GRAND_SCALE = 0.6
+local KEY_DEPTH = 1.3
+local KEY_HEIGHT = 0.3
+local WHITE_KEY = Color3.fromRGB(245, 242, 232)
+local BLACK_KEY = Color3.fromRGB(20, 20, 24)
+local PIANO_BLACK = Color3.fromRGB(34, 30, 34)
 
 local MansionWingDecor = {}
 
@@ -174,6 +182,70 @@ local function buildPiano(parent: Instance, base: Vector3)
 	model.Parent = parent
 end
 
+local function pianoKey(model: Model, name: string, size: Vector3, cframe: CFrame, color: Color3, semitone: number)
+	local keyPart = part(model, name, size, cframe, color, { material = Enum.Material.SmoothPlastic })
+	keyPart.CanQuery = true
+	keyPart.CanTouch = false
+	keyPart:SetAttribute(CONFIG.Piano.SemitoneAttribute, semitone)
+	CollectionService:AddTag(keyPart, CONFIG.Piano.Tag)
+end
+
+-- Piano de cauda com a cauda na parede leste e o teclado para oeste. As 8
+-- teclas brancas (e 5 pretas) tocáveis, grandes, ocupam o lugar do teclado
+-- do modelo; a faixa "NoteStrip" abaixo delas recebe o nome das notas. Sem o
+-- modelo, devolve false (vale o piano de armário).
+local function buildGrandPiano(parent: Instance, base: Vector3): boolean
+	local model = MysteryAssets.clone("GrandPiano")
+	if model == nil then
+		return false
+	end
+	model.Name = "Piano"
+	local function scaled(name: string): number
+		local value = model:GetAttribute(name)
+		return (if typeof(value) == "number" then value else 0) * GRAND_SCALE
+	end
+	-- Medidas antes de girar (no espaço do modelo).
+	local size = model:GetExtentsSize() * GRAND_SCALE
+	local length = size.Z
+	MysteryAssets.place(model, base - Vector3.new(1 + length / 2, 0, 0), -Vector3.xAxis, GRAND_SCALE, parent)
+	for _, name in ipairs({ "WhiteKeys", "BlackKeys" }) do
+		local keys = model:FindFirstChild(name, true)
+		if keys ~= nil and keys:IsA("BasePart") then
+			keys.Transparency = 1
+		end
+	end
+	local pivot = model:GetPivot()
+	local left, right = scaled("KeyboardMaxX"), scaled("KeyboardMinX")
+	local top, front = scaled("KeyTopY"), scaled("KeyFrontZ")
+	-- O +X do modelo é a esquerda de quem toca: a nota grave fica lá.
+	local keyWidth = (left - right) / #WHITE_KEYS
+	for index, semitone in ipairs(WHITE_KEYS) do
+		local x = left - (index - 0.5) * keyWidth
+		pianoKey(model, `WhiteKey{index}`, Vector3.new(keyWidth - 0.06, KEY_HEIGHT, KEY_DEPTH), pivot * CFrame.new(x, top - KEY_HEIGHT / 2, front + KEY_DEPTH / 2), WHITE_KEY, semitone)
+	end
+	for index, black in ipairs(BLACK_KEYS) do
+		local x = left - black.after * keyWidth
+		pianoKey(model, `BlackKey{index}`, Vector3.new(keyWidth * 0.55, KEY_HEIGHT, KEY_DEPTH * 0.6), pivot * CFrame.new(x, top + 0.1, front + KEY_DEPTH * 0.7), BLACK_KEY, black.semitone)
+	end
+	-- Faixa das notas na frente do piano, logo abaixo das teclas.
+	local strip = part(model, "NoteStrip", Vector3.new(left - right, 0.55, 0.05), pivot * CFrame.new((left + right) / 2, top - 0.7, front - 0.26), Color3.fromRGB(40, 30, 28))
+	strip.CastShadow = false
+	-- Preto laqueado (o preto puro do modelo some na sala escura).
+	local body = model:FindFirstChild("Body", true)
+	if body ~= nil and body:IsA("BasePart") then
+		body.Color = PIANO_BLACK
+		body.Material = Enum.Material.SmoothPlastic
+		body.Reflectance = 0.12
+	end
+	-- Corpo sólido atrás do teclado (a malha não colide) e o banco.
+	local bodyFront = front + KEY_DEPTH + 0.3
+	local bodyDepth = size.Z / 2 - bodyFront
+	local block = MysteryAssets.blocker(model, "Block", Vector3.new(size.X, top, bodyDepth), pivot * CFrame.new(0, top / 2, bodyFront + bodyDepth / 2))
+	block.CanQuery = false
+	solidPart(model, "Bench", Vector3.new(4, 2, 1.8), pivot * CFrame.new((left + right) / 2, 1, front - 2.4), Color3.fromRGB(28, 22, 22))
+	return true
+end
+
 local function gramophone(parent: Instance, base: Vector3)
 	BuildingDecor.createSideTable(parent, "GramophoneTable", base, GameConfig.Building)
 	local top = base + Vector3.new(0, 3.2, 0)
@@ -211,11 +283,14 @@ local function buildMusicRoom(parent: Instance, wing: Wing, style: BuildingConfi
 	local folder = Instance.new("Model")
 	folder.Name = "MusicRoom"
 	local centerZ = (room.minZ + room.maxZ) / 2
-	buildPiano(folder, Vector3.new(room.maxX, floorY, centerZ))
+	local pianoBase = Vector3.new(room.maxX, floorY, centerZ)
+	if not buildGrandPiano(folder, pianoBase) then
+		buildPiano(folder, pianoBase)
+	end
 	rug(folder, "MusicRug", Vector3.new(room.maxX - 12, floorY, centerZ), 12, 14, Color3.fromRGB(60, 40, 90), style)
 	-- Plateia de frente para o piano.
 	for index, dz in ipairs({ -5, 5 }) do
-		BuildingDecor.createSofa(folder, `MusicSofa{index}`, Vector3.new(room.maxX - 20, floorY, centerZ + dz), Vector3.xAxis, 6, style)
+		BuildingDecor.createSofa(folder, `MusicSofa{index}`, Vector3.new(room.maxX - 24, floorY, centerZ + dz), Vector3.xAxis, 6, style)
 	end
 	gramophone(folder, Vector3.new(room.minX + 4, floorY, room.maxZ - 4))
 	local southInner = room.maxZ - 0.7

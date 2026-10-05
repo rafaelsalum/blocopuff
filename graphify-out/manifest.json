@@ -125,8 +125,8 @@
     "semantic_hash": ""
   },
   "README.md": {
-    "mtime": 1791166984.988624,
-    "ast_hash": "74620314a303031eca7fc83031824ef0",
+    "mtime": 1791170581.6026232,
+    "ast_hash": "8354db4171b1fdcddf76f15dc128df76",
     "semantic_hash": ""
   },
   "src/client/controllers/CombatCameraController.luau": {
@@ -1305,8 +1305,8 @@
     "semantic_hash": ""
   },
   "tests/Locale.spec.luau": {
-    "mtime": 1791165745.2231534,
-    "ast_hash": "5ef0f3360b4e74a12658bf085dccccb7",
+    "mtime": 1791169990.1062331,
+    "ast_hash": "d5046fc5d86572a8dc715672cf5f72cb",
     "semantic_hash": ""
   },
   "docs/FASE_5C_CASARAO_VIVO.md": {
@@ -1345,8 +1345,8 @@
     "semantic_hash": ""
   },
   "src/server/services/MansionWingDecor.luau": {
-    "mtime": 1791151270.1781461,
-    "ast_hash": "e9a6e1087bd05edf30f800cac85526ff",
+    "mtime": 1791170694.653849,
+    "ast_hash": "be2a5610a142e8ccd0af05037fd130d8",
     "semantic_hash": ""
   },
   "src/server/services/PianoService.luau": {
@@ -1425,8 +1425,8 @@
     "semantic_hash": ""
   },
   "src/client/controllers/MysteryController.luau": {
-    "mtime": 1791166913.258017,
-    "ast_hash": "b6b8e5d7ffd3ac040dbdc2c502ae7d01",
+    "mtime": 1791170694.6542037,
+    "ast_hash": "7396b38df2b8785fb238c312ef91046b",
     "semantic_hash": ""
   },
   "src/client/ui/MysteryView.luau": {
@@ -1440,8 +1440,8 @@
     "semantic_hash": ""
   },
   "src/server/services/MysteryProps.luau": {
-    "mtime": 1791166444.381312,
-    "ast_hash": "674675b9ca22f24a34b2970918b06c8a",
+    "mtime": 1791170694.6533244,
+    "ast_hash": "ad8d73f909f8a0630366fa7ff7fbcc81",
     "semantic_hash": ""
   },
   "src/server/services/MysteryService.luau": {
@@ -1467,6 +1467,51 @@
   "tests/MysteryRules.spec.luau": {
     "mtime": 1791166929.4615376,
     "ast_hash": "f4e0beba06701e10a110e53ef5b23af6",
+    "semantic_hash": ""
+  },
+  "src/server/services/MysteryAssets.luau": {
+    "mtime": 1791169775.6293473,
+    "ast_hash": "3b03f02520765c61ea1d2f74fe635c7e",
+    "semantic_hash": ""
+  },
+  "src/server/services/MysteryPropsBasic.luau": {
+    "mtime": 1791169854.107859,
+    "ast_hash": "8dc4b65f81f8506c4ad794f0228eade3",
+    "semantic_hash": ""
+  },
+  "docs/candidatos-misterios/1-candelabro-ferro.jpg": {
+    "mtime": 1791168875.756179,
+    "ast_hash": "65453242b73d06aa4f8b17a79c95164b",
+    "semantic_hash": ""
+  },
+  "docs/candidatos-misterios/2-castical-latao.jpg": {
+    "mtime": 1791168875.758808,
+    "ast_hash": "4e0ec42593459cda86d046a61fd82f2b",
+    "semantic_hash": ""
+  },
+  "docs/candidatos-misterios/3-vitrais.jpg": {
+    "mtime": 1791168875.7610662,
+    "ast_hash": "10e291ce2547f97ca8d109164549274e",
+    "semantic_hash": ""
+  },
+  "docs/candidatos-misterios/4-relogio-pendulo.jpg": {
+    "mtime": 1791168875.7639678,
+    "ast_hash": "c4804dae1f71274544ef34dcd199b3ef",
+    "semantic_hash": ""
+  },
+  "docs/candidatos-misterios/5-cofre.jpg": {
+    "mtime": 1791168875.7664533,
+    "ast_hash": "25aac0a77277f6cfc056b8270d7392c4",
+    "semantic_hash": ""
+  },
+  "docs/candidatos-misterios/6-piano-cauda-e-moldura.jpg": {
+    "mtime": 1791168875.7685883,
+    "ast_hash": "556627fbd2f863f13704cd584b4d18a2",
+    "semantic_hash": ""
+  },
+  "docs/candidatos-misterios/7-estante-partitura.jpg": {
+    "mtime": 1791168875.770611,
+    "ast_hash": "5843dd8c13e9218f055783fab0a55d52",
     "semantic_hash": ""
   }
 }
