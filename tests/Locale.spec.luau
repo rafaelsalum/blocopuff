@@ -272,6 +272,12 @@ local CATALOGS: { { path: string, texts: (string) -> { string } } } = {
 		end,
 	},
 	{
+		path = "src/shared/config/BaronRoomsConfig.luau",
+		texts = function(source)
+			return fieldValues(source, { "name", "title", "action", "object", "hint" })
+		end,
+	},
+	{
 		path = "src/server/services/MysteryProps.luau",
 		texts = function(source)
 			-- Em prompt(peça, id, ação, objeto) o primeiro literal é o id.

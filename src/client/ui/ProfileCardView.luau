@@ -12,6 +12,7 @@ local TweenService = game:GetService("TweenService")
 
 local Lang = require(ReplicatedStorage.Shared.i18n.Lang)
 local LevelCurve = require(ReplicatedStorage.Shared.modules.LevelCurve)
+local BaronRoomsConfig = require(ReplicatedStorage.Shared.config.BaronRoomsConfig)
 local MysteryConfig = require(ReplicatedStorage.Shared.config.MysteryConfig)
 local ProfileTypes = require(ReplicatedStorage.Shared.types.ProfileTypes)
 local RelicCatalog = require(ReplicatedStorage.Shared.config.RelicCatalog)
@@ -347,6 +348,9 @@ function ProfileCardView.new(
 		local titles = RelicCatalog.titlesFor(relics, snapshot.dailyRelicCount)
 		if MysteryConfig.allSolved(snapshot.mysteries) then
 			table.insert(titles, MysteryConfig.AllTitle)
+		end
+		for _, title in ipairs(BaronRoomsConfig.titlesFor(snapshot.baronRooms)) do
+			table.insert(titles, title)
 		end
 		titleLine.Text = if #titles > 0 then Lang.t("🏅 %s", Lang.t(titles[1])) else Lang.t("🏅 Sem título ainda (veja o 📜 Álbum)")
 		notice.Visible = not snapshot.saved

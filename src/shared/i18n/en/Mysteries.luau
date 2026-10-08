@@ -49,4 +49,20 @@ return table.freeze({
 	["MISTÉRIO RESOLVIDO!"] = "MYSTERY SOLVED!",
 	["%s · +%d 🎟"] = "%s · +%d 🎟",
 	["TODOS OS MISTÉRIOS!"] = "ALL MYSTERIES!",
+
+	-- Salas Secretas do Barão
+	["Gabinete do Vovô Puff"] = "Grandpa Puff's Study",
+	["Sala do Tesouro"] = "Treasure Room",
+	["Herdeiro do Vovô Puff"] = "Grandpa Puff's Heir",
+	["Caçador de Tesouros"] = "Treasure Hunter",
+	["Pegar o troféu"] = "Take the trophy",
+	["Troféu do Vovô Puff"] = "Grandpa Puff's Trophy",
+	["Abrir o baú"] = "Open the chest",
+	["Baú do Tesouro"] = "Treasure Chest",
+	["A estante do leste da Biblioteca se abriu"] = "The east bookshelf in the Library swung open",
+	["O túnel do Porão está aberto"] = "The Cellar tunnel is open",
+	["SALA SECRETA!"] = "SECRET ROOM!",
+	["PASSAGEM SECRETA!"] = "SECRET PASSAGE!",
+	["NOVO TÍTULO!"] = "NEW TITLE!",
+	["Título: %s"] = "Title: %s",
 })

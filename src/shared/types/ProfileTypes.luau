@@ -114,6 +114,8 @@ export type ProfileSnapshot = {
 	dailyRelicCount: number,
 	-- Mistérios do Barão já resolvidos (ids do MysteryConfig).
 	mysteries: { string },
+	-- Salas Secretas do Barão com o prêmio pego (ids do BaronRoomsConfig).
+	baronRooms: { string },
 	-- Eventos desta atualização (para comemorar uma vez só).
 	dailyReward: DailyReward?,
 	completedChallenges: { string }?,

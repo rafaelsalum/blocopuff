@@ -46,6 +46,7 @@ local OnboardingService = require(script.services.OnboardingService)
 local DashService = require(script.services.DashService)
 local PianoService = require(script.services.PianoService)
 local MysteryService = require(script.services.MysteryService)
+local BaronRoomsService = require(script.services.BaronRoomsService)
 local RelicService = require(script.services.RelicService)
 
 local WORLD_NAME = "BlocoPuffWorld"
@@ -233,6 +234,15 @@ if mysteryOk then
 	print("[BlocoPuff] Baron's mysteries ready")
 else
 	warn(string.format("[BlocoPuff] Baron's mysteries unavailable: %s", tostring(mysteryFailure)))
+end
+
+-- Salas Secretas do Barão (5C.3): acesso e prêmios do Gabinete e do
+-- Tesouro (o cenário vem com a ala leste). Opcional.
+local baronRoomsOk, baronRoomsFailure = pcall(BaronRoomsService.start, PuffadorService.getRemotesFolder())
+if baronRoomsOk then
+	print("[BlocoPuff] Baron's secret rooms ready")
+else
+	warn(string.format("[BlocoPuff] Baron's secret rooms unavailable: %s", tostring(baronRoomsFailure)))
 end
 
 -- Relíquias e Álbum do Casarão (5C.2). Depois das estações e da ala leste

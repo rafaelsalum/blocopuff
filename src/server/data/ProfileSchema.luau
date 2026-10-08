@@ -78,6 +78,8 @@ export type Profile = {
 	dailyRelicCount: number,
 	-- Mistérios do Barão resolvidos (5C.3): id → os.time(). Opcional.
 	mysteries: { [string]: number },
+	-- Salas Secretas do Barão com o prêmio pego (5C.3): id → os.time(). Opcional.
+	baronRooms: { [string]: number },
 	appliedRounds: { string },
 	createdAt: number,
 	updatedAt: number,
@@ -155,6 +157,7 @@ function ProfileSchema.default(now: number): Profile
 		dailyRelicDay = 0,
 		dailyRelicCount = 0,
 		mysteries = {},
+		baronRooms = {},
 		appliedRounds = {},
 		createdAt = now,
 		updatedAt = now,
@@ -338,6 +341,7 @@ function ProfileSchema.fromStored(raw: unknown, now: number): (Profile, boolean)
 		profile.dailyRelicDay = cleanNumber(data.dailyRelicDay, 0)
 		profile.dailyRelicCount = cleanNumber(data.dailyRelicCount, 0)
 		profile.mysteries = readDatedIds(data.mysteries, now, MAX_MYSTERY_ID)
+		profile.baronRooms = readDatedIds(data.baronRooms, now, MAX_MYSTERY_ID)
 		profile.session = readSession(data.session)
 		return profile, true
 	end
@@ -385,6 +389,7 @@ function ProfileSchema.fromStored(raw: unknown, now: number): (Profile, boolean)
 		dailyRelicDay = cleanNumber(data.dailyRelicDay, 0),
 		dailyRelicCount = cleanNumber(data.dailyRelicCount, 0),
 		mysteries = readDatedIds(data.mysteries, now, MAX_MYSTERY_ID),
+		baronRooms = readDatedIds(data.baronRooms, now, MAX_MYSTERY_ID),
 		appliedRounds = readAppliedRounds(data.appliedRounds),
 		createdAt = repairedCreatedAt(cleanLarge(data.createdAt, now), puffs, secrets, now),
 		updatedAt = repairedTime(cleanLarge(data.updatedAt, now), now),
@@ -497,6 +502,7 @@ function ProfileSchema.toStored(profile: Profile): { [string]: any }
 		dailyRelicDay = profile.dailyRelicDay,
 		dailyRelicCount = profile.dailyRelicCount,
 		mysteries = table.clone(profile.mysteries),
+		baronRooms = table.clone(profile.baronRooms),
 		appliedRounds = table.clone(profile.appliedRounds),
 		createdAt = profile.createdAt,
 		updatedAt = profile.updatedAt,

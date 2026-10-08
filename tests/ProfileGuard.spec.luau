@@ -187,6 +187,16 @@ do
 	check("normal relic save has no anomalies", #none == 0 and fresh.dailyRelicCount == 6)
 end
 
+-- Salas Secretas do Barão: prêmio pego nunca some.
+do
+	local stored = profile({ baronRooms = { Study = 7 } })
+	local merged, anomalies = ProfileGuard.mergeForSave(stored, profile({ baronRooms = { Treasure = 9 } }))
+	check("baron rooms are restored", merged.baronRooms.Study == 7 and merged.baronRooms.Treasure == 9)
+	check("baron rooms anomaly reported", table.find(anomalies, "baronRooms+1") ~= nil)
+	local fresh, none = ProfileGuard.mergeForSave(stored, profile({ baronRooms = { Study = 7, Treasure = 9 } }))
+	check("normal baron rooms save has no anomalies", #none == 0 and fresh.baronRooms.Treasure == 9)
+end
+
 -- Contagem de Puffs.
 check("countPuffs", ProfileGuard.countPuffs(profile()) == 2)
 check("countPuffs nil", ProfileGuard.countPuffs(nil) == 0)

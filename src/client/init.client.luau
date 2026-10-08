@@ -39,6 +39,7 @@ local PuffMachineController = require(script.controllers.PuffMachineController)
 local ChallengesController = require(script.controllers.ChallengesController)
 local RelicController = require(script.controllers.RelicController)
 local MysteryController = require(script.controllers.MysteryController)
+local BaronRoomsController = require(script.controllers.BaronRoomsController)
 local PartyController = require(script.controllers.PartyController)
 local ReactionController = require(script.controllers.ReactionController)
 local LobbyStationsController = require(script.controllers.LobbyStationsController)
@@ -243,6 +244,14 @@ local mysteryOk, mysteryErr = pcall(function()
 end)
 if not mysteryOk then
 	warn(string.format("[BlocoPuff] Failed to start mystery controller: %s", tostring(mysteryErr)))
+end
+
+-- Salas Secretas do Barão (5C.3).
+local baronRoomsOk, baronRoomsErr = pcall(function()
+	BaronRoomsController.start()
+end)
+if not baronRoomsOk then
+	warn(string.format("[BlocoPuff] Failed to start baron rooms controller: %s", tostring(baronRoomsErr)))
 end
 
 local partyOk, partyErr = pcall(function()

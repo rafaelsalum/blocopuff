@@ -11,7 +11,9 @@ local GameConfig = require(ReplicatedStorage.Shared.config.GameConfig)
 local MansionConfig = require(ReplicatedStorage.Shared.config.MansionConfig)
 local MansionWingConfig = require(ReplicatedStorage.Shared.config.MansionWingConfig)
 local MansionWingLayout = require(ReplicatedStorage.Shared.modules.MansionWingLayout)
+local BaronRoomsLayout = require(ReplicatedStorage.Shared.modules.BaronRoomsLayout)
 local Lang = require(ReplicatedStorage.Shared.i18n.Lang)
+local BaronRoomsBuilder = require(script.Parent.BaronRoomsBuilder)
 local BuildingDecor = require(script.Parent.BuildingDecor)
 local MansionDoors = require(script.Parent.MansionDoors)
 local MansionPlaque = require(script.Parent.MansionPlaque)
@@ -124,15 +126,29 @@ local function railAround(parent: Instance, name: string, hole: Box, floorY: num
 	solid(parent, `{name}End`, box(endX - r / 2, floorY, hole.min.Z, endX + r / 2, top, hole.max.Z), style.FrameColor, Enum.Material.Wood)
 end
 
+-- Vão de uma Sala Secreta do Barão na parede leste (BaronRoomsLayout).
+local function passageHole(id: string): Box
+	local room = BaronRoomsLayout.room(id)
+	assert(room ~= nil, `Unknown baron room {id}`)
+	local hole = room.passage.hole
+	return box(hole.minX, hole.minY, hole.minZ, hole.maxX, hole.maxY, hole.maxZ)
+end
+
 -- Paredes externas da ala (norte, sul e leste) entre `y0` e `y1`; a oeste
--- fica a parede do Casarão.
-local function outerWalls(parent: Instance, name: string, wing: Wing, y0: number, y1: number, color: Color3, material: Enum.Material, withWest: boolean)
+-- fica a parede do Casarão. `eastHole`: vão de uma Sala Secreta na leste
+-- (fechado pelo lacre do BaronRoomsBuilder).
+local function outerWalls(parent: Instance, name: string, wing: Wing, y0: number, y1: number, color: Color3, material: Enum.Material, withWest: boolean, eastHole: Box?)
 	local t = wing.wallThickness
 	-- No andar principal a parede do Casarão já cobre o canto oeste.
 	local x0 = if withWest then wing.minX - t else wing.minX
 	solid(parent, `{name}North`, box(x0, y0, wing.minZ - t, wing.maxX + t, y1, wing.minZ), color, material)
 	solid(parent, `{name}South`, box(x0, y0, wing.maxZ, wing.maxX + t, y1, wing.maxZ + t), color, material)
-	solid(parent, `{name}East`, box(wing.maxX, y0, wing.minZ, wing.maxX + t, y1, wing.maxZ), color, material)
+	local east = box(wing.maxX, y0, wing.minZ, wing.maxX + t, y1, wing.maxZ)
+	if eastHole ~= nil then
+		WallBuilder.createWallWithHoles(parent, `{name}East`, east, { eastHole }, color, material)
+	else
+		solid(parent, `{name}East`, east, color, material)
+	end
 	if withWest then
 		solid(parent, `{name}West`, box(wing.minX - t, y0, wing.minZ, wing.minX, y1, wing.maxZ), color, material)
 	end
@@ -147,7 +163,7 @@ local function createMainLevel(parent: Instance, wing: Wing, style: BuildingConf
 	local upHole = stairHole(wing.upStairs)
 	slabWithHole(parent, "WingFloor", box(wing.minX, floorY - SLAB, wing.minZ - t, wing.maxX + t, floorY, wing.maxZ + t), downHole, MansionConfig.FloorColor, Enum.Material.WoodPlanks)
 	slabWithHole(parent, "WingCeiling", box(wing.minX, wing.ceilingY, wing.minZ - t, wing.maxX + t, wing.atticFloorY, wing.maxZ + t), upHole, CONFIG.AtticColor, Enum.Material.WoodPlanks)
-	outerWalls(parent, "WingWall", wing, floorY, wing.ceilingY, CONFIG.WallpaperColors.StairHall :: Color3, Enum.Material.Plaster, false)
+	outerWalls(parent, "WingWall", wing, floorY, wing.ceilingY, CONFIG.WallpaperColors.StairHall :: Color3, Enum.Material.Plaster, false, passageHole("Study"))
 
 	local half = MansionConfig.PartitionThickness / 2
 	for _, doorway in ipairs(wing.doorways) do
@@ -171,7 +187,7 @@ local function createCellar(parent: Instance, wing: Wing)
 	local t = wing.wallThickness
 	local floorTop = wing.cellarFloorY
 	solid(parent, "CellarFloor", box(wing.minX - t, floorTop - SLAB, wing.minZ - t, wing.maxX + t, floorTop, wing.maxZ + t), CONFIG.CellarFloorColor, Enum.Material.Cobblestone)
-	outerWalls(parent, "CellarWall", wing, floorTop, wing.floorY - SLAB, CONFIG.CellarColor, Enum.Material.Brick, true)
+	outerWalls(parent, "CellarWall", wing, floorTop, wing.floorY - SLAB, CONFIG.CellarColor, Enum.Material.Brick, true, passageHole("Treasure"))
 end
 
 -- Papel de parede, lambri e quadros das faces do andar principal.
@@ -191,10 +207,22 @@ local function decorateWalls(parent: Instance, wing: Wing, style: BuildingConfig
 		end
 		return gaps
 	end
+	-- Vão do Gabinete (atrás da estante): sem papel de parede nem moldura.
+	local studyHole = passageHole("Study")
 	local function face(name: string, a: Vector3, b: Vector3, inward: Vector3, color: Color3, faceZ: number?, faceX: number?, noArt: boolean?)
 		local origin = Vector3.new((a.X + b.X) / 2, 0, (a.Z + b.Z) / 2)
 		local along = inward:Cross(Vector3.yAxis)
 		local length = Vector2.new(b.X - a.X, b.Z - a.Z).Magnitude
+		local gaps = gapsFor(origin, along, length, faceZ, faceX)
+		if name == "LibraryEast" then
+			local center = (studyHole.min + studyHole.max) / 2
+			table.insert(gaps, {
+				offset = (center - origin):Dot(along),
+				frame = false,
+				width = studyHole.max.Z - studyHole.min.Z,
+				height = studyHole.max.Y - studyHole.min.Y,
+			})
+		end
 		BuildingDecor.decorateStory(parent, {
 			name = name,
 			origin = origin,
@@ -208,7 +236,7 @@ local function decorateWalls(parent: Instance, wing: Wing, style: BuildingConfig
 			art = noArt ~= true,
 			windows = false,
 			door = false,
-			gaps = gapsFor(origin, along, length, faceZ, faceX),
+			gaps = gaps,
 			lampRange = 0,
 			lampBrightness = 0,
 		}, rng)
@@ -280,6 +308,8 @@ function MansionWing.build(parent: Instance, style: BuildingConfig): Model
 	createLights(model, wing, style)
 	MansionDoors.build(model, wing.doorways)
 	MansionWingDecor.build(model, wing, style)
+	-- Depois da decoração: marca a estante e o túnel como passagens.
+	BaronRoomsBuilder.build(model, style)
 	model.Parent = parent
 	return model
 end

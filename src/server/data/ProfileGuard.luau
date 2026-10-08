@@ -136,6 +136,12 @@ function ProfileGuard.mergeForSave(stored: unknown, outgoing: Data): (Data, { st
 		table.insert(anomalies, `mysteries+{restoredMysteries}`)
 	end
 
+	local baronRooms, restoredRooms = mergeSecrets(old.baronRooms, outgoing.baronRooms)
+	merged.baronRooms = baronRooms
+	if restoredRooms > 0 then
+		table.insert(anomalies, `baronRooms+{restoredRooms}`)
+	end
+
 	if numberOr(old.dailyRelicCount, 0) > numberOr(outgoing.dailyRelicCount, 0) then
 		merged.dailyRelicCount = old.dailyRelicCount
 		merged.dailyRelicDay = math.max(numberOr(old.dailyRelicDay, 0), numberOr(outgoing.dailyRelicDay, 0))

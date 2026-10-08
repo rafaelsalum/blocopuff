@@ -292,6 +292,33 @@ Seção **TESTES DA PARTIDA** no painel admin. Vale só para o servidor atual e 
 - **Testar de verdade:** só com o jogo publicado. O Roblox só preenche quem convidou em convites reais, e o Studio pode não ter acesso ao DataStore e ao MessagingService. Os banners de recompensa da página do convite são configurados no Creator Hub (Engagement > Referral Rewards), com o jogo publicado há pelo menos 1 dia.
 - **Testes:** `lune run tests/ReferralRules.spec`.
 
+### Salas Secretas do Barão (Fase 5C, entrega 5C.3, parte 3)
+
+Duas salas novas, encostadas do lado de fora da parede leste da ala. Elas fecham a 5C.3.
+
+- **📚 Gabinete do Vovô Puff** (andar principal): fica atrás da estante do leste com o livro vermelho (`EastShelf2`) na Biblioteca. Abre para quem achou as 10 páginas do Diário. Dentro há escrivaninha, globo, poltrona, estantes, o retrato do Vovô e o **Troféu do Vovô Puff**.
+- **💰 Sala do Tesouro** (Porão): fica no fim de um túnel atrás das tábuas do `CellarTunnel`. Abre para quem resolveu o Cofrinho do Porão. Tem tochas, moedas espalhadas e o **Baú do Tesouro**.
+- **Passagem só na tela de quem tem acesso:** para todo mundo, o vão na parede fica fechado por um lacre. O servidor publica o acesso no Player (atributos `BaronRoom_Study` e `BaronRoom_Treasure`, calculados do perfil). O cliente de quem tem acesso some com o lacre e as tábuas, que também deixam de colidir (a física do personagem roda no cliente), e gira a estante na dobradiça.
+  - **Amigos** veem a passagem aberta enquanto alguém com acesso estiver a até 14 studs da entrada ou dentro da sala. Ela fecha 3 s depois que essa pessoa sai.
+  - **Quem está dentro sempre consegue sair** (`BaronRoomsRules.shouldOpen`).
+- **Prêmio:** +15 🎟 por sala e um título: **Herdeiro do Vovô Puff** (Gabinete) e **Caçador de Tesouros** (Tesouro). Os títulos aparecem no Álbum e no cartão de perfil. Amigos que entraram junto não ganham: o prompt nem aparece para eles. Depois de pegar, o prompt some e o baú fica aberto na tela de quem pegou. Quem acaba de ganhar acesso (a última página, o cofrinho) recebe o aviso "PASSAGEM SECRETA!".
+- **Segurança:** o cliente só pede (remote `BaronRooms`, `("Claim", id)`). O servidor confere tudo:
+  - o acesso pelo perfil (não pelo atributo);
+  - se a pessoa está no lobby;
+  - se está dentro da sala e a até 12 studs do prêmio;
+  - 1 s entre pedidos;
+  - uma vez por jogador.
+- **Perfil:** campo `baronRooms` (id → data). É opcional e não exige nova versão. O `ProfileGuard` não deixa um save antigo apagar um prêmio pego.
+- **Telemetria:** `BaronRoomClaimed` (com a contagem e o id) e a entrada de tickets `BaronRoom` na economia nativa.
+- **Código:**
+  - `config/BaronRoomsConfig`;
+  - `modules/BaronRoomsRules` (regras puras);
+  - `modules/BaronRoomsLayout` (geometria derivada da ala);
+  - `services/BaronRoomsBuilder` (salas, lacres e prêmios, chamado pelo `MansionWing`, que abre os vãos na parede leste);
+  - `services/BaronRoomsService`;
+  - `controllers/BaronRoomsController`.
+- **Testes:** `lune run tests/BaronRoomsRules.spec`.
+
 ### Mistérios do Barão (Fase 5C, entrega 5C.3, parte 2)
 
 Quatro quebra-cabeças no Casarão. As pistas ficam espalhadas pelos cômodos, e várias páginas do Diário apontam para elas. **Cada servidor sorteia as próprias respostas** (`MysteryRules.generate`), então a solução não vaza de um servidor para outro.
@@ -361,11 +388,11 @@ Escopo em `docs/FASE_5C_CASARAO_VIVO.md`. A 5C.3 sai em três partes: o Diário 
 ### Ala leste do Casarão: Biblioteca, Sala de Música, Sótão e Porão (Fase 5C, entrega 5C.1, parte 2)
 
 - **Ala nova** a leste do Casarão (`MansionWing`, geometria em `MansionWingLayout`, medidas em `MansionWingConfig`):
-  - **Biblioteca** (norte): porta para o Salão da Coleção, estantes altas, escada de rodinhas e canto de leitura. Tem um livro vermelho "errado" (`WrongBook`), reservado para a passagem secreta da 5C.3.
+  - **Biblioteca** (norte): porta para o Salão da Coleção, estantes altas, escada de rodinhas e canto de leitura. Tem um livro vermelho "errado" (`WrongBook`), que marca a passagem para o Gabinete do Vovô Puff (5C.3).
   - **Hall da Escadaria** (meio): porta para o Jardim do Barão, escada que sobe ao Sótão e escada que desce ao Porão.
   - **Sala de Música** (sul): piano tocável, sofás, gramofone e partituras.
   - **Sótão** (em cima, a ala inteira): escuro, com baús, móveis cobertos por lençóis e teias.
-  - **Porão** (embaixo): barris, adega, goteiras com som e a entrada fechada do túnel (`CellarTunnel`, reservada para a 5C.3).
+  - **Porão** (embaixo): barris, adega, goteiras com som e a entrada fechada do túnel (`CellarTunnel`), que leva à Sala do Tesouro (5C.3).
 - **Portas:** todas as portas da ala usam as mesmas portas automáticas com som da parte 1, um pouco menores que os arcos. Cada lado tem uma placa dizendo para onde a porta leva.
 - **Escadas:** os degraus são de verdade e têm uma rampa invisível por cima, para subir liso no celular. Há guarda-corpos nos lados abertos e em volta dos buracos.
 - **Piano** (`PianoService`): clicar ou tocar numa tecla toca a nota para todos por perto. São 13 teclas, de Dó a Dó, com os sustenidos, e a tecla afunda um pouco a cada nota. Há intervalo mínimo por tecla e por jogador.

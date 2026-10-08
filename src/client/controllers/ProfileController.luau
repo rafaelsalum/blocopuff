@@ -11,6 +11,7 @@ local RunService = game:GetService("RunService")
 local PuffCatalog = require(ReplicatedStorage.Shared.config.PuffCatalog)
 local DailyConfig = require(ReplicatedStorage.Shared.config.DailyConfig)
 local SecretCatalog = require(ReplicatedStorage.Shared.config.SecretCatalog)
+local BaronRoomsConfig = require(ReplicatedStorage.Shared.config.BaronRoomsConfig)
 local MysteryConfig = require(ReplicatedStorage.Shared.config.MysteryConfig)
 local RelicCatalog = require(ReplicatedStorage.Shared.config.RelicCatalog)
 local PuffadorConstants = require(ReplicatedStorage.Shared.modules.PuffadorConstants)
@@ -261,6 +262,9 @@ local function parse(raw: unknown): ProfileSnapshot?
 		mysteries = parseIds(data.mysteries, function(id: unknown): boolean
 			return typeof(id) == "string" and table.find(MysteryConfig.Ids, id) ~= nil
 		end, #MysteryConfig.Ids) or {},
+		baronRooms = parseIds(data.baronRooms, function(id: unknown): boolean
+			return typeof(id) == "string" and table.find(BaronRoomsConfig.Ids, id) ~= nil
+		end, #BaronRoomsConfig.Ids) or {},
 		dailyRelicDay = readNumber(data.dailyRelicDay),
 		dailyRelicCount = readNumber(data.dailyRelicCount),
 		relicEvent = parseRelicEvent(data.relicEvent),
