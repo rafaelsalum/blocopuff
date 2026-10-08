@@ -317,9 +317,10 @@ function MysteryView.new(playerGui: PlayerGui, onSubmit: (id: string, answer: { 
 		hint.Text = if solved then Lang.t("✓ Você já resolveu este mistério!") else Lang.t(info.hint)
 		hint.TextColor3 = if solved then UiTheme.Colors.Green else UiTheme.Colors.InkSoft
 		status.Text = ""
-		clockPage.Visible = id == "Clock"
+		-- Resolvido: sem controles (relógio e cofre); as velas aparecem acesas.
+		clockPage.Visible = id == "Clock" and not solved
 		candlePage.Visible = id == "Candles"
-		safePage.Visible = id == "Safe"
+		safePage.Visible = id == "Safe" and not solved
 		table.clear(lit)
 		candleColors = if candles ~= nil then table.clone(candles) else {}
 		renderCandles()

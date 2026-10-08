@@ -2,6 +2,7 @@
 
 -- Testes das regras dos Mistérios do Barão (rodar com: lune run tests/MysteryRules.spec.luau).
 
+local MysteryPrompts = require("../src/shared/modules/MysteryPrompts")
 local MysteryRules = require("../src/server/data/MysteryRules")
 
 local passed = 0
@@ -132,6 +133,14 @@ local three = { Clock = 1, Candles = 2, Piano = 3 }
 local all, last = MysteryRules.solve(three, "Safe", IDS, 5, 10, 100)
 check("last mystery pays the bonus", all ~= nil and last ~= nil and last.allSolved and last.tickets == 15 and last.solvedCount == 4)
 check("solve keeps the original", three.Safe == nil)
+
+-- Depois de resolvido, o prompt some (o quebra-cabeça não convida a repetir);
+-- o piano continua tocável.
+check("solved clock hides its prompt", MysteryPrompts.hidesWhenSolved("Clock"))
+check("solved candles hide their prompt", MysteryPrompts.hidesWhenSolved("Candles"))
+check("solved safe hides its prompt", MysteryPrompts.hidesWhenSolved("Safe"))
+check("piano stays playable", not MysteryPrompts.hidesWhenSolved("Piano"))
+check("unknown id keeps prompt", not MysteryPrompts.hidesWhenSolved("Nope"))
 
 print(`{passed} passed, {failures} failed`)
 if failures > 0 then

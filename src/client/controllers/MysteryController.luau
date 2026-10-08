@@ -4,7 +4,9 @@
 -- cenário (atributo MysteryConfig.PromptAttribute) abrem a tela do
 -- quebra-cabeça, a tentativa vai ao servidor e a resposta comemora (ou
 -- avisa que errou). Para quem já resolveu, o cenário muda só na tela dele:
--- velas acesas, cofrinho aberto e o relógio da torre na hora certa.
+-- velas acesas, cofrinho aberto e o relógio da torre na hora certa, e o
+-- prompt daquele mistério some (`MysteryPrompts`), para não convidar a
+-- resolver de novo.
 
 local Players = game:GetService("Players")
 local ProximityPromptService = game:GetService("ProximityPromptService")
@@ -16,6 +18,7 @@ local Workspace = game:GetService("Workspace")
 local Lang = require(ReplicatedStorage.Shared.i18n.Lang)
 local MysteryConfig = require(ReplicatedStorage.Shared.config.MysteryConfig)
 local ProfileTypes = require(ReplicatedStorage.Shared.types.ProfileTypes)
+local MysteryPrompts = require(ReplicatedStorage.Shared.modules.MysteryPrompts)
 local PuffadorConstants = require(ReplicatedStorage.Shared.modules.PuffadorConstants)
 local StateAttributeNames = require(ReplicatedStorage.Shared.types.StateAttributeNames)
 local NotificationManager = require(script.Parent.Parent.notifications.NotificationManager)
@@ -190,12 +193,25 @@ local function setTowerClock(folder: Instance): boolean
 	return true
 end
 
+-- Desliga, só para este jogador, os prompts de um mistério resolvido.
+local function hideSolvedPrompts(folder: Instance, id: string)
+	if not MysteryPrompts.hidesWhenSolved(id) then
+		return
+	end
+	for _, prompt in ipairs(folder:GetDescendants()) do
+		if prompt:IsA("ProximityPrompt") and prompt:GetAttribute(MysteryConfig.PromptAttribute) == id then
+			prompt.Enabled = false
+		end
+	end
+end
+
 -- Muda o cenário (só para este jogador) de um mistério resolvido.
 local function applySolved(id: string)
 	local folder = mysteriesFolder()
 	if folder == nil or applied[id] then
 		return
 	end
+	hideSolvedPrompts(folder, id)
 	if id == "Candles" then
 		for index = 1, #MysteryConfig.CandleColors do
 			local model = folder:FindFirstChild(`MysteryCandle{index}`)
@@ -289,6 +305,9 @@ function MysteryController.start()
 	ProximityPromptService.PromptTriggered:Connect(function(prompt: ProximityPrompt, triggeredBy: Player)
 		local id = prompt:GetAttribute(MysteryConfig.PromptAttribute)
 		if triggeredBy ~= player or typeof(id) ~= "string" or isCompeting(player) then
+			return
+		end
+		if solved[id] and MysteryPrompts.hidesWhenSolved(id) then
 			return
 		end
 		newView.open(id, solved[id] == true, if id == "Candles" then candleColors() else nil)
