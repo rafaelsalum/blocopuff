@@ -43,6 +43,12 @@ for seed = 1, 200 do
 end
 check("always one ghost and one detective", valid == 200)
 check("needs two candidates", MysteryModeRules.assignRoles({ 10 }, {}, nil, sequence({ 0.5 })) == nil)
+-- Dois humanos já bastam (os bots são Moradores): um Fantasma, um Detetive,
+-- e o Fantasma alterna entre eles.
+local pair = MysteryModeRules.assignRoles({ 10, 20 }, {}, nil, sequence({ 0.1, 0.5 }))
+check("two humans get both roles", pair ~= nil and pair.ghost ~= pair.detective)
+local nextPair = MysteryModeRules.assignRoles({ 10, 20 }, {}, if pair ~= nil then pair.ghost else nil, sequence({ 0.1, 0.5 }))
+check("ghost alternates between two humans", pair ~= nil and nextPair ~= nil and nextPair.ghost ~= pair.ghost)
 
 -- O Fantasma da rodada passada não repete (com outra opção).
 local repeats = 0

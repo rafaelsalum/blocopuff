@@ -53,7 +53,7 @@ O jogador passa a:
 - **Voto pela porta do mirante** (acrescentado depois da 5D.3, para o jogador escolher o que quer jogar):
   - cada uma das 3 portas do mirante leva o nome e a cor de um modo (`DoorModes`: Corrida, Arena no meio, Mistério); a fila continua uma só;
   - entrar no mirante por uma porta é votar no modo dela; o voto vale enquanto o jogador estiver na fila (com a Ficha da Partida também) e muda se ele sair e entrar por outra porta; quem entra pelo botão JOGAR ou só pela Party não vota;
-  - a próxima partida é o modo mais votado entre os escalados que **pode rodar** (o Mistério sem 4 humanos não conta, e vale o segundo mais votado); empate segue a ordem da rotação;
+  - a próxima partida é o modo mais votado entre os escalados que **pode rodar** (o Mistério sem 2 humanos não conta, e vale o segundo mais votado); empate segue a ordem da rotação;
   - o voto vale mais que a regra do novato e que a de não repetir o modo novo (os jogadores escolheram); sem nenhum voto, segue a rotação, que não anda nas partidas votadas;
   - os painéis do mirante mostram os votos ao vivo e o jogador recebe um aviso "SEU VOTO"; a prévia do próximo modo é recalculada a cada segundo da contagem.
 - **Anúncio do próximo modo:**
@@ -121,7 +121,7 @@ O jogador passa a:
 
 - **Corrida:** RoboPuffs sobem por pontos de caminho da rampa, erram às vezes (pulam tarde um barril) e usam o Puffador com pouca frequência. Mesmas regras de recompensa da 5B.
 - **Mistério:** bots só podem ser **Moradores**. Andam entre os cômodos, pegam moedas e fogem quando um jogador corre para eles. **Nunca** são Fantasma nem Detetive, porque o modo depende de blefe e leitura de gente.
-- O Mistério só entra na rotação com **pelo menos 4 humanos** (os bots completam até 6). Abaixo disso, a rotação pula para a Arena.
+- O Mistério roda com **pelo menos 2 humanos** (os bots completam até 6 como Moradores). Com só 2 o Detetive sabe que o Fantasma é o outro humano, mas o voto na porta precisa valer para quem joga em dupla; com 3+ volta a haver dúvida. Abaixo de 2, a rotação pula para a Arena.
 
 ---
 
@@ -197,7 +197,7 @@ Módulos puros, com testes antes da implementação:
 - [ ] Com a rotação desligada (só Arena), nada muda no comportamento nem no perfil (5D.1).
 - [ ] O próximo modo aparece no intervalo e na abertura, para todos.
 - [ ] Novatos jogam as 3 primeiras partidas na Arena.
-- [ ] O Mistério nunca começa com menos de 4 humanos.
+- [ ] O Mistério nunca começa com menos de 2 humanos (fora o teste solo do Studio).
 - [ ] Na Corrida, todo objeto que cai tem aviso antes, e ninguém é eliminado.
 - [ ] No Mistério, nenhum jogador consegue descobrir o papel de outro pela rede ou pela interface.
 - [ ] O Puffador cai quando o Detetive erra ou desmaia, e qualquer Morador pode pegá-lo.

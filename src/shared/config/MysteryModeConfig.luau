@@ -22,7 +22,9 @@ export type WingConfig = {
 export type MysteryModeConfig = {
 	Wing: WingConfig,
 	Duration: number,
-	-- Humanos mínimos para o Mistério entrar na rotação.
+	-- Humanos mínimos para o Mistério rodar (Fantasma e Detetive são sempre
+	-- humanos; os bots completam como Moradores). Com 2, o segredo é fraco,
+	-- mas o voto na porta roxa precisa valer para quem joga em dupla.
 	MinHumans: number,
 	-- Tempo (s) do começo sem sustos, para todos se espalharem.
 	StartGrace: number,
@@ -62,7 +64,7 @@ local MysteryModeConfig: MysteryModeConfig = {
 		LightRange = 32,
 	}),
 	Duration = 180,
-	MinHumans = 4,
+	MinHumans = 2,
 	StartGrace = 10,
 	ScareRange = 6,
 	ScareCooldown = 1,
