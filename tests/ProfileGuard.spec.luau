@@ -197,6 +197,17 @@ do
 	check("normal baron rooms save has no anomalies", #none == 0 and fresh.baronRooms.Treasure == 9)
 end
 
+-- Limites do dia (Fantasminha, presente do Barão): não dá para burlar.
+do
+	local stored = profile({ ghostDay = 20, ghostCount = 4, baraoGiftDay = 20, baraoGiftCount = 2 })
+	local stale = ProfileGuard.mergeForSave(stored, profile({ ghostDay = 20, ghostCount = 1, baraoGiftDay = 19, baraoGiftCount = 3 }))
+	check("ghost count never drops on the same day", stale.ghostCount == 4 and stale.ghostDay == 20)
+	check("older gift day is replaced by the stored one", stale.baraoGiftDay == 20 and stale.baraoGiftCount == 2)
+	local nextDay, none = ProfileGuard.mergeForSave(stored, profile({ ghostDay = 21, ghostCount = 1, baraoGiftDay = 20, baraoGiftCount = 3 }))
+	check("a new day keeps the lower count", nextDay.ghostDay == 21 and nextDay.ghostCount == 1)
+	check("normal daily counters save has no anomalies", #none == 0 and nextDay.baraoGiftCount == 3)
+end
+
 -- Contagem de Puffs.
 check("countPuffs", ProfileGuard.countPuffs(profile()) == 2)
 check("countPuffs nil", ProfileGuard.countPuffs(nil) == 0)

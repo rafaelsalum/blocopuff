@@ -2,7 +2,7 @@
 
 -- Portas do Casarão no cliente (Fase 5C.1). O servidor monta as folhas
 -- fechadas (MansionDoors); aqui cada porta abre sozinha quando alguém (você,
--- outro jogador ou um bot) chega perto, para o lado oposto de quem chegou,
+-- outro jogador, um bot ou o Barão passeando) chega perto, para o lado oposto de quem chegou,
 -- com rangido, e fecha batendo quando todos saem. As folhas não têm
 -- colisão: a animação é só visual e cada cliente anima a sua.
 
@@ -10,11 +10,14 @@ local CollectionService = game:GetService("CollectionService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
+local Workspace = game:GetService("Workspace")
 
 local MansionConfig = require(ReplicatedStorage.Shared.config.MansionConfig)
 local StateAttributeNames = require(ReplicatedStorage.Shared.types.StateAttributeNames)
+local BaraoWalk = require(ReplicatedStorage.Shared.modules.BaraoWalk)
 
 local CONFIG = MansionConfig.Door
+local FRIENDLY_BARAO_TAG = "BaraoFriendly"
 -- Intervalo (s) entre as buscas de quem está perto.
 local SCAN_INTERVAL = 0.1
 -- Folhas que ainda não chegaram do servidor: novas tentativas.
@@ -178,6 +181,14 @@ local function collectRoots(): { Vector3 }
 		local root = bot:FindFirstChild("HumanoidRootPart")
 		if root ~= nil and root:IsA("BasePart") then
 			table.insert(positions, root.Position)
+		end
+	end
+	-- O Barão do Jardim passeando (a posição sai do horário do servidor).
+	for _, barao in ipairs(CollectionService:GetTagged(FRIENDLY_BARAO_TAG)) do
+		local elapsed = BaraoWalk.elapsed(barao, Workspace:GetServerTimeNow())
+		if elapsed ~= nil then
+			local cframe = BaraoWalk.pose(BaraoWalk.route(), elapsed)
+			table.insert(positions, cframe.Position)
 		end
 	end
 	return positions

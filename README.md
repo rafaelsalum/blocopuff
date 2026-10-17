@@ -292,6 +292,46 @@ Seção **TESTES DA PARTIDA** no painel admin. Vale só para o servidor atual e 
 - **Testar de verdade:** só com o jogo publicado. O Roblox só preenche quem convidou em convites reais, e o Studio pode não ter acesso ao DataStore e ao MessagingService. Os banners de recompensa da página do convite são configurados no Creator Hub (Engagement > Referral Rewards), com o jogo publicado há pelo menos 1 dia.
 - **Testes:** `lune run tests/ReferralRules.spec`.
 
+### Vida no Casarão: Fantasminha Puff e Barão passeando (Fase 5C, entrega 5C.4, parte 1)
+
+- **👻 Fantasminha Puff:**
+  - **Quando aparece:** só com alguém no lobby. O primeiro vem 90 s depois que o servidor sobe; depois, um a cada 3 a 5 min, num dos 8 cômodos do Álbum (nunca o mesmo da vez anterior).
+  - **Onde:** o ponto livre é achado com o índice do `RelicSpots`. Ele flutua 3,2 studs acima do piso, ou um pouco acima do móvel quando o ponto cai em cima de um.
+  - **Aviso discreto** para quem está no lobby: "👻 Um Fantasminha apareceu! · 📚 Biblioteca".
+  - **Pegar:** o primeiro jogador do lobby a encostar nele ganha +2 🎟, até 5 por dia. Os outros recebem "Fulano pegou o Fantasminha!".
+  - **Limite do dia:** quem já chegou no limite não consome o Fantasminha (os outros ainda podem pegar) e recebe o aviso uma vez.
+  - **Sem ninguém:** ele some sozinho em 45 s.
+  - **Visual:** feito de peças (corpo, barra ondulada, olhinhos, bochechas, bracinhos, brilho e faíscas). No cliente ele flutua, balança, vira para quem chega perto e some numa nuvenzinha.
+  - **Som:** o risinho fica em `GiggleSoundId`, que ainda está vazio (pendente na lista de sons, #41).
+- **🐶 Barão passeando:**
+  - **Quando:** com alguém no lobby, a cada 1,5 a 2,5 min ele sai da caminha e faz uma volta de uns 50 s:
+    - Jardim;
+    - arco norte, até o Salão da Coleção, onde cheira o chão;
+    - de volta ao Jardim;
+    - espia o Salão Principal pelo arco do meio;
+    - caminha de novo.
+  - **Rota:** `modules/BaraoWalk`, sempre pelo meio dos arcos. No fim ele vira para o arco em cima da caminha e deita. O modelo é `Persistent` no streaming, porque só o cliente move ele. Ele não colide com ninguém e as portas dos arcos abrem para ele também.
+  - **Sincronia:** o servidor publica só o início do passeio e a pausa do carinho (atributos `BaraoWalkStart` e `BaraoWalkPause`). Servidor e cliente calculam a mesma posição pelo horário do servidor. O aviso de carinho acompanha ele a cada 0,2 s.
+  - **Carinho:** funciona onde ele estiver. Andando, ele para, comemora e depois segue.
+  - **Presente:** cada carinho tem 10% de chance de presente (+2 🎟), até 3 por dia ("🎁 PRESENTE DO BARÃO!").
+- **Segurança:** tudo é decidido no servidor:
+  - o toque só vale para quem está no lobby, perto (raiz a até 4,5 studs do centro dele, conferido a cada 0,25 s) e dentro do mesmo cômodo (não atravessa parede);
+  - com a carteira no teto (99.999 🎟), nada é pago e a cota do dia não é gasta;
+  - o carinho confere a distância até a posição atual dele;
+  - os limites do dia vêm do perfil.
+- **Perfil:** campos `ghostDay`, `ghostCount`, `baraoGiftDay` e `baraoGiftCount`. São opcionais e não exigem nova versão. O `ProfileGuard` mantém o dia mais recente e, no mesmo dia, a maior contagem: um save antigo não reabre o limite.
+- **Telemetria:** `GhostCaught` (com a contagem do dia e o cômodo), `BaraoGift` e as entradas de tickets `Ghost` e `BaraoGift` na economia nativa.
+- **Código:**
+  - `config/MansionLifeConfig` (todos os números);
+  - `data/MansionLifeRules` e `modules/WalkPath` (regras puras);
+  - `modules/BaraoWalk`;
+  - `services/MansionLifeService` (Fantasminha e o remote `MansionLife`);
+  - `services/MansionGhostModel`;
+  - `services/BaraoWalkService`;
+  - `controllers/MansionLifeController`;
+  - o passeio animado no `BaraoVisualController`.
+- **Testes:** `lune run tests/MansionLifeRules.spec`.
+
 ### Salas Secretas do Barão (Fase 5C, entrega 5C.3, parte 3)
 
 Duas salas novas, encostadas do lado de fora da parede leste da ala. Elas fecham a 5C.3.

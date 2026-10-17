@@ -186,6 +186,19 @@ local function isClear(index: Index, position: Vector3): boolean
 	return true
 end
 
+-- Verdadeiro se nenhuma peça visível ocupa a caixa de centro `center` e
+-- tamanho `size` (para quem flutua, como o Fantasminha).
+function RelicSpots.isFree(index: Index, center: Vector3, size: Vector3): boolean
+	local lo = center - size / 2
+	local hi = center + size / 2
+	for _, box in ipairs(boxesNear(index, lo.X, hi.X, lo.Z, hi.Z)) do
+		if box.lo.X < hi.X and box.hi.X > lo.X and box.lo.Y < hi.Y and box.hi.Y > lo.Y and box.lo.Z < hi.Z and box.hi.Z > lo.Z then
+			return false
+		end
+	end
+	return true
+end
+
 local function farFrom(position: Vector3, occupied: { Vector3 }): boolean
 	for _, other in ipairs(occupied) do
 		if (other - position).Magnitude < MIN_SEPARATION then

@@ -40,6 +40,7 @@ local ChallengesController = require(script.controllers.ChallengesController)
 local RelicController = require(script.controllers.RelicController)
 local MysteryController = require(script.controllers.MysteryController)
 local BaronRoomsController = require(script.controllers.BaronRoomsController)
+local MansionLifeController = require(script.controllers.MansionLifeController)
 local PartyController = require(script.controllers.PartyController)
 local ReactionController = require(script.controllers.ReactionController)
 local LobbyStationsController = require(script.controllers.LobbyStationsController)
@@ -252,6 +253,14 @@ local baronRoomsOk, baronRoomsErr = pcall(function()
 end)
 if not baronRoomsOk then
 	warn(string.format("[BlocoPuff] Failed to start baron rooms controller: %s", tostring(baronRoomsErr)))
+end
+
+-- Vida no Casarão (5C.4): Fantasminha Puff e o presente do Barão.
+local lifeOk, lifeErr = pcall(function()
+	MansionLifeController.start()
+end)
+if not lifeOk then
+	warn(string.format("[BlocoPuff] Failed to start mansion life controller: %s", tostring(lifeErr)))
 end
 
 local partyOk, partyErr = pcall(function()

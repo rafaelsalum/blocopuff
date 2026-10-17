@@ -14,7 +14,6 @@
 -- distância máxima e nada animado continuamente pelo servidor.
 
 local CollectionService = game:GetService("CollectionService")
-local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local MansionConfig = require(ReplicatedStorage.Shared.config.MansionConfig)
@@ -23,7 +22,8 @@ local PuffCatalog = require(ReplicatedStorage.Shared.config.PuffCatalog)
 local MansionLayout = require(ReplicatedStorage.Shared.modules.MansionLayout)
 local PuffEffects = require(ReplicatedStorage.Shared.modules.PuffEffects)
 local BaraoModel = require(ReplicatedStorage.Shared.modules.BaraoModel)
-local TelemetryService = require(script.Parent.TelemetryService)
+local BaraoWalk = require(ReplicatedStorage.Shared.modules.BaraoWalk)
+local BaraoWalkService = require(script.Parent.BaraoWalkService)
 
 type PuffDefinition = PuffCatalog.PuffDefinition
 
@@ -33,14 +33,12 @@ local SERVICE_NAME = "LobbyStationsService"
 local STATION_ATTRIBUTE = "LobbyStation"
 local SIGN_DISTANCE = 45
 local PROMPT_DISTANCE = 9
-local PET_COOLDOWN = 2
 -- Barão do Jardim: tamanho, caminha e quanto tempo fica feliz no carinho.
 local FRIENDLY_BARAO_SCALE = 1.15
 local FRIENDLY_BED_SIZE = 6.5
 local FRIENDLY_PROMPT_GAP = 1.5
 local FRIENDLY_PROMPT_HEIGHT = 1
 local FRIENDLY_BARAO_TAG = "BaraoFriendly"
-local PET_ATTRIBUTE = "BaraoPet"
 -- Vitrine: Puffs por fileira e distância entre pedestais.
 local SHOWCASE_PER_ROW = 11
 local SHOWCASE_SPACING = 9.4
@@ -50,7 +48,6 @@ local SHOWCASE_EFFECT_RATE = 0.25
 local LobbyStationsService = {}
 
 local started = false
-local lastPet: { [Player]: number } = {}
 
 local function part(parent: Instance, name: string, size: Vector3, cframe: CFrame, color: Color3, material: Enum.Material?, shape: Enum.PartType?): Part
 	local instance = Instance.new("Part")
@@ -141,17 +138,20 @@ end
 
 -- Barão amigável: dorme numa caminha; carinho faz ele acordar, pular e
 -- abanar o rabo. Quem anima é o cliente (BaraoVisualController, tag
--- BaraoFriendly); aqui só o contador "BaraoPet" avisa do carinho.
+-- BaraoFriendly); o carinho, o presente e o passeio pelos salões ficam no
+-- BaraoWalkService.
 local function buildFriendlyBarao(parent: Instance, base: Vector3)
 	-- Cilindro com o eixo (X) em pé: um disco baixo.
 	local bed = part(parent, "BaraoBed", Vector3.new(0.6, FRIENDLY_BED_SIZE, FRIENDLY_BED_SIZE), CFrame.new(base + Vector3.new(0, 0.3, 0)), Color3.fromRGB(64, 40, 70), Enum.Material.Fabric, Enum.PartType.Cylinder)
 	bed.CFrame = CFrame.new(base + Vector3.new(0, 0.3, 0)) * CFrame.Angles(0, 0, math.rad(90))
 	local barao = BaraoModel.build(FRIENDLY_BARAO_SCALE)
 	barao.Name = "BaraoLobby"
-	-- De frente para o arco do Salão Principal (−X); o modelo olha para −Z.
-	local restCFrame = CFrame.new(base + Vector3.new(0, 0.6, 0)) * CFrame.Angles(0, math.pi / 2, 0)
+	local restCFrame = BaraoWalk.restCFrame()
 	barao:PivotTo(restCFrame)
-	barao:SetAttribute(PET_ATTRIBUTE, 0)
+	barao:SetAttribute(BaraoModel.PetAttribute, 0)
+	-- Ele passeia só na tela de cada um (o modelo do servidor fica na
+	-- caminha): não pode sair do streaming de quem está longe do Jardim.
+	barao.ModelStreamingMode = Enum.ModelStreamingMode.Persistent
 	barao:SetAttribute(BaraoModel.RestAttribute, restCFrame)
 	barao.Parent = parent
 	CollectionService:AddTag(barao, FRIENDLY_BARAO_TAG)
@@ -190,23 +190,7 @@ local function buildFriendlyBarao(parent: Instance, base: Vector3)
 	anchor.CanTouch = false
 	anchor.CastShadow = false
 	local proximity = prompt(anchor, "Barao", Lang.t("Fazer carinho"), Lang.t("Barão"))
-	local happy = false
-	proximity.Triggered:Connect(function(player: Player)
-		local clock = os.clock()
-		local last = lastPet[player]
-		if happy or (last ~= nil and clock - last < PET_COOLDOWN) then
-			return
-		end
-		lastPet[player] = clock
-		happy = true
-		zzz.Text = "💜"
-		TelemetryService.lobbyEvent(player, "BaraoPet", 1)
-		barao:SetAttribute(PET_ATTRIBUTE, ((barao:GetAttribute(PET_ATTRIBUTE) :: number?) or 0) + 1)
-		task.delay(BaraoModel.FriendlyHappySeconds, function()
-			zzz.Text = "Zzz"
-			happy = false
-		end)
-	end)
+	BaraoWalkService.start({ model = barao, anchor = anchor, prompt = proximity, status = zzz })
 end
 
 -- Um Puff exposto: nuvem de três bolinhas foscas nas cores do rastro, sobre
@@ -341,14 +325,10 @@ function LobbyStationsService.start(worldRoot: Model)
 	buildShowcase(folder, floorY, collection.minX + 8, { collection.minZ + 5, collection.minZ + 15 })
 	buildPuffdexLectern(folder, at((collection.minX + collection.maxX) / 2, collection.maxZ - half - 6))
 	buildMachine(folder, at(collection.maxX - 4.5, collection.maxZ - half - 9), -1)
-	buildFriendlyBarao(folder, MansionLayout.roomCenter("Garden"))
+	buildFriendlyBarao(folder, BaraoWalk.bedBase())
 	buildShop(folder, at(garden.maxX - 3.5, (garden.minZ + garden.maxZ) / 2 + 12), -1)
 	buildChallengeBoard(folder, at(MansionLayout.room("Meeting").minX + 1.5, meeting.Z - 5))
 	buildPartyPost(folder, meeting + Vector3.new(0, 0, 13))
-
-	Players.PlayerRemoving:Connect(function(player: Player)
-		lastPet[player] = nil
-	end)
 end
 
 return table.freeze(LobbyStationsService)

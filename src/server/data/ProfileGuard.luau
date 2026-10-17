@@ -9,6 +9,8 @@
 --   * Conquistas secretas, relíquias e mistérios resolvidos: todo gravado
 --     continua.
 --   * Relíquia do Dia: a contagem e o último dia nunca caem.
+--   * Limites do dia (Fantasminha, presente do Barão): o dia mais recente
+--     vale e, no mesmo dia, a contagem maior (não dá para burlar o limite).
 --   * Estatísticas, nível, XP e prestígio: ficam com o maior valor (o XP só
 --     pode cair quando o prestígio sobe, que zera o nível de propósito).
 --   * Tickets: gastar é normal, mas o total ganho nunca cai; se cair, a
@@ -37,6 +39,21 @@ end
 
 local function numberOr(value: unknown, fallback: number): number
 	return number(value) or fallback
+end
+
+-- Contador diário (`dayKey`, `countKey`): fica o dia mais recente e, no
+-- mesmo dia, o maior contador. Devolve se precisou corrigir.
+local function mergeDailyCounter(merged: Data, old: Data, outgoing: Data, dayKey: string, countKey: string): boolean
+	local oldDay = numberOr(old[dayKey], 0)
+	local newDay = numberOr(outgoing[dayKey], 0)
+	local oldCount = numberOr(old[countKey], 0)
+	local newCount = numberOr(outgoing[countKey], 0)
+	if oldDay > newDay or (oldDay == newDay and oldCount > newCount) then
+		merged[dayKey] = oldDay
+		merged[countKey] = oldCount
+		return true
+	end
+	return false
 end
 
 -- Todo Puff de `stored` continua; `count` fica com o maior valor.
@@ -146,6 +163,13 @@ function ProfileGuard.mergeForSave(stored: unknown, outgoing: Data): (Data, { st
 		merged.dailyRelicCount = old.dailyRelicCount
 		merged.dailyRelicDay = math.max(numberOr(old.dailyRelicDay, 0), numberOr(outgoing.dailyRelicDay, 0))
 		table.insert(anomalies, "dailyRelics")
+	end
+
+	if mergeDailyCounter(merged, old, outgoing, "ghostDay", "ghostCount") then
+		table.insert(anomalies, "ghosts")
+	end
+	if mergeDailyCounter(merged, old, outgoing, "baraoGiftDay", "baraoGiftCount") then
+		table.insert(anomalies, "baraoGifts")
 	end
 
 	local stats, restoredStats = mergeStats(old.stats, outgoing.stats)

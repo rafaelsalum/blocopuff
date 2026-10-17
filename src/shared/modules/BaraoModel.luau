@@ -48,6 +48,8 @@ BaraoModel.RestAttribute = "BaraoRest"
 BaraoModel.VariantAttribute = "BaraoVariant"
 -- Quanto tempo o Barão do Jardim fica feliz depois de um carinho.
 BaraoModel.FriendlyHappySeconds = 2.6
+-- Contador de carinhos do Barão do Jardim (o cliente comemora quando muda).
+BaraoModel.PetAttribute = "BaraoPet"
 
 local ASSET_WAIT = 5
 local TEMPLATE_NAME = "BaraoMesh"

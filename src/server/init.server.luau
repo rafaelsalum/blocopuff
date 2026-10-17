@@ -48,6 +48,7 @@ local PianoService = require(script.services.PianoService)
 local MysteryService = require(script.services.MysteryService)
 local BaronRoomsService = require(script.services.BaronRoomsService)
 local RelicService = require(script.services.RelicService)
+local MansionLifeService = require(script.services.MansionLifeService)
 
 local WORLD_NAME = "BlocoPuffWorld"
 local GENERATED_BY_ATTRIBUTE = "GeneratedBy"
@@ -252,6 +253,15 @@ if relicsOk then
 	print("[BlocoPuff] Mansion relics ready")
 else
 	warn(string.format("[BlocoPuff] Mansion relics unavailable: %s", tostring(relicsFailure)))
+end
+
+-- Vida no Casarão (5C.4): Fantasminha Puff e o aviso do presente do Barão.
+-- O passeio do Barão começa com as estações. Opcional.
+local lifeOk, lifeFailure = pcall(MansionLifeService.start, world, PuffadorService.getRemotesFolder())
+if lifeOk then
+	print("[BlocoPuff] Mansion life ready")
+else
+	warn(string.format("[BlocoPuff] Mansion life unavailable: %s", tostring(lifeFailure)))
 end
 
 -- Party (entra junto nas partidas) e reações de quem está assistindo.

@@ -9,7 +9,8 @@
 --   * Barão do Jardim (tag "BaraoFriendly"): o modelo do servidor é
 --     animado aqui mesmo; dorme e, no carinho ("BaraoPet"), acorda, late,
 --     pula dando uma volta, solta corações e senta abanando o rabo olhando
---     para você.
+--     para você. De vez em quando passeia pelos salões (BaraoWalk: a
+--     posição sai do horário do servidor; aqui só suavizamos as curvas).
 -- A posição segue a raiz com suavização e o giro é feito pelo caminho mais
 -- curto (sem virar de uma vez), o que também inclina o corpo nas curvas.
 -- Longe da câmera nada é animado.
@@ -23,7 +24,9 @@ local TweenService = game:GetService("TweenService")
 local Workspace = game:GetService("Workspace")
 
 local GameConfig = require(ReplicatedStorage.Shared.config.GameConfig)
+local MansionLifeConfig = require(ReplicatedStorage.Shared.config.MansionLifeConfig)
 local BaraoModel = require(ReplicatedStorage.Shared.modules.BaraoModel)
+local BaraoWalk = require(ReplicatedStorage.Shared.modules.BaraoWalk)
 local BaraoAnimator = require(script.Parent.Parent.effects.BaraoAnimator)
 
 type Animator = BaraoAnimator.Animator
@@ -47,6 +50,9 @@ type ArenaBarao = {
 type FriendlyBarao = {
 	model: Model,
 	rest: CFrame,
+	-- Onde ele está agora (na caminha ou passeando) e para onde olha.
+	cframe: CFrame,
+	yaw: number,
 	animator: Animator,
 	lastPet: number,
 	happyUntil: number,
@@ -395,14 +401,16 @@ local function addFriendly(instance: Instance)
 	local entry: FriendlyBarao = {
 		model = model,
 		rest = rest,
+		cframe = rest,
+		yaw = (heading(rest)),
 		-- Mede as peças a partir do descanso publicado pelo servidor (não do
 		-- pivô do modelo, que pode chegar diferente no cliente).
 		animator = BaraoAnimator.new(model, { zzz = false, effects = false }, rest),
-		lastPet = counter(model, "BaraoPet"),
+		lastPet = counter(model, BaraoModel.PetAttribute),
 		happyUntil = 0,
 	}
-	model:GetAttributeChangedSignal("BaraoPet"):Connect(function()
-		local value = counter(model, "BaraoPet")
+	model:GetAttributeChangedSignal(BaraoModel.PetAttribute):Connect(function()
+		local value = counter(model, BaraoModel.PetAttribute)
 		if value ~= entry.lastPet then
 			entry.lastPet = value
 			entry.happyUntil = os.clock() + BaraoModel.FriendlyHappySeconds
@@ -418,17 +426,39 @@ local function addFriendly(instance: Instance)
 	friendly[model] = entry
 end
 
+-- Onde o Barão do Jardim deveria estar agora: na caminha ou no passeio
+-- (CFrame, se está andando e se está passeando).
+local function friendlyTarget(entry: FriendlyBarao): (CFrame, boolean, boolean)
+	local elapsed = BaraoWalk.elapsed(entry.model, Workspace:GetServerTimeNow())
+	if elapsed == nil then
+		return entry.rest, false, false
+	end
+	local cframe, moving, done = BaraoWalk.pose(BaraoWalk.route(), elapsed)
+	if done then
+		return entry.rest, false, false
+	end
+	return cframe, moving, true
+end
+
 local function stepFriendly(entry: FriendlyBarao, deltaTime: number)
 	local dt = math.min(deltaTime, MAX_STEP)
-	if (entry.rest.Position - cameraPosition()).Magnitude > FRIENDLY_DRAW_DISTANCE then
+	local target, moving, strolling = friendlyTarget(entry)
+	if (target.Position - cameraPosition()).Magnitude > FRIENDLY_DRAW_DISTANCE then
+		entry.cframe = target
+		entry.yaw = (heading(target))
 		return
 	end
+	-- A posição já é contínua; só o giro nas curvas é suavizado.
+	local targetYaw = heading(target)
+	local turnStep = shortestAngle(entry.yaw, targetYaw) * (1 - math.exp(-dt * TURN_RATE))
+	entry.yaw += turnStep
+	entry.cframe = compose(target.Position, entry.yaw, 0)
 	local happy = os.clock() < entry.happyUntil
-	entry.animator.update(entry.rest, dt, {
-		mode = if happy then "Celebrate" else "Sleeping",
-		speed = 0,
-		turn = 0,
-		lookYaw = if happy then lookAtLocal(entry.rest) else 0,
+	entry.animator.update(entry.cframe, dt, {
+		mode = if happy then "Celebrate" elseif strolling then "Patrol" else "Sleeping",
+		speed = if moving and not happy then MansionLifeConfig.Barao.Speed else 0,
+		turn = if dt > 0 then turnStep / dt else 0,
+		lookYaw = if happy then lookAtLocal(entry.cframe) else 0,
 		enraged = false,
 	})
 end

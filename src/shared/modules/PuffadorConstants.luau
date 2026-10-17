@@ -38,6 +38,7 @@ export type PuffadorConstantsModule = {
 	PuffShotsRemoteName: string,
 	MysteryRemoteName: string,
 	BaronRoomsRemoteName: string,
+	MansionLifeRemoteName: string,
 
 	OwnerUserIdAttribute: string,
 	RoundIdAttribute: string,
@@ -85,6 +86,8 @@ local PuffadorConstants: PuffadorConstantsModule = {
 	MysteryRemoteName = "Mystery",
 	-- Salas Secretas do Barão (5C.3): prêmio do Gabinete e do Tesouro.
 	BaronRoomsRemoteName = "BaronRooms",
+	-- Vida no Casarão (5C.4): Fantasminha e presente do Barão.
+	MansionLifeRemoteName = "MansionLife",
 
 	OwnerUserIdAttribute = "OwnerUserId",
 	RoundIdAttribute = StateAttributeNames.RoundId,
