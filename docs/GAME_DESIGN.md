@@ -91,6 +91,15 @@ A forma exata de degradação da arena deve ser validada em playtest.
 
 Hoje, blocos aleatórios piscam em vermelho e caem, cada vez em maior número. A Fase 5 acrescenta a **Tempestade**: as janelas do andar de cima estouram sozinhas, uma por vez, e os lustres do térreo caem em sequência, sempre com aviso (ver `docs/FASE_5_PARTIDA_VIVA_CASARAO_REAGE.md`).
 
+### Modos do Casarão (Fase 5D)
+
+A partida passa a girar entre modos no mesmo servidor, com uma fila só (ver `docs/FASE_5D_MODOS_DO_CASARAO.md`):
+
+- **Arena:** o modo base descrito neste documento, o mais frequente e o primeiro de todo jogador novo.
+- **Corrida da Torre do Relógio:** subir a rampa em espiral desviando do que o Barão joga do topo; o primeiro a chegar vence.
+- **Mistério no Casarão:** dedução social inspirada no Murder Mystery 2, com Fantasma, Detetive e Moradores, sem violência.
+- Rotação inicial: Arena → Corrida → Arena → Mistério, configurável.
+
 ---
 
 ## 5. Arena
