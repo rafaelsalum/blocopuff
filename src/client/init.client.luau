@@ -38,6 +38,7 @@ local PuffdexController = require(script.controllers.PuffdexController)
 local PuffMachineController = require(script.controllers.PuffMachineController)
 local ChallengesController = require(script.controllers.ChallengesController)
 local ModeController = require(script.controllers.ModeController)
+local MysteryModeController = require(script.controllers.MysteryModeController)
 local RelicController = require(script.controllers.RelicController)
 local MysteryController = require(script.controllers.MysteryController)
 local BaronRoomsController = require(script.controllers.BaronRoomsController)
@@ -239,6 +240,14 @@ local modeOk, modeErr = pcall(function()
 end)
 if not modeOk then
 	warn(string.format("[BlocoPuff] Failed to start mode controller: %s", tostring(modeErr)))
+end
+
+-- Mistério no Casarão (5D.3): papel, botões do Fantasma e avisos.
+local mysteryModeOk, mysteryModeErr = pcall(function()
+	MysteryModeController.start()
+end)
+if not mysteryModeOk then
+	warn(string.format("[BlocoPuff] Failed to start Mystery mode controller: %s", tostring(mysteryModeErr)))
 end
 
 -- Relíquias e Álbum do Casarão (5C.2).

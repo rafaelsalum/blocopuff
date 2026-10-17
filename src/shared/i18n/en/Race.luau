@@ -13,4 +13,5 @@ return table.freeze({
 	["Se cair, você volta para cá"] = "If you fall, you come back here",
 	["VOCÊ CHEGOU EM %s!"] = "YOU FINISHED %s!",
 	["Aguarde o fim da corrida no topo"] = "Wait at the top for the race to end",
+	["Acompanhe o resto da partida"] = "Watch the rest of the match",
 })

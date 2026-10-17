@@ -291,6 +291,18 @@ local function getRanking(): { [Combatant]: number }?
 	return rankPositions()
 end
 
+local function start(_remotes: Folder?) end
+
+local function getPuffadorHolders(humans: { Player }): { Player }
+	return humans
+end
+
+local function onEliminated(_combatant: Combatant) end
+
+local function getWinners(): { [Combatant]: boolean }?
+	return nil
+end
+
 local function beginBots(bots: { Combatant }, _humans: { Player })
 	RaceBotBrain.begin(requireTower(), bots)
 end
@@ -334,6 +346,7 @@ end
 
 local RaceMode: RoundModeTypes.RoundMode = {
 	id = "Race",
+	start = start,
 	canRun = canRun,
 	prepare = prepare,
 	getSpawnCFrames = getSpawnCFrames,
@@ -345,6 +358,9 @@ local RaceMode: RoundModeTypes.RoundMode = {
 	lastStanding = false,
 	evaluate = evaluate,
 	getRanking = getRanking,
+	getPuffadorHolders = getPuffadorHolders,
+	onEliminated = onEliminated,
+	getWinners = getWinners,
 	beginBots = beginBots,
 	endBots = endBots,
 	getRespawnCFrame = getRespawnCFrame,

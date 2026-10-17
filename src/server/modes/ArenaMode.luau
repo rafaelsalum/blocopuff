@@ -92,6 +92,18 @@ local function getRanking(): { [Combatant]: number }?
 	return nil
 end
 
+local function start(_remotes: Folder?) end
+
+local function getPuffadorHolders(humans: { Player }): { Player }
+	return humans
+end
+
+local function onEliminated(_combatant: Combatant) end
+
+local function getWinners(): { [Combatant]: boolean }?
+	return nil
+end
+
 local function beginBots(bots: { Combatant }, humans: { Player })
 	BotBrainService.beginRound(bots, humans)
 end
@@ -155,6 +167,7 @@ end
 
 local ArenaMode: RoundModeTypes.RoundMode = {
 	id = "Arena",
+	start = start,
 	canRun = canRun,
 	prepare = prepare,
 	getSpawnCFrames = getSpawnCFrames,
@@ -166,6 +179,9 @@ local ArenaMode: RoundModeTypes.RoundMode = {
 	lastStanding = true,
 	evaluate = evaluate,
 	getRanking = getRanking,
+	getPuffadorHolders = getPuffadorHolders,
+	onEliminated = onEliminated,
+	getWinners = getWinners,
 	beginBots = beginBots,
 	endBots = endBots,
 	getRespawnCFrame = getRespawnCFrame,

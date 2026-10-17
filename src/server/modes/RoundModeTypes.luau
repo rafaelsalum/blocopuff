@@ -5,6 +5,9 @@
 -- intervalo); o modo cuida do mapa e do que só existe nele (na Arena: blocos,
 -- armadilhas, corredores, Tocas, Barão, cofre e Caos Final).
 
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local EliminationTypes = require(ReplicatedStorage.Shared.types.EliminationTypes)
 local CombatantRegistry = require(script.Parent.Parent.services.CombatantRegistry)
 
 type Combatant = CombatantRegistry.Combatant
@@ -15,6 +18,9 @@ export type BeginContext = {
 	combatants: { Combatant },
 	humans: { Player },
 	roundDuration: number,
+	-- Tira um participante da partida (o RoundService registra posição,
+	-- telemetria e o resultado).
+	eliminate: (combatant: Combatant, reason: EliminationTypes.EliminationReason) -> (),
 }
 
 export type TickContext = {
@@ -32,6 +38,8 @@ export type Outcome = {
 
 export type RoundMode = {
 	id: string,
+	-- Servidor começando: o modo cria o que precisa (remotes do cliente).
+	start: (remotes: Folder?) -> (),
 	-- Pode rodar com esta fila agora? (`humans` = jogadores reais escalados.)
 	canRun: (humans: number) -> boolean,
 	-- Deixa o mapa pronto antes de qualquer participante chegar.
@@ -53,6 +61,13 @@ export type RoundMode = {
 	evaluate: (timeUp: boolean) -> Outcome?,
 	-- Posição final de cada participante (nil = pela ordem de eliminação).
 	getRanking: () -> { [Combatant]: number }?,
+	-- Quem recebe o Puffador no começo (Mistério: só o Detetive).
+	getPuffadorHolders: (humans: { Player }) -> { Player },
+	-- Avisado logo que um participante é eliminado (antes do corpo cair).
+	onEliminated: (combatant: Combatant) -> (),
+	-- Vencedores em equipe (Mistério: todos os Moradores). nil = o vencedor
+	-- único do resultado.
+	getWinners: () -> { [Combatant]: boolean }?,
 	-- Cérebro dos bots RoboPuff neste modo.
 	beginBots: (bots: { Combatant }, humans: { Player }) -> (),
 	endBots: () -> (),

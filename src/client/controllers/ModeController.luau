@@ -36,6 +36,12 @@ local function modeInfo(mode: string): ModeInfo?
 			title = T("CORRIDA DA TORRE"),
 			goal = T("Chegue ao topo primeiro! Desvie do que o Barão joga"),
 		}
+	elseif mode == "Mystery" then
+		return {
+			icon = "👻",
+			title = T("MISTÉRIO NO CASARÃO"),
+			goal = T("Um Fantasma está entre vocês · descubra quem é"),
+		}
 	end
 	return nil
 end

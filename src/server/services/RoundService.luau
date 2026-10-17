@@ -423,6 +423,7 @@ local function eliminateParticipant(combatant: Combatant, reason: EliminationRea
 	CombatantRegistry.setAttribute(combatant, ATTR_IS_ELIMINATED, true)
 	CombatantRegistry.setAttribute(combatant, ATTR_ELIMINATION_REASON, reason)
 	CombatantRegistry.setAttribute(combatant, ATTR_ELIMINATED_AT_ROUND_ID, currentRoundId)
+	currentMode.onEliminated(combatant)
 	if player ~= nil then
 		TelemetryService.eliminated(player, reason, stillAlive + 1)
 		PuffadorService.revokeFrom(player)
@@ -612,7 +613,6 @@ local function beginRound(timings: RoundTimings): boolean
 	-- Os escalados já desceram: o mirante reabre para a fila da próxima.
 	MatchQueueService.setCountdown(nil)
 	connectParticipantDeathHandlers(participantOrder)
-	PuffadorService.beginRound(humans, currentRoundId)
 	KnockbackService.beginRound(currentRoundId)
 	PuffMomentService.beginRound()
 	RoundStatsService.beginRound()
@@ -624,7 +624,10 @@ local function beginRound(timings: RoundTimings): boolean
 		combatants = participantOrder,
 		humans = humans,
 		roundDuration = currentRoundDuration,
+		eliminate = eliminateParticipant,
 	})
+	-- Depois do begin: o modo já decidiu quem segura o Puffador.
+	PuffadorService.beginRound(humans, currentRoundId, currentMode.getPuffadorHolders(humans))
 	currentMode.beginBots(bots, humans)
 
 	-- O id antes do estado: quem reage ao Active já vê a rodada nova.
@@ -731,6 +734,7 @@ end
 
 local function commitProfiles(result: ResultTypes.RoundResult)
 	local roundKey = PlayerDataService.roundKey(currentRoundId, currentRoundStartedAt)
+	local teamWinners = currentMode.getWinners()
 	-- Bots (id negativo) não têm perfil, mas mudam a recompensa de quem jogou
 	-- com eles (BotRewardRules).
 	local humans, bots = 0, 0
@@ -746,7 +750,9 @@ local function commitProfiles(result: ResultTypes.RoundResult)
 		local combatant = if player ~= nil then CombatantRegistry.forPlayer(player) else nil
 		if player ~= nil and combatant ~= nil and participants[combatant] ~= nil then
 			local extra = RoundStatsService.get(combatant)
-			local won = not result.draw and result.winnerUserId == entry.userId
+			local won = if teamWinners ~= nil
+				then teamWinners[combatant] == true
+				else not result.draw and result.winnerUserId == entry.userId
 			local podium = won or (entry.position <= 3 and result.participantCount >= TOP3_MIN_PARTICIPANTS)
 			local outcome = BotRewardRules.evaluate({
 				won = won,
@@ -893,12 +899,13 @@ local function runEnding(timings: RoundTimings)
 	local tiedLast = if survivors == 0 then RoundResultBuilder.getLastEliminated(eliminationTimes) else {}
 	-- Nos modos sem eliminação (Corrida), quem não venceu perdeu.
 	local isDraw = currentMode.lastStanding and winner == nil and (survivors > 1 or #tiedLast > 1)
+	local teamWinners = currentMode.getWinners()
 	local outcomes: { [Player]: string } = {}
 	for _, combatant in ipairs(participantOrder) do
 		local participant = participants[combatant]
 		local player = combatant.player
 		if participant ~= nil and player ~= nil then
-			local won = winner ~= nil and combatant.id == winner.userId
+			local won = if teamWinners ~= nil then teamWinners[combatant] == true else winner ~= nil and combatant.id == winner.userId
 			local inDraw = isDraw and (participant.alive or table.find(tiedLast, combatant) ~= nil)
 			outcomes[player] = if won then "Win" elseif inDraw then "Draw" else "Loss"
 		end
@@ -975,6 +982,9 @@ function RoundService.start()
 		resultRemote = remote
 	elseif remotes == nil then
 		warn("[BlocoPuff] RoundService: remotes folder not found; round results disabled")
+	end
+	for _, mode in pairs(ModeRegistry.all()) do
+		mode.start(remotes)
 	end
 	playerRemovingConnection = Players.PlayerRemoving:Connect(onPlayerRemoving)
 	playerAddedConnection = Players.PlayerAdded:Connect(onPlayerAdded)

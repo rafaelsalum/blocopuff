@@ -244,15 +244,21 @@ function PuffadorService.isTraining(player: Player): boolean
 	return trainees[player] == true
 end
 
-function PuffadorService.beginRound(players: { Player }, roundId: number)
-	-- Quem foi escalado deixa de treinar e recebe o Puffador da partida.
+-- `holders`: quem recebe o Puffador da partida (nil = todos os escalados;
+-- no Mistério, só o Detetive). Os outros escalados perdem o de treino.
+function PuffadorService.beginRound(players: { Player }, roundId: number, holders: { Player }?)
+	local granted = holders or players
+	-- Quem foi escalado deixa de treinar.
 	for _, player in ipairs(players) do
 		trainees[player] = nil
+		if table.find(granted, player) == nil then
+			PuffadorService.revokeFrom(player)
+		end
 	end
 	ProjectileService.clearAll()
 	currentRoundId = roundId
 	acceptingRequests = true
-	PuffadorService.grantTo(players)
+	PuffadorService.grantTo(granted)
 end
 
 function PuffadorService.endRound()
