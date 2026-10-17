@@ -214,14 +214,20 @@ local function selectParticipants(): { Player }
 	return selected
 end
 
--- Rotação de modos: o que pode rodar com estes jogadores e se há um novato
--- entre eles (as primeiras partidas da vida são sempre na Arena).
+-- Rotação de modos: o que pode rodar com estes jogadores, se há um novato
+-- entre eles (as primeiras partidas da vida são sempre na Arena) e os votos
+-- deles nas portas do mirante.
 local function rotationInput(humans: { Player }): ModeRotation.Input
 	local available: { [string]: boolean } = {}
 	for id, mode in pairs(ModeRegistry.all()) do
 		available[id] = mode.canRun(#humans)
 	end
 	local hasBeginner = false
+	local choices: { string } = {}
+	for _, player in ipairs(humans) do
+		local vote = player:GetAttribute(StateAttributeNames.PlayerModeVote)
+		table.insert(choices, if type(vote) == "string" then vote else "")
+	end
 	for _, player in ipairs(humans) do
 		local snapshot = PlayerDataService.getSnapshot(player)
 		if snapshot ~= nil and ModeRotation.isBeginner(snapshot.stats.matches, ModeRotationConfig.BeginnerArenaMatches) then
@@ -234,6 +240,7 @@ local function rotationInput(humans: { Player }): ModeRotation.Input
 		baseMode = ModeRotationConfig.BaseMode,
 		available = available,
 		hasBeginner = hasBeginner,
+		votes = ModeRotation.tally(choices),
 	}
 end
 
@@ -567,6 +574,8 @@ local function runCountdown(timings: RoundTimings): boolean
 			remaining = math.min(remaining, FORCED_COUNTDOWN + 1)
 		end
 		remaining -= 1
+		-- Os votos podem mudar até o embarque fechar.
+		publishNextMode()
 		-- Nos últimos segundos o mirante fecha as portas (embarque).
 		MatchQueueService.setCountdown(remaining)
 		ReplicatedState.setTimeRemaining(remaining)

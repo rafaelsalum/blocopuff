@@ -98,7 +98,7 @@ A partida passa a girar entre modos no mesmo servidor, com uma fila só (ver `do
 - **Arena:** o modo base descrito neste documento, o mais frequente e o primeiro de todo jogador novo.
 - **Corrida da Torre do Relógio:** subir a rampa em espiral desviando do que o Barão joga do topo; o primeiro a chegar vence.
 - **Mistério no Casarão:** dedução social inspirada no Murder Mystery 2, com Fantasma, Detetive e Moradores, sem violência.
-- Rotação inicial: Arena → Corrida → Arena → Mistério, configurável.
+- **Escolha pela porta:** cada uma das 3 portas do mirante leva a um modo; entrar por ela é votar nele, e a partida é o modo mais votado da fila que pode rodar. Sem votos, vale a rotação Arena → Corrida → Arena → Mistério, configurável.
 
 ---
 

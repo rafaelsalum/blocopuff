@@ -1,7 +1,8 @@
 --!strict
 
--- Modos de partida no cliente (Fase 5D): avisa qual será a próxima partida
--- quando não for a Arena, abre a partida com o nome e o objetivo do modo e,
+-- Modos de partida no cliente (Fase 5D): confirma o voto ao entrar no
+-- mirante por uma das portas, avisa qual será a próxima partida quando não
+-- for a Arena, abre a partida com o nome e o objetivo do modo e,
 -- na Corrida da Torre, mostra o checkpoint e a posição ao vivo. Na Arena
 -- nada muda: o HUD de combate de sempre cuida de tudo.
 
@@ -44,6 +45,15 @@ local function modeInfo(mode: string): ModeInfo?
 		}
 	end
 	return nil
+end
+
+-- Nome do modo no aviso de voto (a Arena também).
+local function voteTitle(mode: string): (string, string)
+	local info = modeInfo(mode)
+	if info ~= nil then
+		return info.icon, info.title
+	end
+	return "🏟", T("DERRUBE SEUS AMIGOS")
 end
 
 local ModeController = {}
@@ -96,6 +106,7 @@ end
 local function run(container: Instance, panel: Panel)
 	local localPlayer = Players.LocalPlayer
 	local lastNextMode = ""
+	local lastVote = readString(localPlayer, StateAttributeNames.PlayerModeVote)
 	local introRound = 0
 	local lastCheckpoint = 0
 	local announcedFinish = 0
@@ -106,6 +117,26 @@ local function run(container: Instance, panel: Panel)
 		local nextMode = readString(container, StateAttributeNames.NextRoundMode)
 		local roundId = readNumber(container, StateAttributeNames.RoundId)
 		local participant = localPlayer:GetAttribute(StateAttributeNames.PlayerIsParticipant) == true
+
+		-- Voto novo pela porta do mirante.
+		local vote = readString(localPlayer, StateAttributeNames.PlayerModeVote)
+		if vote ~= lastVote then
+			lastVote = vote
+			if vote ~= "" then
+				local icon, title = voteTitle(vote)
+				NotificationManager.notify({
+					channel = "Banner",
+					category = CATEGORY,
+					priority = "Normal",
+					key = "mode-vote",
+					icon = icon,
+					title = T("SEU VOTO: %s", title),
+					subtitle = T("O modo mais votado da fila é o da próxima partida"),
+					tone = "Gold",
+					duration = 3,
+				})
+			end
+		end
 
 		-- Próxima partida diferente da Arena: um aviso por mudança.
 		local waiting = state == "WaitingForPlayers" or state == "Countdown"

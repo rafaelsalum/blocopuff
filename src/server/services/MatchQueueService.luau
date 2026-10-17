@@ -32,6 +32,12 @@
 --
 -- O atributo "InMatchQueue" do jogador diz ao HUD se ele está na fila e
 -- "QueuePlace" onde está a vaga (mirante, ficha ou Party).
+--
+-- Voto pela porta (Fase 5D): cada porta do mirante leva a um modo
+-- (ModeRotationConfig.DoorModes). Entrar no mirante por ela grava o modo
+-- no atributo "ModeVote" do jogador; o voto vale enquanto ele estiver na
+-- fila (some ao sair dela ou ao entrar na partida) e muda se ele sair e
+-- entrar por outra porta. O RoundService conta os votos de quem vai jogar.
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -40,16 +46,23 @@ local RunService = game:GetService("RunService")
 local GameConfig = require(ReplicatedStorage.Shared.config.GameConfig)
 local QueueConfig = require(ReplicatedStorage.Shared.config.QueueConfig)
 local BuildingLayout = require(ReplicatedStorage.Shared.modules.BuildingLayout)
+local MansionLayout = require(ReplicatedStorage.Shared.modules.MansionLayout)
+local ModeRotationConfig = require(ReplicatedStorage.Shared.config.ModeRotationConfig)
 local PuffadorConstants = require(ReplicatedStorage.Shared.modules.PuffadorConstants)
 local StateAttributeNames = require(ReplicatedStorage.Shared.types.StateAttributeNames)
 local PartyService = require(script.Parent.PartyService)
 local TelemetryService = require(script.Parent.TelemetryService)
 local QueueVisuals = require(script.Parent.QueueVisuals)
+local ModeRotation = require(script.Parent.Parent.data.ModeRotation)
 
 type QueueVisualsHandle = QueueVisuals.QueueVisualsHandle
 
 local ATTR_IN_QUEUE = StateAttributeNames.PlayerInMatchQueue
 local ATTR_QUEUE_PLACE = StateAttributeNames.PlayerQueuePlace
+local ATTR_MODE_VOTE = StateAttributeNames.PlayerModeVote
+-- Só conta como "entrou pela porta" quem aparece no mirante colado na
+-- parede das portas (e não, por exemplo, renascendo no meio dele).
+local DOOR_REACH = 6
 
 -- Última posição em que o dono da ficha foi visto se mexendo (AFK).
 type Stillness = { position: Vector3, since: number }
@@ -140,8 +153,18 @@ local function updateBoard()
 		table.insert(userIds, player.UserId)
 	end
 	table.sort(userIds)
+	local choices: { string } = {}
+	for player in pairs(queued) do
+		local vote = player:GetAttribute(ATTR_MODE_VOTE)
+		table.insert(choices, if type(vote) == "string" then vote else "")
+	end
+	local votes = ModeRotation.tally(choices)
+	local voteParts: { string } = {}
+	for _, mode in ipairs(ModeRotationConfig.DoorModes) do
+		table.insert(voteParts, `{mode}={votes[mode] or 0}`)
+	end
 	local remaining = countdownRemaining
-	local key = `{queuedCount}|{botCount}|{tostring(remaining)}|{gatesClosed}|{table.concat(userIds, ",")}|{warmupLine}`
+	local key = `{queuedCount}|{botCount}|{tostring(remaining)}|{gatesClosed}|{table.concat(userIds, ",")}|{warmupLine}|{table.concat(voteParts, ",")}`
 	if key == lastBoardKey then
 		return
 	end
@@ -155,6 +178,7 @@ local function updateBoard()
 		gatesClosed = gatesClosed,
 		userIds = userIds,
 		warmup = warmupLine,
+		votes = votes,
 	})
 end
 
@@ -216,6 +240,23 @@ local function callTickets()
 	end
 end
 
+-- Quem acabou de entrar no mirante pela porta vota no modo dela.
+local function recordDoorVotes(zone: { [Player]: boolean })
+	local mansion = MansionLayout.get()
+	for player in pairs(zone) do
+		local root = livingRoot(player)
+		if not inZone[player] and root ~= nil and math.abs(root.Position.X - mansion.galleryWallX) <= DOOR_REACH then
+			local door = ModeRotation.nearestDoor(mansion.passages, root.Position.Z)
+			-- Porta sem modo na config: Arena, como mostra o portal (QueueVisuals).
+			local mode = if door ~= nil then ModeRotationConfig.DoorModes[door] or ModeRotationConfig.BaseMode else nil
+			if mode ~= nil and player:GetAttribute(ATTR_MODE_VOTE) ~= mode then
+				player:SetAttribute(ATTR_MODE_VOTE, mode)
+				TelemetryService.lobbyEvent(player, "ModeVote", 1, mode)
+			end
+		end
+	end
+end
+
 local function refresh()
 	local arena = GameConfig.Arena
 	local building = GameConfig.Building
@@ -228,6 +269,7 @@ local function refresh()
 	end
 
 	updateTickets(nextZone, os.clock())
+	recordDoorVotes(nextZone)
 
 	-- Quem segura a vaga (mirante ou ficha); a Party vem junto.
 	local nextQueued: { [Player]: boolean } = {}
@@ -252,6 +294,10 @@ local function refresh()
 		end
 		if player:GetAttribute(ATTR_IN_QUEUE) ~= value then
 			player:SetAttribute(ATTR_IN_QUEUE, value)
+		end
+		-- Fora da fila, o voto acaba (inclusive ao entrar na partida).
+		if not value and player:GetAttribute(ATTR_MODE_VOTE) ~= nil then
+			player:SetAttribute(ATTR_MODE_VOTE, nil)
 		end
 	end
 	inZone = nextZone

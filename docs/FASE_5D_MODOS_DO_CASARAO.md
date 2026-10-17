@@ -49,7 +49,13 @@ O jogador passa a:
   - um modo só entra se as condições dele forem atendidas (ex.: Mistério pede um mínimo de humanos); senão, a rotação pula para o próximo, e a Arena sempre pode entrar;
   - o mesmo modo novo nunca se repete duas vezes seguidas;
   - as **3 primeiras partidas da vida do jogador** são sempre Arena, para ele aprender o Puffador; se houver um novato na fila, a rotação respeita isso (ele vê a Arena; os outros recebem a Arena também nessa rodada);
-  - a sequência fica em config para trocar depois por votação ou por evento (Fase 6) sem mexer no código.
+  - a sequência fica em config para trocar depois por evento (Fase 6) sem mexer no código.
+- **Voto pela porta do mirante** (acrescentado depois da 5D.3, para o jogador escolher o que quer jogar):
+  - cada uma das 3 portas do mirante leva o nome e a cor de um modo (`DoorModes`: Corrida, Arena no meio, Mistério); a fila continua uma só;
+  - entrar no mirante por uma porta é votar no modo dela; o voto vale enquanto o jogador estiver na fila (com a Ficha da Partida também) e muda se ele sair e entrar por outra porta; quem entra pelo botão JOGAR ou só pela Party não vota;
+  - a próxima partida é o modo mais votado entre os escalados que **pode rodar** (o Mistério sem 4 humanos não conta, e vale o segundo mais votado); empate segue a ordem da rotação;
+  - o voto vale mais que a regra do novato e que a de não repetir o modo novo (os jogadores escolheram); sem nenhum voto, segue a rotação, que não anda nas partidas votadas;
+  - os painéis do mirante mostram os votos ao vivo e o jogador recebe um aviso "SEU VOTO"; a prévia do próximo modo é recalculada a cada segundo da contagem.
 - **Anúncio do próximo modo:**
   - no intervalo, a etiqueta da fila e o HUD mostram o próximo modo com ícone e frase curta;
   - na contagem, uma tela de abertura de 3 s com o nome do modo e o objetivo em uma frase.
@@ -125,7 +131,8 @@ Valores de partida para o playtest. Ficam em `config/ModeRotationConfig`, `confi
 
 | Item | Valor inicial |
 |---|---|
-| Sequência da rotação | Arena → Corrida → Arena → Mistério |
+| Sequência da rotação (sem votos) | Arena → Corrida → Arena → Mistério |
+| Portas do mirante (de −Z para +Z) | Corrida · Arena · Mistério |
 | Partidas iniciais só na Arena | 3 |
 | Tela de abertura do modo | 3 s |
 | **Corrida:** duração máxima | 2 min 30 s |
@@ -226,7 +233,7 @@ Módulos puros, com testes antes da implementação:
 - o Detetive atira em qualquer um ou fica com medo de errar? (a punição está na medida?)
 - o Fantasma consegue se disfarçar ou é descoberto logo?
 - desmaiar cedo no Mistério frustra? O Fantasminha espectador segura o jogador até o fim?
-- a sequência Arena → Corrida → Arena → Mistério é a melhor, ou os jogadores pedem votação?
+- quais portas recebem mais votos, e quantas partidas ainda saem da rotação (sem votos)?
 
 ---
 
@@ -252,7 +259,6 @@ Módulos puros, com testes antes da implementação:
 
 ## Fora de escopo desta entrega
 
-- votação do próximo modo pelos jogadores (fica para a Fase 6, junto dos eventos);
 - perks do Fantasma (correr mais rápido, ficar invisível por um instante, armadilha) e itens cosméticos por papel;
 - modo Assassino (todos contra todos com alvos), versão "Hardcore" e outros modos;
 - rankings globais por modo.

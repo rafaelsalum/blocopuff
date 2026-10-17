@@ -99,6 +99,35 @@ local broken: ModeRotation.Cursor = { index = 99, last = nil }
 local fromBroken = ModeRotation.pick(broken, input(ALL))
 check("out of range cursor is normalized", fromBroken == "Arena" or fromBroken == "Race" or fromBroken == "Mystery")
 
+-- Votos das portas: o mais votado entre os que podem rodar.
+local function voted(votes: { [string]: number }, available: { [string]: boolean }?, hasBeginner: boolean?): ModeRotation.Input
+	return {
+		sequence = SEQUENCE,
+		baseMode = "Arena",
+		available = available or ALL,
+		hasBeginner = hasBeginner == true,
+		votes = votes,
+	}
+end
+check("most voted mode wins", ModeRotation.pick(ModeRotation.initialCursor(), voted({ Mystery = 3, Race = 1 })) == "Mystery")
+check("votes beat the beginner rule", ModeRotation.pick(ModeRotation.initialCursor(), voted({ Race = 1 }, nil, true)) == "Race")
+local again: ModeRotation.Cursor = { index = 3, last = "Race" }
+check("voted mode may repeat", ModeRotation.pick(again, voted({ Race = 2 })) == "Race")
+check("unavailable vote falls to the next", ModeRotation.pick(ModeRotation.initialCursor(), voted({ Mystery = 4, Race = 2 }, noMystery)) == "Race")
+check("only unavailable votes: rotation", ModeRotation.pick({ index = 2, last = "Arena" }, voted({ Mystery = 4 }, noMystery)) == "Race")
+local tieCursor: ModeRotation.Cursor = { index = 4, last = "Arena" }
+check("tie follows the rotation order", ModeRotation.pick(tieCursor, voted({ Race = 2, Mystery = 2 })) == "Mystery")
+local _, afterVote = ModeRotation.pick({ index = 2, last = "Arena" }, voted({ Mystery = 1 }))
+check("a vote keeps the rotation position", afterVote.index == 2 and afterVote.last == "Mystery")
+check("no votes: plain rotation", ModeRotation.pick({ index = 2, last = "Arena" }, voted({})) == "Race")
+
+-- Porta de entrada e contagem dos votos.
+local DOORS = { -22.5, 0, 22.5 }
+check("nearest door by z", ModeRotation.nearestDoor(DOORS, -20) == 1 and ModeRotation.nearestDoor(DOORS, 3) == 2 and ModeRotation.nearestDoor(DOORS, 30) == 3)
+check("no doors, no vote", ModeRotation.nearestDoor({}, 0) == nil)
+local counted = ModeRotation.tally({ "Race", "", "Mystery", "Race" })
+check("tally counts votes and skips blanks", counted.Race == 2 and counted.Mystery == 1 and counted[""] == nil)
+
 -- Novato: só as primeiras partidas.
 check("beginner below the limit", ModeRotation.isBeginner(2, 3))
 check("not a beginner at the limit", not ModeRotation.isBeginner(3, 3))

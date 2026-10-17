@@ -9,7 +9,11 @@
 -- - um modo novo nunca se repete duas vezes seguidas (a Arena pode);
 -- - com um novato na fila, joga-se a Arena e a rotação não anda, para o
 --   modo novo vir logo depois;
--- - se nada servir, a Arena (o modo base) sempre pode entrar.
+-- - se nada servir, a Arena (o modo base) sempre pode entrar;
+-- - com votos (as portas do mirante), vence o modo mais votado entre os que
+--   podem rodar, sem as regras do novato e da repetição (os jogadores
+--   escolheram); empate segue a ordem da rotação; a posição na rotação não
+--   anda, para ela seguir de onde estava quando ninguém votar.
 
 export type Cursor = {
 	-- Posição (1-based) na sequência do próximo modo a tentar.
@@ -24,6 +28,8 @@ export type Input = {
 	-- Modos que podem rodar agora.
 	available: { [string]: boolean },
 	hasBeginner: boolean,
+	-- Votos por modo de quem vai jogar (nil = ninguém votou).
+	votes: { [string]: number }?,
 }
 
 local ModeRotation = {}
@@ -39,11 +45,39 @@ local function normalizedIndex(index: number, length: number): number
 	return ((math.floor(index) - 1) % length) + 1
 end
 
+-- Modo mais votado entre os que podem rodar; empate na ordem da rotação a
+-- partir de `start`. nil se nenhum voto vale.
+local function mostVoted(input: Input, start: number): string?
+	local votes = input.votes
+	if votes == nil then
+		return nil
+	end
+	local best: string? = nil
+	local bestCount = 0
+	local sequence = input.sequence
+	local seen: { [string]: boolean } = {}
+	for offset = 0, #sequence - 1 do
+		local mode = sequence[normalizedIndex(start + offset, #sequence)]
+		local count = votes[mode] or 0
+		if not seen[mode] and input.available[mode] == true and count > bestCount then
+			best = mode
+			bestCount = count
+		end
+		seen[mode] = true
+	end
+	return best
+end
+
 -- Modo da próxima partida e o cursor seguinte (não altera `cursor`).
 function ModeRotation.pick(cursor: Cursor, input: Input): (string, Cursor)
 	local sequence = input.sequence
 	local length = #sequence
 	local start = normalizedIndex(cursor.index, length)
+
+	local voted = mostVoted(input, start)
+	if voted ~= nil then
+		return voted, { index = start, last = voted }
+	end
 
 	if input.hasBeginner or length == 0 then
 		return input.baseMode, { index = start, last = input.baseMode }
@@ -59,6 +93,32 @@ function ModeRotation.pick(cursor: Cursor, input: Input): (string, Cursor)
 	end
 
 	return input.baseMode, { index = normalizedIndex(start + 1, length), last = input.baseMode }
+end
+
+-- Porta do mirante por onde o jogador entrou: a de `z` mais perto da
+-- posição dele (as portas ficam na mesma parede). nil sem portas.
+function ModeRotation.nearestDoor(passages: { number }, z: number): number?
+	local best: number? = nil
+	local bestGap = math.huge
+	for index, passageZ in ipairs(passages) do
+		local gap = math.abs(z - passageZ)
+		if gap < bestGap then
+			best = index
+			bestGap = gap
+		end
+	end
+	return best
+end
+
+-- Votos por modo a partir do voto de cada jogador ("" = sem voto).
+function ModeRotation.tally(choices: { string }): { [string]: number }
+	local votes: { [string]: number } = {}
+	for _, choice in ipairs(choices) do
+		if choice ~= "" then
+			votes[choice] = (votes[choice] or 0) + 1
+		end
+	end
+	return votes
 end
 
 -- Novato: ainda nas primeiras partidas da vida, que são sempre na Arena.

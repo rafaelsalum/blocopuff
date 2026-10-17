@@ -14,12 +14,16 @@ export type ModeRotationConfig = {
 	-- Primeiras partidas da vida do jogador, sempre na Arena (para aprender
 	-- o Puffador).
 	BeginnerArenaMatches: number,
+	-- Modo de cada porta do mirante (na ordem de MansionLayout.passages, de
+	-- −Z para +Z): entrar por ela é votar nele.
+	DoorModes: { ModeId },
 }
 
 local ModeRotationConfig: ModeRotationConfig = {
 	BaseMode = "Arena",
 	Sequence = table.freeze({ "Arena", "Race", "Arena", "Mystery" } :: { ModeId }),
 	BeginnerArenaMatches = 3,
+	DoorModes = table.freeze({ "Race", "Arena", "Mystery" } :: { ModeId }),
 }
 
 return table.freeze(ModeRotationConfig)

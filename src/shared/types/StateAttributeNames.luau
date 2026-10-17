@@ -47,6 +47,9 @@ export type StateAttributeNames = {
 	-- mirante), "Ticket" (com a Ficha da Partida, passeando) ou "Party" (só
 	-- pela Party). Escrito pelo MatchQueueService.
 	PlayerQueuePlace: string,
+	-- Modo votado ao entrar no mirante por uma das portas (Fase 5D): "" sem
+	-- voto. Escrito pelo MatchQueueService.
+	PlayerModeVote: string,
 	-- No Model do corpo de um bot RoboPuff (Fase 5B): id negativo dele. O
 	-- corpo também leva a tag BotTag (CollectionService).
 	BotId: string,
@@ -94,6 +97,7 @@ local StateAttributeNames: StateAttributeNames = {
 	PlayerPartyId = "PartyId",
 	PlayerInMatchQueue = "InMatchQueue",
 	PlayerQueuePlace = "QueuePlace",
+	PlayerModeVote = "ModeVote",
 	BotId = "BotId",
 	BotTag = "RoboPuff",
 	LastDashAt = "LastDashAt",

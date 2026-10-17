@@ -1,12 +1,14 @@
 --!strict
 
 -- Visual da fila da partida (MatchQueueService é quem decide):
---   * do lado do Casarão, um portal "🏟 ENTRAR NA FILA" em cada porta do
---     mirante e uma passadeira com setas vindo do Salão Principal;
---   * dentro do mirante, faixa verde na entrada de cada porta;
+--   * do lado do Casarão, um portal em cada porta do mirante com o modo em
+--     que ela vota (ModeRotationConfig.DoorModes), nas cores do modo, e uma
+--     passadeira com setas vindo do Salão Principal;
+--   * dentro do mirante, faixa na cor do modo na entrada de cada porta;
 --   * a barreira de luz dourada que fecha as portas nos últimos segundos;
---   * um painel em cada ponta do mirante com a fila, o tempo, os avatares
---     de quem está na fila e quem mais estourou balões no aquecimento.
+--   * um painel em cada ponta do mirante com a fila, o tempo, os votos de
+--     cada modo, os avatares de quem está na fila e quem mais estourou
+--     balões no aquecimento.
 -- Só instâncias nativas; o painel só é redesenhado quando algo muda.
 
 local Players = game:GetService("Players")
@@ -16,6 +18,8 @@ local Workspace = game:GetService("Workspace")
 local BotConfig = require(ReplicatedStorage.Shared.config.BotConfig)
 local GameConfig = require(ReplicatedStorage.Shared.config.GameConfig)
 local MansionConfig = require(ReplicatedStorage.Shared.config.MansionConfig)
+local ModeRotationConfig = require(ReplicatedStorage.Shared.config.ModeRotationConfig)
+local MysteryModeConfig = require(ReplicatedStorage.Shared.config.MysteryModeConfig)
 local BuildingLayout = require(ReplicatedStorage.Shared.modules.BuildingLayout)
 local MansionLayout = require(ReplicatedStorage.Shared.modules.MansionLayout)
 local Lang = require(ReplicatedStorage.Shared.i18n.Lang)
@@ -33,6 +37,8 @@ export type BoardState = {
 	userIds: { number },
 	-- Linha do aquecimento ("🎈 Ana 7 · Rafa 5"), ou "".
 	warmup: string,
+	-- Votos de quem está na fila em cada modo (portas do mirante).
+	votes: { [string]: number },
 }
 
 export type QueueVisualsHandle = {
@@ -57,6 +63,38 @@ local PORTAL_HEIGHT = 13
 local PORTAL_HEADER = Vector2.new(12, 2.4)
 local RUNNER_LENGTH = 14
 local SIGN_DISTANCE = 80
+
+type DoorStyle = {
+	icon: string,
+	title: string,
+	subtitle: string,
+	color: Color3,
+}
+
+-- Aparência de cada porta pelo modo em que ela vota.
+local function doorStyle(mode: string): DoorStyle
+	if mode == "Race" then
+		return {
+			icon = "🕰",
+			title = Lang.t("🕰 CORRIDA DA TORRE"),
+			subtitle = Lang.t("Entre para votar · o primeiro no topo vence"),
+			color = Color3.fromRGB(255, 150, 64),
+		}
+	elseif mode == "Mystery" then
+		return {
+			icon = "👻",
+			title = Lang.t("👻 MISTÉRIO NO CASARÃO"),
+			subtitle = Lang.t("Entre para votar · a partir de %d jogadores", MysteryModeConfig.MinHumans),
+			color = Color3.fromRGB(176, 120, 255),
+		}
+	end
+	return {
+		icon = "🏟",
+		title = Lang.t("🏟 DERRUBE SEUS AMIGOS"),
+		subtitle = Lang.t("Entre para votar · derrube todos da arena"),
+		color = GREEN,
+	}
+end
 
 local QueueVisuals = {}
 
@@ -103,30 +141,31 @@ local function surface(target: BasePart, pixelsPerStud: number): SurfaceGui
 	return gui
 end
 
--- Portal do lado do Casarão (virado para +X): duas colunas verdes e um
--- letreiro no alto, bem maior que as placas das salas.
-local function buildPortal(folder: Instance, index: number, wallX: number, floorY: number, z: number)
+-- Portal do lado do Casarão (virado para +X): duas colunas na cor do modo
+-- e um letreiro no alto, bem maior que as placas das salas.
+local function buildPortal(folder: Instance, index: number, wallX: number, floorY: number, z: number, style: DoorStyle)
 	local halfDoor = MansionConfig.PassageSize.X / 2
 	for side = -1, 1, 2 do
-		part(folder, `Portal{index}Pillar`, Vector3.new(0.8, PORTAL_HEIGHT, 0.8), CFrame.new(wallX + 0.5, floorY + PORTAL_HEIGHT / 2, z + side * (halfDoor + 1)), GREEN, Enum.Material.SmoothPlastic)
+		part(folder, `Portal{index}Pillar`, Vector3.new(0.8, PORTAL_HEIGHT, 0.8), CFrame.new(wallX + 0.5, floorY + PORTAL_HEIGHT / 2, z + side * (halfDoor + 1)), style.color, Enum.Material.Neon)
 	end
 	local header = part(
 		folder,
 		`Portal{index}Header`,
 		Vector3.new(PORTAL_HEADER.X, PORTAL_HEADER.Y, 0.4),
-		-- Frente (−Z local) virada para dentro do Casarão (+X).
-		CFrame.lookAt(Vector3.new(wallX + 0.6, floorY + PORTAL_HEIGHT + 0.4, z), Vector3.new(wallX + 10, floorY + PORTAL_HEIGHT + 0.4, z)),
+		-- Frente (−Z local) virada para dentro do Casarão (+X), na frente das
+		-- colunas (senão elas tapam as pontas do texto).
+		CFrame.lookAt(Vector3.new(wallX + 1.2, floorY + PORTAL_HEIGHT + 0.4, z), Vector3.new(wallX + 10, floorY + PORTAL_HEIGHT + 0.4, z)),
 		PANEL
 	)
 	local gui = surface(header, 40)
-	label(gui, "Title", Lang.t("🏟 ENTRAR NA FILA"), Enum.Font.FredokaOne, GOLD, UDim2.fromScale(0.04, 0.04), UDim2.fromScale(0.92, 0.6))
-	label(gui, "Subtitle", Lang.t("Entre e saia quando quiser"), Enum.Font.GothamBold, INK, UDim2.fromScale(0.04, 0.64), UDim2.fromScale(0.92, 0.3))
+	label(gui, "Title", style.title, Enum.Font.FredokaOne, style.color, UDim2.fromScale(0.04, 0.04), UDim2.fromScale(0.92, 0.6))
+	label(gui, "Subtitle", style.subtitle, Enum.Font.GothamBold, INK, UDim2.fromScale(0.04, 0.64), UDim2.fromScale(0.92, 0.3))
 end
 
 -- Passadeira com setas do Salão Principal até a porta.
-local function buildRunner(folder: Instance, index: number, wallX: number, floorY: number, z: number)
+local function buildRunner(folder: Instance, index: number, wallX: number, floorY: number, z: number, color: Color3)
 	local width = MansionConfig.PassageSize.X - 2
-	part(folder, `Runner{index}`, Vector3.new(RUNNER_LENGTH, 0.12, width), CFrame.new(wallX + RUNNER_LENGTH / 2, floorY + 0.12, z), GREEN:Lerp(Color3.new(0, 0, 0), 0.35), Enum.Material.Fabric)
+	part(folder, `Runner{index}`, Vector3.new(RUNNER_LENGTH, 0.12, width), CFrame.new(wallX + RUNNER_LENGTH / 2, floorY + 0.12, z), color:Lerp(Color3.new(0, 0, 0), 0.35), Enum.Material.Fabric)
 	for arrow = 1, 3 do
 		local x = wallX + 3 + (arrow - 1) * 4
 		-- Chevron apontando para a porta (−X): duas barras em V.
@@ -176,6 +215,7 @@ end
 type Board = {
 	count: TextLabel,
 	status: TextLabel,
+	votes: TextLabel,
 	warmup: TextLabel,
 	avatars: { ImageLabel },
 }
@@ -185,9 +225,10 @@ local function buildBoard(folder: Instance, name: string, cframe: CFrame): Board
 	frame.CastShadow = false
 	local board = part(folder, name, Vector3.new(BOARD_SIZE.X, BOARD_SIZE.Y, 0.2), cframe, PANEL)
 	local gui = surface(board, 30)
-	label(gui, "Title", Lang.t("🏟 FILA DA PARTIDA"), Enum.Font.FredokaOne, GOLD, UDim2.fromScale(0.03, 0.03), UDim2.fromScale(0.94, 0.2))
-	local count = label(gui, "Count", "", Enum.Font.FredokaOne, INK, UDim2.fromScale(0.03, 0.24), UDim2.fromScale(0.94, 0.2))
-	local status = label(gui, "Status", "", Enum.Font.GothamBold, GREEN, UDim2.fromScale(0.03, 0.45), UDim2.fromScale(0.94, 0.13))
+	label(gui, "Title", Lang.t("🏟 FILA DA PARTIDA"), Enum.Font.FredokaOne, GOLD, UDim2.fromScale(0.03, 0.02), UDim2.fromScale(0.94, 0.16))
+	local count = label(gui, "Count", "", Enum.Font.FredokaOne, INK, UDim2.fromScale(0.03, 0.19), UDim2.fromScale(0.94, 0.16))
+	local status = label(gui, "Status", "", Enum.Font.GothamBold, GREEN, UDim2.fromScale(0.03, 0.36), UDim2.fromScale(0.94, 0.11))
+	local votes = label(gui, "Votes", "", Enum.Font.GothamBold, GOLD, UDim2.fromScale(0.03, 0.48), UDim2.fromScale(0.94, 0.11))
 	local row = Instance.new("Frame")
 	row.Name = "Avatars"
 	row.Position = UDim2.fromScale(0.03, 0.61)
@@ -226,7 +267,7 @@ local function buildBoard(folder: Instance, name: string, cframe: CFrame): Board
 		table.insert(avatars, avatar)
 	end
 	local warmup = label(gui, "Warmup", "", Enum.Font.GothamBold, INK, UDim2.fromScale(0.03, 0.84), UDim2.fromScale(0.94, 0.12))
-	return { count = count, status = status, warmup = warmup, avatars = avatars }
+	return { count = count, status = status, votes = votes, warmup = warmup, avatars = avatars }
 end
 
 local function statusText(state: BoardState): string
@@ -244,10 +285,26 @@ local function statusText(state: BoardState): string
 	return if missing == 1 then Lang.t("Falta 1 jogador para começar") else Lang.t("Faltam %d jogadores para começar", missing)
 end
 
+-- "🗳 Votos: 🕰 1 · 🏟 2 · 👻 0" na ordem das portas.
+local function votesText(votes: { [string]: number }): string
+	local parts: { string } = {}
+	local total = 0
+	for _, mode in ipairs(ModeRotationConfig.DoorModes) do
+		local count = votes[mode] or 0
+		total += count
+		table.insert(parts, `{doorStyle(mode).icon} {count}`)
+	end
+	if total == 0 then
+		return Lang.t("🗳 Entre por uma porta para votar no modo")
+	end
+	return Lang.t("🗳 Votos: %s", table.concat(parts, " · "))
+end
+
 local function render(board: Board, state: BoardState)
 	board.count.Text = Lang.t("%d / %d na fila", state.count, state.maximum)
 	board.status.Text = statusText(state)
 	board.status.TextColor3 = if state.gatesClosed then GOLD else GREEN
+	board.votes.Text = votesText(state.votes)
 	board.warmup.Text = state.warmup
 	local humans = #state.userIds
 	for index, avatar in ipairs(board.avatars) do
@@ -281,10 +338,11 @@ function QueueVisuals.build(worldRoot: Model): QueueVisualsHandle
 	local floorY = gallery.floorY
 	local barriers: { Part } = {}
 	for index, z in ipairs(mansion.passages) do
-		buildPortal(folder, index, mansion.galleryWallX, floorY, z)
-		buildRunner(folder, index, mansion.galleryWallX, floorY, z)
+		local style = doorStyle(ModeRotationConfig.DoorModes[index] or ModeRotationConfig.BaseMode)
+		buildPortal(folder, index, mansion.galleryWallX, floorY, z, style)
+		buildRunner(folder, index, mansion.galleryWallX, floorY, z, style.color)
 		table.insert(barriers, buildBarrier(folder, index, mansion.galleryWallX, floorY, z))
-		part(folder, `QueueMat{index}`, Vector3.new(1.2, 0.14, MansionConfig.PassageSize.X), CFrame.new(eastX - 1.2, floorY + 0.07, z), GREEN, Enum.Material.SmoothPlastic)
+		part(folder, `QueueMat{index}`, Vector3.new(1.2, 0.14, MansionConfig.PassageSize.X), CFrame.new(eastX - 1.2, floorY + 0.07, z), style.color, Enum.Material.SmoothPlastic)
 	end
 
 	-- Painéis nas paredes das pontas, virados para dentro do mirante.
