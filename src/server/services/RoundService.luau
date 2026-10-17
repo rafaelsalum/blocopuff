@@ -30,7 +30,6 @@ local ProfileSchema = require(script.Parent.Parent.data.ProfileSchema)
 local ResultTypes = require(ReplicatedStorage.Shared.types.ResultTypes)
 local CombatantRegistry = require(script.Parent.CombatantRegistry)
 local BotFillService = require(script.Parent.BotFillService)
-local BotBrainService = require(script.Parent.BotBrainService)
 local ModeRegistry = require(script.Parent.Parent.modes.ModeRegistry)
 local RoundModeTypes = require(script.Parent.Parent.modes.RoundModeTypes)
 local ModeRotation = require(script.Parent.Parent.data.ModeRotation)
@@ -112,6 +111,8 @@ local function baseMode(): RoundMode
 	return mode
 end
 local currentMode: RoundMode = baseMode()
+-- Duração da partida em andamento (cada modo pode ter a sua).
+local currentRoundDuration = 0
 local modeCursor = ModeRotation.initialCursor()
 -- Comandos de teste do painel admin (MatchTestControls).
 -- Início forçado vale até este os.clock() (pedido na espera aguarda a
@@ -592,6 +593,7 @@ local function beginRound(timings: RoundTimings): boolean
 	currentRoundStartedAt = os.time()
 	chooseMode(selected)
 
+	currentRoundDuration = currentMode.getRoundDuration(timings.RoundDuration)
 	currentMode.prepare(currentRoundId)
 
 	clearRoundParticipants()
@@ -621,14 +623,15 @@ local function beginRound(timings: RoundTimings): boolean
 		roundId = currentRoundId,
 		combatants = participantOrder,
 		humans = humans,
-		roundDuration = timings.RoundDuration,
+		roundDuration = currentRoundDuration,
 	})
-	BotBrainService.beginRound(bots, humans)
+	currentMode.beginBots(bots, humans)
 
-	setState(RoundTypes.Active)
+	-- O id antes do estado: quem reage ao Active já vê a rodada nova.
 	ReplicatedState.setRoundId(currentRoundId)
+	setState(RoundTypes.Active)
 	ReplicatedState.setParticipantCount(#participantOrder)
-	ReplicatedState.setTimeRemaining(timings.RoundDuration)
+	ReplicatedState.setTimeRemaining(currentRoundDuration)
 	ReplicatedState.setStatusMessage(RoundMessages.Active)
 
 	print(string.format("[BlocoPuff] Round %d (%s) started with %d participants (%d bots)", currentRoundId, currentMode.id, #participantOrder, #bots))
@@ -647,9 +650,9 @@ local function alivePlayers(): { Player }
 	return players
 end
 
-local function runActive(timings: RoundTimings)
-	local remaining = timings.RoundDuration
-	local climaxDuration = currentMode.getClimaxDuration(timings.RoundDuration)
+local function runActive()
+	local remaining = currentRoundDuration
+	local climaxDuration = currentMode.getClimaxDuration(currentRoundDuration)
 
 	while isRunning do
 		if endRoundRequested then
@@ -668,9 +671,22 @@ local function runActive(timings: RoundTimings)
 			break
 		end
 
+		local outcome = currentMode.evaluate(false)
+		if outcome ~= nil then
+			local modeWinner = outcome.winner
+			winner = if modeWinner ~= nil then { userId = modeWinner.id, name = modeWinner.name } else nil
+			break
+		end
+
 		local aliveCount, soleActive = evaluateActiveParticipants()
 
-		if aliveCount == 0 then
+		if not currentMode.lastStanding then
+			-- Sem eliminação que decida (Corrida): só o modo ou o tempo acabam.
+			if aliveCount == 0 then
+				winner = nil
+				break
+			end
+		elseif aliveCount == 0 then
 			-- Todos caíram antes do próximo tique: vence quem caiu por último,
 			-- se caiu sozinho; quedas no mesmo instante terminam em empate.
 			local lastPlayers = RoundResultBuilder.getLastEliminated(eliminationTimes)
@@ -686,7 +702,9 @@ local function runActive(timings: RoundTimings)
 		end
 
 		if remaining <= 0 then
-			winner = nil
+			local timeUpOutcome = currentMode.evaluate(true)
+			local timeUpWinner = if timeUpOutcome ~= nil then timeUpOutcome.winner else nil
+			winner = if timeUpWinner ~= nil then { userId = timeUpWinner.id, name = timeUpWinner.name } else nil
 			break
 		end
 
@@ -752,6 +770,8 @@ local function commitProfiles(result: ResultTypes.RoundResult)
 				blocksBuilt = extra.blocksBuilt,
 				comebacks = extra.comebacks,
 				botWins = outcome.stats.botWins,
+				raceMatches = if currentMode.id == "Race" then 1 else 0,
+				raceWins = if currentMode.id == "Race" and won then 1 else 0,
 			}
 			-- O XP usa os mesmos números já limitados que vão para o perfil
 			-- (o applyRound limita de novo e registra as anomalias).
@@ -812,7 +832,7 @@ local function publishResult()
 			end
 		end
 	end
-	local result = RoundResultBuilder.build(currentRoundId, snapshots, winnerCombatant)
+	local result = RoundResultBuilder.build(currentRoundId, snapshots, winnerCombatant, currentMode.getRanking())
 	local committed, commitFailure = pcall(commitProfiles, result)
 	if not committed then
 		warn(string.format("[BlocoPuff] Could not save round to profiles: %s", tostring(commitFailure)))
@@ -847,7 +867,7 @@ local function runEnding(timings: RoundTimings)
 	forceStartUntil = 0
 	skipToChaosRequested = false
 	endRoundRequested = false
-	BotBrainService.endRound()
+	currentMode.endBots()
 	currentMode.finish()
 	KnockbackService.endRound()
 	-- Volta por Cima também vale para quem venceu depois da Segunda Chance.
@@ -871,7 +891,8 @@ local function runEnding(timings: RoundTimings)
 		end
 	end
 	local tiedLast = if survivors == 0 then RoundResultBuilder.getLastEliminated(eliminationTimes) else {}
-	local isDraw = winner == nil and (survivors > 1 or #tiedLast > 1)
+	-- Nos modos sem eliminação (Corrida), quem não venceu perdeu.
+	local isDraw = currentMode.lastStanding and winner == nil and (survivors > 1 or #tiedLast > 1)
 	local outcomes: { [Player]: string } = {}
 	for _, combatant in ipairs(participantOrder) do
 		local participant = participants[combatant]
@@ -932,7 +953,7 @@ local function runRoundLifecycle()
 		if not beginRound(timings) then
 			continue
 		end
-		runActive(timings)
+		runActive()
 		if not isRunning then
 			break
 		end
@@ -978,8 +999,8 @@ function RoundService.stop()
 	end
 
 	disconnectParticipantDeathHandlers()
-	BotBrainService.endRound()
 	for _, mode in pairs(ModeRegistry.all()) do
+		mode.endBots()
 		mode.stop()
 	end
 	KnockbackService.stop()

@@ -35,6 +35,8 @@ local active = false
 local lastHits: { [Combatant]: LastHit } = {}
 local protectedUntil: { [Combatant]: number } = {}
 local sendToPlayer: HitSender? = nil
+-- Força do disparo no modo em andamento (Corrida: mais fraco que na Arena).
+local shotForce = 1
 
 local function isActiveParticipant(combatant: Combatant): boolean
 	return active
@@ -74,7 +76,7 @@ local function computeVelocity(direction: Vector3, power: number): Vector3
 	local config = GameConfig.Knockback
 	local flat = Vector3.new(direction.X, 0, direction.Z)
 	local horizontal = if flat.Magnitude > 1e-3 then flat.Unit else Vector3.zero
-	local multiplier = if power > 1 then config.SuperMultiplier else 1
+	local multiplier = (if power > 1 then config.SuperMultiplier else 1) * shotForce
 	return (horizontal * config.HorizontalSpeed * multiplier) + Vector3.new(0, config.VerticalSpeed * multiplier, 0)
 end
 
@@ -180,8 +182,14 @@ function KnockbackService.beginRound(newRoundId: number)
 	table.clear(protectedUntil)
 end
 
+-- Força dos disparos até o fim da rodada (volta a 1 no endRound).
+function KnockbackService.setShotForce(force: number)
+	shotForce = math.clamp(force, 0, 1)
+end
+
 function KnockbackService.endRound()
 	active = false
+	shotForce = 1
 	table.clear(lastHits)
 	table.clear(protectedUntil)
 end

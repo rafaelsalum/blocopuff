@@ -37,6 +37,7 @@ local LeaderboardController = require(script.controllers.LeaderboardController)
 local PuffdexController = require(script.controllers.PuffdexController)
 local PuffMachineController = require(script.controllers.PuffMachineController)
 local ChallengesController = require(script.controllers.ChallengesController)
+local ModeController = require(script.controllers.ModeController)
 local RelicController = require(script.controllers.RelicController)
 local MysteryController = require(script.controllers.MysteryController)
 local BaronRoomsController = require(script.controllers.BaronRoomsController)
@@ -230,6 +231,14 @@ local challengesOk, challengesErr = pcall(function()
 end)
 if not challengesOk then
 	warn(string.format("[BlocoPuff] Failed to start challenges controller: %s", tostring(challengesErr)))
+end
+
+-- Modos de partida (5D): próximo modo, abertura e progresso da Corrida.
+local modeOk, modeErr = pcall(function()
+	ModeController.start()
+end)
+if not modeOk then
+	warn(string.format("[BlocoPuff] Failed to start mode controller: %s", tostring(modeErr)))
 end
 
 -- Relíquias e Álbum do Casarão (5C.2).

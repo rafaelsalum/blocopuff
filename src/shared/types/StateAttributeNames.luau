@@ -30,6 +30,9 @@ export type StateAttributeNames = {
 	PlayerEliminatedAtRoundId: string,
 	PlayerRoundsUntilTurn: string,
 	PlayerRoundBlocksDestroyed: string,
+	PlayerRaceCheckpoint: string,
+	PlayerRacePosition: string,
+	PlayerRaceFinishOrder: string,
 	PlayerHasSecondChance: string,
 	PlayerRoundKnockouts: string,
 	-- Puff equipado (id do PuffCatalog), escrito pelo servidor a partir do
@@ -80,6 +83,11 @@ local StateAttributeNames: StateAttributeNames = {
 	PlayerEliminatedAtRoundId = "EliminatedAtRoundId",
 	PlayerRoundsUntilTurn = "RoundsUntilTurn",
 	PlayerRoundBlocksDestroyed = "RoundBlocksDestroyed",
+	-- Corrida da Torre (Fase 5D.2): checkpoint alcançado, posição ao vivo e
+	-- ordem de chegada (0 = ainda subindo).
+	PlayerRaceCheckpoint = "RaceCheckpoint",
+	PlayerRacePosition = "RacePosition",
+	PlayerRaceFinishOrder = "RaceFinishOrder",
 	PlayerHasSecondChance = "HasSecondChance",
 	PlayerRoundKnockouts = "RoundKnockouts",
 	PlayerEquippedPuff = "EquippedPuff",

@@ -19,6 +19,7 @@ export type HudViewHandle = {
 	setCombatTimer: (text: string) -> (),
 	setCombatParticipants: (count: number) -> (),
 	setArenaIntegrity: (remaining: number, total: number) -> (),
+	setArenaVisible: (visible: boolean) -> (),
 	setPersonalScore: (count: number, visible: boolean) -> (),
 	setLives: (state: LivesState) -> (),
 	setTimerDanger: (danger: boolean) -> (),
@@ -40,6 +41,7 @@ function HudView.new(playerGui: PlayerGui, onJoin: () -> (), onLeave: () -> ()):
 	handle.setCombatTimer = combatHud.setTimer
 	handle.setCombatParticipants = combatHud.setParticipants
 	handle.setArenaIntegrity = combatHud.setArenaIntegrity
+	handle.setArenaVisible = combatHud.setArenaVisible
 	handle.setPersonalScore = combatHud.setPersonalScore
 	handle.setLives = combatHud.setLives
 	handle.setTimerDanger = combatHud.setTimerDanger

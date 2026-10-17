@@ -24,6 +24,9 @@ export type ProfileStats = {
 	-- Vitórias em partidas sem outro humano, só contra bots RoboPuff (5B).
 	-- Não entram em `wins` (ranking, Puffdex).
 	botWins: number,
+	-- Corrida da Torre do Relógio (Fase 5D.2).
+	raceMatches: number,
+	raceWins: number,
 }
 
 -- Desafio do dia (4.3): progresso e se já foi concluído (os tickets saem
@@ -142,6 +145,8 @@ local ProfileTypes = {
 		"blocksBuilt",
 		"comebacks",
 		"botWins",
+		"raceMatches",
+		"raceWins",
 	}),
 }
 

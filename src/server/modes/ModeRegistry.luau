@@ -5,11 +5,13 @@
 
 local RoundModeTypes = require(script.Parent.RoundModeTypes)
 local ArenaMode = require(script.Parent.ArenaMode)
+local RaceMode = require(script.Parent.RaceMode)
 
 type RoundMode = RoundModeTypes.RoundMode
 
 local MODES: { [string]: RoundMode } = table.freeze({
 	[ArenaMode.id] = ArenaMode,
+	[RaceMode.id] = RaceMode,
 })
 
 local ModeRegistry = {}

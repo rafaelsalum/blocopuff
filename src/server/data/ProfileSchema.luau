@@ -432,6 +432,8 @@ local function roundLimits(): { [string]: number }
 		blocksBuilt = GameConfig.SecretRoom.BuildCharges,
 		comebacks = 1,
 		botWins = 1,
+		raceMatches = 1,
+		raceWins = 1,
 	}
 end
 

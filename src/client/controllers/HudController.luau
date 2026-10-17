@@ -48,6 +48,8 @@ local cached = {
 	roundsUntilTurn = 0,
 	roundBlocksDestroyed = 0,
 	finalChaos = false,
+	-- Modo da partida em andamento (Fase 5D).
+	roundMode = "Arena",
 	hasSecondChance = false,
 	inMatchQueue = false,
 	queuePlace = "",
@@ -241,11 +243,15 @@ local function renderActive(currentView: HudViewHandle)
 	currentView.setCombatVisible(true)
 	currentView.setCombatTimer(formatMinutesSeconds(cached.timeRemaining))
 	currentView.setCombatParticipants(cached.participantCount)
+	-- Blocos, barra da Arena e vidas só existem na Arena; nos outros modos o
+	-- controle do modo mostra o próprio progresso (ModeController).
+	local inArena = cached.roundMode == "Arena" or cached.roundMode == ""
+	currentView.setArenaVisible(inArena)
 	currentView.setArenaIntegrity(cached.remainingBlockCount, cached.totalBlockCount)
-	currentView.setPersonalScore(cached.roundBlocksDestroyed, cached.isParticipant)
+	currentView.setPersonalScore(cached.roundBlocksDestroyed, cached.isParticipant and inArena)
 	currentView.setTimerDanger(cached.finalChaos)
 
-	local competing = cached.isParticipant and not cached.isEliminated
+	local competing = cached.isParticipant and not cached.isEliminated and inArena
 	local secondChanceUsed = competing and GameConfig.SecondChance.Enabled and not cached.hasSecondChance
 	if not competing then
 		currentView.setLives("Hidden")
@@ -385,6 +391,7 @@ function HudController.start()
 		cached.remainingBlockCount = readNumberAttribute(containerInstance, StateAttributeNames.RemainingBlockCount)
 		cached.totalBlockCount = readNumberAttribute(containerInstance, StateAttributeNames.TotalBlockCount)
 		cached.finalChaos = readBooleanAttribute(containerInstance, StateAttributeNames.FinalChaos)
+		cached.roundMode = readStringAttribute(containerInstance, StateAttributeNames.RoundMode)
 	end
 
 	local function refreshFromPlayer()

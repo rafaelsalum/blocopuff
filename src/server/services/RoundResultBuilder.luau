@@ -102,7 +102,9 @@ local function pickHighlight(entries: { ResultEntry }, kind: string, title: stri
 	return { kind = kind, title = title, userId = best.userId, name = best.name, value = read(best) }
 end
 
-function RoundResultBuilder.build(roundId: number, snapshots: { ParticipantSnapshot }, winner: Combatant?): RoundResult
+-- `ranking`: posições decididas pelo modo (Corrida: ordem de chegada e
+-- altura). Sem ela, a posição vem da ordem de eliminação.
+function RoundResultBuilder.build(roundId: number, snapshots: { ParticipantSnapshot }, winner: Combatant?, ranking: { [Combatant]: number }?): RoundResult
 	local entries: { ResultEntry } = {}
 	local comebacks: { [number]: number } = {}
 	local tiedPositions = resolveTies(snapshots)
@@ -116,8 +118,12 @@ function RoundResultBuilder.build(roundId: number, snapshots: { ParticipantSnaps
 
 	for _, snapshot in ipairs(snapshots) do
 		local combatant = snapshot.combatant
-		local position = if snapshot.alive then 1 else (tiedPositions[combatant] or snapshot.eliminatedPosition or #snapshots)
-		if not snapshot.alive and position == 1 and (winner == nil or winner ~= combatant) then
+		local ranked = if ranking ~= nil then ranking[combatant] else nil
+		local position = if ranked ~= nil
+			then ranked
+			elseif snapshot.alive then 1
+			else (tiedPositions[combatant] or snapshot.eliminatedPosition or #snapshots)
+		if (ranking ~= nil or not snapshot.alive) and position == 1 and (winner == nil or winner ~= combatant) then
 			sharedFirst += 1
 		end
 		table.insert(entries, {
@@ -182,7 +188,8 @@ function RoundResultBuilder.build(roundId: number, snapshots: { ParticipantSnaps
 		roundId = roundId,
 		winnerUserId = if winner ~= nil then winner.id else 0,
 		winnerName = if winner ~= nil then winner.name else "",
-		draw = winner == nil and (survivors > 1 or sharedFirst > 1),
+		-- Com posições do modo (Corrida), não há empate: quem não venceu perdeu.
+		draw = ranking == nil and winner == nil and (survivors > 1 or sharedFirst > 1),
 		participantCount = #snapshots,
 		entries = entries,
 		highlights = highlights,

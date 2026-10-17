@@ -18,6 +18,8 @@ export type CombatHudViewHandle = {
 	setTimer: (text: string) -> (),
 	setParticipants: (count: number) -> (),
 	setArenaIntegrity: (remaining: number, total: number) -> (),
+	-- Esconde a barra da Arena nos modos sem blocos (Corrida).
+	setArenaVisible: (visible: boolean) -> (),
 	setPersonalScore: (count: number, visible: boolean) -> (),
 	setLives: (state: LivesState) -> (),
 	setTimerDanger: (danger: boolean) -> (),
@@ -311,6 +313,10 @@ function CombatHudView.new(playerGui: PlayerGui): CombatHudViewHandle
 
 	handle.setParticipants = function(count: number)
 		playersValue.Text = tostring(math.max(0, math.floor(count)))
+	end
+
+	handle.setArenaVisible = function(visible: boolean)
+		arenaRoot.Visible = visible
 	end
 
 	handle.setArenaIntegrity = function(remaining: number, total: number)

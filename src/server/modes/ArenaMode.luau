@@ -21,9 +21,13 @@ local VaultService = require(services.VaultService)
 local FinalChaosService = require(services.FinalChaosService)
 local TelemetryService = require(services.TelemetryService)
 local ReplicatedState = require(services.ReplicatedStateService)
+local BotBrainService = require(services.BotBrainService)
+local CombatantRegistry = require(services.CombatantRegistry)
 
 type BeginContext = RoundModeTypes.BeginContext
 type TickContext = RoundModeTypes.TickContext
+type Outcome = RoundModeTypes.Outcome
+type Combatant = CombatantRegistry.Combatant
 
 local awakeningRandom = Random.new()
 
@@ -40,6 +44,10 @@ end
 
 local function getSpawnCFrames(count: number): { CFrame }
 	return ArenaService.getPlayerSpawnCFrames(count)
+end
+
+local function getRoundDuration(default: number): number
+	return default
 end
 
 local function begin(context: BeginContext)
@@ -73,6 +81,23 @@ local function tick(context: TickContext)
 	ReplicatedState.setFinalChaos(true)
 	TelemetryService.finalChaosStarted(context.alivePlayers())
 	print(string.format("[BlocoPuff] Round %d entered Final Chaos (%ds)", context.roundId, context.climaxDuration))
+end
+
+-- Na Arena só vale o padrão: o último em pé vence (`lastStanding`).
+local function evaluate(_timeUp: boolean): Outcome?
+	return nil
+end
+
+local function getRanking(): { [Combatant]: number }?
+	return nil
+end
+
+local function beginBots(bots: { Combatant }, humans: { Player })
+	BotBrainService.beginRound(bots, humans)
+end
+
+local function endBots()
+	BotBrainService.endRound()
 end
 
 -- Segunda Chance: um bloco inteiro, de preferência no andar de baixo.
@@ -133,10 +158,16 @@ local ArenaMode: RoundModeTypes.RoundMode = {
 	canRun = canRun,
 	prepare = prepare,
 	getSpawnCFrames = getSpawnCFrames,
+	getRoundDuration = getRoundDuration,
 	begin = begin,
 	getClimaxDuration = getClimaxDuration,
 	isInClimax = isInClimax,
 	tick = tick,
+	lastStanding = true,
+	evaluate = evaluate,
+	getRanking = getRanking,
+	beginBots = beginBots,
+	endBots = endBots,
 	getRespawnCFrame = getRespawnCFrame,
 	getRemainingFloorRatio = getRemainingFloorRatio,
 	finish = finish,
