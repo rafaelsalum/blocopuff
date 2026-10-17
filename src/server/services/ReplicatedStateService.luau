@@ -3,6 +3,7 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local GameConfig = require(ReplicatedStorage.Shared.config.GameConfig)
+local ModeRotationConfig = require(ReplicatedStorage.Shared.config.ModeRotationConfig)
 local RoundTypes = require(ReplicatedStorage.Shared.types.RoundTypes)
 local StateAttributeNames = require(ReplicatedStorage.Shared.types.StateAttributeNames)
 
@@ -26,6 +27,8 @@ local ATTR_TOTAL_BLOCK_COUNT = StateAttributeNames.TotalBlockCount
 local ATTR_REMAINING_BLOCK_COUNT = StateAttributeNames.RemainingBlockCount
 local ATTR_DESTROYED_BLOCK_COUNT = StateAttributeNames.DestroyedBlockCount
 local ATTR_FINAL_CHAOS = StateAttributeNames.FinalChaos
+local ATTR_ROUND_MODE = StateAttributeNames.RoundMode
+local ATTR_NEXT_ROUND_MODE = StateAttributeNames.NextRoundMode
 
 local ReplicatedStateService = {}
 
@@ -97,6 +100,8 @@ function ReplicatedStateService.create(): Configuration
 	setAttribute(ATTR_REMAINING_BLOCK_COUNT, 0)
 	setAttribute(ATTR_DESTROYED_BLOCK_COUNT, 0)
 	setAttribute(ATTR_FINAL_CHAOS, false)
+	setAttribute(ATTR_ROUND_MODE, ModeRotationConfig.BaseMode)
+	setAttribute(ATTR_NEXT_ROUND_MODE, ModeRotationConfig.BaseMode)
 
 	return container
 end
@@ -139,6 +144,14 @@ end
 
 function ReplicatedStateService.setFinalChaos(active: boolean)
 	setAttribute(ATTR_FINAL_CHAOS, active)
+end
+
+function ReplicatedStateService.setRoundMode(mode: string)
+	setAttribute(ATTR_ROUND_MODE, mode)
+end
+
+function ReplicatedStateService.setNextRoundMode(mode: string)
+	setAttribute(ATTR_NEXT_ROUND_MODE, mode)
 end
 
 function ReplicatedStateService.getContainer(): Configuration?

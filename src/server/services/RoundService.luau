@@ -9,20 +9,12 @@ local RoundTypes = require(ReplicatedStorage.Shared.types.RoundTypes)
 local RoundMessages = require(ReplicatedStorage.Shared.modules.RoundMessages)
 local StateAttributeNames = require(ReplicatedStorage.Shared.types.StateAttributeNames)
 local EliminationTypes = require(ReplicatedStorage.Shared.types.EliminationTypes)
-local ArenaService = require(script.Parent.ArenaService)
 local LobbyService = require(script.Parent.LobbyService)
 local ReplicatedState = require(script.Parent.ReplicatedStateService)
 local PuffadorService = require(script.Parent.PuffadorService)
-local EliminationService = require(script.Parent.EliminationService)
-local VaultService = require(script.Parent.VaultService)
 local KnockbackService = require(script.Parent.KnockbackService)
-local TrapService = require(script.Parent.TrapService)
-local FinalChaosService = require(script.Parent.FinalChaosService)
 local RoundResultBuilder = require(script.Parent.RoundResultBuilder)
 local TelemetryService = require(script.Parent.TelemetryService)
-local SecretPassageService = require(script.Parent.SecretPassageService)
-local TocaService = require(script.Parent.TocaService)
-local BaraoService = require(script.Parent.BaraoService)
 local BuildModeService = require(script.Parent.BuildModeService)
 local PuffMomentService = require(script.Parent.PuffMomentService)
 local CorridorTelemetryService = require(script.Parent.CorridorTelemetryService)
@@ -39,8 +31,10 @@ local ResultTypes = require(ReplicatedStorage.Shared.types.ResultTypes)
 local CombatantRegistry = require(script.Parent.CombatantRegistry)
 local BotFillService = require(script.Parent.BotFillService)
 local BotBrainService = require(script.Parent.BotBrainService)
-
-local awakeningRandom = Random.new()
+local ModeRegistry = require(script.Parent.Parent.modes.ModeRegistry)
+local RoundModeTypes = require(script.Parent.Parent.modes.RoundModeTypes)
+local ModeRotation = require(script.Parent.Parent.data.ModeRotation)
+local ModeRotationConfig = require(ReplicatedStorage.Shared.config.ModeRotationConfig)
 local PuffadorConstants = require(ReplicatedStorage.Shared.modules.PuffadorConstants)
 local CharacterImpulse = require(ReplicatedStorage.Shared.modules.CharacterImpulse)
 
@@ -48,6 +42,7 @@ type RoundState = RoundTypes.RoundState
 type RoundTimings = GameConfig.RoundTimings
 type EliminationReason = EliminationTypes.EliminationReason
 type Combatant = CombatantRegistry.Combatant
+type RoundMode = RoundModeTypes.RoundMode
 
 type Participant = {
 	combatant: Combatant,
@@ -109,6 +104,15 @@ local eliminationPositions: { [Combatant]: number } = {}
 -- Momento de cada eliminação: quedas no mesmo instante viram empate.
 local eliminationTimes: { [Combatant]: number } = {}
 local resultRemote: RemoteEvent? = nil
+-- Rotação de modos (Fase 5D): o modo da partida em andamento e a posição na
+-- sequência da config.
+local function baseMode(): RoundMode
+	local mode = ModeRegistry.get(ModeRotationConfig.BaseMode)
+	assert(mode ~= nil, "base round mode is not registered")
+	return mode
+end
+local currentMode: RoundMode = baseMode()
+local modeCursor = ModeRotation.initialCursor()
 -- Comandos de teste do painel admin (MatchTestControls).
 -- Início forçado vale até este os.clock() (pedido na espera aguarda a
 -- contagem começar, mas não fica valendo para sempre).
@@ -209,8 +213,52 @@ local function selectParticipants(): { Player }
 	return selected
 end
 
-local function teleportParticipantsToArena(combatants: { Combatant })
-	local spawnCFrames = ArenaService.getPlayerSpawnCFrames(#combatants)
+-- Rotação de modos: o que pode rodar com estes jogadores e se há um novato
+-- entre eles (as primeiras partidas da vida são sempre na Arena).
+local function rotationInput(humans: { Player }): ModeRotation.Input
+	local available: { [string]: boolean } = {}
+	for id, mode in pairs(ModeRegistry.all()) do
+		available[id] = mode.canRun(#humans)
+	end
+	local hasBeginner = false
+	for _, player in ipairs(humans) do
+		local snapshot = PlayerDataService.getSnapshot(player)
+		if snapshot ~= nil and ModeRotation.isBeginner(snapshot.stats.matches, ModeRotationConfig.BeginnerArenaMatches) then
+			hasBeginner = true
+			break
+		end
+	end
+	return {
+		sequence = ModeRotationConfig.Sequence,
+		baseMode = ModeRotationConfig.BaseMode,
+		available = available,
+		hasBeginner = hasBeginner,
+	}
+end
+
+-- Prévia do próximo modo para a fila atual (pode mudar se a fila mudar até
+-- a partida começar; quem decide é chooseMode).
+local function publishNextMode()
+	local queued: { Player } = {}
+	for _, player in ipairs(rotationQueue) do
+		if MatchQueueService.hasPlace(player) then
+			table.insert(queued, player)
+		end
+	end
+	local nextMode = ModeRotation.pick(modeCursor, rotationInput(queued))
+	ReplicatedState.setNextRoundMode(nextMode)
+end
+
+-- Decide o modo da partida com os jogadores escalados e anda a rotação.
+local function chooseMode(selected: { Player })
+	local modeId, nextCursor = ModeRotation.pick(modeCursor, rotationInput(selected))
+	modeCursor = nextCursor
+	currentMode = ModeRegistry.get(modeId) or baseMode()
+	ReplicatedState.setRoundMode(currentMode.id)
+end
+
+local function teleportParticipantsToMap(combatants: { Combatant })
+	local spawnCFrames = currentMode.getSpawnCFrames(#combatants)
 
 	for index, combatant in ipairs(combatants) do
 		local cframe = spawnCFrames[index]
@@ -220,12 +268,12 @@ local function teleportParticipantsToArena(combatants: { Combatant })
 
 		local character = CombatantRegistry.getCharacter(combatant)
 		if character == nil then
-			warn(string.format("[BlocoPuff] Skipping arena teleport for %s: character not found", combatant.name))
+			warn(string.format("[BlocoPuff] Skipping %s teleport for %s: character not found", currentMode.id, combatant.name))
 			continue
 		end
 
 		if not moveCharacterTo(character, cframe) then
-			warn(string.format("[BlocoPuff] Failed to move %s into the arena", combatant.name))
+			warn(string.format("[BlocoPuff] Failed to move %s into the %s map", combatant.name, currentMode.id))
 		end
 	end
 end
@@ -296,11 +344,12 @@ local function creditKnockout(victim: Combatant)
 	end
 end
 
--- Primeira queda para fora da arena: devolve o jogador a um bloco inteiro
--- (de preferência no andar de baixo) em vez de eliminá-lo. Desligada no
--- Caos Final. Retorna true se a Segunda Chance foi usada.
+-- Primeira queda para fora do mapa: devolve o jogador ao lugar que o modo
+-- escolher (na Arena, um bloco inteiro de preferência no andar de baixo) em
+-- vez de eliminá-lo. O modo pode negar (na Arena, durante o Caos Final).
+-- Retorna true se a Segunda Chance foi usada.
 local function trySecondChance(combatant: Combatant): boolean
-	if CombatantRegistry.getAttribute(combatant, ATTR_HAS_SECOND_CHANCE) ~= true or FinalChaosService.isRunning() then
+	if CombatantRegistry.getAttribute(combatant, ATTR_HAS_SECOND_CHANCE) ~= true then
 		return false
 	end
 	local character = CombatantRegistry.getCharacter(combatant)
@@ -308,13 +357,7 @@ local function trySecondChance(combatant: Combatant): boolean
 		return false
 	end
 
-	local cframe: CFrame? = nil
-	for floorIndex = 1, GameConfig.Arena.FloorCount do
-		cframe = ArenaService.getSafeRespawnCFrame(floorIndex)
-		if cframe ~= nil then
-			break
-		end
-	end
+	local cframe = currentMode.getRespawnCFrame()
 	if cframe == nil or not moveCharacterTo(character, cframe) then
 		return false
 	end
@@ -487,10 +530,12 @@ local function runWaitingForPlayers()
 	ReplicatedState.clearWinner()
 	ReplicatedState.setStatusMessage(RoundMessages.WaitingForPlayers)
 	ReplicatedState.setParticipantCount(countQueued())
+	publishNextMode()
 
 	while isRunning and countQueued() < GameConfig.MinimumPlayers do
 		task.wait(POLL_INTERVAL)
 		ReplicatedState.setParticipantCount(countQueued())
+		publishNextMode()
 	end
 end
 
@@ -498,6 +543,7 @@ local function runCountdown(timings: RoundTimings): boolean
 	setState(RoundTypes.Countdown)
 
 	local remaining = timings.LobbyCountdown
+	publishNextMode()
 	MatchQueueService.setCountdown(remaining)
 	ReplicatedState.setTimeRemaining(remaining)
 	ReplicatedState.setStatusMessage(RoundMessages.countdown(remaining))
@@ -544,11 +590,9 @@ local function beginRound(timings: RoundTimings): boolean
 	MatchQueueService.setOpen(false)
 	currentRoundId += 1
 	currentRoundStartedAt = os.time()
+	chooseMode(selected)
 
-	-- A arena precisa estar totalmente restaurada e com a destruição
-	-- habilitada para a nova rodada antes que qualquer jogador chegue nela.
-	ArenaService.restoreAllBlocks()
-	ArenaService.beginRound(currentRoundId)
+	currentMode.prepare(currentRoundId)
 
 	clearRoundParticipants()
 	local combatants = CombatantRegistry.forPlayers(selected)
@@ -562,30 +606,23 @@ local function beginRound(timings: RoundTimings): boolean
 	end
 	local humans = participantPlayers()
 
-	teleportParticipantsToArena(participantOrder)
+	teleportParticipantsToMap(participantOrder)
 	-- Os escalados já desceram: o mirante reabre para a fila da próxima.
 	MatchQueueService.setCountdown(nil)
 	connectParticipantDeathHandlers(participantOrder)
 	PuffadorService.beginRound(humans, currentRoundId)
 	KnockbackService.beginRound(currentRoundId)
-	TrapService.beginRound()
-	SecretPassageService.beginRound(currentRoundId)
-	TocaService.beginRound(currentRoundId)
 	PuffMomentService.beginRound()
 	RoundStatsService.beginRound()
 	SecretAchievementService.beginRound()
 	PlayerDataService.roundStarted(humans)
-	CorridorTelemetryService.beginRound(currentRoundId)
-	-- O Barão acorda e o cofre destranca no mesmo instante sorteado.
-	local awakening = timings.RoundDuration * awakeningRandom:NextNumber(GameConfig.Barao.WakeMinFraction, GameConfig.Barao.WakeMaxFraction)
-	BaraoService.beginRound(currentRoundId, awakening)
 	TelemetryService.roundStarted(humans, #bots)
-	ReplicatedState.setFinalChaos(false)
-	VaultService.beginRound(currentRoundId, awakening)
-
-	-- Só inicia o monitoramento da zona depois que os participantes já
-	-- estão posicionados na arena, evitando eliminar alguém ainda no lobby.
-	EliminationService.beginRound(participantOrder, currentRoundId)
+	currentMode.begin({
+		roundId = currentRoundId,
+		combatants = participantOrder,
+		humans = humans,
+		roundDuration = timings.RoundDuration,
+	})
 	BotBrainService.beginRound(bots, humans)
 
 	setState(RoundTypes.Active)
@@ -594,28 +631,25 @@ local function beginRound(timings: RoundTimings): boolean
 	ReplicatedState.setTimeRemaining(timings.RoundDuration)
 	ReplicatedState.setStatusMessage(RoundMessages.Active)
 
-	print(string.format("[BlocoPuff] Round %d started with %d participants (%d bots)", currentRoundId, #participantOrder, #bots))
+	print(string.format("[BlocoPuff] Round %d (%s) started with %d participants (%d bots)", currentRoundId, currentMode.id, #participantOrder, #bots))
 	return true
 end
 
-local function startFinalChaos(duration: number)
-	FinalChaosService.begin(duration)
-	ReplicatedState.setFinalChaos(true)
-	local alivePlayers: { Player } = {}
+local function alivePlayers(): { Player }
+	local players: { Player } = {}
 	for _, combatant in ipairs(participantOrder) do
 		local participant = participants[combatant]
 		local player = combatant.player
 		if participant ~= nil and participant.alive and player ~= nil then
-			table.insert(alivePlayers, player)
+			table.insert(players, player)
 		end
 	end
-	TelemetryService.finalChaosStarted(alivePlayers)
-	print(string.format("[BlocoPuff] Round %d entered Final Chaos (%ds)", currentRoundId, duration))
+	return players
 end
 
 local function runActive(timings: RoundTimings)
 	local remaining = timings.RoundDuration
-	local chaosDuration = FinalChaosService.getDuration(timings.RoundDuration)
+	local climaxDuration = currentMode.getClimaxDuration(timings.RoundDuration)
 
 	while isRunning do
 		if endRoundRequested then
@@ -625,7 +659,7 @@ local function runActive(timings: RoundTimings)
 		end
 		if skipToChaosRequested then
 			skipToChaosRequested = false
-			remaining = math.min(remaining, chaosDuration)
+			remaining = math.min(remaining, climaxDuration)
 		end
 
 		-- Todos os humanos saíram e só sobraram bots: não há por que seguir.
@@ -656,9 +690,12 @@ local function runActive(timings: RoundTimings)
 			break
 		end
 
-		if remaining <= chaosDuration and not FinalChaosService.isRunning() then
-			startFinalChaos(chaosDuration)
-		end
+		currentMode.tick({
+			roundId = currentRoundId,
+			remaining = remaining,
+			climaxDuration = climaxDuration,
+			alivePlayers = alivePlayers,
+		})
 
 		task.wait(TICK_INTERVAL)
 		remaining -= 1
@@ -781,8 +818,7 @@ local function publishResult()
 		warn(string.format("[BlocoPuff] Could not save round to profiles: %s", tostring(commitFailure)))
 	end
 	-- Conquista "Por um Fio" (arena quase vazia); chamada antes de restaurar os pisos.
-	local total = ArenaService.getTotalBlockCount()
-	local remainingRatio = if total > 0 then ArenaService.getRemainingBlockCount() / total else 1
+	local remainingRatio = currentMode.getRemainingFloorRatio()
 	-- Conquistas são de jogador: um bot vencedor não ganha nada.
 	local secretWinner = if result.draw or winnerCombatant == nil then nil else winnerCombatant.player
 	local secretsOk, secretsFailure = pcall(SecretAchievementService.roundFinished, secretWinner, remainingRatio)
@@ -812,17 +848,8 @@ local function runEnding(timings: RoundTimings)
 	skipToChaosRequested = false
 	endRoundRequested = false
 	BotBrainService.endRound()
-	EliminationService.endRound()
-	FinalChaosService.stop()
-	ReplicatedState.setFinalChaos(false)
+	currentMode.finish()
 	KnockbackService.endRound()
-	TrapService.endRound()
-	SecretPassageService.endRound()
-	BaraoService.endRound()
-	TocaService.endRound()
-	ArenaService.endRound()
-	VaultService.endRound()
-	CorridorTelemetryService.endRound()
 	-- Volta por Cima também vale para quem venceu depois da Segunda Chance.
 	local roundWinner = winner
 	if roundWinner ~= nil then
@@ -879,12 +906,9 @@ local function runEnding(timings: RoundTimings)
 	end
 
 	LobbyService.returnToLobby(participantPlayers())
-	-- Os corpos dos bots saem antes de os pisos voltarem.
+	-- Os corpos dos bots saem antes de o mapa ser restaurado.
 	BotFillService.endRound()
-	-- Restaura depois que os jogadores já saíram da arena, evitando que um
-	-- bloco reapareça dentro de um personagem.
-	ArenaService.restoreAllBlocks()
-	TrapService.refresh()
+	currentMode.cleanup()
 	for _, combatant in ipairs(participantOrder) do
 		resetParticipantAttributes(combatant)
 	end
@@ -955,23 +979,18 @@ function RoundService.stop()
 
 	disconnectParticipantDeathHandlers()
 	BotBrainService.endRound()
-	EliminationService.stop()
-	FinalChaosService.stop()
-	ReplicatedState.setFinalChaos(false)
+	for _, mode in pairs(ModeRegistry.all()) do
+		mode.stop()
+	end
 	KnockbackService.stop()
-	TrapService.stop()
-	SecretPassageService.stop()
-	BaraoService.stop()
-	TocaService.stop()
 	PuffMomentService.stop()
-	CorridorTelemetryService.stop()
-	ArenaService.endRound()
-	VaultService.stop()
 	BuildModeService.stop()
 	PuffadorService.stop()
 	LobbyService.returnToLobby(participantPlayers())
 	BotFillService.stop()
-	ArenaService.restoreAllBlocks()
+	for _, mode in pairs(ModeRegistry.all()) do
+		mode.cleanup()
+	end
 	for _, combatant in ipairs(participantOrder) do
 		resetParticipantAttributes(combatant)
 	end
@@ -999,7 +1018,7 @@ function RoundService.requestForceStart(): boolean
 end
 
 function RoundService.requestSkipToFinalChaos(): boolean
-	if currentState ~= RoundTypes.Active or FinalChaosService.isRunning() then
+	if currentState ~= RoundTypes.Active or currentMode.isInClimax() then
 		return false
 	end
 	skipToChaosRequested = true

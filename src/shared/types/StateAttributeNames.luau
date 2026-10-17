@@ -20,6 +20,8 @@ export type StateAttributeNames = {
 	RemainingBlockCount: string,
 	DestroyedBlockCount: string,
 	FinalChaos: string,
+	RoundMode: string,
+	NextRoundMode: string,
 
 	PlayerIsParticipant: string,
 	PlayerParticipatingRoundId: string,
@@ -67,6 +69,9 @@ local StateAttributeNames: StateAttributeNames = {
 	RemainingBlockCount = "RemainingBlockCount",
 	DestroyedBlockCount = "DestroyedBlockCount",
 	FinalChaos = "FinalChaos",
+	-- Modo da partida em andamento e o previsto para a próxima (Fase 5D).
+	RoundMode = "RoundMode",
+	NextRoundMode = "NextRoundMode",
 
 	PlayerIsParticipant = "IsRoundParticipant",
 	PlayerParticipatingRoundId = "ParticipatingRoundId",
