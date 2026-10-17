@@ -139,6 +139,7 @@ local function giggleSound(model: Model): Sound?
 	sound.Name = "Giggle"
 	sound.SoundId = CONFIG.GiggleSoundId
 	sound.Volume = GIGGLE_VOLUME
+	sound.PlaybackSpeed = CONFIG.GiggleSpeed
 	sound.RollOffMaxDistance = GIGGLE_DISTANCE
 	sound.Parent = body
 	sound:Play()

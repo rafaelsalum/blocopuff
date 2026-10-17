@@ -30,7 +30,7 @@ type ProfileSnapshot = ProfileTypes.ProfileSnapshot
 type Room = BaronRoomsLayout.Room
 
 local WAIT_TIMEOUT = 15
-local CLAIM_SOUND = "rbxassetid://138190748214493"
+local CLAIM_SOUND = "rbxassetid://9116395089"
 local REFRESH_SECONDS = 3
 -- Avisos de "passagem aberta" só depois que o perfil já carregou (no
 -- carregamento o acesso chega de uma vez e não é novidade).

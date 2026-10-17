@@ -41,6 +41,7 @@ local RelicController = require(script.controllers.RelicController)
 local MysteryController = require(script.controllers.MysteryController)
 local BaronRoomsController = require(script.controllers.BaronRoomsController)
 local MansionLifeController = require(script.controllers.MansionLifeController)
+local MansionAmbienceController = require(script.controllers.MansionAmbienceController)
 local PartyController = require(script.controllers.PartyController)
 local ReactionController = require(script.controllers.ReactionController)
 local LobbyStationsController = require(script.controllers.LobbyStationsController)
@@ -261,6 +262,14 @@ local lifeOk, lifeErr = pcall(function()
 end)
 if not lifeOk then
 	warn(string.format("[BlocoPuff] Failed to start mansion life controller: %s", tostring(lifeErr)))
+end
+
+-- Ambiente do Casarão (5C.4): retratos, lustres e o relógio da torre.
+local ambienceOk, ambienceErr = pcall(function()
+	MansionAmbienceController.start()
+end)
+if not ambienceOk then
+	warn(string.format("[BlocoPuff] Failed to start mansion ambience controller: %s", tostring(ambienceErr)))
 end
 
 local partyOk, partyErr = pcall(function()

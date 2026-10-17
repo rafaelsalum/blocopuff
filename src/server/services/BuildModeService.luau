@@ -31,7 +31,7 @@ type Cell = BuildTargeting.Cell
 -- impede) e altura extra acima do bloco (pés de quem está caindo no buraco).
 local OCCUPANCY_INSET = 0.4
 local OCCUPANCY_HEADROOM = 5
-local SOUND_BUILD = "rbxassetid://120925282182940"
+local SOUND_BUILD = "rbxassetid://9118598279"
 
 local BuildModeService = {}
 

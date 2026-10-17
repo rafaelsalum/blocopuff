@@ -32,7 +32,7 @@ local FIXED_TARGETS = 6
 local CHECK_INTERVAL = 0.25
 local TARGET_COLOR = Color3.fromRGB(255, 93, 115)
 local TARGET_HIT_COLOR = Color3.fromRGB(255, 209, 102)
-local HIT_SOUND = "rbxassetid://123582256549202"
+local HIT_SOUND = "rbxassetid://9126073001"
 
 type Session = {
 	startedAt: number,

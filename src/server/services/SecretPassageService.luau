@@ -42,8 +42,8 @@ local HANDLER_KEY = "SecretPassages"
 local PAINTING_TAG = "RevealPainting"
 local GLOW_COLOR = Color3.fromRGB(255, 206, 90)
 local REVEAL_TIME = 0.8
-local SOUND_REVEAL = "rbxassetid://118315466257318"
-local SOUND_WRONG = "rbxassetid://85047859986879"
+local SOUND_REVEAL = "rbxassetid://9116394876"
+local SOUND_WRONG = "rbxassetid://1839997989"
 local WRONG_COOLDOWN = 0.6
 
 local SecretPassageService = {}

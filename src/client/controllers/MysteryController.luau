@@ -28,8 +28,8 @@ local ProfileController = require(script.Parent.ProfileController)
 type ProfileSnapshot = ProfileTypes.ProfileSnapshot
 
 local WAIT_TIMEOUT = 15
-local SOLVED_SOUND = "rbxassetid://138190748214493"
-local ALL_SOUND = "rbxassetid://84872960927850"
+local SOLVED_SOUND = "rbxassetid://9116395089"
+local ALL_SOUND = "rbxassetid://9119816546"
 local FOLDER_NAME = "Mysteries"
 local REAPPLY_SECONDS = 3
 -- Pêndulo do relógio resolvido: balanço (graus) e tempo de ida e volta.

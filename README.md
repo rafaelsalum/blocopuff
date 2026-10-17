@@ -292,6 +292,54 @@ Seção **TESTES DA PARTIDA** no painel admin. Vale só para o servidor atual e 
 - **Testar de verdade:** só com o jogo publicado. O Roblox só preenche quem convidou em convites reais, e o Studio pode não ter acesso ao DataStore e ao MessagingService. Os banners de recompensa da página do convite são configurados no Creator Hub (Engagement > Referral Rewards), com o jogo publicado há pelo menos 1 dia.
 - **Testes:** `lune run tests/ReferralRules.spec`.
 
+### Ambiente do Casarão: retratos, lustres e o relógio da torre (Fase 5C, entrega 5C.4, parte 2)
+
+Tudo roda no cliente de cada um (sem custo de rede); o servidor só monta os retratos e marca os lustres.
+
+- **🖼️ Retratos da família Puff:** seis quadros pendurados em paredes livres (conferidas no Studio):
+
+  | Retrato | Onde fica |
+  |---|---|
+  | Vovô Puff (cartola e monóculo) | Salão Principal |
+  | Vovó Puff (coque e colar de pérolas) | Salão Principal |
+  | Bisavô Explorador | Biblioteca |
+  | Tia Puff, a Cantora | Sala de Música |
+  | Barão Filhote | Hall da Escadaria |
+  | Primo Fantasma | Sótão |
+
+  - **Desenho:** formas arredondadas numa SurfaceGui (`MansionPortraitArt`), com uma plaquinha de nome traduzida.
+  - **Olhos:** as pupilas seguem o seu personagem quando você passa na frente, até 36 studs. De vez em quando o retrato pisca. Longe, nada é animado.
+- **💡 Lustres:** quando uma porta do Casarão bate, os lustres a até 40 studs balançam para longe dela, presos no alto da corrente. O balanço é mais forte perto da porta e vai parando sozinho em uns 6 s, com um tilintar de cristais.
+  - Só os 4 lustres mais perto balançam, e só os 2 mais perto tilintam (cada um num tom), com pelo menos 2,5 s entre dois tilintares.
+  - Se outra porta bate durante o balanço, ele ganha força sem voltar ao centro de repente.
+  - O `MansionDoorController` avisa a batida pelo `MansionSignals`.
+  - Os 9 lustres do Casarão e da ala ganham a tag `MansionChandelier`.
+- **🕰️ Relógio da torre:** toca a cada 5 min do horário do servidor, então todo mundo ouve junto.
+  - O som sai do relógio no Sótão e se espalha pelo Casarão, mais baixo de longe.
+  - Quem está na partida não ouve.
+  - Não toca no instante em que você entra no jogo.
+- **🔊 Sons novos:** todos da biblioteca licenciada da Roblox (ProSoundEffects), que não some nem tem problema de direitos:
+
+  | Som | Arquivo da biblioteca |
+  |---|---|
+  | Disparo do Puffador | "Comic Expulsions Whooshes Tube Blows", com tom variando ±6% a cada tiro |
+  | Acerto do Puffador | "Comic Small Pop" |
+  | Risinho do Fantasminha | risadinha de bebê, um pouco mais aguda |
+  | Fantasminha pego | "Magic Glows Chiming Hits" |
+  | Relógio da torre | "Clock Chimes" |
+  | Lustre | "Chandelier Shakes Tinkles" |
+
+  O disparo antigo era uma ferramenta pneumática, e o acerto antigo era um áudio enviado por um usuário qualquer.
+- **🔁 Sons de usuários trocados:** os 24 áudios antigos enviados por usuários avulsos agora são da ProSoundEffects, mais um "Wrong Answer" da APM. Eles foram escolhidos com o mesmo jeito e duração parecida, e todos carregaram no Studio. A lista completa está em `docs/SONS_PARA_PESQUISAR.md`.
+  - A única exceção é a nota do piano tocável, porque as bibliotecas licenciadas não têm uma nota de piano isolada.
+- **Código:**
+  - `config/MansionAmbienceConfig` (retratos, lustres e relógio);
+  - `modules/AmbienceMath` (contas puras);
+  - `services/MansionAmbienceService` e `MansionPortraitArt`;
+  - `controllers/MansionAmbienceController`;
+  - `effects/PortraitEyes`, `ChandelierSwing` e `MansionSignals`.
+- **Testes:** `lune run tests/AmbienceMath.spec`.
+
 ### Vida no Casarão: Fantasminha Puff e Barão passeando (Fase 5C, entrega 5C.4, parte 1)
 
 - **👻 Fantasminha Puff:**
@@ -302,7 +350,7 @@ Seção **TESTES DA PARTIDA** no painel admin. Vale só para o servidor atual e 
   - **Limite do dia:** quem já chegou no limite não consome o Fantasminha (os outros ainda podem pegar) e recebe o aviso uma vez.
   - **Sem ninguém:** ele some sozinho em 45 s.
   - **Visual:** feito de peças (corpo, barra ondulada, olhinhos, bochechas, bracinhos, brilho e faíscas). No cliente ele flutua, balança, vira para quem chega perto e some numa nuvenzinha.
-  - **Som:** o risinho fica em `GiggleSoundId`, que ainda está vazio (pendente na lista de sons, #41).
+  - **Som:** risinho de tempos em tempos (`GiggleSoundId`, escolhido na 5C.4 parte 2).
 - **🐶 Barão passeando:**
   - **Quando:** com alguém no lobby, a cada 1,5 a 2,5 min ele sai da caminha e faz uma volta de uns 50 s:
     - Jardim;
@@ -748,7 +796,7 @@ Escopo em `docs/FASE_2_SEGREDOS_COFRE_BARAO.md`.
   - os olhos (`Eye` e `Eye2`) seguem a cabeça; bravo, eles brilham em vermelho por um `Highlight` (a cor da peça não aparece sobre a textura);
   - se o modelo faltar ou estiver incompleto, o jogo avisa no Output e usa o Barão de blocos (`BaraoBlocks`);
   - as malhas e texturas precisam estar liberadas para a experiência (Creator Hub → item → Permissões), senão aparecem invisíveis ou cinza no jogo publicado.
-- **Latido de verdade:** o latido é o áudio `rbxassetid://124017572768108` (~3 s, em `GameConfig.Barao.BarkSoundIds`), tocado inteiro e com o tom um pouco variado (`BarkPitch`). Um latido não começa enquanto o anterior toca: o Barão só faz a animação de latir.
+- **Latido de verdade:** o latido sorteia entre dois latidos curtos e roucos da ProSoundEffects (`GameConfig.Barao.BarkSoundIds`, ~1 s cada), tocados inteiros e um pouco mais agudos, com o tom variando (`BarkPitch`). Um latido não começa enquanto o anterior toca: o Barão só faz a animação de latir.
 - **Território:** placas "🐾 TERRITÓRIO DO BARÃO" e pegadas no chão de cada patamar.
 
 ### Puffador menor (Fase 4, ajuste pós-4.5)

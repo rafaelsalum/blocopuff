@@ -34,6 +34,8 @@ type FeedbackViewHandle = FeedbackView.FeedbackViewHandle
 
 local STATE_WAIT_TIMEOUT = 10
 local MUZZLE_FLASH_LIFETIME = 0.12
+-- Velocidade original do som, guardada antes da variação de tom.
+local BASE_SPEED_ATTRIBUTE = "BaseSpeed"
 -- Marcos de blocos derrubados na rodada que merecem uma notificação.
 local SCORE_MILESTONES: { [number]: string } = {
 	[10] = T("10 blocos derrubados! 🔥"),
@@ -194,6 +196,16 @@ local function playToolSound(tool: Tool, soundName: string)
 		return
 	end
 
+	-- Tom um pouco diferente a cada tiro (sem ficar repetitivo).
+	local jitter = sound:GetAttribute(PuffadorConstants.PitchJitterAttribute)
+	if typeof(jitter) == "number" then
+		local base = sound:GetAttribute(BASE_SPEED_ATTRIBUTE)
+		if typeof(base) ~= "number" then
+			base = sound.PlaybackSpeed
+			sound:SetAttribute(BASE_SPEED_ATTRIBUTE, base)
+		end
+		sound.PlaybackSpeed = (base :: number) * (1 + (math.random() * 2 - 1) * jitter)
+	end
 	sound.TimePosition = 0
 	sound:Play()
 end

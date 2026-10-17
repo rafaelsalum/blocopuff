@@ -272,6 +272,19 @@ local CATALOGS: { { path: string, texts: (string) -> { string } } } = {
 		end,
 	},
 	{
+		path = "src/shared/config/MansionAmbienceConfig.luau",
+		texts = function(source)
+			-- Em portrait(id, nome, ...) só o nome tem espaço ou acento.
+			local texts = {}
+			for _, literal in literalArgs(source, "portrait") do
+				if string.find(literal, "[%s\128-\255]") ~= nil then
+					table.insert(texts, literal)
+				end
+			end
+			return texts
+		end,
+	},
+	{
 		path = "src/shared/config/BaronRoomsConfig.luau",
 		texts = function(source)
 			return fieldValues(source, { "name", "title", "action", "object", "hint" })

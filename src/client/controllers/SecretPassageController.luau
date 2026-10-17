@@ -13,7 +13,7 @@ local Lang = require(ReplicatedStorage.Shared.i18n.Lang)
 local NotificationManager = require(script.Parent.Parent.notifications.NotificationManager)
 
 local WAIT_TIMEOUT = 15
-local CHIME = "rbxassetid://118315466257318"
+local CHIME = "rbxassetid://9116394876"
 
 local SecretPassageController = {}
 

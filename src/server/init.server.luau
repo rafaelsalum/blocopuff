@@ -49,6 +49,7 @@ local MysteryService = require(script.services.MysteryService)
 local BaronRoomsService = require(script.services.BaronRoomsService)
 local RelicService = require(script.services.RelicService)
 local MansionLifeService = require(script.services.MansionLifeService)
+local MansionAmbienceService = require(script.services.MansionAmbienceService)
 
 local WORLD_NAME = "BlocoPuffWorld"
 local GENERATED_BY_ATTRIBUTE = "GeneratedBy"
@@ -244,6 +245,15 @@ if baronRoomsOk then
 	print("[BlocoPuff] Baron's secret rooms ready")
 else
 	warn(string.format("[BlocoPuff] Baron's secret rooms unavailable: %s", tostring(baronRoomsFailure)))
+end
+
+-- Ambiente do Casarão (5C.4): retratos com olhos e os lustres que balançam.
+-- Antes das relíquias. Opcional.
+local ambienceOk, ambienceFailure = pcall(MansionAmbienceService.start, world)
+if ambienceOk then
+	print("[BlocoPuff] Mansion ambience ready")
+else
+	warn(string.format("[BlocoPuff] Mansion ambience unavailable: %s", tostring(ambienceFailure)))
 end
 
 -- Relíquias e Álbum do Casarão (5C.2). Depois das estações e da ala leste

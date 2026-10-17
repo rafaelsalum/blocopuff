@@ -2,8 +2,9 @@
 
 -- Portas do Casarão no cliente (Fase 5C.1). O servidor monta as folhas
 -- fechadas (MansionDoors); aqui cada porta abre sozinha quando alguém (você,
--- outro jogador, um bot ou o Barão passeando) chega perto, para o lado oposto de quem chegou,
--- com rangido, e fecha batendo quando todos saem. As folhas não têm
+-- outro jogador, um bot ou o Barão passeando) chega perto, para o lado
+-- oposto de quem chegou, com rangido, e fecha batendo quando todos saem (a
+-- batida avisa os lustres perto, MansionSignals). As folhas não têm
 -- colisão: a animação é só visual e cada cliente anima a sua.
 
 local CollectionService = game:GetService("CollectionService")
@@ -15,6 +16,7 @@ local Workspace = game:GetService("Workspace")
 local MansionConfig = require(ReplicatedStorage.Shared.config.MansionConfig)
 local StateAttributeNames = require(ReplicatedStorage.Shared.types.StateAttributeNames)
 local BaraoWalk = require(ReplicatedStorage.Shared.modules.BaraoWalk)
+local MansionSignals = require(script.Parent.Parent.effects.MansionSignals)
 
 local CONFIG = MansionConfig.Door
 local FRIENDLY_BARAO_TAG = "BaraoFriendly"
@@ -245,6 +247,7 @@ local function step(deltaTime: number)
 				door.progress = math.max(0, door.progress - deltaTime / CONFIG.CloseTime)
 				if door.progress <= 0 then
 					playSound(door, CONFIG.SlamSoundId, CONFIG.SlamSpeed)
+					MansionSignals.fireDoorSlammed(door.center)
 				end
 			end
 			pose(door)

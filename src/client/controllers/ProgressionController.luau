@@ -26,7 +26,7 @@ type ProfileSnapshot = ProfileTypes.ProfileSnapshot
 type XpAward = ProfileTypes.XpAward
 
 local WAIT_TIMEOUT = 15
-local LEVEL_UP_SOUND = "rbxassetid://112485797063762"
+local LEVEL_UP_SOUND = "rbxassetid://9116422213"
 -- Aviso de perfil demorando: depois de quantos segundos e a cada quanto.
 local PROFILE_SLOW_SECONDS = 8
 local PROFILE_NOTICE_EVERY = 15

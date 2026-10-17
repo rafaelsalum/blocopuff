@@ -50,6 +50,8 @@ local BORE_COLOR = Color3.fromRGB(22, 14, 34)
 local BODY_Y = 0.85
 local BODY_DIAMETER = 0.95
 local ALONG_Z = CFrame.Angles(0, math.rad(90), 0)
+-- Variação de tom do disparo (±6%).
+local SHOT_PITCH_JITTER = 0.06
 local VERTICAL = CFrame.Angles(0, 0, math.rad(90))
 -- Tamanho na mão (1 = o desenho original). Menor para não tapar a mira;
 -- o prêmio do Cofre, que é só exposição, usa o tamanho cheio.
@@ -108,16 +110,20 @@ end
 local function createSounds(handle: Part, variant: Variant)
 	local shotSound = Instance.new("Sound")
 	shotSound.Name = PuffadorConstants.ShotSoundName
-	shotSound.SoundId = "rbxassetid://9117660626"
-	shotSound.Volume = if variant == "Super" then 0.7 else 0.55
-	shotSound.PlaybackSpeed = if variant == "Super" then 0.8 else 1
+	-- "Comic Expulsions Whooshes Tube Blows 8" e "Comic Expulsions Small
+	-- Pops Tube Blows 8" (ProSoundEffects): fuuump de desenho no disparo e
+	-- um pop no acerto. O cliente varia um pouco o tom a cada tiro.
+	shotSound.SoundId = "rbxassetid://9113857275"
+	shotSound.Volume = if variant == "Super" then 0.75 else 0.6
+	shotSound.PlaybackSpeed = if variant == "Super" then 0.85 else 1
+	shotSound:SetAttribute(PuffadorConstants.PitchJitterAttribute, SHOT_PITCH_JITTER)
 	shotSound.RollOffMaxDistance = 70
 	shotSound.Parent = handle
 
 	local hitSound = Instance.new("Sound")
 	hitSound.Name = PuffadorConstants.HitSoundName
-	hitSound.SoundId = "rbxassetid://112273997485926"
-	hitSound.Volume = 0.5
+	hitSound.SoundId = "rbxassetid://9113856410"
+	hitSound.Volume = 0.55
 	hitSound.PlaybackSpeed = if variant == "Super" then 0.85 else 1
 	hitSound.RollOffMaxDistance = 45
 	hitSound.Parent = handle

@@ -44,6 +44,7 @@ export type PuffadorConstantsModule = {
 	RoundIdAttribute: string,
 	ProjectileIdAttribute: string,
 	ShotSoundName: string,
+	PitchJitterAttribute: string,
 	HitSoundName: string,
 
 	PuffadorPrimaryColor: Color3,
@@ -93,6 +94,8 @@ local PuffadorConstants: PuffadorConstantsModule = {
 	RoundIdAttribute = StateAttributeNames.RoundId,
 	ProjectileIdAttribute = "ProjectileId",
 	ShotSoundName = "ShotSound",
+	-- Variação de tom (fração) a cada vez que o som toca.
+	PitchJitterAttribute = "PitchJitter",
 	HitSoundName = "HitSound",
 
 	PuffadorPrimaryColor = Color3.fromRGB(194, 168, 255),

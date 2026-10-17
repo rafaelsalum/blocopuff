@@ -36,7 +36,7 @@ local SERVICE_NAME = "VaultService"
 local LOCKED_FEEDBACK_COOLDOWN = 1.5
 local HOLDER_GLOW = Color3.fromRGB(255, 200, 70)
 local SOUND_LOCKED = "rbxassetid://9118901593"
-local SOUND_OPEN = "rbxassetid://7757282096"
+local SOUND_OPEN = "rbxassetid://9114881875"
 local SPIN_SPEED = 1.6
 
 local VaultService = {}

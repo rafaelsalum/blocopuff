@@ -28,9 +28,9 @@ local T = Lang.t
 
 local WAIT_TIMEOUT = 15
 local TRAMPOLINE_TAG = "PuffTrampoline"
-local JOIN_SOUND = "rbxassetid://103516326607012"
-local BEEP_SOUND = "rbxassetid://117751546358455"
-local TRAMPOLINE_SOUND = "rbxassetid://127855700916139"
+local JOIN_SOUND = "rbxassetid://9114302479"
+local BEEP_SOUND = "rbxassetid://9113880475"
+local TRAMPOLINE_SOUND = "rbxassetid://9113864448"
 local FINAL_BEEPS = 3
 local BELL_SOUND = "rbxassetid://9113421646"
 -- O "saiu da fila" logo depois de a ficha expirar já foi dito.

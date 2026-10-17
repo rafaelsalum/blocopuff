@@ -15,7 +15,7 @@ local TrapFxUtil = require(script.Parent.TrapFxUtil)
 
 local PUFF_COUNT = 14
 local LIFETIME = 0.6
-local SOUND_ID = "rbxassetid://127183292018512"
+local SOUND_ID = "rbxassetid://9126229255"
 
 local DashFx = {}
 

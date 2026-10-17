@@ -35,8 +35,8 @@ local HITBOX_NAME = "Hitbox"
 local PROMPT_NAME = "PickPrompt"
 -- Sons da Creator Store já usados no jogo: achado (desbloqueio do Puffdex)
 -- e conquista maior (subir de nível).
-local FOUND_SOUND = "rbxassetid://138190748214493"
-local COMPLETE_SOUND = "rbxassetid://112485797063762"
+local FOUND_SOUND = "rbxassetid://9116395089"
+local COMPLETE_SOUND = "rbxassetid://9116422213"
 local SOUND_VOLUME = 0.6
 local SPARKLES_NAME = "Sparkles"
 -- Distância (studs) em que as faíscas acendem e intervalo da conferência.

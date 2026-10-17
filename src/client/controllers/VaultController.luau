@@ -22,9 +22,9 @@ type Tone = NotificationManager.Tone
 
 local T = Lang.t
 local WAIT_TIMEOUT = 15
-local CHIME_SOUND = "rbxassetid://123582256549202"
+local CHIME_SOUND = "rbxassetid://9126073001"
 local ALARM_SECONDS = 2.5
-local SUPER_SOUND = "rbxassetid://84872960927850"
+local SUPER_SOUND = "rbxassetid://9119816546"
 
 local VaultController = {}
 

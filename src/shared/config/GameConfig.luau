@@ -378,8 +378,8 @@ local Telemetry: TelemetryConfig = table.freeze({
 -- expulsa quem encontra, sem dano. A
 -- perseguição é mais lenta que o jogador (WalkSpeed 16) para dar chance de
 -- fugir, e dá para pular por cima dele (JumpClearance: altura dos pés acima
--- do piso que já passa sobre ele). Os sons são provisórios, embutidos no
--- Roblox: troque por latidos reais (rbxassetid://...) quando houver.
+-- do piso que já passa sobre ele). Os sons vêm da biblioteca licenciada
+-- (ProSoundEffects).
 local Barao: BaraoConfig = table.freeze({
 	Enabled = true,
 	-- Acorda (e destranca o cofre) entre 20% e 35% do tempo da rodada.
@@ -410,16 +410,17 @@ local Barao: BaraoConfig = table.freeze({
 	PushLift = 24,
 	BarkIntervalPatrol = NumberRange.new(6, 13),
 	BarkIntervalChase = NumberRange.new(2.2, 4.5),
-	-- Latidos de verdade (~3 s, vários "au" seguidos). Um latido não começa
+	-- Latidos curtos e roucos da biblioteca licenciada (ProSoundEffects), um
+	-- pouco mais agudos para soar como cachorro. Um latido não começa
 	-- enquanto o anterior ainda toca; o tom varia um pouco para não repetir.
-	BarkSoundIds = table.freeze({ "rbxassetid://124017572768108" }),
-	BarkPitch = NumberRange.new(0.94, 1.08),
-	FunnySoundIds = table.freeze({ "rbxassetid://92357564819100", "rbxassetid://127855700916139" }),
+	BarkSoundIds = table.freeze({ "rbxassetid://9113956178", "rbxassetid://9113955086" }),
+	BarkPitch = NumberRange.new(1.08, 1.22),
+	FunnySoundIds = table.freeze({ "rbxassetid://9113864076", "rbxassetid://9113864448" }),
 	FootstepSoundId = "rbxassetid://9113125102",
 	-- Batida grave, sem direção, tocada só para quem está sendo perseguido.
-	TensionSoundId = "rbxassetid://139459003161851",
+	TensionSoundId = "rbxassetid://9119882039",
 	-- Portinhola do túnel batendo quando ele entra ou sai.
-	DoorSoundId = "rbxassetid://80586503367690",
+	DoorSoundId = "rbxassetid://9126265222",
 })
 
 -- Tocas Seguras: protegem do Barão (não do Puffador) por MaxStay segundos;

@@ -198,11 +198,10 @@ local Window: WindowConfig = table.freeze({
 	LooseBlocksAlong = 6,
 	LooseBlockDelay = 1,
 	BoardedFraction = 0.3,
-	CrackSoundId = "rbxassetid://133541517744065",
-	ShatterSoundId = "rbxassetid://132535085898211",
-	-- Sons que vêm com o Roblox (o antigo swoosh.wav não carrega mais).
-	-- Para um "whoosh" de verdade, troque por um áudio do Creator Store.
-	GustSoundId = "rbxassetid://110536638811166",
+	CrackSoundId = "rbxassetid://9114592509",
+	ShatterSoundId = "rbxassetid://9119913393",
+	-- Rajada de vento passando (ProSoundEffects).
+	GustSoundId = "rbxassetid://9113840530",
 	PigeonLaneLength = 40,
 	PigeonLaneWidth = 6,
 	PigeonLaneHeight = 8,
@@ -219,7 +218,7 @@ local Window: WindowConfig = table.freeze({
 	RainHeight = 7,
 	RainDuration = 5,
 	RainGrip = 1.5,
-	RainSoundId = "rbxassetid://13039198193",
+	RainSoundId = "rbxassetid://9112793880",
 })
 
 local Rug: RugConfig = table.freeze({
@@ -278,7 +277,7 @@ local Chandelier: ChandelierConfig = table.freeze({
 	HoleRadius = 6.5,
 	HoleDelay = 0.6,
 	CreakSoundId = "rbxassetid://9113763589",
-	CrashSoundId = "rbxassetid://100922696429381",
+	CrashSoundId = "rbxassetid://9114590297",
 })
 
 local Fireplace: FireplaceConfig = table.freeze({
@@ -301,7 +300,7 @@ local Fireplace: FireplaceConfig = table.freeze({
 	BlurTime = 1.5,
 	CoughSoundId = "rbxassetid://9125577419",
 	PuffSoundId = "rbxassetid://9125640290",
-	SneezeSoundId = "rbxassetid://128530189877904",
+	SneezeSoundId = "rbxassetid://9119304380",
 })
 
 local TrapConfig: TrapConfig = table.freeze({

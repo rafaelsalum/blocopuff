@@ -44,10 +44,10 @@ type Stage = "Hidden" | "Shake" | "Card"
 
 local POP_SOUND = "rbxassetid://9113263649"
 local FANFARE: { [PuffRarity]: { id: string, speed: number, volume: number } } = {
-	Common = { id = "rbxassetid://123582256549202", speed = 1, volume = 0.6 },
-	Rare = { id = "rbxassetid://123582256549202", speed = 1.15, volume = 0.7 },
-	Epic = { id = "rbxassetid://138190748214493", speed = 1, volume = 0.8 },
-	Legendary = { id = "rbxassetid://84872960927850", speed = 1, volume = 0.9 },
+	Common = { id = "rbxassetid://9126073001", speed = 1, volume = 0.6 },
+	Rare = { id = "rbxassetid://9126073001", speed = 1.15, volume = 0.7 },
+	Epic = { id = "rbxassetid://9116395089", speed = 1, volume = 0.8 },
+	Legendary = { id = "rbxassetid://9119816546", speed = 1, volume = 0.9 },
 }
 local SHAKE_SECONDS: { [PuffRarity]: number } = { Common = 1, Rare = 1.1, Epic = 1.4, Legendary = 1.8 }
 local CONFETTI_COUNT: { [PuffRarity]: number } = { Common = 18, Rare = 26, Epic = 40, Legendary = 56 }

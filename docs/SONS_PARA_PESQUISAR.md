@@ -99,26 +99,29 @@ Já são sons de verdade e ficam como estão: a música de fundo (`GameConfig.Mu
 | 38 | Ambiente: lareira crepitando (loop) | `fireplace crackling loop` |
 | 39 | Relíquia encontrada | `item collect sparkle` |
 | 40 | Página do Diário encontrada | `paper page flip` |
-| 41 | Fantasminha passando | `cute ghost whoosh` |
 | 42 | Porta trancada (chave/nível) | `door locked handle rattle` |
 
 ## Sons aplicados (escolhidos na Creator Store)
 
-Todos são gratuitos, foram testados no Studio e já estão no código. Preferência pela biblioteca ProSoundEffects ("(SFX)"). Ficaram de fora cópias de outros jogos, que correm risco de remoção por direitos autorais.
+Todos são gratuitos, foram testados no Studio e já estão no código. Todos vêm de bibliotecas licenciadas: ProSoundEffects ("(SFX)") e, no erro, APM (1839997989, "Wrong Answer 3"). Os áudios enviados por usuários avulsos foram trocados, porque podem ser removidos ou ter direitos de terceiros.
+
+Única exceção: a nota do piano tocável (`MansionWingConfig.Piano.NoteSoundId`, 96243649310055). O jogo precisa de uma nota isolada de piano, afinada pelo `PlaybackSpeed`, e a ProSoundEffects e a APM só têm trechos com várias teclas. Se aparecer uma nota única licenciada, troque o ID.
 
 | # | ID | # | ID | # | ID |
 |---|---|---|---|---|---|
-| 1 | 9120839174 | 13 | 9113763589 | 25 | 118315466257318 |
-| 2 | 111763202035471 | 14 | 100922696429381 | 26 | 85047859986879 |
-| 3 | 9113421646 | 15 | 9125577419 | 27 | 9117660626 |
-| 4 | 103516326607012 | 16 | 9125640290 | 28 | 112273997485926 |
-| 5 | 117751546358455 | 17 | 128530189877904 | 29 | 127183292018512 |
-| 6 | 133541517744065 | 18 | 9113125102 | 30 | 9113263649 |
-| 7 | 132535085898211 | 19 | 139459003161851 | 31 | 123582256549202 |
-| 8 | 110536638811166 | 20 | 80586503367690 | 32 | 120925282182940 |
-| 9 | 9113444620 | 21 | 92357564819100 + 127855700916139 | 33 | 88442833509532 |
-| 10 | 13039198193 | 22 | 9125544264 (toca 2,5 s) | 34 | 112485797063762 |
-| 11 | 9113838965 | 23 | 9118901593 | 35 | 138190748214493 |
-| 12 | 9125714630 | 24 | 7757282096 | 36 | 84872960927850 |
+| 1 | 9120839174 | 13 | 9113763589 | 25 | 9116394876 |
+| 2 | 9114153270 | 14 | 9114590297 | 26 | 1839997989 |
+| 3 | 9113421646 | 15 | 9125577419 | 27 | 9113857275 (5C.4) |
+| 4 | 9114302479 | 16 | 9125640290 | 28 | 9113856410 (5C.4) |
+| 5 | 9113880475 | 17 | 9119304380 | 29 | 9126229255 |
+| 6 | 9114592509 | 18 | 9113125102 | 30 | 9113263649 |
+| 7 | 9119913393 | 19 | 9119882039 | 31 | 9126073001 |
+| 8 | 9113840530 | 20 | 9126265222 | 32 | 9118598279 |
+| 9 | 9113444620 | 21 | 9113864076 + 9113864448 | 33 | 9119717523 |
+| 10 | 9112793880 | 22 | 9125544264 (toca 2,5 s) | 34 | 9116422213 |
+| 11 | 9113838965 | 23 | 9118901593 | 35 | 9116395089 |
+| 12 | 9125714630 | 24 | 9114881875 | 36 | 9119816546 |
 
-Trampolim do aquecimento: 127855700916139 (boing). Para trocar um som, basta mudar o ID no arquivo indicado na tabela de cima.
+Latido do Barão (coiote rouco, um pouco mais agudo): 9113956178 + 9113955086. Vida e ambiente do Casarão (5C.4, todos ProSoundEffects): risinho do Fantasminha 9125367760, Fantasminha pego 9116394545, relógio da torre 9113816347, lustre balançando 9113782484.
+
+Trampolim do aquecimento: 9113864448 (boing). Para trocar um som, basta mudar o ID no arquivo indicado na tabela de cima.

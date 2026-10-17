@@ -83,6 +83,9 @@ local MansionWingConfig: MansionWingConfig = {
 	CellarFloorColor = Color3.fromRGB(74, 70, 66),
 	CellarDripSoundId = "rbxassetid://9126190654",
 	Piano = table.freeze({
+		-- Nota única de piano afinada pelo PlaybackSpeed. As bibliotecas
+		-- licenciadas (ProSoundEffects/APM) não têm uma nota isolada de piano;
+		-- ver docs/SONS_PARA_PESQUISAR.md.
 		NoteSoundId = "rbxassetid://96243649310055",
 		Volume = 0.8,
 		KeyCooldown = 0.15,

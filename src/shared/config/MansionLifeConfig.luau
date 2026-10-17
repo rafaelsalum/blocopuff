@@ -28,8 +28,9 @@ export type GhostConfig = {
 	-- Atributos do modelo: centro de onde ele flutua (CFrame) e o cômodo.
 	BaseAttribute: string,
 	RoomAttribute: string,
-	-- Som do risinho ("" = sem som até escolhermos um).
+	-- Risinho (ProSoundEffects) e a velocidade dele (mais agudo = fantasminha).
 	GiggleSoundId: string,
+	GiggleSpeed: number,
 	ClaimSoundId: string,
 }
 
@@ -64,8 +65,11 @@ MansionLifeConfig.Ghost = table.freeze({
 	Tag = "MansionGhost",
 	BaseAttribute = "GhostBase",
 	RoomAttribute = "GhostRoom",
-	GiggleSoundId = "",
-	ClaimSoundId = "rbxassetid://138190748214493",
+	-- "Baby Laughing Giggling" e "Magic Glows Soft Clusters Of Chiming Hits"
+	-- (ProSoundEffects, biblioteca licenciada da Roblox).
+	GiggleSoundId = "rbxassetid://9125367760",
+	GiggleSpeed = 1.18,
+	ClaimSoundId = "rbxassetid://9116394545",
 }) :: GhostConfig
 
 MansionLifeConfig.Barao = table.freeze({

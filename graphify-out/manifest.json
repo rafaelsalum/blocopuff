@@ -10,8 +10,8 @@
     "semantic_hash": ""
   },
   "src/client/controllers/PuffadorController.luau": {
-    "mtime": 1791125407.3147063,
-    "ast_hash": "665d2aee18dd63dce0242536b73fc037",
+    "mtime": 1792199559.7378554,
+    "ast_hash": "e692afd666bffaf77c36467d23361051",
     "semantic_hash": ""
   },
   "src/client/controllers/SpectatorController.luau": {
@@ -20,8 +20,8 @@
     "semantic_hash": ""
   },
   "src/client/init.client.luau": {
-    "mtime": 1792197658.8475657,
-    "ast_hash": "305742d516d53296e99cccb3a34daa7c",
+    "mtime": 1792199552.5968144,
+    "ast_hash": "f72b2305b2949f599504e1d69bf0d5d9",
     "semantic_hash": ""
   },
   "src/client/ui/CrosshairView.luau": {
@@ -45,8 +45,8 @@
     "semantic_hash": ""
   },
   "src/server/init.server.luau": {
-    "mtime": 1792197560.5215046,
-    "ast_hash": "2ec6f6a972b1bf2492167f80009e93a4",
+    "mtime": 1792199552.5961359,
+    "ast_hash": "955b98a1ab69f9c529765a5a160a9d9e",
     "semantic_hash": ""
   },
   "src/server/services/ArenaService.luau": {
@@ -85,13 +85,13 @@
     "semantic_hash": ""
   },
   "src/shared/config/GameConfig.luau": {
-    "mtime": 1791150232.1438446,
-    "ast_hash": "1f0ea2653f1dbc5a6d584f937c9a1ed8",
+    "mtime": 1792200493.9135082,
+    "ast_hash": "f6ab5366f961bad852df5670f7003045",
     "semantic_hash": ""
   },
   "src/shared/modules/PuffadorConstants.luau": {
-    "mtime": 1792197435.7374153,
-    "ast_hash": "56057773a8ed8b6adec5b57e5dfd72bf",
+    "mtime": 1792199552.5984232,
+    "ast_hash": "1c9ce83cd1ff25d03d7849ed850c72ff",
     "semantic_hash": ""
   },
   "src/shared/modules/RoundMessages.luau": {
@@ -125,8 +125,8 @@
     "semantic_hash": ""
   },
   "README.md": {
-    "mtime": 1792198686.5225103,
-    "ast_hash": "e34f05faab89ca04213e297294d54709",
+    "mtime": 1792200528.091792,
+    "ast_hash": "3aa5f24d2c6a9d400ed0f38beebff3ca",
     "semantic_hash": ""
   },
   "src/client/controllers/CombatCameraController.luau": {
@@ -225,8 +225,8 @@
     "semantic_hash": ""
   },
   "src/client/ui/UiKit.luau": {
-    "mtime": 1791150232.1521132,
-    "ast_hash": "2963aca8137601e85c4e9abef95d20f7",
+    "mtime": 1792200485.00848,
+    "ast_hash": "a683785854efbef9db30cada699e4309",
     "semantic_hash": ""
   },
   "src/client/controllers/MusicController.luau": {
@@ -245,13 +245,13 @@
     "semantic_hash": ""
   },
   "src/client/controllers/VaultController.luau": {
-    "mtime": 1791150238.9252005,
-    "ast_hash": "68e4c49b47680fcab7a7a0eb1a6d9cea",
+    "mtime": 1792200485.0112224,
+    "ast_hash": "940a19415526cbe36ba13ee9f521bcd5",
     "semantic_hash": ""
   },
   "src/server/services/PuffadorModel.luau": {
-    "mtime": 1791150232.1486323,
-    "ast_hash": "372e7cb1d57ac0c61b97b1656b6d0c08",
+    "mtime": 1792199559.7381768,
+    "ast_hash": "5cbbe07bb1b4f241b9ac23d88ecbd7a0",
     "semantic_hash": ""
   },
   "src/server/services/SecretRoomBuilder.luau": {
@@ -265,8 +265,8 @@
     "semantic_hash": ""
   },
   "src/server/services/VaultService.luau": {
-    "mtime": 1791150232.150361,
-    "ast_hash": "251c953d1cb935b479e02b3c5b0ad378",
+    "mtime": 1792200484.9893005,
+    "ast_hash": "d1c498ee720d9c52defb956b638dffd1",
     "semantic_hash": ""
   },
   "docs/FASE_1_CORE_GAMEPLAY_UX.md": {
@@ -355,8 +355,8 @@
     "semantic_hash": ""
   },
   "src/client/controllers/SecretPassageController.luau": {
-    "mtime": 1791150232.1496396,
-    "ast_hash": "7d8f01a2055c8d2e299bd614764d3ebb",
+    "mtime": 1792200485.0119677,
+    "ast_hash": "5533f75851ea83b7836f1976cb4c8b6e",
     "semantic_hash": ""
   },
   "src/server/services/CorridorBuilder.luau": {
@@ -365,8 +365,8 @@
     "semantic_hash": ""
   },
   "src/server/services/SecretPassageService.luau": {
-    "mtime": 1791150232.1491437,
-    "ast_hash": "4c7cba51818f73373c38511bf7411e21",
+    "mtime": 1792200484.9869406,
+    "ast_hash": "cbca3839560786638d8eefb0852ec8fb",
     "semantic_hash": ""
   },
   "src/client/controllers/BaraoController.luau": {
@@ -395,8 +395,8 @@
     "semantic_hash": ""
   },
   "src/server/services/BuildModeService.luau": {
-    "mtime": 1791150232.1508741,
-    "ast_hash": "7b0fdccef4d6816dc0ef1989de26aad2",
+    "mtime": 1792200484.990981,
+    "ast_hash": "ec7814d0ea99606b7e46862fb57ad91e",
     "semantic_hash": ""
   },
   "src/shared/modules/BuildTargeting.luau": {
@@ -455,8 +455,8 @@
     "semantic_hash": ""
   },
   "src/client/controllers/ProgressionController.luau": {
-    "mtime": 1791159412.6053064,
-    "ast_hash": "9996766e82267cda1b3f356e55e091e3",
+    "mtime": 1792200485.0184457,
+    "ast_hash": "cd1b2e804efe4bbee00f82732e3e83a4",
     "semantic_hash": ""
   },
   "src/client/ui/ProfileCardView.luau": {
@@ -515,8 +515,8 @@
     "semantic_hash": ""
   },
   "src/client/ui/PuffdexView.luau": {
-    "mtime": 1791163732.253301,
-    "ast_hash": "ae57868154eea50c67a53e724637af59",
+    "mtime": 1792200485.0062444,
+    "ast_hash": "981aa8608f95e1faa9ada3b2ba7217c2",
     "semantic_hash": ""
   },
   "src/server/data/PuffInventory.luau": {
@@ -650,8 +650,8 @@
     "semantic_hash": ""
   },
   "src/server/services/TrainingService.luau": {
-    "mtime": 1791150232.1500125,
-    "ast_hash": "044a690fa045a5f33634a7c3377e5d4b",
+    "mtime": 1792200484.9841685,
+    "ast_hash": "c0d12665ae6d25e69c04d1c2a5d0a649",
     "semantic_hash": ""
   },
   "src/server/services/MansionService.luau": {
@@ -665,8 +665,8 @@
     "semantic_hash": ""
   },
   "src/shared/config/MansionConfig.luau": {
-    "mtime": 1791150232.1424055,
-    "ast_hash": "1f381674c1728c21b2aab5d2dc1bf52c",
+    "mtime": 1792200484.9980602,
+    "ast_hash": "8d82a7a7c10834b9241e7768890b4d45",
     "semantic_hash": ""
   },
   "src/shared/modules/MansionLayout.luau": {
@@ -675,8 +675,8 @@
     "semantic_hash": ""
   },
   "src/client/controllers/MatchQueueController.luau": {
-    "mtime": 1791150232.1475656,
-    "ast_hash": "562ae4c451a4a10f3f206cd0f5db408a",
+    "mtime": 1792200485.0171106,
+    "ast_hash": "eefdcf186c1fb7ebf347bfe9a3d95252",
     "semantic_hash": ""
   },
   "src/server/services/MatchQueueService.luau": {
@@ -1025,8 +1025,8 @@
     "semantic_hash": ""
   },
   "src/shared/config/TrapConfig.luau": {
-    "mtime": 1791150232.1432488,
-    "ast_hash": "47136d5b21e7531b924665dda80c3246",
+    "mtime": 1792200493.9136536,
+    "ast_hash": "660abf278bb33a59a51cc686e057d8f3",
     "semantic_hash": ""
   },
   "src/shared/modules/TrapConstants.luau": {
@@ -1180,8 +1180,8 @@
     "semantic_hash": ""
   },
   "src/client/effects/DashFx.luau": {
-    "mtime": 1791150232.1540072,
-    "ast_hash": "404150c6c94820b06cc409afee41721f",
+    "mtime": 1792200485.009485,
+    "ast_hash": "ea43578fb1cf08189dde8677feb0f32b",
     "semantic_hash": ""
   },
   "src/client/ui/DashButtonView.luau": {
@@ -1305,8 +1305,8 @@
     "semantic_hash": ""
   },
   "tests/Locale.spec.luau": {
-    "mtime": 1791424171.6157541,
-    "ast_hash": "7189550009d7a9ecb1d349e6f2cf7602",
+    "mtime": 1792199570.1650987,
+    "ast_hash": "5b2b7eba8f5b5ec66ae9baeb5882b731",
     "semantic_hash": ""
   },
   "docs/FASE_5C_CASARAO_VIVO.md": {
@@ -1315,8 +1315,8 @@
     "semantic_hash": ""
   },
   "src/client/controllers/MansionDoorController.luau": {
-    "mtime": 1792197599.214798,
-    "ast_hash": "115c72adbf236092bb6f06b24790870f",
+    "mtime": 1792199469.4966242,
+    "ast_hash": "672c35918ad96fc1b882dba1a15def35",
     "semantic_hash": ""
   },
   "src/server/services/MansionDoors.luau": {
@@ -1325,8 +1325,8 @@
     "semantic_hash": ""
   },
   "docs/SONS_PARA_PESQUISAR.md": {
-    "mtime": 1791150274.5134387,
-    "ast_hash": "17d2f24bbd6dabd4d1d2790a815b3d9a",
+    "mtime": 1792200517.416233,
+    "ast_hash": "492c45f9f61ebbbf6948fde63a3cba85",
     "semantic_hash": ""
   },
   "src/client/controllers/AtticController.luau": {
@@ -1355,8 +1355,8 @@
     "semantic_hash": ""
   },
   "src/shared/config/MansionWingConfig.luau": {
-    "mtime": 1791151262.9979768,
-    "ast_hash": "cb66f389e7ea2169c70ea13fed5f333b",
+    "mtime": 1792200493.9139886,
+    "ast_hash": "6f04814941d6b9a88339fbcdb279aaf7",
     "semantic_hash": ""
   },
   "src/shared/modules/MansionWingLayout.luau": {
@@ -1365,8 +1365,8 @@
     "semantic_hash": ""
   },
   "src/client/controllers/RelicController.luau": {
-    "mtime": 1791163573.3692472,
-    "ast_hash": "a453d9861659ed9f15962680f64a0188",
+    "mtime": 1792200485.0213914,
+    "ast_hash": "60d617299d639f8f3d67fc9aca25e876",
     "semantic_hash": ""
   },
   "src/client/ui/AlbumView.luau": {
@@ -1415,8 +1415,8 @@
     "semantic_hash": ""
   },
   "src/client/ui/PuffMachineReveal.luau": {
-    "mtime": 1791158587.6542833,
-    "ast_hash": "f983b33d2cf1c173be4654542f8f4cf6",
+    "mtime": 1792200485.001915,
+    "ast_hash": "087fb1812bfd17ef7b2aa44c590e5214",
     "semantic_hash": ""
   },
   "src/client/ui/DiaryPageView.luau": {
@@ -1425,8 +1425,8 @@
     "semantic_hash": ""
   },
   "src/client/controllers/MysteryController.luau": {
-    "mtime": 1791422551.0228288,
-    "ast_hash": "0f906ed5020ecdb010c628512c86d29a",
+    "mtime": 1792200485.01488,
+    "ast_hash": "4e6c7ed124b32897eb76760434603c0f",
     "semantic_hash": ""
   },
   "src/client/ui/MysteryView.luau": {
@@ -1520,8 +1520,8 @@
     "semantic_hash": ""
   },
   "src/client/controllers/BaronRoomsController.luau": {
-    "mtime": 1791424210.4077113,
-    "ast_hash": "3f241093c1a265c774ab9eba6ff593de",
+    "mtime": 1792200485.0243573,
+    "ast_hash": "96341d3ac6059785f0343f99f0ff4f6a",
     "semantic_hash": ""
   },
   "src/server/services/BaronRoomsBuilder.luau": {
@@ -1555,8 +1555,8 @@
     "semantic_hash": ""
   },
   "src/client/controllers/MansionLifeController.luau": {
-    "mtime": 1792197921.5283103,
-    "ast_hash": "3163c0bd821820c5624bbb5f3617499a",
+    "mtime": 1792199552.5974717,
+    "ast_hash": "ed98435a63ce83612b9ef674da173216",
     "semantic_hash": ""
   },
   "src/server/data/MansionLifeRules.luau": {
@@ -1580,8 +1580,8 @@
     "semantic_hash": ""
   },
   "src/shared/config/MansionLifeConfig.luau": {
-    "mtime": 1792197477.4274833,
-    "ast_hash": "18aa090f41cab718c1b5e848635b5358",
+    "mtime": 1792199552.5972629,
+    "ast_hash": "cc807deeb4cfb70ef5176f6c6e69d76a",
     "semantic_hash": ""
   },
   "src/shared/i18n/en/MansionLife.luau": {
@@ -1602,6 +1602,56 @@
   "tests/MansionLifeRules.spec.luau": {
     "mtime": 1792197679.7243786,
     "ast_hash": "e1ed500967cdb0d31a0fc2dee10ca929",
+    "semantic_hash": ""
+  },
+  "src/client/controllers/MansionAmbienceController.luau": {
+    "mtime": 1792200318.5331001,
+    "ast_hash": "f585b0de73db1c270b16e6d347d15a06",
+    "semantic_hash": ""
+  },
+  "src/client/effects/ChandelierSwing.luau": {
+    "mtime": 1792200598.2118995,
+    "ast_hash": "f05763ea7d4edc3c6ed543a6671c5bb4",
+    "semantic_hash": ""
+  },
+  "src/client/effects/MansionSignals.luau": {
+    "mtime": 1792199464.6703832,
+    "ast_hash": "15bcf71546212e2336905de52600c5eb",
+    "semantic_hash": ""
+  },
+  "src/client/effects/PortraitEyes.luau": {
+    "mtime": 1792200318.5329678,
+    "ast_hash": "eb073c4d9d59a9c4317bfbe31dd9c0ac",
+    "semantic_hash": ""
+  },
+  "src/server/services/MansionAmbienceService.luau": {
+    "mtime": 1792200318.5331938,
+    "ast_hash": "70d47c819ac6887913d5177c2bd85bd0",
+    "semantic_hash": ""
+  },
+  "src/server/services/MansionPortraitArt.luau": {
+    "mtime": 1792200056.1840723,
+    "ast_hash": "fdf0f5c3306955be038248f49114ff2f",
+    "semantic_hash": ""
+  },
+  "src/shared/config/MansionAmbienceConfig.luau": {
+    "mtime": 1792199653.5310466,
+    "ast_hash": "8ccb96036589c3b25cfa1849891c54e5",
+    "semantic_hash": ""
+  },
+  "src/shared/i18n/en/MansionAmbience.luau": {
+    "mtime": 1792199559.7424197,
+    "ast_hash": "0d92021c02097035e03ff351cb182065",
+    "semantic_hash": ""
+  },
+  "src/shared/modules/AmbienceMath.luau": {
+    "mtime": 1792200056.1873775,
+    "ast_hash": "e51bc95bf0576215585dbf304d023e58",
+    "semantic_hash": ""
+  },
+  "tests/AmbienceMath.spec.luau": {
+    "mtime": 1792200073.868854,
+    "ast_hash": "be4e71e283ddb98198ca0b55ca08c17a",
     "semantic_hash": ""
   }
 }
