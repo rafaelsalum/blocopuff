@@ -11,6 +11,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerStorage = game:GetService("ServerStorage")
 
 local MysteryModeConfig = require(ReplicatedStorage.Shared.config.MysteryModeConfig)
+local KnifeMesh = require(ReplicatedStorage.Shared.modules.KnifeMesh)
 local MurderRules = require(script.Parent.Parent.data.MurderRules)
 local CombatantRegistry = require(script.Parent.CombatantRegistry)
 
@@ -28,11 +29,11 @@ export type Throw = {
 local TOOL_NAME = "Faca"
 local GENERATED_BY_ATTRIBUTE = "GeneratedBy"
 local SERVICE_NAME = "MurderKnife"
-local HANDLE_COLOR = Color3.fromRGB(70, 44, 30)
-local BLADE_COLOR = Color3.fromRGB(150, 160, 176)
+-- Tamanho da faca na mão (1 = a malha original, 3 studs).
+local HELD_SCALE = 0.55
 local THROWN_SPIN = 18
 -- A faca arremessada é maior que a da mão, para dar para ver no ar.
-local THROWN_SCALE = 1.8
+local THROWN_SCALE = 0.8
 local TRAIL_COLOR = Color3.fromRGB(255, 90, 90)
 local SHEATH_NAME = "MurderKnives"
 
@@ -53,39 +54,30 @@ local function sheath(): Folder
 	return folder
 end
 
-local function knifeParts(parent: Instance, anchored: boolean, scale: number?): (Part, Part)
-	local size = scale or 1
+-- Faca 3D (KnifeMesh): uma pega invisível "Handle" (a ferramenta segura
+-- por ela; frente -Z) com a malha da faca presa à frente.
+local function knifeParts(parent: Instance, anchored: boolean, scale: number): (Part, Part)
 	local handle = Instance.new("Part")
 	handle.Name = "Handle"
-	handle.Size = Vector3.new(0.3, 0.3, 1) * size
-	handle.Color = HANDLE_COLOR
-	handle.Material = Enum.Material.Wood
+	handle.Size = Vector3.new(0.3, 0.3, 0.6) * scale
+	handle.Transparency = 1
 	handle.Anchored = anchored
 	handle.CanCollide = false
 	handle.CanQuery = false
 	handle.CanTouch = false
 	handle.Massless = true
 	handle.Parent = parent
-	local blade = Instance.new("Part")
-	blade.Name = "Blade"
-	blade.Size = Vector3.new(0.1, 0.4, 1.5) * size
-	blade.Color = BLADE_COLOR
-	blade.Material = Enum.Material.Metal
-	blade.Anchored = anchored
-	blade.CanCollide = false
-	blade.CanQuery = false
-	blade.CanTouch = false
-	blade.Massless = true
-	-- A lâmina sai da ponta do cabo (−Z).
-	blade.CFrame = handle.CFrame * CFrame.new(0, 0.05 * size, -1.25 * size)
-	blade.Parent = parent
+	local knife = KnifeMesh.part("Knife", scale)
+	knife.Anchored = anchored
+	knife.CFrame = handle.CFrame * KnifeMesh.inHand(scale)
+	knife.Parent = parent
 	if not anchored then
 		local weld = Instance.new("WeldConstraint")
 		weld.Part0 = handle
-		weld.Part1 = blade
+		weld.Part1 = knife
 		weld.Parent = handle
 	end
-	return handle, blade
+	return handle, knife
 end
 
 local function buildTool(): Tool
@@ -93,10 +85,11 @@ local function buildTool(): Tool
 	tool.Name = TOOL_NAME
 	tool.CanBeDropped = false
 	tool.RequiresHandle = true
-	-- Cabo na mão, lâmina para a frente.
-	tool.Grip = CFrame.new(0, 0, 0.3)
+	-- O meio do cabo fica na mão (a pega "Handle" já está nele) e a lâmina
+	-- para a frente.
+	tool.Grip = CFrame.new()
 	tool:SetAttribute(GENERATED_BY_ATTRIBUTE, SERVICE_NAME)
-	knifeParts(tool, false)
+	knifeParts(tool, false, HELD_SCALE)
 	return tool
 end
 
@@ -197,8 +190,7 @@ function MurderKnife.throw(throw: Throw)
 	direction = direction.Unit
 	local model = Instance.new("Model")
 	model.Name = "ThrownKnife"
-	local handle, blade = knifeParts(model, true, THROWN_SCALE)
-	blade.Material = Enum.Material.Neon
+	local handle = knifeParts(model, true, THROWN_SCALE)
 	model.PrimaryPart = handle
 	-- Rastro vermelho atrás da faca, para quem está perto ver de onde veio.
 	local tail = Instance.new("Attachment")

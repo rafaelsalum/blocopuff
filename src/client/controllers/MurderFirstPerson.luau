@@ -3,8 +3,9 @@
 -- Primeira pessoa do Assassinato no Casarão (Fase 5E.4): durante a partida a
 -- câmera fica travada nos olhos (sem afastar com a rolagem, para ninguém
 -- espiar por cima das paredes) e na tela aparecem só a mão e o item do
--- papel: a faca do Assassino (abaixada enquanto guardada, erguida quando à
--- vista) ou a arma do Xerife e do Herói. A câmera não balança ao andar
+-- papel: a faca 3D do Assassino (KnifeMesh; abaixada enquanto guardada,
+-- erguida quando à vista) ou o próprio Puffador do Xerife e do Herói (cópia
+-- das peças da ferramenta que ele segura). A câmera não balança ao andar
 -- (enjoa, principalmente as crianças). O modelo das mãos é só do cliente,
 -- preso à câmera e invisível para raios.
 
@@ -15,6 +16,7 @@ local UserInputService = game:GetService("UserInputService")
 local Workspace = game:GetService("Workspace")
 
 local MysteryModeConfig = require(ReplicatedStorage.Shared.config.MysteryModeConfig)
+local KnifeMesh = require(ReplicatedStorage.Shared.modules.KnifeMesh)
 local CombatCameraController = require(script.Parent.CombatCameraController)
 
 export type Item = "Knife" | "Gun"
@@ -37,11 +39,20 @@ local PULSE_SECONDS: { [Pulse]: number } = { Stab = 0.25, Throw = 0.45, Shot = 0
 -- Depois do arremesso, a faca some da mão por esse tempo.
 local THROW_EMPTY_SECONDS = 0.6
 
-local ARM_SIZE = Vector3.new(0.55, 0.55, 2.3)
-local KNIFE_HANDLE_COLOR = Color3.fromRGB(70, 44, 30)
-local KNIFE_BLADE_COLOR = Color3.fromRGB(170, 178, 192)
-local GUN_COLOR = Color3.fromRGB(110, 170, 255)
-local GUN_TRIM_COLOR = Color3.fromRGB(240, 244, 255)
+local ARM_SIZE = Vector3.new(0.42, 0.42, 2.3)
+-- O braço sai um pouco mais escuro que a pele (com o brilho da luz, a cor
+-- cheia vira um bloco claro demais).
+local ARM_SHADE = 0.15
+-- Faca na tela (1 = a malha original): na mão, girada para mostrar a
+-- lateral da lâmina (de frente só se veria o fio).
+local KNIFE_SCALE = 0.6
+local KNIFE_GRIP = CFrame.new(0, 0.1, -0.1) * CFrame.Angles(math.rad(18), math.rad(12), math.rad(-60))
+-- Puffador na tela: um pouco à frente e virado de lado (de trás só se veria
+-- a tampa) e menor que o da mão do personagem (inteiro ele tapa a tela).
+local GUN_GRIP = CFrame.new(0.15, -0.1, -0.9) * CFrame.Angles(math.rad(-10), math.rad(14), math.rad(-8))
+local GUN_SCALE = 0.75
+-- Peças que vão junto na cópia do Puffador (som, luz, efeitos e juntas não).
+local GUN_KEEP_CLASSES = { "DataModelMesh", "Decal", "Texture", "SurfaceAppearance" }
 local DEFAULT_SKIN = Color3.fromRGB(245, 205, 150)
 
 type Piece = {
@@ -57,6 +68,8 @@ local enabled = false
 local pieces: { Piece } = {}
 local model: Model? = nil
 local currentItem: Item? = nil
+-- Ferramenta de onde sai a cópia do Puffador.
+local currentSource: Tool? = nil
 local raised = true
 local raiseAlpha = 1
 local charge = 0
@@ -81,12 +94,7 @@ local function skinColor(): Color3
 	return DEFAULT_SKIN
 end
 
-local function addPiece(parent: Model, name: string, size: Vector3, color: Color3, material: Enum.Material, offset: CFrame, isItem: boolean)
-	local part = Instance.new("Part")
-	part.Name = name
-	part.Size = size
-	part.Color = color
-	part.Material = material
+local function addPart(parent: Model, part: BasePart, offset: CFrame, isItem: boolean)
 	part.Anchored = true
 	part.CanCollide = false
 	part.CanQuery = false
@@ -94,6 +102,47 @@ local function addPiece(parent: Model, name: string, size: Vector3, color: Color
 	part.CastShadow = false
 	part.Parent = parent
 	table.insert(pieces, { part = part, offset = offset, isItem = isItem })
+end
+
+local function addPiece(parent: Model, name: string, size: Vector3, color: Color3, material: Enum.Material, offset: CFrame, isItem: boolean)
+	local part = Instance.new("Part")
+	part.Name = name
+	part.Size = size
+	part.Color = color
+	part.Material = material
+	addPart(parent, part, offset, isItem)
+end
+
+local function keepInGunCopy(instance: Instance): boolean
+	for _, className in ipairs(GUN_KEEP_CLASSES) do
+		if instance:IsA(className) then
+			return true
+		end
+	end
+	return false
+end
+
+-- Cópia das peças do Puffador, cada uma na posição em relação à pega.
+local function addGunCopy(parent: Model, tool: Tool)
+	local handle = tool:FindFirstChild("Handle")
+	if handle == nil or not handle:IsA("BasePart") then
+		return
+	end
+	for _, descendant in ipairs(tool:GetDescendants()) do
+		if descendant:IsA("BasePart") and descendant.Transparency < 1 then
+			local copy = descendant:Clone()
+			for _, child in ipairs(copy:GetChildren()) do
+				if not keepInGunCopy(child) then
+					child:Destroy()
+				elseif child:IsA("SpecialMesh") then
+					child.Scale *= GUN_SCALE
+				end
+			end
+			copy.Size *= GUN_SCALE
+			local relative = handle.CFrame:ToObjectSpace(descendant.CFrame)
+			addPart(parent, copy, GUN_GRIP * CFrame.new(relative.Position * GUN_SCALE) * relative.Rotation, true)
+		end
+	end
 end
 
 local function destroyModel()
@@ -106,7 +155,7 @@ local function destroyModel()
 end
 
 -- Monta a mão com o item (o ponto de origem é a mão).
-local function buildModel(item: Item)
+local function buildModel(item: Item, source: Tool?)
 	destroyModel()
 	local camera = Workspace.CurrentCamera
 	if camera == nil then
@@ -114,14 +163,11 @@ local function buildModel(item: Item)
 	end
 	local newModel = Instance.new("Model")
 	newModel.Name = "MurderViewmodel"
-	addPiece(newModel, "Arm", ARM_SIZE, skinColor(), Enum.Material.SmoothPlastic, CFrame.new(0, 0, ARM_SIZE.Z / 2), false)
+	addPiece(newModel, "Arm", ARM_SIZE, skinColor():Lerp(Color3.new(0, 0, 0), ARM_SHADE), Enum.Material.SmoothPlastic, CFrame.new(0, 0, ARM_SIZE.Z / 2), false)
 	if item == "Knife" then
-		addPiece(newModel, "Handle", Vector3.new(0.26, 0.26, 0.8), KNIFE_HANDLE_COLOR, Enum.Material.Wood, CFrame.new(0, 0.12, -0.25), true)
-		addPiece(newModel, "Blade", Vector3.new(0.08, 0.34, 1.25), KNIFE_BLADE_COLOR, Enum.Material.Metal, CFrame.new(0, 0.16, -1.25), true)
-	else
-		addPiece(newModel, "Grip", Vector3.new(0.3, 0.6, 0.32), GUN_TRIM_COLOR, Enum.Material.SmoothPlastic, CFrame.new(0, 0.1, -0.2), true)
-		addPiece(newModel, "Body", Vector3.new(0.42, 0.5, 1.3), GUN_COLOR, Enum.Material.SmoothPlastic, CFrame.new(0, 0.5, -0.55), true)
-		addPiece(newModel, "Barrel", Vector3.new(0.26, 0.26, 0.6), GUN_TRIM_COLOR, Enum.Material.Neon, CFrame.new(0, 0.55, -1.45), true)
+		addPart(newModel, KnifeMesh.part("Knife", KNIFE_SCALE), KNIFE_GRIP * KnifeMesh.inHand(KNIFE_SCALE), true)
+	elseif source ~= nil then
+		addGunCopy(newModel, source)
 	end
 	newModel.Parent = camera
 	model = newModel
@@ -189,7 +235,8 @@ local function onRender(deltaTime: number)
 	local root = camera.CFrame * BASE * pose * pulse
 	for _, piece in ipairs(pieces) do
 		piece.part.CFrame = root * piece.offset
-		piece.part.Transparency = if piece.isItem and emptyHand then 1 else 0
+		-- (o tanque de vidro do Puffador tem transparência própria)
+		piece.part.LocalTransparencyModifier = if piece.isItem and emptyHand then 1 else 0
 	end
 end
 
@@ -214,7 +261,7 @@ function MurderFirstPerson.enable()
 	UserInputService.MouseIconEnabled = false
 	local item = currentItem
 	if item ~= nil then
-		buildModel(item)
+		buildModel(item, currentSource)
 	end
 	RunService:BindToRenderStep(RENDER_STEP_NAME, RENDER_PRIORITY, onRender)
 end
@@ -248,12 +295,14 @@ function MurderFirstPerson.isEnabled(): boolean
 	return enabled
 end
 
--- Item na mão (nil: mãos vazias, nada na tela).
-function MurderFirstPerson.setItem(item: Item?)
-	if item == currentItem then
+-- Item na mão (nil: mãos vazias, nada na tela). Para a arma, `source` é o
+-- Puffador que o personagem segura (a tela mostra uma cópia dele).
+function MurderFirstPerson.setItem(item: Item?, source: Tool?)
+	if item == currentItem and source == currentSource then
 		return
 	end
 	currentItem = item
+	currentSource = source
 	charge = 0
 	pulseKind = nil
 	if not enabled then
@@ -262,7 +311,7 @@ function MurderFirstPerson.setItem(item: Item?)
 	if item == nil then
 		destroyModel()
 	else
-		buildModel(item)
+		buildModel(item, source)
 	end
 end
 

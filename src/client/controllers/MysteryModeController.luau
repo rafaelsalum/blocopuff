@@ -38,6 +38,7 @@ local CHARGE_FILL_SECONDS = 0.35
 -- Segurando a carga, avisa o servidor de novo (senão ele guarda a faca).
 local DRAW_REPEAT_SECONDS = 2
 local CROSSHAIR_SIZE = 6
+local GUN_RETRY_SECONDS = 0.2
 
 local MysteryModeController = {}
 
@@ -237,8 +238,12 @@ local function run(remote: RemoteEvent, container: Instance, playerGui: PlayerGu
 		if role == "Murderer" then
 			MurderFirstPerson.setItem("Knife")
 			MurderFirstPerson.setRaised(tool ~= nil and tool.Name == KNIFE_TOOL_NAME)
-		elseif tool ~= nil and tool.Name == PuffadorConstants.ToolName then
-			MurderFirstPerson.setItem("Gun")
+		elseif tool ~= nil and holdingGun and tool:FindFirstChild("Handle") ~= nil then
+			MurderFirstPerson.setItem("Gun", tool)
+		elseif tool ~= nil and holdingGun then
+			-- O Puffador ainda está chegando no cliente: tenta de novo já já.
+			MurderFirstPerson.setItem(nil)
+			task.delay(GUN_RETRY_SECONDS, refresh)
 			MurderFirstPerson.setRaised(true)
 		else
 			MurderFirstPerson.setItem(nil)
