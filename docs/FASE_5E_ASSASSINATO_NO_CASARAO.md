@@ -258,6 +258,7 @@ Cada entrega é testada no Studio e tem commit próprio.
 **Andamento:**
 - **5E.1 entregue.** A arma do Xerife é o próprio Puffador (com 1 tiro a cada 3 s, sem empurrão) e fica sempre na mão; uma arma com cara de revólver e o "guardar a arma" ficam para a 5E.4. O XP do modo conta golpes, arremessos, moedas e pegar a arma (só sobreviver parado não conta). O voto da porta passou a durar entre partidas: quem volta da partida cai direto no mirante e continua votando no mesmo modo.
 - **5E.2 entregue.** A Ala de dois andares substitui a grade de 9 cômodos. Ficou de fora o Porão: a passagem secreta vai da Biblioteca até a Cozinha (dá o mesmo atalho de fuga sem um terceiro nível). Os bots ainda andam em linha reta até um ponto sorteado (agora nos dois andares); andar pelos pontos de navegação é a 5E.3.
+- **5E.3 entregue.** Os bots andam pelo grafo da planta (A* em `NavGraph`, seguido por `MysteryBotNav`): passam pelas portas, sobem e descem pelas escadas e usam a passagem secreta. Passeiam de cômodo em cômodo; fogem para um dos cômodos mais longe de quem estiver com a faca na mão a até 25 studs no mesmo andar, sem passar pelo cômodo dele; metade vai até perto da arma caída, sem pegá-la. Quando travam, pulam e refazem a rota, e desistem do destino depois de 3 travadas seguidas. No Studio, os Inocentes percorreram uns 450 studs em 40 s pelos dois andares, e um bot fugiu de 8 para 71 studs em 6 s depois que a faca foi sacada.
 
 ---
 

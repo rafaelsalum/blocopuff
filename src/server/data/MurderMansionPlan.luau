@@ -292,6 +292,17 @@ function MurderMansionPlan.openArea(room: Room): Area
 	}
 end
 
+-- Cômodo em que o ponto (x, z) do andar `level` está, ou nil (escada no
+-- meio do caminho conta como o cômodo dela; a passagem secreta, não).
+function MurderMansionPlan.roomAt(plan: Plan, x: number, z: number, level: number): string?
+	for _, room in ipairs(plan.rooms) do
+		if room.level == level and x >= room.minX and x <= room.maxX and z >= room.minZ and z <= room.maxZ then
+			return room.id
+		end
+	end
+	return nil
+end
+
 -- Nós alcançáveis a partir de `start` seguindo as arestas.
 function MurderMansionPlan.reachableFrom(plan: Plan, start: string): { [string]: boolean }
 	local neighbors: { [string]: { string } } = {}

@@ -27,6 +27,8 @@ export type WingLayout = {
 	roomCenters: { Vector3 },
 	-- Um ponto do chão sorteado no miolo livre de um cômodo sorteado.
 	randomPoint: (random: Random) -> Vector3,
+	-- Um ponto do chão sorteado no miolo livre de um cômodo da planta.
+	randomPointIn: (roomId: string, random: Random) -> Vector3?,
 	-- Altura do chão do andar em que `position` está.
 	floorAt: (position: Vector3) -> number,
 	-- Posição no mundo de um ponto da planta.
@@ -326,6 +328,15 @@ function MurderMansionBuilder.build(): WingLayout
 			local room = openRooms[random:NextInteger(1, #openRooms)]
 			local area = MurderMansionPlan.openArea(room)
 			return toWorld(random:NextNumber(area.minX, area.maxX), random:NextNumber(area.minZ, area.maxZ), room.level)
+		end,
+		randomPointIn = function(roomId: string, random: Random): Vector3?
+			for _, room in ipairs(openRooms) do
+				if room.id == roomId then
+					local area = MurderMansionPlan.openArea(room)
+					return toWorld(random:NextNumber(area.minX, area.maxX), random:NextNumber(area.minZ, area.maxZ), room.level)
+				end
+			end
+			return nil
 		end,
 		floorAt = function(position: Vector3): number
 			-- O que estiver logo abaixo (degrau, laje ou chão); sem nada, o

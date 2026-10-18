@@ -717,7 +717,18 @@ local function beginBots(bots: { Combatant }, _humans: { Player })
 			end,
 		}
 		else nil
-	MysteryBots.begin(requireWing(), bots, driver)
+	MysteryBots.begin(requireWing(), bots, {
+		murderer = function(): Combatant?
+			local current = murderer
+			return if current ~= nil and isAlive(current) then current else nil
+		end,
+		droppedGun = function(): Vector3?
+			local gun = droppedGun
+			local gunPart = if gun ~= nil then gun.PrimaryPart else nil
+			return if gunPart ~= nil then gunPart.Position else nil
+		end,
+		driver = driver,
+	})
 end
 
 local function endBots()
