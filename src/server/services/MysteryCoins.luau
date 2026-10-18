@@ -10,10 +10,10 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local MysteryModeConfig = require(ReplicatedStorage.Shared.config.MysteryModeConfig)
 local CombatantRegistry = require(script.Parent.CombatantRegistry)
-local MysteryWingBuilder = require(script.Parent.MysteryWingBuilder)
+local MurderMansionBuilder = require(script.Parent.MurderMansionBuilder)
 
 type Combatant = CombatantRegistry.Combatant
-type WingLayout = MysteryWingBuilder.WingLayout
+type WingLayout = MurderMansionBuilder.WingLayout
 
 -- Quem pode pegar agora e o que acontece ao pegar (devolve se aceitou).
 export type Collector = {

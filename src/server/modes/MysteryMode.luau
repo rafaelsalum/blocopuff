@@ -35,7 +35,7 @@ local PuffadorService = require(services.PuffadorService)
 local ProjectileService = require(services.ProjectileService)
 local PlayerDataService = require(services.PlayerDataService)
 local TelemetryService = require(services.TelemetryService)
-local MysteryWingBuilder = require(services.MysteryWingBuilder)
+local MurderMansionBuilder = require(services.MurderMansionBuilder)
 local MysteryCoins = require(services.MysteryCoins)
 local MysteryBots = require(services.MysteryBots)
 local MurderKnife = require(services.MurderKnife)
@@ -45,7 +45,7 @@ type TickContext = RoundModeTypes.TickContext
 type Outcome = RoundModeTypes.Outcome
 type Combatant = CombatantRegistry.Combatant
 type Role = MurderRules.Role
-type WingLayout = MysteryWingBuilder.WingLayout
+type WingLayout = MurderMansionBuilder.WingLayout
 
 local REMOTE_NAME = "MysteryMode"
 local HIT_HANDLER_KEY = "Mystery"
@@ -99,7 +99,7 @@ local studioSoloRounds = 0
 local function requireWing(): WingLayout
 	local current = wing
 	if current == nil then
-		current = MysteryWingBuilder.build()
+		current = MurderMansionBuilder.build()
 		wing = current
 	end
 	return current
@@ -292,7 +292,9 @@ local function buildDroppedGun(layout: WingLayout, position: Vector3): Model
 	body.CanCollide = false
 	body.CanQuery = false
 	body.CastShadow = false
-	body.CFrame = CFrame.new(Vector3.new(position.X, layout.floorY + 1.2, position.Z))
+	-- No chão do andar em que caiu (a Ala tem dois andares).
+	local floorY = layout.floorAt(position)
+	body.CFrame = CFrame.new(Vector3.new(position.X, floorY + 1.2, position.Z))
 	body.Parent = model
 	local light = Instance.new("PointLight")
 	light.Color = GUN_COLOR
@@ -301,7 +303,6 @@ local function buildDroppedGun(layout: WingLayout, position: Vector3): Model
 	light.Parent = body
 	local beam = Instance.new("Part")
 	beam.Name = "Beam"
-	beam.Size = Vector3.new(0.6, 30, 0.6)
 	beam.Color = GUN_COLOR
 	beam.Material = Enum.Material.Neon
 	beam.Transparency = 0.55
@@ -309,7 +310,8 @@ local function buildDroppedGun(layout: WingLayout, position: Vector3): Model
 	beam.CanCollide = false
 	beam.CanQuery = false
 	beam.CastShadow = false
-	beam.CFrame = CFrame.new(Vector3.new(position.X, layout.floorY + 15, position.Z))
+	beam.Size = Vector3.new(0.6, 13, 0.6)
+	beam.CFrame = CFrame.new(Vector3.new(position.X, floorY + 7.5, position.Z))
 	beam.Parent = model
 	model.PrimaryPart = body
 	model.Parent = layout.folder
@@ -325,7 +327,7 @@ local function dropGun(at: Vector3?)
 	end
 	removeDroppedGun()
 	gunHolder = nil
-	droppedGun = buildDroppedGun(layout, at or lastGunPosition or layout.center)
+	droppedGun = buildDroppedGun(layout, at or lastGunPosition or layout.randomPoint(random))
 	sendToAll("GunDropped")
 end
 

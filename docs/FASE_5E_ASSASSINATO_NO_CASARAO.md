@@ -101,15 +101,14 @@ O jogador passa a:
 
 Substitui a grade de 9 cômodos iguais. Fica longe do lobby, da Arena e da Torre, montada uma vez no início do servidor e só resetada entre partidas.
 
-- **Dois andares** com **duas escadas** em lados opostos e **uma passagem secreta** (estante giratória da Biblioteca até o Porão), para existirem caminhos em círculo: quem foge sempre tem para onde ir.
-- **Cômodos com identidade**, cada um com móveis próprios e uma cor de luz:
-  - térreo: Hall de entrada, Salão de Baile, Cozinha, Sala de Jantar, Biblioteca;
-  - andar de cima: dois Quartos, Sala de Música, Estufa, Corredor dos Retratos;
-  - Porão pequeno ligado à Biblioteca.
+- **Dois andares** de 3 x 2 cômodos (32 x 36 studs), com **portas entre todos os vizinhos**, **duas escadas** em lados opostos (Salão de Baile → Sala de Música e Sala de Estar → Estufa) e **uma passagem secreta**: um corredor escondido atrás das estantes, da Biblioteca até a Cozinha. Assim existem caminhos em círculo: quem foge sempre tem para onde ir.
+- **Cômodos com identidade**, cada um com móveis próprios:
+  - térreo: Biblioteca, Sala de Jantar, Cozinha, Salão de Baile, Hall de Entrada, Sala de Estar;
+  - andar de cima: Quarto do Barão, Corredor dos Retratos, Quarto de Hóspedes, Sala de Música, Sala de Jogos, Estufa.
 - **Esconderijos:** armários, debaixo de mesas e camas, atrás de cortinas. O jogador fica parcialmente visível, nunca invisível.
-- **Luz suficiente para enxergar:** só alguns cantos escuros (Porão e Estufa), nunca o mapa inteiro.
+- **Luz suficiente para enxergar:** um lustre e duas arandelas por cômodo (luz verde na Estufa); a passagem secreta fica na penumbra.
 - **Linhas de visão quebradas:** colunas, estantes e biombos impedem ver o mapa inteiro de um ponto.
-- **Pontos de navegação** dos bots já fazem parte do mapa (centro de cada cômodo, cada porta, cada degrau de ponta das escadas).
+- **Pontos de navegação** dos bots já fazem parte da planta (centro de cada cômodo, cada porta, pé e alto de cada escada com um ponto de aproximação, e a passagem secreta).
 - Mesmo orçamento de peças e de luz do Casarão (5C), tudo ancorado.
 
 ### Bots Inocentes
@@ -167,7 +166,7 @@ Ficam em `config/MysteryModeConfig`.
   - `MurderRules` (módulo puro, substitui `MysteryModeRules`): sorteio dos papéis, condições de vitória, punição do Xerife, quem pode pegar a arma, proteção da largada e recargas, alcance e ângulo do golpe, moedas em tickets;
   - `MurderKnife` (novo): sacar, guardar, golpe e arremesso (arremesso reaproveita o projétil de `MysterySheet`, renomeado);
   - `MurderGun` (novo): tiro, punição, arma caída e Herói (sai do `MysteryMode` atual);
-  - `MurderWingBuilder` (substitui `MysteryWingBuilder`): mapa de dois andares e pontos de navegação;
+  - `MurderMansionPlan` (módulo puro): a planta (cômodos, portas, escadas, passagem e pontos de navegação); `MurderMansionBuilder` (substitui `MysteryWingBuilder`) monta os dois andares e `MurderMansionProps`, os móveis e esconderijos;
   - `NavGraph` (módulo puro, novo): grafo de pontos, caminho mais curto (A*), ponto mais próximo e "lado oposto" para fugir;
   - `MysteryBots` passa a usar o `NavGraph` e o comportamento de fuga;
   - `MysteryCoins` ganha o saco com limite.
@@ -258,6 +257,7 @@ Cada entrega é testada no Studio e tem commit próprio.
 
 **Andamento:**
 - **5E.1 entregue.** A arma do Xerife é o próprio Puffador (com 1 tiro a cada 3 s, sem empurrão) e fica sempre na mão; uma arma com cara de revólver e o "guardar a arma" ficam para a 5E.4. O XP do modo conta golpes, arremessos, moedas e pegar a arma (só sobreviver parado não conta). O voto da porta passou a durar entre partidas: quem volta da partida cai direto no mirante e continua votando no mesmo modo.
+- **5E.2 entregue.** A Ala de dois andares substitui a grade de 9 cômodos. Ficou de fora o Porão: a passagem secreta vai da Biblioteca até a Cozinha (dá o mesmo atalho de fuga sem um terceiro nível). Os bots ainda andam em linha reta até um ponto sorteado (agora nos dois andares); andar pelos pontos de navegação é a 5E.3.
 
 ---
 

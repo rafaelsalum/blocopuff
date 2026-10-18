@@ -10,10 +10,10 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local BotConfig = require(ReplicatedStorage.Shared.config.BotConfig)
 local CombatantRegistry = require(script.Parent.CombatantRegistry)
-local MysteryWingBuilder = require(script.Parent.MysteryWingBuilder)
+local MurderMansionBuilder = require(script.Parent.MurderMansionBuilder)
 
 type Combatant = CombatantRegistry.Combatant
-type WingLayout = MysteryWingBuilder.WingLayout
+type WingLayout = MurderMansionBuilder.WingLayout
 
 export type MurdererDriver = {
 	murderer: Combatant,
