@@ -39,6 +39,8 @@ local CHARGE_FILL_SECONDS = 0.35
 local DRAW_REPEAT_SECONDS = 2
 local CROSSHAIR_SIZE = 6
 local GUN_RETRY_SECONDS = 0.2
+-- Tela própria do botão da faca (a do botão de tiro é do Puffador).
+local KNIFE_BUTTON_NAME = "BlocoPuffKnifeButton"
 
 local MysteryModeController = {}
 
@@ -181,7 +183,7 @@ local function run(remote: RemoteEvent, container: Instance, playerGui: PlayerGu
 	end
 
 	-- Botão da faca no celular (no lugar do botão de tiro, ao lado do pulo).
-	local knifeButton = if UserInputService.TouchEnabled then FireButtonView.new(playerGui, holdStarted, holdEnded) else nil
+	local knifeButton = if UserInputService.TouchEnabled then FireButtonView.new(playerGui, holdStarted, holdEnded, KNIFE_BUTTON_NAME) else nil
 	if knifeButton ~= nil then
 		knifeButton.setLabel("🔪", T("FACA"))
 	end

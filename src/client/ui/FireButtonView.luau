@@ -49,8 +49,10 @@ local function findJumpButton(playerGui: PlayerGui): GuiObject?
 	return nil
 end
 
-function FireButtonView.new(playerGui: PlayerGui, onPress: () -> (), onRelease: () -> ()): FireButtonViewHandle
-	local screenGui = UiTheme.createScreenGui(FIRE_BUTTON_NAME, playerGui, 19)
+-- `guiName` separa outro botão no mesmo visual (a faca do Assassinato):
+-- com o mesmo nome, criar um apagaria o outro.
+function FireButtonView.new(playerGui: PlayerGui, onPress: () -> (), onRelease: () -> (), guiName: string?): FireButtonViewHandle
+	local screenGui = UiTheme.createScreenGui(guiName or FIRE_BUTTON_NAME, playerGui, 19)
 	screenGui.Enabled = false
 
 	local root = Instance.new("Frame")
