@@ -1,12 +1,14 @@
 --!strict
 
 -- Assassinato no Casarão no cliente (Fase 5E): a roleta e o selo do papel
--- (só o próprio jogador sabe o seu), os controles da faca do Assassino
--- (sacar e guardar com Q, golpear com o clique, arremessar com E, e botões
--- no celular), o contador de moedas, os avisos da arma caída e do Herói e a
--- revelação de quem era quem no fim.
+-- (só o próprio jogador sabe o seu), a primeira pessoa com a mão e o item
+-- na tela (MurderFirstPerson), a faca do Assassino (clique ou toque rápido
+-- golpeia; segurar e soltar arremessa para onde a mira aponta; no celular,
+-- um botão só, no lugar do botão de tiro), o contador de moedas, os avisos
+-- da arma caída e do Herói e a revelação de quem era quem no fim.
 
 local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local UserInputService = game:GetService("UserInputService")
 local Workspace = game:GetService("Workspace")
@@ -19,6 +21,8 @@ local UiTheme = require(script.Parent.Parent.ui.UiTheme)
 local UiKit = require(script.Parent.Parent.ui.UiKit)
 local ResponsiveScale = require(script.Parent.Parent.ui.ResponsiveScale)
 local RoleRevealView = require(script.Parent.Parent.ui.RoleRevealView)
+local FireButtonView = require(script.Parent.Parent.ui.FireButtonView)
+local MurderFirstPerson = require(script.Parent.MurderFirstPerson)
 local NotificationManager = require(script.Parent.Parent.notifications.NotificationManager)
 
 local T = Lang.t
@@ -29,8 +33,11 @@ local DISPLAY_ORDER = 6
 local CATEGORY = "Mystery"
 local COINS_ATTRIBUTE = "MysteryCoins"
 local KNIFE_TOOL_NAME = "Faca"
-local EQUIP_KEY = Enum.KeyCode.Q
-local THROW_KEY = Enum.KeyCode.E
+-- A carga do arremesso enche nesse tempo depois de virar arremesso (s).
+local CHARGE_FILL_SECONDS = 0.35
+-- Segurando a carga, avisa o servidor de novo (senão ele guarda a faca).
+local DRAW_REPEAT_SECONDS = 2
+local CROSSHAIR_SIZE = 6
 
 local MysteryModeController = {}
 
@@ -38,20 +45,13 @@ local started = false
 
 type Hud = {
 	gui: ScreenGui,
+	aimGui: ScreenGui,
 	coinsLabel: TextLabel,
-	knifeButtons: Frame,
-	equip: UiKit.ButtonHandle,
-	stab: UiKit.ButtonHandle,
-	throw: UiKit.ButtonHandle,
+	crosshair: Frame,
+	hint: TextLabel,
 }
 
-type Actions = {
-	toggleEquip: () -> (),
-	stab: () -> (),
-	throw: () -> (),
-}
-
-local function createHud(playerGui: PlayerGui, actions: Actions): Hud
+local function createHud(playerGui: PlayerGui): Hud
 	local gui = UiTheme.createScreenGui(GUI_NAME, playerGui, DISPLAY_ORDER)
 	gui.Enabled = false
 
@@ -66,41 +66,37 @@ local function createHud(playerGui: PlayerGui, actions: Actions): Hud
 	coinsLabel.Size = UDim2.fromScale(1, 1)
 	UiTheme.addTextOutline(coinsLabel, 1.5)
 
-	local knifeButtons = Instance.new("Frame")
-	knifeButtons.Name = "KnifeButtons"
-	knifeButtons.AnchorPoint = Vector2.new(1, 1)
-	knifeButtons.Position = UDim2.new(1, -18, 1, -150)
-	knifeButtons.Size = UDim2.fromOffset(170, 184)
-	knifeButtons.BackgroundTransparency = 1
-	knifeButtons.Visible = false
-	knifeButtons.Parent = gui
-	ResponsiveScale.attach(knifeButtons, Vector2.new(1280, 720), 0.75, 1.1)
-	local equip = UiKit.createButton(knifeButtons, {
-		name = "Equip",
-		text = T("🔪 SACAR (Q)"),
-		variant = "Neutral",
-		size = UDim2.new(1, 0, 0, 52),
-		position = UDim2.fromOffset(0, 0),
-	})
-	equip.button.Activated:Connect(actions.toggleEquip)
-	local stab = UiKit.createButton(knifeButtons, {
-		name = "Stab",
-		text = T("🔪 GOLPEAR"),
-		variant = "Danger",
-		size = UDim2.new(1, 0, 0, 52),
-		position = UDim2.fromOffset(0, 64),
-	})
-	stab.button.Activated:Connect(actions.stab)
-	local throw = UiKit.createButton(knifeButtons, {
-		name = "Throw",
-		text = T("🎯 ARREMESSAR (E)"),
-		variant = "Warning",
-		size = UDim2.new(1, 0, 0, 52),
-		position = UDim2.fromOffset(0, 128),
-	})
-	throw.button.Activated:Connect(actions.throw)
+	-- Mira: um ponto no centro exato da tela (a primeira pessoa esconde o
+	-- cursor). Fica numa tela própria que ignora a barra do topo, como a mira
+	-- do Puffador; senão os dois centros não batem.
+	local aimGui = UiTheme.createScreenGui(GUI_NAME .. "Aim", playerGui, DISPLAY_ORDER)
+	aimGui.IgnoreGuiInset = true
+	aimGui.Enabled = false
+	local crosshair = Instance.new("Frame")
+	crosshair.Name = "Crosshair"
+	crosshair.AnchorPoint = Vector2.new(0.5, 0.5)
+	crosshair.Position = UDim2.fromScale(0.5, 0.5)
+	crosshair.Size = UDim2.fromOffset(CROSSHAIR_SIZE, CROSSHAIR_SIZE)
+	crosshair.BackgroundColor3 = Color3.new(1, 1, 1)
+	crosshair.BackgroundTransparency = 0.1
+	crosshair.BorderSizePixel = 0
+	crosshair.Parent = aimGui
+	UiTheme.addCorner(crosshair, 999)
+	local ring = Instance.new("UIStroke")
+	ring.Color = Color3.new(0, 0, 0)
+	ring.Thickness = 1.5
+	ring.Transparency = 0.3
+	ring.Parent = crosshair
 
-	return { gui = gui, coinsLabel = coinsLabel, knifeButtons = knifeButtons, equip = equip, stab = stab, throw = throw }
+	-- Dica curta logo abaixo da mira (faca liberada em tantos segundos).
+	local hint = UiTheme.createLabel(aimGui, "Hint", "", Enum.Font.GothamBold, 16)
+	hint.AnchorPoint = Vector2.new(0.5, 0)
+	hint.Position = UDim2.new(0.5, 0, 0.5, 18)
+	hint.Size = UDim2.fromOffset(240, 24)
+	hint.Visible = false
+	UiTheme.addTextOutline(hint, 1.5)
+
+	return { gui = gui, aimGui = aimGui, coinsLabel = coinsLabel, crosshair = crosshair, hint = hint }
 end
 
 local function notify(channel: "Center" | "Banner", key: string, icon: string, title: string, subtitle: string, tone: NotificationManager.Tone, duration: number)
@@ -117,59 +113,96 @@ local function notify(channel: "Center" | "Banner", key: string, icon: string, t
 	})
 end
 
-local function knifeEquipped(player: Player): boolean
+local function heldTool(player: Player): Tool?
 	local character = player.Character
-	local tool = if character ~= nil then character:FindFirstChild(KNIFE_TOOL_NAME) else nil
-	return tool ~= nil and tool:IsA("Tool")
+	return if character ~= nil then character:FindFirstChildOfClass("Tool") else nil
 end
 
 local function run(remote: RemoteEvent, container: Instance, playerGui: PlayerGui)
 	local localPlayer = Players.LocalPlayer
 	local role = ""
 	local isHero = false
+	local graceEndsAt = 0
 	local throwReadyAt = 0
+	local stabReadyAt = 0
+	-- Ataque em andamento: quando começou (nil: solto).
+	local pressedAt: number? = nil
+	local drawSentAt: number? = nil
 	local view = RoleRevealView.create(playerGui)
-
-	-- Direção do arremesso: para onde o mouse aponta; no toque, para onde a
-	-- câmera olha.
-	local function aimDirection(): Vector3
-		local character = localPlayer.Character
-		local root = if character ~= nil then character:FindFirstChild("HumanoidRootPart") else nil
-		if not UserInputService.TouchEnabled and root ~= nil and root:IsA("BasePart") then
-			local target = localPlayer:GetMouse().Hit.Position
-			local flat = Vector3.new(target.X - root.Position.X, 0, target.Z - root.Position.Z)
-			if flat.Magnitude > 1 then
-				return flat
-			end
-		end
-		local camera = Workspace.CurrentCamera
-		return if camera ~= nil then camera.CFrame.LookVector else Vector3.zAxis
-	end
-
-	local actions: Actions = {
-		toggleEquip = function()
-			if role == "Murderer" then
-				remote:FireServer("Equip", not knifeEquipped(localPlayer))
-			end
-		end,
-		stab = function()
-			if role == "Murderer" and knifeEquipped(localPlayer) then
-				remote:FireServer("Stab")
-			end
-		end,
-		throw = function()
-			if role == "Murderer" and knifeEquipped(localPlayer) and os.clock() >= throwReadyAt then
-				remote:FireServer("Throw", aimDirection())
-			end
-		end,
-	}
-	local hud = createHud(playerGui, actions)
+	local hud = createHud(playerGui)
 
 	local function inMatch(): boolean
 		return container:GetAttribute(StateAttributeNames.RoundState) == "Active"
 			and container:GetAttribute(StateAttributeNames.RoundMode) == "Mystery"
 			and localPlayer:GetAttribute(StateAttributeNames.PlayerIsParticipant) == true
 	end
+
+	local function canAttack(): boolean
+		return role == "Murderer" and inMatch() and os.clock() >= graceEndsAt
+	end
+
+	-- Para onde a mira (centro da tela) aponta.
+	local function aimDirection(): Vector3
+		local camera = Workspace.CurrentCamera
+		return if camera ~= nil then camera.CFrame.LookVector else Vector3.zAxis
+	end
+
+	local function holdStarted()
+		if not canAttack() then
+			return
+		end
+		pressedAt = os.clock()
+		drawSentAt = nil
+	end
+
+	-- Soltou: rápido é golpe; segurado (com o arremesso pronto) é arremesso.
+	local function holdEnded()
+		local startedAt = pressedAt
+		pressedAt = nil
+		MurderFirstPerson.setCharge(0)
+		if startedAt == nil or not canAttack() then
+			return
+		end
+		local now = os.clock()
+		local held = now - startedAt
+		if held >= MysteryModeConfig.ThrowHoldSeconds and now >= throwReadyAt then
+			throwReadyAt = now + MysteryModeConfig.ThrowCooldown
+			stabReadyAt = now + MysteryModeConfig.StabCooldown
+			remote:FireServer("Throw", aimDirection())
+			MurderFirstPerson.pulse("Throw")
+			return
+		end
+		if now >= stabReadyAt then
+			stabReadyAt = now + MysteryModeConfig.StabCooldown
+			remote:FireServer("Stab")
+			MurderFirstPerson.pulse("Stab")
+		end
+	end
+
+	-- Botão da faca no celular (no lugar do botão de tiro, ao lado do pulo).
+	local knifeButton = if UserInputService.TouchEnabled then FireButtonView.new(playerGui, holdStarted, holdEnded) else nil
+	if knifeButton ~= nil then
+		knifeButton.setLabel("🔪", T("FACA"))
+	end
+
+	-- Carga do arremesso enquanto segura (mostra a faca para todos).
+	RunService.RenderStepped:Connect(function()
+		local startedAt = pressedAt
+		if startedAt == nil then
+			return
+		end
+		local now = os.clock()
+		local over = now - startedAt - MysteryModeConfig.ThrowHoldSeconds
+		if over < 0 or now < throwReadyAt then
+			return
+		end
+		local sentAt = drawSentAt
+		if sentAt == nil or now - sentAt >= DRAW_REPEAT_SECONDS then
+			drawSentAt = now
+			remote:FireServer("Draw")
+		end
+		MurderFirstPerson.setCharge(over / CHARGE_FILL_SECONDS)
+	end)
 
 	local function refresh()
 		-- O papel vale até a partida acabar (o aviso do papel pode chegar
@@ -183,15 +216,33 @@ local function run(remote: RemoteEvent, container: Instance, playerGui: PlayerGu
 			isHero = false
 		end
 		local alive = localPlayer:GetAttribute(StateAttributeNames.PlayerIsEliminated) ~= true
-		local playing = inMatch() and alive
+		local playing = inMatch() and alive and role ~= ""
 		hud.gui.Enabled = playing
-		hud.knifeButtons.Visible = role == "Murderer"
-		-- O botão de golpear é para o toque; no PC o golpe é o clique.
-		hud.stab.root.Visible = UserInputService.TouchEnabled
-		local equipped = knifeEquipped(localPlayer)
-		hud.equip.setText(if equipped then T("✋ GUARDAR (Q)") else T("🔪 SACAR (Q)"))
-		hud.stab.setEnabled(equipped)
-		hud.throw.setEnabled(equipped)
+		hud.aimGui.Enabled = playing
+		if playing then
+			MurderFirstPerson.enable()
+		else
+			MurderFirstPerson.disable()
+			pressedAt = nil
+		end
+		if knifeButton ~= nil then
+			knifeButton.setVisible(playing and role == "Murderer")
+		end
+		-- Item na mão: a faca sempre com o Assassino (erguida quando à vista
+		-- de todos); a arma quando o Xerife ou o Herói a segura.
+		local tool = heldTool(localPlayer)
+		local holdingGun = tool ~= nil and tool.Name == PuffadorConstants.ToolName
+		-- Com a arma na mão vale a mira do Puffador.
+		hud.crosshair.Visible = not holdingGun
+		if role == "Murderer" then
+			MurderFirstPerson.setItem("Knife")
+			MurderFirstPerson.setRaised(tool ~= nil and tool.Name == KNIFE_TOOL_NAME)
+		elseif tool ~= nil and tool.Name == PuffadorConstants.ToolName then
+			MurderFirstPerson.setItem("Gun")
+			MurderFirstPerson.setRaised(true)
+		else
+			MurderFirstPerson.setItem(nil)
+		end
 		if not playing and role ~= "" and not alive then
 			view.setBadge(nil)
 		end
@@ -199,10 +250,26 @@ local function run(remote: RemoteEvent, container: Instance, playerGui: PlayerGu
 		hud.coinsLabel.Text = T("💰 %d/%d", if typeof(coins) == "number" then coins else 0, MysteryModeConfig.MaxCoinsPerPlayer)
 	end
 
+	-- Faca liberada em tantos segundos (só o Assassino vê).
+	task.spawn(function()
+		while true do
+			local remaining = math.ceil(graceEndsAt - os.clock())
+			local showing = role == "Murderer" and remaining > 0 and hud.aimGui.Enabled
+			hud.hint.Visible = showing
+			if showing then
+				hud.hint.Text = T("🔪 faca liberada em %ds", remaining)
+			end
+			task.wait(0.2)
+		end
+	end)
+
 	remote.OnClientEvent:Connect(function(kind: unknown, a: unknown, b: unknown, c: unknown, d: unknown)
 		if kind == "Role" and typeof(a) == "string" then
 			role = a
 			isHero = false
+			graceEndsAt = os.clock() + (if typeof(b) == "number" then b else 0)
+			throwReadyAt = 0
+			stabReadyAt = 0
 			view.spin(a, MysteryModeConfig.RoleRevealSeconds)
 			refresh()
 		elseif kind == "GunDropped" then
@@ -217,22 +284,43 @@ local function run(remote: RemoteEvent, container: Instance, playerGui: PlayerGu
 			notify("Center", "mystery-hero", "🦸", T("VOCÊ É O HERÓI!"), T("Acerte o Assassino · errar elimina você"), "Gold", 3)
 		elseif kind == "ThrowCooldown" and typeof(a) == "number" then
 			throwReadyAt = os.clock() + a
+			if knifeButton ~= nil then
+				knifeButton.startCooldown(a)
+			end
 		elseif kind == "Reveal" and typeof(a) == "string" and typeof(b) == "string" and typeof(c) == "string" and typeof(d) == "string" then
 			view.setBadge(nil)
 			view.showReveal({ murderer = a, sheriff = b, hero = c, winner = d })
 		end
 	end)
 
+	-- No PC o ataque é o clique (ou o gatilho do controle); o toque usa o
+	-- botão da faca.
+	local function isAttackInput(input: InputObject): boolean
+		return input.UserInputType == Enum.UserInputType.MouseButton1 or input.KeyCode == Enum.KeyCode.ButtonR2
+	end
+	-- Coice da arma na tela (no ritmo da recarga do Xerife).
+	local shotReadyAt = 0
+	local function gunKick()
+		local tool = heldTool(localPlayer)
+		local now = os.clock()
+		if tool ~= nil and tool.Name == PuffadorConstants.ToolName and now >= shotReadyAt then
+			shotReadyAt = now + MysteryModeConfig.SheriffReload
+			MurderFirstPerson.pulse("Shot")
+		end
+	end
 	UserInputService.InputBegan:Connect(function(input: InputObject, processed: boolean)
-		if processed or role ~= "Murderer" or not inMatch() then
+		if processed or not isAttackInput(input) then
 			return
 		end
-		if input.KeyCode == EQUIP_KEY then
-			actions.toggleEquip()
-		elseif input.KeyCode == THROW_KEY then
-			actions.throw()
-		elseif input.UserInputType == Enum.UserInputType.MouseButton1 then
-			actions.stab()
+		if role == "Murderer" then
+			holdStarted()
+		elseif inMatch() then
+			gunKick()
+		end
+	end)
+	UserInputService.InputEnded:Connect(function(input: InputObject)
+		if isAttackInput(input) and pressedAt ~= nil then
+			holdEnded()
 		end
 	end)
 

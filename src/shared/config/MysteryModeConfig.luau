@@ -37,6 +37,12 @@ export type MysteryModeConfig = {
 	ThrowSpeed: number,
 	ThrowRange: number,
 	ThrowHitRadius: number,
+	-- Depois do último ataque, a faca volta a ficar guardada (s).
+	DrawnSeconds: number,
+	-- Segurar o ataque por isso (s) vira arremesso; menos é golpe.
+	ThrowHoldSeconds: number,
+	-- Campo de visão da primeira pessoa (graus).
+	FirstPersonFov: number,
 	-- Arma do Xerife: recarga entre tiros (s).
 	SheriffReload: number,
 	-- Arma caída: raio para pegar.
@@ -68,9 +74,12 @@ local MysteryModeConfig: MysteryModeConfig = {
 	StabCooldown = 1,
 	StabMaxHeight = 5,
 	ThrowCooldown = 4,
-	ThrowSpeed = 90,
+	ThrowSpeed = 70,
 	ThrowRange = 110,
 	ThrowHitRadius = 2.5,
+	DrawnSeconds = 4,
+	ThrowHoldSeconds = 0.3,
+	FirstPersonFov = 80,
 	SheriffReload = 3,
 	PickupRadius = 5,
 	CoinsPerRound = 40,

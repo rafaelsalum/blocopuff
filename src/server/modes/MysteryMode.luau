@@ -51,8 +51,8 @@ local REMOTE_NAME = "MysteryMode"
 local HIT_HANDLER_KEY = "Mystery"
 local COINS_ATTRIBUTE = "MysteryCoins"
 local PICKUP_CHECK_SECONDS = 0.2
--- Sacar e guardar a faca no máximo a cada tanto (remote do cliente).
-local EQUIP_MIN_INTERVAL = 0.15
+-- Mostrar a faca (carregando o arremesso) no máximo a cada tanto.
+local DRAW_MIN_INTERVAL = 0.15
 local GUN_COLOR = Color3.fromRGB(110, 170, 255)
 local POOF_COLORS = {
 	Color3.fromRGB(255, 120, 160),
@@ -89,7 +89,9 @@ local murdererDownBy: Combatant? = nil
 local winnerSide: MurderRules.Winner? = nil
 local lastStabAt: number? = nil
 local lastThrowAt: number? = nil
-local lastEquipAt = 0
+local lastDrawRequestAt = 0
+-- Último ataque do Assassino: a faca fica à vista até DrawnSeconds depois.
+local lastDrawAt = 0
 
 -- Entre partidas (no mesmo servidor): quem já foi o quê.
 local history: { [number]: MurderRules.RoleHistory } = {}
@@ -444,20 +446,51 @@ local function tryThrow(direction: Vector3)
 	})
 end
 
-local function onRemote(player: Player, action: unknown, value: unknown)
-	local current = murderer
-	if current == nil or current.player ~= player then
+-- Atacar (ou carregar o arremesso) põe a faca na mão, à vista de todos.
+local function drawKnife(current: Combatant)
+	local now = os.clock()
+	-- Pedidos seguidos demais (cliente insistindo) não mexem na faca.
+	if now - lastDrawRequestAt < DRAW_MIN_INTERVAL then
 		return
 	end
-	if action == "Equip" and typeof(value) == "boolean" then
-		local now = os.clock()
-		if now - lastEquipAt >= EQUIP_MIN_INTERVAL then
-			lastEquipAt = now
-			MurderKnife.setEquipped(current, value)
-		end
+	lastDrawRequestAt = now
+	if not MurderKnife.isEquipped(current) then
+		MurderKnife.setEquipped(current, true)
+	end
+	lastDrawAt = now
+end
+
+-- Sem atacar por um tempo, a faca do Assassino humano volta a ficar
+-- guardada (o bot do teste solo fica sempre com ela na mão).
+local function sheatheIdleKnife()
+	local current = murderer
+	if current == nil or current.player == nil or not MurderKnife.isEquipped(current) then
+		return
+	end
+	if os.clock() - lastDrawAt >= MysteryModeConfig.DrawnSeconds then
+		MurderKnife.setEquipped(current, false)
+	end
+end
+
+local function onRemote(player: Player, action: unknown, value: unknown)
+	local current = murderer
+	if not running or current == nil or current.player ~= player or not isAlive(current) then
+		return
+	end
+	-- No começo ninguém ataca (dá tempo de todos se espalharem).
+	if elapsed() < MysteryModeConfig.StartGrace then
+		return
+	end
+	if action == "Draw" then
+		drawKnife(current)
 	elseif action == "Stab" then
+		drawKnife(current)
 		tryStab()
 	elseif action == "Throw" and typeof(value) == "Vector3" and isFiniteVector(value) and Vector3.new(value.X, 0, value.Z).Magnitude > 1e-3 then
+		-- O arremesso vale mesmo logo depois de um "Draw" (a faca já está
+		-- à vista desde a carga).
+		lastDrawRequestAt = 0
+		drawKnife(current)
 		tryThrow(value)
 	end
 end
@@ -542,6 +575,7 @@ local function resetState()
 	winnerSide = nil
 	lastStabAt = nil
 	lastThrowAt = nil
+	lastDrawAt = 0
 	removeDroppedGun()
 end
 
@@ -601,6 +635,7 @@ local function begin(context: BeginContext)
 	task.spawn(function()
 		while running and generation == current do
 			checkGunPickup()
+			sheatheIdleKnife()
 			task.wait(PICKUP_CHECK_SECONDS)
 		end
 	end)

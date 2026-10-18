@@ -1,13 +1,14 @@
 --!strict
 
--- Faca do Assassino (Fase 5E): a ferramenta (guardada na mochila até ele
--- sacar; sacada, todos a veem na mão), o alvo do golpe de perto e a faca
+-- Faca do Assassino (Fase 5E): a ferramenta (guardada fora da mochila, no
+-- servidor, até ele atacar; sacada, todos a veem na mão), o alvo do golpe de perto e a faca
 -- arremessada, que voa em linha reta, para na primeira parede ou móvel e
 -- atinge o primeiro que encontrar. Tudo simulado no servidor; o modo decide
 -- quem pode golpear, as recargas e o que acontece com o alvo.
 
 local RunService = game:GetService("RunService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local ServerStorage = game:GetService("ServerStorage")
 
 local MysteryModeConfig = require(ReplicatedStorage.Shared.config.MysteryModeConfig)
 local MurderRules = require(script.Parent.Parent.data.MurderRules)
@@ -30,16 +31,33 @@ local SERVICE_NAME = "MurderKnife"
 local HANDLE_COLOR = Color3.fromRGB(70, 44, 30)
 local BLADE_COLOR = Color3.fromRGB(150, 160, 176)
 local THROWN_SPIN = 18
+-- A faca arremessada é maior que a da mão, para dar para ver no ar.
+local THROWN_SCALE = 1.8
+local TRAIL_COLOR = Color3.fromRGB(255, 90, 90)
+local SHEATH_NAME = "MurderKnives"
 
 local MurderKnife = {}
 
 local tools: { [Combatant]: Tool } = {}
 local flying: { [Model]: RBXScriptConnection } = {}
 
-local function knifeParts(parent: Instance, anchored: boolean): (Part, Part)
+-- Faca guardada: fora da mochila, para não aparecer na barra de itens.
+local function sheath(): Folder
+	local existing = ServerStorage:FindFirstChild(SHEATH_NAME)
+	if existing ~= nil and existing:IsA("Folder") then
+		return existing
+	end
+	local folder = Instance.new("Folder")
+	folder.Name = SHEATH_NAME
+	folder.Parent = ServerStorage
+	return folder
+end
+
+local function knifeParts(parent: Instance, anchored: boolean, scale: number?): (Part, Part)
+	local size = scale or 1
 	local handle = Instance.new("Part")
 	handle.Name = "Handle"
-	handle.Size = Vector3.new(0.3, 0.3, 1)
+	handle.Size = Vector3.new(0.3, 0.3, 1) * size
 	handle.Color = HANDLE_COLOR
 	handle.Material = Enum.Material.Wood
 	handle.Anchored = anchored
@@ -50,7 +68,7 @@ local function knifeParts(parent: Instance, anchored: boolean): (Part, Part)
 	handle.Parent = parent
 	local blade = Instance.new("Part")
 	blade.Name = "Blade"
-	blade.Size = Vector3.new(0.1, 0.4, 1.5)
+	blade.Size = Vector3.new(0.1, 0.4, 1.5) * size
 	blade.Color = BLADE_COLOR
 	blade.Material = Enum.Material.Metal
 	blade.Anchored = anchored
@@ -59,7 +77,7 @@ local function knifeParts(parent: Instance, anchored: boolean): (Part, Part)
 	blade.CanTouch = false
 	blade.Massless = true
 	-- A lâmina sai da ponta do cabo (−Z).
-	blade.CFrame = handle.CFrame * CFrame.new(0, 0.05, -1.25)
+	blade.CFrame = handle.CFrame * CFrame.new(0, 0.05 * size, -1.25 * size)
 	blade.Parent = parent
 	if not anchored then
 		local weld = Instance.new("WeldConstraint")
@@ -82,19 +100,14 @@ local function buildTool(): Tool
 	return tool
 end
 
--- Entrega a faca guardada (jogador: na mochila; bot: já na mão, só no teste
--- solo do Studio).
+-- Entrega a faca guardada (jogador: fora da mochila, o modo saca quando
+-- ele ataca; bot: já na mão, só no teste solo do Studio).
 function MurderKnife.give(combatant: Combatant)
 	MurderKnife.take(combatant)
 	local tool = buildTool()
 	local player = combatant.player
 	if player ~= nil then
-		local backpack = player:FindFirstChildOfClass("Backpack")
-		if backpack == nil then
-			tool:Destroy()
-			return
-		end
-		tool.Parent = backpack
+		tool.Parent = sheath()
 	else
 		local humanoid = CombatantRegistry.getHumanoid(combatant)
 		if humanoid == nil then
@@ -122,17 +135,18 @@ function MurderKnife.isEquipped(combatant: Combatant): boolean
 	return tool ~= nil and character ~= nil and tool.Parent == character
 end
 
--- Saca ou guarda a faca (botão do Assassino).
+-- Saca ou guarda a faca (o modo saca ao atacar e guarda depois de um tempo).
 function MurderKnife.setEquipped(combatant: Combatant, equipped: boolean)
 	local tool = tools[combatant]
 	local humanoid = CombatantRegistry.getHumanoid(combatant)
-	if tool == nil or humanoid == nil or humanoid.Health <= 0 then
+	-- Faca destruída com o corpo (reset sem eliminação): nada a fazer.
+	if tool == nil or tool.Parent == nil or humanoid == nil or humanoid.Health <= 0 then
 		return
 	end
 	if equipped then
 		humanoid:EquipTool(tool)
 	elseif MurderKnife.isEquipped(combatant) then
-		humanoid:UnequipTools()
+		tool.Parent = sheath()
 	end
 end
 
@@ -183,8 +197,25 @@ function MurderKnife.throw(throw: Throw)
 	direction = direction.Unit
 	local model = Instance.new("Model")
 	model.Name = "ThrownKnife"
-	local handle = knifeParts(model, true)
+	local handle, blade = knifeParts(model, true, THROWN_SCALE)
+	blade.Material = Enum.Material.Neon
 	model.PrimaryPart = handle
+	-- Rastro vermelho atrás da faca, para quem está perto ver de onde veio.
+	local tail = Instance.new("Attachment")
+	tail.Position = Vector3.new(0, 0.3, 0)
+	tail.Parent = handle
+	local tip = Instance.new("Attachment")
+	tip.Position = Vector3.new(0, -0.3, 0)
+	tip.Parent = handle
+	local trail = Instance.new("Trail")
+	trail.Attachment0 = tail
+	trail.Attachment1 = tip
+	trail.Color = ColorSequence.new(TRAIL_COLOR)
+	trail.Transparency = NumberSequence.new(0.2, 1)
+	trail.Lifetime = 0.25
+	trail.LightEmission = 1
+	trail.FaceCamera = true
+	trail.Parent = handle
 	model:PivotTo(CFrame.lookAt(throw.origin, throw.origin + direction))
 	model.Parent = throw.obstacles
 

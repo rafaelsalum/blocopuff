@@ -25,6 +25,8 @@ local WALL_CLEARANCE = 1
 local CombatCameraController = {}
 
 local enabled = false
+-- Desligada por outro modo de câmera (primeira pessoa do Assassinato).
+local suppressed = false
 local recoilDistance = 0
 local previousMouseBehavior = Enum.MouseBehavior.Default
 local previousMouseIconEnabled = true
@@ -133,7 +135,7 @@ local function onRenderStep(deltaTime: number)
 end
 
 function CombatCameraController.enable()
-	if enabled then
+	if enabled or suppressed then
 		return
 	end
 
@@ -185,6 +187,14 @@ function CombatCameraController.disable()
 	local localPlayer = Players.LocalPlayer
 	if localPlayer ~= nil then
 		restoreZoom(localPlayer)
+	end
+end
+
+-- Enquanto suprimida, equipar o Puffador não muda a câmera.
+function CombatCameraController.setSuppressed(value: boolean)
+	suppressed = value
+	if value then
+		CombatCameraController.disable()
 	end
 end
 
