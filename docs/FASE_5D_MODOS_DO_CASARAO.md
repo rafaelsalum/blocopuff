@@ -84,6 +84,8 @@ O jogador passa a:
 
 ### 5D.3 Mistério no Casarão
 
+> **Substituído pela Fase 5E** (`docs/FASE_5E_ASSASSINATO_NO_CASARAO.md`): no playtest em família o Fantasma, o susto e o mapa em grade não divertiram; o modo vira o Assassinato no Casarão, fiel ao MM2. O texto abaixo fica como registro do que foi entregue na 5D.3.
+
 **Objetivo:** os Moradores sobrevivem ou capturam o Fantasma; o Fantasma assusta todo mundo.
 
 - **Papéis secretos** (cartão na tela por 4 s no começo, só o próprio jogador vê o seu):
@@ -142,7 +144,7 @@ Valores de partida para o playtest. Ficam em `config/ModeRotationConfig`, `confi
 | Corrida: força do Puffador | 50% da Arena |
 | Corrida: fim | 3º jogador chega ou o tempo acaba |
 | **Mistério:** duração | 3 min |
-| Mistério: humanos mínimos | 4 (bots completam até 6) |
+| Mistério: humanos mínimos | 2 (bots completam até 6) |
 | Mistério: proteção inicial | 10 s sem sustos |
 | Mistério: recarga do Lençol Voador | 4 s |
 | Mistério: recarga do Puffador do Detetive | 2 s |

@@ -33,7 +33,7 @@ O jogo deve ser fácil de entender nos primeiros segundos, mas oferecer profundi
 
 O BlocoPuff deve ser acessível para crianças e famílias, mas não infantilizado a ponto de afastar jogadores mais velhos.
 
-A violência é substituída por humor físico: Puff, empurrões, quedas, blocos quebrando, perseguições e sons engraçados.
+A violência é substituída por humor físico: Puff, empurrões, quedas, blocos quebrando, perseguições e sons engraçados. A exceção é o modo **Assassinato no Casarão** (Fase 5E), fiel ao Murder Mystery 2: tem faca e arma, mas em estilo desenho animado, sem sangue nem corpo no chão, e a interface diz "eliminar", nunca "matar".
 
 O jogo deve funcionar bem em **mobile, desktop e gamepad**, com prioridade especial para mobile.
 
@@ -97,7 +97,7 @@ A partida passa a girar entre modos no mesmo servidor, com uma fila só (ver `do
 
 - **Arena:** o modo base descrito neste documento, o mais frequente e o primeiro de todo jogador novo.
 - **Corrida da Torre do Relógio:** subir a rampa em espiral desviando do que o Barão joga do topo; o primeiro a chegar vence.
-- **Mistério no Casarão:** dedução social inspirada no Murder Mystery 2, com Fantasma, Detetive e Moradores, sem violência.
+- **Assassinato no Casarão:** fiel ao Murder Mystery 2, com Assassino (faca), Xerife (arma), Inocentes e Herói, num Casarão de dois andares (ver `docs/FASE_5E_ASSASSINATO_NO_CASARAO.md`; substitui o Mistério da 5D.3, com Fantasma e Detetive).
 - **Escolha pela porta:** cada uma das 3 portas do mirante leva a um modo; entrar por ela é votar nele, e a partida é o modo mais votado da fila que pode rodar. Sem votos, vale a rotação Arena → Corrida → Arena → Mistério, configurável.
 
 ---
