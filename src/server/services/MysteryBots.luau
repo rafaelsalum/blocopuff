@@ -15,6 +15,7 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local BotConfig = require(ReplicatedStorage.Shared.config.BotConfig)
+local PuffadorConstants = require(ReplicatedStorage.Shared.modules.PuffadorConstants)
 local NavGraph = require(script.Parent.Parent.data.NavGraph)
 local CombatantRegistry = require(script.Parent.CombatantRegistry)
 local MurderMansionBuilder = require(script.Parent.MurderMansionBuilder)
@@ -76,6 +77,38 @@ local MysteryBots = {}
 local random = Random.new()
 local running = false
 local generation = 0
+-- Puffadores dos bots guardados durante a partida.
+local stashedGuns: { [Combatant]: Tool } = {}
+
+-- Os bots nascem com o Puffador na mão (BotBody); no Assassinato só o
+-- Xerife e o Herói têm arma, então a dos bots fica guardada até o fim.
+local function stashGuns(bots: { Combatant })
+	for _, bot in ipairs(bots) do
+		local character = CombatantRegistry.getCharacter(bot)
+		local tool = if character ~= nil then character:FindFirstChild(PuffadorConstants.ToolName) else nil
+		if tool ~= nil and tool:IsA("Tool") then
+			stashedGuns[bot] = tool
+			tool.Parent = nil
+		end
+	end
+end
+
+-- Fim da partida: cada bot vivo volta com o Puffador na mão.
+local function restoreGuns()
+	for bot, tool in pairs(stashedGuns) do
+		local character = CombatantRegistry.getCharacter(bot)
+		local humanoid = CombatantRegistry.getHumanoid(bot)
+		-- Corpo novo (o bot renasceu) já vem com o próprio Puffador.
+		local hasOwn = character ~= nil and character:FindFirstChild(PuffadorConstants.ToolName) ~= nil
+		if character ~= nil and humanoid ~= nil and humanoid.Health > 0 and not hasOwn then
+			tool.Parent = character
+			humanoid:EquipTool(tool)
+		else
+			tool:Destroy()
+		end
+	end
+	table.clear(stashedGuns)
+end
 
 local function threatFor(context: Context, bot: Combatant, root: BasePart): BasePart?
 	local murderer = context.murderer()
@@ -218,6 +251,7 @@ function MysteryBots.begin(layout: WingLayout, bots: { Combatant }, context: Con
 	if #bots == 0 then
 		return
 	end
+	stashGuns(bots)
 	local nav = MysteryBotNav.new(layout)
 	local speed = BotConfig.Levels.Normal.WalkSpeed * SPEED_FACTOR
 	local states: { [Combatant]: BotState } = {}
@@ -258,6 +292,7 @@ end
 function MysteryBots.stop()
 	running = false
 	generation += 1
+	restoreGuns()
 end
 
 return table.freeze(MysteryBots)

@@ -18,7 +18,6 @@
 -- ele); nenhum atributo replicado revela quem é quem. A faca sacada todos
 -- veem, porque está na mão do Assassino.
 
-local Debris = game:GetService("Debris")
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -39,6 +38,8 @@ local MurderMansionBuilder = require(services.MurderMansionBuilder)
 local MysteryCoins = require(services.MysteryCoins)
 local MysteryBots = require(services.MysteryBots)
 local MurderKnife = require(services.MurderKnife)
+local MurderGhosts = require(services.MurderGhosts)
+local MurderGunDrop = require(services.MurderGunDrop)
 
 type BeginContext = RoundModeTypes.BeginContext
 type TickContext = RoundModeTypes.TickContext
@@ -53,13 +54,6 @@ local COINS_ATTRIBUTE = "MysteryCoins"
 local PICKUP_CHECK_SECONDS = 0.2
 -- Mostrar a faca (carregando o arremesso) no máximo a cada tanto.
 local DRAW_MIN_INTERVAL = 0.15
-local GUN_COLOR = Color3.fromRGB(110, 170, 255)
-local POOF_COLORS = {
-	Color3.fromRGB(255, 120, 160),
-	Color3.fromRGB(255, 214, 90),
-	Color3.fromRGB(120, 220, 255),
-	Color3.fromRGB(190, 140, 255),
-}
 
 local random = Random.new()
 local remote: RemoteEvent? = nil
@@ -168,20 +162,24 @@ local function remember(combatant: Combatant?, field: "murderer" | "sheriff")
 end
 
 -- No teste solo do Studio o papel do jogador alterna (começa Xerife, com um
--- bot de Assassino; depois ele é o Assassino). Fora do Studio, os dois
+-- bot de Assassino; depois ele é o Assassino, com um bot de Xerife que não
+-- atira, mas deixa a arma cair ao ser eliminado). Fora do Studio, os dois
 -- papéis são sempre de humanos.
 local function pickSoloRoles(human: Combatant, combatants: { Combatant })
 	studioSoloRounds += 1
-	if studioSoloRounds % 2 == 0 then
-		murderer = human
-		return
-	end
-	sheriff = human
+	local bot: Combatant? = nil
 	for _, combatant in ipairs(combatants) do
 		if combatant.player == nil then
-			murderer = combatant
-			return
+			bot = combatant
+			break
 		end
+	end
+	if studioSoloRounds % 2 == 0 then
+		murderer = human
+		sheriff = bot
+	else
+		sheriff = human
+		murderer = bot
 	end
 end
 
@@ -220,104 +218,12 @@ local function assignRoles(combatants: { Combatant }, humans: { Player })
 	remember(sheriff, "sheriff")
 end
 
--- Fumaça e confete onde o eliminado estava, e o corpo some (sem corpo no
--- chão). Roda antes de o RoundService zerar a vida do personagem.
-local function poof(combatant: Combatant)
-	local character = CombatantRegistry.getCharacter(combatant)
-	local root = CombatantRegistry.getRoot(combatant)
-	local layout = wing
-	if character == nil or root == nil or layout == nil then
-		return
-	end
-	local burst = Instance.new("Part")
-	burst.Name = "Poof"
-	burst.Size = Vector3.one
-	burst.Transparency = 1
-	burst.Anchored = true
-	burst.CanCollide = false
-	burst.CanQuery = false
-	burst.CanTouch = false
-	burst.CFrame = root.CFrame
-	burst.Parent = layout.folder
-	local smoke = Instance.new("ParticleEmitter")
-	smoke.Texture = "rbxasset://textures/particles/smoke_main.dds"
-	smoke.Color = ColorSequence.new(Color3.fromRGB(235, 235, 245))
-	smoke.Size = NumberSequence.new(2.5, 5)
-	smoke.Transparency = NumberSequence.new(0.2, 1)
-	smoke.Lifetime = NumberRange.new(0.6, 1)
-	smoke.Speed = NumberRange.new(4, 8)
-	smoke.SpreadAngle = Vector2.new(180, 180)
-	smoke.Enabled = false
-	smoke.Parent = burst
-	smoke:Emit(16)
-	for _, color in ipairs(POOF_COLORS) do
-		local confetti = Instance.new("ParticleEmitter")
-		confetti.Texture = "rbxasset://textures/particles/sparkles_main.dds"
-		confetti.Color = ColorSequence.new(color)
-		confetti.Size = NumberSequence.new(0.5)
-		confetti.Lifetime = NumberRange.new(0.8, 1.4)
-		confetti.Speed = NumberRange.new(10, 18)
-		confetti.SpreadAngle = Vector2.new(180, 180)
-		confetti.Acceleration = Vector3.new(0, -25, 0)
-		confetti.Enabled = false
-		confetti.Parent = burst
-		confetti:Emit(10)
-	end
-	Debris:AddItem(burst, 2)
-	for _, descendant in ipairs(character:GetDescendants()) do
-		if descendant:IsA("BasePart") or descendant:IsA("Decal") then
-			descendant.Transparency = 1
-		elseif descendant:IsA("BillboardGui") or descendant:IsA("SurfaceGui") then
-			descendant.Enabled = false
-		end
-	end
-end
-
 local function removeDroppedGun()
 	local gun = droppedGun
 	if gun ~= nil then
 		gun:Destroy()
 		droppedGun = nil
 	end
-end
-
--- Arma caída: brilho e feixe de luz visíveis de longe.
-local function buildDroppedGun(layout: WingLayout, position: Vector3): Model
-	local model = Instance.new("Model")
-	model.Name = "DroppedSheriffGun"
-	local body = Instance.new("Part")
-	body.Name = "Gun"
-	body.Size = Vector3.new(1.2, 1.2, 3)
-	body.Color = GUN_COLOR
-	body.Material = Enum.Material.Neon
-	body.Anchored = true
-	body.CanCollide = false
-	body.CanQuery = false
-	body.CastShadow = false
-	-- No chão do andar em que caiu (a Ala tem dois andares).
-	local floorY = layout.floorAt(position)
-	body.CFrame = CFrame.new(Vector3.new(position.X, floorY + 1.2, position.Z))
-	body.Parent = model
-	local light = Instance.new("PointLight")
-	light.Color = GUN_COLOR
-	light.Range = 14
-	light.Brightness = 3
-	light.Parent = body
-	local beam = Instance.new("Part")
-	beam.Name = "Beam"
-	beam.Color = GUN_COLOR
-	beam.Material = Enum.Material.Neon
-	beam.Transparency = 0.55
-	beam.Anchored = true
-	beam.CanCollide = false
-	beam.CanQuery = false
-	beam.CastShadow = false
-	beam.Size = Vector3.new(0.6, 13, 0.6)
-	beam.CFrame = CFrame.new(Vector3.new(position.X, floorY + 7.5, position.Z))
-	beam.Parent = model
-	model.PrimaryPart = body
-	model.Parent = layout.folder
-	return model
 end
 
 -- A arma cai onde o portador estava (ou onde foi vista por último, ou no
@@ -329,7 +235,9 @@ local function dropGun(at: Vector3?)
 	end
 	removeDroppedGun()
 	gunHolder = nil
-	droppedGun = buildDroppedGun(layout, at or lastGunPosition or layout.randomPoint(random))
+	-- No chão do andar em que caiu (a Ala tem dois andares).
+	local position = at or lastGunPosition or layout.randomPoint(random)
+	droppedGun = MurderGunDrop.build(Vector3.new(position.X, layout.floorAt(position), position.Z), layout.folder)
 	sendToAll("GunDropped")
 end
 
@@ -341,6 +249,8 @@ local function knockOut(victim: Combatant, reason: EliminationTypes.EliminationR
 	local remove = eliminate
 	-- Um acerto adiado (task.defer) pode chegar depois do fim da partida.
 	if running and remove ~= nil and isAlive(victim) then
+		-- O fantasma sai antes da eliminação, com o corpo ainda inteiro.
+		MurderGhosts.eliminate(victim, victim.name, requireWing().folder)
 		remove(victim, reason)
 	end
 end
@@ -654,7 +564,7 @@ local function onEliminated(combatant: Combatant)
 		return
 	end
 	alive[combatant] = false
-	poof(combatant)
+	MurderGhosts.eliminate(combatant, combatant.name, requireWing().folder)
 	if combatant == murderer then
 		MurderKnife.take(combatant)
 	end
@@ -821,6 +731,7 @@ local function stopRound()
 	PuffadorService.setFireCooldown(nil)
 	MysteryCoins.stop()
 	MurderKnife.clear()
+	MurderGhosts.clear()
 	removeDroppedGun()
 end
 
