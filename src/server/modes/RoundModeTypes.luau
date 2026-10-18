@@ -61,13 +61,17 @@ export type RoundMode = {
 	evaluate: (timeUp: boolean) -> Outcome?,
 	-- Posição final de cada participante (nil = pela ordem de eliminação).
 	getRanking: () -> { [Combatant]: number }?,
-	-- Quem recebe o Puffador no começo (Mistério: só o Detetive).
+	-- Quem recebe o Puffador no começo (Assassinato: só o Xerife).
 	getPuffadorHolders: (humans: { Player }) -> { Player },
 	-- Avisado logo que um participante é eliminado (antes do corpo cair).
 	onEliminated: (combatant: Combatant) -> (),
-	-- Vencedores em equipe (Mistério: todos os Moradores). nil = o vencedor
-	-- único do resultado.
+	-- Vencedores em equipe (Assassinato: os Inocentes vivos). nil = o
+	-- vencedor único do resultado.
 	getWinners: () -> { [Combatant]: boolean }?,
+	-- Ações do jogador que contam como "jogou" para o XP, em modos em que
+	-- nem todos atiram (Assassinato: golpes, arremessos, moedas). nil = só
+	-- tiros, construções e derrubadas contam.
+	getActions: ((combatant: Combatant) -> number)?,
 	-- Cérebro dos bots RoboPuff neste modo.
 	beginBots: (bots: { Combatant }, humans: { Player }) -> (),
 	endBots: () -> (),

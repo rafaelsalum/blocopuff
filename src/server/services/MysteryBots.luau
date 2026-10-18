@@ -1,10 +1,10 @@
 --!strict
 
--- Bots RoboPuff no Mistério no Casarão (Fase 5D.3). Na partida de verdade os
--- bots são só Moradores: andam de um cômodo para outro (pegando as moedas
+-- Bots RoboPuff no Assassinato no Casarão (Fase 5E). Na partida de verdade
+-- os bots são só Inocentes: andam de um cômodo para outro (pegando as moedas
 -- que estiverem no caminho), sem nunca blefar nem acusar ninguém. No teste
--- solo do Studio, um bot faz o Fantasma: vai atrás de quem está perto e
--- assusta quando alcança.
+-- solo do Studio, um bot faz o Assassino: vai atrás de quem está perto e
+-- golpeia quando alcança.
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
@@ -15,12 +15,12 @@ local MysteryWingBuilder = require(script.Parent.MysteryWingBuilder)
 type Combatant = CombatantRegistry.Combatant
 type WingLayout = MysteryWingBuilder.WingLayout
 
-export type GhostDriver = {
-	ghost: Combatant,
-	-- Quem o Fantasma ainda pode assustar.
+export type MurdererDriver = {
+	murderer: Combatant,
+	-- Quem o Assassino ainda pode eliminar.
 	targets: () -> { Combatant },
-	-- Tenta assustar quem estiver ao alcance (as regras ficam no modo).
-	scare: () -> (),
+	-- Tenta golpear quem estiver ao alcance (as regras ficam no modo).
+	attack: () -> (),
 }
 
 local TICK_SECONDS = 0.4
@@ -56,9 +56,9 @@ local function wander(layout: WingLayout, bot: Combatant, goals: { [Combatant]: 
 	humanoid:MoveTo((goal :: Goal).position)
 end
 
-local function chase(driver: GhostDriver)
-	local root = CombatantRegistry.getRoot(driver.ghost)
-	local humanoid = CombatantRegistry.getHumanoid(driver.ghost)
+local function chase(driver: MurdererDriver)
+	local root = CombatantRegistry.getRoot(driver.murderer)
+	local humanoid = CombatantRegistry.getHumanoid(driver.murderer)
 	if root == nil or humanoid == nil or humanoid.Health <= 0 then
 		return
 	end
@@ -76,11 +76,13 @@ local function chase(driver: GhostDriver)
 	end
 	if nearest ~= nil then
 		humanoid:MoveTo(nearest.Position)
+		-- Olha para o alvo: o golpe só vale à frente.
+		root.CFrame = CFrame.lookAt(root.Position, Vector3.new(nearest.Position.X, root.Position.Y, nearest.Position.Z))
 	end
-	driver.scare()
+	driver.attack()
 end
 
-function MysteryBots.begin(layout: WingLayout, bots: { Combatant }, ghostDriver: GhostDriver?)
+function MysteryBots.begin(layout: WingLayout, bots: { Combatant }, murdererDriver: MurdererDriver?)
 	MysteryBots.stop()
 	if #bots == 0 then
 		return
@@ -101,8 +103,8 @@ function MysteryBots.begin(layout: WingLayout, bots: { Combatant }, ghostDriver:
 			local now = os.clock()
 			for _, bot in ipairs(bots) do
 				if CombatantRegistry.isPresent(bot) then
-					if ghostDriver ~= nil and ghostDriver.ghost == bot then
-						chase(ghostDriver)
+					if murdererDriver ~= nil and murdererDriver.murderer == bot then
+						chase(murdererDriver)
 					else
 						wander(layout, bot, goals, now)
 					end

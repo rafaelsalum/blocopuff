@@ -82,8 +82,8 @@ local function doorStyle(mode: string): DoorStyle
 		}
 	elseif mode == "Mystery" then
 		return {
-			icon = "👻",
-			title = Lang.t("👻 MISTÉRIO NO CASARÃO"),
+			icon = "🔪",
+			title = Lang.t("🔪 ASSASSINATO NO CASARÃO"),
 			subtitle = Lang.t("Entre para votar · a partir de %d jogadores", MysteryModeConfig.MinHumans),
 			color = Color3.fromRGB(176, 120, 255),
 		}

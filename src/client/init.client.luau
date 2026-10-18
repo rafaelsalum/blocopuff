@@ -242,7 +242,7 @@ if not modeOk then
 	warn(string.format("[BlocoPuff] Failed to start mode controller: %s", tostring(modeErr)))
 end
 
--- Mistério no Casarão (5D.3): papel, botões do Fantasma e avisos.
+-- Assassinato no Casarão (5E): roleta e selo do papel, faca e avisos.
 local mysteryModeOk, mysteryModeErr = pcall(function()
 	MysteryModeController.start()
 end)

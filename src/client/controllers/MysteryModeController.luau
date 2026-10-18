@@ -1,9 +1,10 @@
 --!strict
 
--- Mistério no Casarão no cliente (Fase 5D.3): o cartão do papel (só o
--- próprio jogador sabe o seu), os botões do Fantasma (Assustar e Lençol
--- Voador, também nas teclas Q e E), o contador de moedas e os avisos do
--- Puffador caído, do Herói, do erro do Detetive e da revelação no fim.
+-- Assassinato no Casarão no cliente (Fase 5E): a roleta e o selo do papel
+-- (só o próprio jogador sabe o seu), os controles da faca do Assassino
+-- (sacar e guardar com Q, golpear com o clique, arremessar com E, e botões
+-- no celular), o contador de moedas, os avisos da arma caída e do Herói e a
+-- revelação de quem era quem no fim.
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -17,6 +18,7 @@ local Lang = require(ReplicatedStorage.Shared.i18n.Lang)
 local UiTheme = require(script.Parent.Parent.ui.UiTheme)
 local UiKit = require(script.Parent.Parent.ui.UiKit)
 local ResponsiveScale = require(script.Parent.Parent.ui.ResponsiveScale)
+local RoleRevealView = require(script.Parent.Parent.ui.RoleRevealView)
 local NotificationManager = require(script.Parent.Parent.notifications.NotificationManager)
 
 local T = Lang.t
@@ -26,23 +28,9 @@ local GUI_NAME = "BlocoPuffMysteryHud"
 local DISPLAY_ORDER = 6
 local CATEGORY = "Mystery"
 local COINS_ATTRIBUTE = "MysteryCoins"
-local SCARE_KEY = Enum.KeyCode.Q
-local SHEET_KEY = Enum.KeyCode.E
-
-type RoleText = {
-	icon: string,
-	title: string,
-	goal: string,
-}
-
-local function roleText(role: string): RoleText
-	if role == "Ghost" then
-		return { icon = "👻", title = T("VOCÊ É O FANTASMA"), goal = T("Assuste todos sem ser descoberto · Q assusta, E joga o lençol") }
-	elseif role == "Detective" then
-		return { icon = "🔦", title = T("VOCÊ É O DETETIVE"), goal = T("Descubra o Fantasma e capture com um Puff · errar derruba o Puffador") }
-	end
-	return { icon = "🏠", title = T("VOCÊ É MORADOR"), goal = T("Pegue moedas, fuja do Fantasma e descubra quem ele é") }
-end
+local KNIFE_TOOL_NAME = "Faca"
+local EQUIP_KEY = Enum.KeyCode.Q
+local THROW_KEY = Enum.KeyCode.E
 
 local MysteryModeController = {}
 
@@ -51,10 +39,19 @@ local started = false
 type Hud = {
 	gui: ScreenGui,
 	coinsLabel: TextLabel,
-	ghostButtons: Frame,
+	knifeButtons: Frame,
+	equip: UiKit.ButtonHandle,
+	stab: UiKit.ButtonHandle,
+	throw: UiKit.ButtonHandle,
 }
 
-local function createHud(playerGui: PlayerGui, onScare: () -> (), onSheet: () -> ()): Hud
+type Actions = {
+	toggleEquip: () -> (),
+	stab: () -> (),
+	throw: () -> (),
+}
+
+local function createHud(playerGui: PlayerGui, actions: Actions): Hud
 	local gui = UiTheme.createScreenGui(GUI_NAME, playerGui, DISPLAY_ORDER)
 	gui.Enabled = false
 
@@ -69,33 +66,41 @@ local function createHud(playerGui: PlayerGui, onScare: () -> (), onSheet: () ->
 	coinsLabel.Size = UDim2.fromScale(1, 1)
 	UiTheme.addTextOutline(coinsLabel, 1.5)
 
-	local ghostButtons = Instance.new("Frame")
-	ghostButtons.Name = "GhostButtons"
-	ghostButtons.AnchorPoint = Vector2.new(1, 1)
-	ghostButtons.Position = UDim2.new(1, -18, 1, -170)
-	ghostButtons.Size = UDim2.fromOffset(150, 120)
-	ghostButtons.BackgroundTransparency = 1
-	ghostButtons.Visible = false
-	ghostButtons.Parent = gui
-	ResponsiveScale.attach(ghostButtons, Vector2.new(1280, 720), 0.75, 1.1)
-	local scare = UiKit.createButton(ghostButtons, {
-		name = "Scare",
-		text = T("👻 ASSUSTAR"),
-		variant = "Danger",
+	local knifeButtons = Instance.new("Frame")
+	knifeButtons.Name = "KnifeButtons"
+	knifeButtons.AnchorPoint = Vector2.new(1, 1)
+	knifeButtons.Position = UDim2.new(1, -18, 1, -150)
+	knifeButtons.Size = UDim2.fromOffset(170, 184)
+	knifeButtons.BackgroundTransparency = 1
+	knifeButtons.Visible = false
+	knifeButtons.Parent = gui
+	ResponsiveScale.attach(knifeButtons, Vector2.new(1280, 720), 0.75, 1.1)
+	local equip = UiKit.createButton(knifeButtons, {
+		name = "Equip",
+		text = T("🔪 SACAR (Q)"),
+		variant = "Neutral",
 		size = UDim2.new(1, 0, 0, 52),
 		position = UDim2.fromOffset(0, 0),
 	})
-	scare.button.Activated:Connect(onScare)
-	local sheet = UiKit.createButton(ghostButtons, {
-		name = "Sheet",
-		text = T("💨 LENÇOL"),
-		variant = "Neutral",
+	equip.button.Activated:Connect(actions.toggleEquip)
+	local stab = UiKit.createButton(knifeButtons, {
+		name = "Stab",
+		text = T("🔪 GOLPEAR"),
+		variant = "Danger",
 		size = UDim2.new(1, 0, 0, 52),
 		position = UDim2.fromOffset(0, 64),
 	})
-	sheet.button.Activated:Connect(onSheet)
+	stab.button.Activated:Connect(actions.stab)
+	local throw = UiKit.createButton(knifeButtons, {
+		name = "Throw",
+		text = T("🎯 ARREMESSAR (E)"),
+		variant = "Warning",
+		size = UDim2.new(1, 0, 0, 52),
+		position = UDim2.fromOffset(0, 128),
+	})
+	throw.button.Activated:Connect(actions.throw)
 
-	return { gui = gui, coinsLabel = coinsLabel, ghostButtons = ghostButtons }
+	return { gui = gui, coinsLabel = coinsLabel, knifeButtons = knifeButtons, equip = equip, stab = stab, throw = throw }
 end
 
 local function notify(channel: "Center" | "Banner", key: string, icon: string, title: string, subtitle: string, tone: NotificationManager.Tone, duration: number)
@@ -112,76 +117,134 @@ local function notify(channel: "Center" | "Banner", key: string, icon: string, t
 	})
 end
 
+local function knifeEquipped(player: Player): boolean
+	local character = player.Character
+	local tool = if character ~= nil then character:FindFirstChild(KNIFE_TOOL_NAME) else nil
+	return tool ~= nil and tool:IsA("Tool")
+end
+
 local function run(remote: RemoteEvent, container: Instance, playerGui: PlayerGui)
 	local localPlayer = Players.LocalPlayer
 	local role = ""
+	local isHero = false
+	local throwReadyAt = 0
+	local view = RoleRevealView.create(playerGui)
 
-	local function lookDirection(): Vector3
+	-- Direção do arremesso: para onde o mouse aponta; no toque, para onde a
+	-- câmera olha.
+	local function aimDirection(): Vector3
+		local character = localPlayer.Character
+		local root = if character ~= nil then character:FindFirstChild("HumanoidRootPart") else nil
+		if not UserInputService.TouchEnabled and root ~= nil and root:IsA("BasePart") then
+			local target = localPlayer:GetMouse().Hit.Position
+			local flat = Vector3.new(target.X - root.Position.X, 0, target.Z - root.Position.Z)
+			if flat.Magnitude > 1 then
+				return flat
+			end
+		end
 		local camera = Workspace.CurrentCamera
 		return if camera ~= nil then camera.CFrame.LookVector else Vector3.zAxis
 	end
-	local function scare()
-		if role == "Ghost" then
-			remote:FireServer("Scare")
-		end
-	end
-	local function sheet()
-		if role == "Ghost" then
-			remote:FireServer("Sheet", lookDirection())
-		end
-	end
 
-	local hud = createHud(playerGui, scare, sheet)
+	local actions: Actions = {
+		toggleEquip = function()
+			if role == "Murderer" then
+				remote:FireServer("Equip", not knifeEquipped(localPlayer))
+			end
+		end,
+		stab = function()
+			if role == "Murderer" and knifeEquipped(localPlayer) then
+				remote:FireServer("Stab")
+			end
+		end,
+		throw = function()
+			if role == "Murderer" and knifeEquipped(localPlayer) and os.clock() >= throwReadyAt then
+				remote:FireServer("Throw", aimDirection())
+			end
+		end,
+	}
+	local hud = createHud(playerGui, actions)
+
+	local function inMatch(): boolean
+		return container:GetAttribute(StateAttributeNames.RoundState) == "Active"
+			and container:GetAttribute(StateAttributeNames.RoundMode) == "Mystery"
+			and localPlayer:GetAttribute(StateAttributeNames.PlayerIsParticipant) == true
+	end
 
 	local function refresh()
 		-- O papel vale até a partida acabar (o aviso do papel pode chegar
 		-- antes de o estado virar Active).
 		local state = container:GetAttribute(StateAttributeNames.RoundState)
 		if state == "Ending" or state == "WaitingForPlayers" then
+			if role ~= "" then
+				view.hide()
+			end
 			role = ""
+			isHero = false
 		end
-		local inMystery = state == "Active"
-			and container:GetAttribute(StateAttributeNames.RoundMode) == "Mystery"
-			and localPlayer:GetAttribute(StateAttributeNames.PlayerIsParticipant) == true
-		local awake = localPlayer:GetAttribute(StateAttributeNames.PlayerIsEliminated) ~= true
-		hud.gui.Enabled = inMystery and awake
-		hud.ghostButtons.Visible = role == "Ghost"
+		local alive = localPlayer:GetAttribute(StateAttributeNames.PlayerIsEliminated) ~= true
+		local playing = inMatch() and alive
+		hud.gui.Enabled = playing
+		hud.knifeButtons.Visible = role == "Murderer"
+		-- O botão de golpear é para o toque; no PC o golpe é o clique.
+		hud.stab.root.Visible = UserInputService.TouchEnabled
+		local equipped = knifeEquipped(localPlayer)
+		hud.equip.setText(if equipped then T("✋ GUARDAR (Q)") else T("🔪 SACAR (Q)"))
+		hud.stab.setEnabled(equipped)
+		hud.throw.setEnabled(equipped)
+		if not playing and role ~= "" and not alive then
+			view.setBadge(nil)
+		end
 		local coins = localPlayer:GetAttribute(COINS_ATTRIBUTE)
 		hud.coinsLabel.Text = T("💰 %d/%d", if typeof(coins) == "number" then coins else 0, MysteryModeConfig.MaxCoinsPerPlayer)
 	end
 
-	remote.OnClientEvent:Connect(function(kind: unknown, a: unknown, b: unknown, c: unknown)
+	remote.OnClientEvent:Connect(function(kind: unknown, a: unknown, b: unknown, c: unknown, d: unknown)
 		if kind == "Role" and typeof(a) == "string" then
 			role = a
-			local text = roleText(a)
-			notify("Center", "mystery-role", text.icon, text.title, text.goal, if a == "Ghost" then "Danger" else "Gold", 4)
+			isHero = false
+			view.spin(a, MysteryModeConfig.RoleRevealSeconds)
 			refresh()
 		elseif kind == "GunDropped" then
-			notify("Banner", "mystery-gun", "🔦", T("O PUFFADOR CAIU!"), T("Qualquer Morador pode pegar e virar o Herói"), "Warning", 3)
+			notify("Banner", "mystery-gun", "🔫", T("A ARMA DO XERIFE CAIU!"), T("Qualquer Inocente pode pegar e virar o Herói"), "Warning", 3)
 		elseif kind == "GunTaken" then
-			notify("Banner", "mystery-gun", "🦸", T("ALGUÉM PEGOU O PUFFADOR"), T("Há um Herói no Casarão"), "Info", 3)
+			if not isHero then
+				notify("Banner", "mystery-gun", "🦸", T("ALGUÉM PEGOU A ARMA"), T("Há um Herói no Casarão"), "Info", 3)
+			end
 		elseif kind == "Hero" then
-			notify("Center", "mystery-hero", "🦸", T("VOCÊ É O HERÓI!"), T("Capture o Fantasma com um Puff"), "Gold", 3)
-		elseif kind == "Misfire" then
-			notify("Center", "mystery-misfire", "😵", T("ERA UM MORADOR!"), T("Você ficou tonto e derrubou o Puffador"), "Danger", 3)
-		elseif kind == "Reveal" and typeof(a) == "string" and typeof(b) == "string" then
-			local winners = if c == "Ghost" then T("O Fantasma venceu!") elseif c == "Residents" then T("Os Moradores venceram!") else ""
-			local subtitle = if a ~= "" then T("O Fantasma era %s", a) else ""
-			notify("Center", "mystery-reveal", "👻", winners, subtitle, "Winner", 4)
+			isHero = true
+			view.setBadge("Hero")
+			notify("Center", "mystery-hero", "🦸", T("VOCÊ É O HERÓI!"), T("Acerte o Assassino · errar elimina você"), "Gold", 3)
+		elseif kind == "ThrowCooldown" and typeof(a) == "number" then
+			throwReadyAt = os.clock() + a
+		elseif kind == "Reveal" and typeof(a) == "string" and typeof(b) == "string" and typeof(c) == "string" and typeof(d) == "string" then
+			view.setBadge(nil)
+			view.showReveal({ murderer = a, sheriff = b, hero = c, winner = d })
 		end
 	end)
 
 	UserInputService.InputBegan:Connect(function(input: InputObject, processed: boolean)
-		if processed or role ~= "Ghost" then
+		if processed or role ~= "Murderer" or not inMatch() then
 			return
 		end
-		if input.KeyCode == SCARE_KEY then
-			scare()
-		elseif input.KeyCode == SHEET_KEY then
-			sheet()
+		if input.KeyCode == EQUIP_KEY then
+			actions.toggleEquip()
+		elseif input.KeyCode == THROW_KEY then
+			actions.throw()
+		elseif input.UserInputType == Enum.UserInputType.MouseButton1 then
+			actions.stab()
 		end
 	end)
 
+	local function watchCharacter(character: Model)
+		character.ChildAdded:Connect(refresh)
+		character.ChildRemoved:Connect(refresh)
+		refresh()
+	end
+	localPlayer.CharacterAdded:Connect(watchCharacter)
+	if localPlayer.Character ~= nil then
+		watchCharacter(localPlayer.Character)
+	end
 	container.AttributeChanged:Connect(refresh)
 	localPlayer.AttributeChanged:Connect(refresh)
 	refresh()

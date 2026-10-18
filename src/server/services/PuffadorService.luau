@@ -34,6 +34,8 @@ local requestConnection: RBXScriptConnection? = nil
 
 local acceptingRequests = false
 local currentRoundId = 0
+-- Cadência da rodada (nil = GameConfig.Puffador.FireCooldown).
+local fireCooldownOverride: number? = nil
 
 local grantedTools: { [Player]: Tool } = {}
 -- Jogadores na área de treino do lobby (Puffador de treino, 4.5).
@@ -59,8 +61,17 @@ local function isFiniteVector3(vector: Vector3): boolean
 	return isFiniteNumber(vector.X) and isFiniteNumber(vector.Y) and isFiniteNumber(vector.Z)
 end
 
+local function fireCooldown(): number
+	return fireCooldownOverride or GameConfig.Puffador.FireCooldown
+end
+
 local function buildPuffadorTool(variant: Variant): Tool
-	return PuffadorModel.build(variant, SERVICE_NAME)
+	local tool = PuffadorModel.build(variant, SERVICE_NAME)
+	-- O cliente lê a cadência daqui (botão de tiro e previsão local).
+	if fireCooldownOverride ~= nil then
+		tool:SetAttribute(PuffadorConstants.FireCooldownAttribute, fireCooldownOverride)
+	end
+	return tool
 end
 
 local function clearCooldown(player: Player)
@@ -245,7 +256,7 @@ function PuffadorService.isTraining(player: Player): boolean
 end
 
 -- `holders`: quem recebe o Puffador da partida (nil = todos os escalados;
--- no Mistério, só o Detetive). Os outros escalados perdem o de treino.
+-- no Assassinato, só o Xerife). Os outros escalados perdem o de treino.
 function PuffadorService.beginRound(players: { Player }, roundId: number, holders: { Player }?)
 	local granted = holders or players
 	-- Quem foi escalado deixa de treinar.
@@ -261,8 +272,18 @@ function PuffadorService.beginRound(players: { Player }, roundId: number, holder
 	PuffadorService.grantTo(granted)
 end
 
+-- Cadência dos Puffadores desta rodada (nil volta à da config). Vale para
+-- os concedidos daqui em diante e para os que já estão com alguém.
+function PuffadorService.setFireCooldown(seconds: number?)
+	fireCooldownOverride = seconds
+	for _, tool in pairs(grantedTools) do
+		tool:SetAttribute(PuffadorConstants.FireCooldownAttribute, seconds)
+	end
+end
+
 function PuffadorService.endRound()
 	acceptingRequests = false
+	fireCooldownOverride = nil
 	revokeAllTracked()
 	-- A área de treino devolve o Puffador de treino a quem continuar nela.
 	table.clear(trainees)
@@ -386,7 +407,7 @@ local function onRequestPuff(player: Player, rawAimTarget: unknown, rawAimOrigin
 
 	local now = os.clock()
 	local lastFire = lastFireClock[player]
-	local cooldown = GameConfig.Puffador.FireCooldown
+	local cooldown = fireCooldown()
 	if lastFire ~= nil and now - lastFire < cooldown then
 		return
 	end
@@ -464,7 +485,7 @@ function PuffadorService.fireAsBot(bot: CombatantRegistry.Combatant, aimTarget: 
 
 	local now = os.clock()
 	local lastFire = botLastFire[bot]
-	if lastFire ~= nil and now - lastFire < GameConfig.Puffador.FireCooldown then
+	if lastFire ~= nil and now - lastFire < fireCooldown() then
 		return false
 	end
 	local origin = computeOrigin(rootPart, tool)

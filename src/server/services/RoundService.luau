@@ -804,6 +804,7 @@ local function commitProfiles(result: ResultTypes.RoundResult)
 				comebacks = trusted.comebacks,
 				blocksBuilt = trusted.blocksBuilt,
 				shots = extra.shots,
+				modeActions = if currentMode.getActions ~= nil then currentMode.getActions(combatant) else 0,
 				botKnockouts = outcome.xp.botKnockouts,
 				botKnockoutFactor = outcome.xp.botKnockoutFactor,
 				multiplierCount = outcome.xp.multiplierCount,

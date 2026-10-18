@@ -267,8 +267,9 @@ local function renderActive(currentView: HudViewHandle)
 		local reason = cached.eliminationReason
 		local title = if reason == EliminationTypes.FellFromArena
 			then T("VOCÊ CAIU!")
-			elseif reason == EliminationTypes.Scared then T("VOCÊ DESMAIOU DE SUSTO!")
-			elseif reason == EliminationTypes.Captured then T("VOCÊ FOI CAPTURADO!")
+			elseif reason == EliminationTypes.Knifed then T("🔪 O ASSASSINO TE PEGOU!")
+			elseif reason == EliminationTypes.Shot then T("🔫 VOCÊ FOI ATINGIDO!")
+			elseif reason == EliminationTypes.Misfire then T("🔫 ERA UM INOCENTE!")
 			else T("ELIMINADO!")
 		showAnnouncement(
 			currentView,

@@ -36,8 +36,8 @@
 -- Voto pela porta (Fase 5D): cada porta do mirante leva a um modo
 -- (ModeRotationConfig.DoorModes). Entrar no mirante por ela grava o modo
 -- no atributo "ModeVote" do jogador; o voto vale enquanto ele estiver na
--- fila (some ao sair dela ou ao entrar na partida) e muda se ele sair e
--- entrar por outra porta. O RoundService conta os votos de quem vai jogar.
+-- fila, inclusive durante a partida e na volta dela (some só ao sair da
+-- fila) e muda se ele sair e entrar por outra porta. O RoundService conta os votos de quem vai jogar.
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -63,6 +63,9 @@ local ATTR_MODE_VOTE = StateAttributeNames.PlayerModeVote
 -- Só conta como "entrou pela porta" quem aparece no mirante colado na
 -- parede das portas (e não, por exemplo, renascendo no meio dele).
 local DOOR_REACH = 6
+-- Fora da fila (e fora da partida) por esse tempo, o voto acaba. A folga
+-- cobre a volta da partida para o mirante.
+local VOTE_KEEP_SECONDS = 5
 
 -- Última posição em que o dono da ficha foi visto se mexendo (AFK).
 type Stillness = { position: Vector3, since: number }
@@ -94,6 +97,8 @@ local countdownRemaining: number? = nil
 local countdownStart: number? = nil
 local warmupLine = ""
 local lastBoardKey = ""
+-- Desde quando quem tem voto está fora da fila e fora da partida.
+local voteOutSince: { [Player]: number } = {}
 -- Bots RoboPuff esperando no mirante (BotFillService): aparecem no painel,
 -- mas não estão em `queued` nem em `queuedCount` (que são só de jogadores).
 local botCount = 0
@@ -295,9 +300,19 @@ local function refresh()
 		if player:GetAttribute(ATTR_IN_QUEUE) ~= value then
 			player:SetAttribute(ATTR_IN_QUEUE, value)
 		end
-		-- Fora da fila, o voto acaba (inclusive ao entrar na partida).
-		if not value and player:GetAttribute(ATTR_MODE_VOTE) ~= nil then
-			player:SetAttribute(ATTR_MODE_VOTE, nil)
+		-- Saiu da fila, o voto acaba. Na partida (mesmo eliminado) ele
+		-- continua: quem volta da partida cai direto no mirante, sem passar
+		-- pela porta, e segue votando no mesmo modo até entrar por outra.
+		local outside = not value and player:GetAttribute(StateAttributeNames.PlayerIsParticipant) ~= true
+		if not outside or player:GetAttribute(ATTR_MODE_VOTE) == nil then
+			voteOutSince[player] = nil
+		else
+			local since = voteOutSince[player] or os.clock()
+			voteOutSince[player] = since
+			if os.clock() - since >= VOTE_KEEP_SECONDS then
+				player:SetAttribute(ATTR_MODE_VOTE, nil)
+				voteOutSince[player] = nil
+			end
 		end
 	end
 	inZone = nextZone
@@ -479,6 +494,7 @@ function MatchQueueService.start(worldRoot: Model, remotesFolder: Folder)
 	Players.PlayerRemoving:Connect(function(player: Player)
 		lastJoin[player] = nil
 		inZone[player] = nil
+		voteOutSince[player] = nil
 		dropTicket(player)
 		ticketCalled[player] = nil
 		if queued[player] then

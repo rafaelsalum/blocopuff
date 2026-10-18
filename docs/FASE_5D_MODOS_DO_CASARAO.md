@@ -52,7 +52,7 @@ O jogador passa a:
   - a sequência fica em config para trocar depois por evento (Fase 6) sem mexer no código.
 - **Voto pela porta do mirante** (acrescentado depois da 5D.3, para o jogador escolher o que quer jogar):
   - cada uma das 3 portas do mirante leva o nome e a cor de um modo (`DoorModes`: Corrida, Arena no meio, Mistério); a fila continua uma só;
-  - entrar no mirante por uma porta é votar no modo dela; o voto vale enquanto o jogador estiver na fila (com a Ficha da Partida também) e muda se ele sair e entrar por outra porta; quem entra pelo botão JOGAR ou só pela Party não vota;
+  - entrar no mirante por uma porta é votar no modo dela; o voto vale enquanto o jogador estiver na fila (com a Ficha da Partida também), continua durante a partida e na volta dela (quem volta cai direto no mirante) e muda se ele sair e entrar por outra porta; quem entra pelo botão JOGAR ou só pela Party não vota;
   - a próxima partida é o modo mais votado entre os escalados que **pode rodar** (o Mistério sem 2 humanos não conta, e vale o segundo mais votado); empate segue a ordem da rotação;
   - o voto vale mais que a regra do novato e que a de não repetir o modo novo (os jogadores escolheram); sem nenhum voto, segue a rotação, que não anda nas partidas votadas;
   - os painéis do mirante mostram os votos ao vivo e o jogador recebe um aviso "SEU VOTO"; a prévia do próximo modo é recalculada a cada segundo da contagem.

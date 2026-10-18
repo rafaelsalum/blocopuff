@@ -58,7 +58,7 @@ return table.freeze({
 	-- PORTAIS E PAINÉIS DE FILA (Queue Visuals)
 	["🏟 DERRUBE SEUS AMIGOS"] = "🏟 KNOCK YOUR FRIENDS",
 	["🕰 CORRIDA DA TORRE"] = "🕰 TOWER RACE",
-	["👻 MISTÉRIO NO CASARÃO"] = "👻 MANSION MYSTERY",
+	["🔪 ASSASSINATO NO CASARÃO"] = "🔪 MANSION MURDER",
 	["Entre para votar · derrube todos da arena"] = "Enter to vote · knock everyone off the arena",
 	["Entre para votar · o primeiro no topo vence"] = "Enter to vote · first to the top wins",
 	["Entre para votar · a partir de %d jogadores"] = "Enter to vote · %d+ players",

@@ -39,9 +39,9 @@ local function modeInfo(mode: string): ModeInfo?
 		}
 	elseif mode == "Mystery" then
 		return {
-			icon = "👻",
-			title = T("MISTÉRIO NO CASARÃO"),
-			goal = T("Um Fantasma está entre vocês · descubra quem é"),
+			icon = "🔪",
+			title = T("ASSASSINATO NO CASARÃO"),
+			goal = T("Um Assassino está entre vocês · cuidado com a faca"),
 		}
 	end
 	return nil
@@ -160,7 +160,8 @@ local function run(container: Instance, panel: Panel)
 
 		local racing = state == "Active" and participant and roundMode == "Race"
 		local info = modeInfo(roundMode)
-		if state == "Active" and participant and info ~= nil and introRound ~= roundId then
+		-- No Assassinato a roleta do papel (MysteryModeController) é a abertura.
+		if state == "Active" and participant and info ~= nil and roundMode ~= "Mystery" and introRound ~= roundId then
 			introRound = roundId
 			lastCheckpoint = 0
 			announcedFinish = 0

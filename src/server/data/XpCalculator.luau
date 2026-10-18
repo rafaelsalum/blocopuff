@@ -25,6 +25,8 @@ export type XpInput = {
 	comebacks: number,
 	blocksBuilt: number,
 	shots: number,
+	-- Ações próprias do modo que também contam como "jogou" (RoundMode.getActions).
+	modeActions: number?,
 	-- Partida com bots RoboPuff (BotRewardRules); ausentes = regra normal.
 	-- Derrubadas de bots, que valem `botKnockoutFactor` do XP de derrubada.
 	botKnockouts: number?,
@@ -48,6 +50,7 @@ function XpCalculator.compute(input: XpInput): ({ XpLine }, number)
 	local botKnockouts = math.max(0, input.botKnockouts or 0)
 	local active = not ProgressionConfig.RequireActivity
 		or input.shots > 0
+		or (input.modeActions or 0) > 0
 		or input.blocksBuilt > 0
 		or input.knockouts > 0
 		or botKnockouts > 0

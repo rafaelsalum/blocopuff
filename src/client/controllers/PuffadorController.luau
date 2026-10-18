@@ -257,6 +257,13 @@ local function playMuzzleFlash(tool: Tool)
 	Debris:AddItem(flash, MUZZLE_FLASH_LIFETIME)
 end
 
+-- Cadência do Puffador na mão: a da rodada (atributo do servidor) ou a da
+-- config.
+local function toolCooldown(tool: Tool): number
+	local value = tool:GetAttribute(PuffadorConstants.FireCooldownAttribute)
+	return if typeof(value) == "number" then value else GameConfig.Puffador.FireCooldown
+end
+
 local function playLocalShotFeedback(tool: Tool)
 	CombatCameraController.addRecoil()
 	playMuzzleFlash(tool)
@@ -266,7 +273,7 @@ local function playLocalShotFeedback(tool: Tool)
 		crosshair.playShot()
 	end
 	if fireButton ~= nil and UserInputService.TouchEnabled then
-		fireButton.startCooldown(GameConfig.Puffador.FireCooldown)
+		fireButton.startCooldown(toolCooldown(tool))
 	end
 end
 
@@ -283,7 +290,7 @@ local function onToolActivated()
 	end
 
 	local now = os.clock()
-	if now - lastLocalFireClock < GameConfig.Puffador.FireCooldown then
+	if now - lastLocalFireClock < toolCooldown(tool) then
 		return
 	end
 

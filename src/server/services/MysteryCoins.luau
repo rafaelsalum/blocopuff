@@ -1,9 +1,9 @@
 --!strict
 
--- Moedas do Barão no Mistério no Casarão (Fase 5D.3): espalhadas pela Ala,
--- dão aos Moradores um motivo para andar em vez de ficar parados num canto.
+-- Moedas do Barão no Assassinato no Casarão (Fase 5E): espalhadas pela Ala,
+-- dão aos Inocentes um motivo para andar em vez de ficar parados num canto.
 -- Quem passa perto pega (conferido no servidor pela distância), até o
--- limite por rodada. O Fantasma não pega moedas.
+-- limite por rodada (o saco do Assassinato, Fase 5E).
 
 local RunService = game:GetService("RunService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")

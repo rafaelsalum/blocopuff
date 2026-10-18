@@ -256,6 +256,9 @@ Escritos antes da implementação:
 
 Cada entrega é testada no Studio e tem commit próprio.
 
+**Andamento:**
+- **5E.1 entregue.** A arma do Xerife é o próprio Puffador (com 1 tiro a cada 3 s, sem empurrão) e fica sempre na mão; uma arma com cara de revólver e o "guardar a arma" ficam para a 5E.4. O XP do modo conta golpes, arremessos, moedas e pegar a arma (só sobreviver parado não conta). O voto da porta passou a durar entre partidas: quem volta da partida cai direto no mirante e continua votando no mesmo modo.
+
 ---
 
 ## Fora de escopo desta entrega

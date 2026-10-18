@@ -2,17 +2,19 @@
 
 -- Causas de eliminação usadas pelo RoundService (autoridade) e lidas pelo
 -- HudController (cliente). Fonte única para evitar strings soltas.
--- Scared: assustado pelo Fantasma (ou acertado pelo Detetive por engano);
--- Captured: o Fantasma capturado pelo Puffador (Mistério, Fase 5D.3).
-export type EliminationReason = "None" | "FellFromArena" | "CharacterDied" | "PlayerLeft" | "Scared" | "Captured"
+-- Assassinato no Casarão (Fase 5E): Knifed (faca do Assassino), Shot (tiro
+-- do Xerife ou do Herói) e Misfire (o Xerife que acertou um Inocente sai
+-- junto).
+export type EliminationReason = "None" | "FellFromArena" | "CharacterDied" | "PlayerLeft" | "Knifed" | "Shot" | "Misfire"
 
 export type EliminationReasonsModule = {
 	None: EliminationReason,
 	FellFromArena: EliminationReason,
 	CharacterDied: EliminationReason,
 	PlayerLeft: EliminationReason,
-	Scared: EliminationReason,
-	Captured: EliminationReason,
+	Knifed: EliminationReason,
+	Shot: EliminationReason,
+	Misfire: EliminationReason,
 }
 
 local EliminationTypes: EliminationReasonsModule = {
@@ -20,8 +22,9 @@ local EliminationTypes: EliminationReasonsModule = {
 	FellFromArena = "FellFromArena",
 	CharacterDied = "CharacterDied",
 	PlayerLeft = "PlayerLeft",
-	Scared = "Scared",
-	Captured = "Captured",
+	Knifed = "Knifed",
+	Shot = "Shot",
+	Misfire = "Misfire",
 }
 
 return table.freeze(EliminationTypes)

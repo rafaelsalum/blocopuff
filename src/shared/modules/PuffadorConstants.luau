@@ -46,6 +46,7 @@ export type PuffadorConstantsModule = {
 	ShotSoundName: string,
 	PitchJitterAttribute: string,
 	HitSoundName: string,
+	FireCooldownAttribute: string,
 
 	PuffadorPrimaryColor: Color3,
 	PuffadorAccentColor: Color3,
@@ -97,6 +98,9 @@ local PuffadorConstants: PuffadorConstantsModule = {
 	-- Variação de tom (fração) a cada vez que o som toca.
 	PitchJitterAttribute = "PitchJitter",
 	HitSoundName = "HitSound",
+	-- No Puffador concedido: cadência própria da rodada (a arma do Xerife no
+	-- Assassinato recarrega devagar). Sem o atributo, vale a da config.
+	FireCooldownAttribute = "FireCooldown",
 
 	PuffadorPrimaryColor = Color3.fromRGB(194, 168, 255),
 	PuffadorAccentColor = Color3.fromRGB(255, 230, 148),

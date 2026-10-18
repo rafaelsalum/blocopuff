@@ -1,11 +1,13 @@
 --!strict
 
--- Mistério no Casarão (Fase 5D.3, docs/FASE_5D_MODOS_DO_CASARAO.md): um
--- Fantasma disfarçado assusta os Moradores; o Detetive tem o único Puffador.
--- Números iniciais para o playtest.
+-- Assassinato no Casarão (Fase 5E, docs/FASE_5E_ASSASSINATO_NO_CASARAO.md):
+-- o Assassino tem a faca, o Xerife tem a arma (o Puffador com um tiro e
+-- recarga longa) e os Inocentes coletam moedas e fogem. O id do modo
+-- continua "Mystery" (rotação, voto e telemetria). Números iniciais para o
+-- playtest.
 
 export type WingConfig = {
-	-- Centro do chão da Ala do Mistério (longe da Arena, do Casarão e da Torre).
+	-- Centro do chão da Ala (longe da Arena, do Casarão e da Torre).
 	Center: Vector3,
 	-- Grade de cômodos (colunas x linhas) e o tamanho de cada um.
 	Columns: number,
@@ -14,7 +16,7 @@ export type WingConfig = {
 	WallHeight: number,
 	DoorWidth: number,
 	DoorHeight: number,
-	-- Luz fraca em cada cômodo (clima de mistério).
+	-- Luz de cada cômodo.
 	LightBrightness: number,
 	LightRange: number,
 }
@@ -22,23 +24,28 @@ export type WingConfig = {
 export type MysteryModeConfig = {
 	Wing: WingConfig,
 	Duration: number,
-	-- Humanos mínimos para o Mistério rodar (Fantasma e Detetive são sempre
-	-- humanos; os bots completam como Moradores). Com 2, o segredo é fraco,
+	-- Humanos mínimos para o modo rodar (Assassino e Xerife são sempre
+	-- humanos; os bots completam como Inocentes). Com 2, o segredo é fraco,
 	-- mas o voto na porta roxa precisa valer para quem joga em dupla.
 	MinHumans: number,
-	-- Tempo (s) do começo sem sustos, para todos se espalharem.
+	-- Roleta do papel na abertura (s).
+	RoleRevealSeconds: number,
+	-- Tempo (s) do começo sem faca nem tiro, para todos se espalharem.
 	StartGrace: number,
-	-- Susto: alcance (studs) e recarga (s).
-	ScareRange: number,
-	ScareCooldown: number,
-	-- Lençol Voador: recarga, velocidade, alcance e raio de acerto.
-	SheetCooldown: number,
-	SheetSpeed: number,
-	SheetRange: number,
-	SheetHitRadius: number,
-	-- Detetive que acerta um Morador: fica parado (s) e derruba o Puffador.
-	MisfireStun: number,
-	-- Puffador caído: raio para pegar.
+	-- Faca: golpe (alcance em studs, ângulo à frente em graus, recarga em s)
+	-- e diferença de altura máxima até o alvo.
+	StabRange: number,
+	StabConeDegrees: number,
+	StabCooldown: number,
+	StabMaxHeight: number,
+	-- Faca arremessada: recarga, velocidade, alcance e raio de acerto.
+	ThrowCooldown: number,
+	ThrowSpeed: number,
+	ThrowRange: number,
+	ThrowHitRadius: number,
+	-- Arma do Xerife: recarga entre tiros (s).
+	SheriffReload: number,
+	-- Arma caída: raio para pegar.
 	PickupRadius: number,
 	-- Moedas do Barão.
 	CoinsPerRound: number,
@@ -46,8 +53,9 @@ export type MysteryModeConfig = {
 	CoinsPerTicket: number,
 	MaxCoinTickets: number,
 	CoinPickupRadius: number,
-	-- Só no Studio: com um jogador só, o papel dele alterna entre Fantasma e
-	-- Detetive a cada partida (e um bot faz o Fantasma), para dar para testar.
+	-- Só no Studio: com um jogador só, o papel dele alterna entre Xerife e
+	-- Assassino a cada partida (e um bot faz o Assassino), para dar para
+	-- testar. Fora do Studio o Assassino é sempre humano.
 	StudioSoloTest: boolean,
 }
 
@@ -60,19 +68,22 @@ local MysteryModeConfig: MysteryModeConfig = {
 		WallHeight = 14,
 		DoorWidth = 8,
 		DoorHeight = 10,
-		LightBrightness = 1.4,
-		LightRange = 32,
+		LightBrightness = 2.2,
+		LightRange = 40,
 	}),
 	Duration = 180,
 	MinHumans = 2,
+	RoleRevealSeconds = 3,
 	StartGrace = 10,
-	ScareRange = 6,
-	ScareCooldown = 1,
-	SheetCooldown = 4,
-	SheetSpeed = 70,
-	SheetRange = 90,
-	SheetHitRadius = 3.5,
-	MisfireStun = 3,
+	StabRange = 5,
+	StabConeDegrees = 70,
+	StabCooldown = 1,
+	StabMaxHeight = 5,
+	ThrowCooldown = 4,
+	ThrowSpeed = 90,
+	ThrowRange = 110,
+	ThrowHitRadius = 2.5,
+	SheriffReload = 3,
 	PickupRadius = 5,
 	CoinsPerRound = 40,
 	MaxCoinsPerPlayer = 10,
