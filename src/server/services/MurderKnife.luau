@@ -36,6 +36,12 @@ local THROWN_SPIN = 18
 local THROWN_SCALE = 0.8
 local TRAIL_COLOR = Color3.fromRGB(255, 90, 90)
 local SHEATH_NAME = "MurderKnives"
+-- Corpo acertável pela faca arremessada: dos pés (3 abaixo da raiz) até o
+-- alto da cabeça (2 acima).
+local BODY_BELOW_ROOT = 3
+local BODY_ABOVE_ROOT = 2
+-- A mira do golpe pode se afastar até 110° da frente do corpo.
+local AIM_MIN_COSINE = math.cos(math.rad(110))
 
 local MurderKnife = {}
 
@@ -144,26 +150,34 @@ function MurderKnife.setEquipped(combatant: Combatant, equipped: boolean)
 end
 
 -- Primeiro alvo ao alcance do golpe: à frente, perto e sem parede no meio.
-function MurderKnife.stabTarget(attacker: Combatant, targets: { Combatant }, obstacles: Instance): Combatant?
+-- `aim` é para onde a mira do jogador aponta (sem ela, a frente do corpo);
+-- entre vários ao alcance, vale o mais perto da linha da mira.
+function MurderKnife.stabTarget(attacker: Combatant, targets: { Combatant }, obstacles: Instance, aim: Vector3?): Combatant?
 	local root = CombatantRegistry.getRoot(attacker)
 	if root == nil then
 		return nil
 	end
-	local look = root.CFrame.LookVector
+	local bodyFront = root.CFrame.LookVector
+	local flatAim = if aim ~= nil then Vector3.new(aim.X, 0, aim.Z) else Vector3.zero
+	-- A mira vale perto da frente do corpo (em primeira pessoa o corpo gira
+	-- com a câmera); fora disso, um cliente alterado golpearia pelas costas.
+	local aimUsable = flatAim.Magnitude > 1e-3 and MurderRules.aimCosine(flatAim.X, flatAim.Z, bodyFront.X, bodyFront.Z) >= AIM_MIN_COSINE
+	local look = if aimUsable then flatAim.Unit else bodyFront
 	local params = RaycastParams.new()
 	params.FilterType = Enum.RaycastFilterType.Include
 	params.FilterDescendantsInstances = { obstacles }
 	local best: Combatant? = nil
-	local bestDistance = math.huge
+	local bestCosine = -math.huge
 	for _, target in ipairs(targets) do
 		local targetRoot = CombatantRegistry.getRoot(target)
 		if target ~= attacker and targetRoot ~= nil then
 			local offset = targetRoot.Position - root.Position
 			local inReach = math.abs(offset.Y) <= MysteryModeConfig.StabMaxHeight
 				and MurderRules.inStabReach(offset.X, offset.Z, look.X, look.Z, MysteryModeConfig.StabRange, MysteryModeConfig.StabConeDegrees)
-			if inReach and offset.Magnitude < bestDistance and workspace:Raycast(root.Position, offset, params) == nil then
+			local cosine = MurderRules.aimCosine(offset.X, offset.Z, look.X, look.Z)
+			if inReach and cosine > bestCosine and workspace:Raycast(root.Position, offset, params) == nil then
 				best = target
-				bestDistance = offset.Magnitude
+				bestCosine = cosine
 			end
 		end
 	end
@@ -179,10 +193,16 @@ local function finish(model: Model)
 	model:Destroy()
 end
 
--- Faca arremessada (a direção do cliente vale só no plano; a origem é a
--- posição do corpo no servidor).
+-- Para onde a faca aponta (de pé ou deitada, para cima ou para baixo).
+local function facing(position: Vector3, direction: Vector3): CFrame
+	local up = if math.abs(direction.Y) > 0.99 then Vector3.zAxis else Vector3.yAxis
+	return CFrame.lookAt(position, position + direction, up)
+end
+
+-- Faca arremessada: segue a mira do cliente em 3D (para cima e para baixo
+-- também); a origem é a altura dos olhos do corpo no servidor.
 function MurderKnife.throw(throw: Throw)
-	local direction = Vector3.new(throw.direction.X, 0, throw.direction.Z)
+	local direction = throw.direction
 	local length = direction.Magnitude
 	if length ~= length or length < 1e-3 or length == math.huge or throw.origin ~= throw.origin then
 		return
@@ -208,7 +228,7 @@ function MurderKnife.throw(throw: Throw)
 	trail.LightEmission = 1
 	trail.FaceCamera = true
 	trail.Parent = handle
-	model:PivotTo(CFrame.lookAt(throw.origin, throw.origin + direction))
+	model:PivotTo(facing(throw.origin, direction))
 	model.Parent = throw.obstacles
 
 	local params = RaycastParams.new()
@@ -229,10 +249,8 @@ function MurderKnife.throw(throw: Throw)
 		for _, target in ipairs(throw.targets()) do
 			local root = CombatantRegistry.getRoot(target)
 			if root ~= nil then
-				local offset = root.Position - position
-				local along = math.clamp(offset:Dot(direction), 0, reach)
-				local gap = root.Position - (position + direction * along)
-				if Vector3.new(gap.X, 0, gap.Z).Magnitude <= MysteryModeConfig.ThrowHitRadius and math.abs(gap.Y) <= 4 then
+				local t = root.Position
+				if MurderRules.knifeHitsBody(position.X, position.Y, position.Z, direction.X, direction.Y, direction.Z, reach, t.X, t.Y, t.Z, MysteryModeConfig.ThrowHitRadius, BODY_BELOW_ROOT, BODY_ABOVE_ROOT) then
 					throw.onHit(target)
 					finish(model)
 					return
@@ -245,7 +263,7 @@ function MurderKnife.throw(throw: Throw)
 			finish(model)
 			return
 		end
-		model:PivotTo(CFrame.lookAt(position, position + direction) * CFrame.Angles(-travelled * THROWN_SPIN / 10, 0, 0))
+		model:PivotTo(facing(position, direction) * CFrame.Angles(-travelled * THROWN_SPIN / 10, 0, 0))
 	end)
 end
 

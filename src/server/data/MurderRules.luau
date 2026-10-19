@@ -133,6 +133,46 @@ function MurderRules.inStabReach(offsetX: number, offsetZ: number, lookX: number
 	return cosine >= math.cos(math.rad(coneDegrees / 2))
 end
 
+-- Quão perto da linha da mira está um alvo (cosseno do ângulo no plano,
+-- de -1 a 1): entre vários ao alcance, o golpe vai no de cosseno maior.
+function MurderRules.aimCosine(offsetX: number, offsetZ: number, lookX: number, lookZ: number): number
+	local distance = math.sqrt(offsetX * offsetX + offsetZ * offsetZ)
+	local lookLength = math.sqrt(lookX * lookX + lookZ * lookZ)
+	if distance < 1e-3 or lookLength < 1e-3 then
+		return 1
+	end
+	return (offsetX * lookX + offsetZ * lookZ) / (distance * lookLength)
+end
+
+-- A faca arremessada (saindo de p na direção unitária d, andando `reach`
+-- neste quadro) acerta o corpo com raiz em t? O corpo é um cilindro de pé:
+-- `radius` na horizontal, de `below` abaixo a `above` acima da raiz. Vale o
+-- ponto do trecho mais perto da raiz (em 3D, então mirar para cima ou para
+-- baixo conta).
+function MurderRules.knifeHitsBody(
+	px: number,
+	py: number,
+	pz: number,
+	dx: number,
+	dy: number,
+	dz: number,
+	reach: number,
+	tx: number,
+	ty: number,
+	tz: number,
+	radius: number,
+	below: number,
+	above: number
+): boolean
+	local along = math.clamp((tx - px) * dx + (ty - py) * dy + (tz - pz) * dz, 0, reach)
+	local qx, qy, qz = px + dx * along, py + dy * along, pz + dz * along
+	local gapX, gapZ = tx - qx, tz - qz
+	if gapX * gapX + gapZ * gapZ > radius * radius then
+		return false
+	end
+	return qy >= ty - below and qy <= ty + above
+end
+
 -- Moeda nova no saco, ou nil se o saco já está cheio.
 function MurderRules.collect(current: number, bagSize: number): number?
 	if current >= bagSize then

@@ -2,8 +2,8 @@
 
 -- Assassinato no Casarão no cliente (Fase 5E): a roleta e o selo do papel
 -- (só o próprio jogador sabe o seu), a primeira pessoa com a mão e o item
--- na tela (MurderFirstPerson), a faca do Assassino (clique ou toque rápido
--- golpeia; segurar e soltar arremessa para onde a mira aponta; no celular,
+-- na tela (MurderFirstPerson), a faca do Assassino (o clique ou toque golpeia
+-- na hora; segurar e soltar arremessa para onde a mira aponta; no celular,
 -- um botão só, no lugar do botão de tiro), o contador de moedas, os avisos
 -- da arma caída e do Herói e a revelação de quem era quem no fim.
 
@@ -150,15 +150,23 @@ local function run(remote: RemoteEvent, container: Instance, playerGui: PlayerGu
 		return if camera ~= nil then camera.CFrame.LookVector else Vector3.zAxis
 	end
 
+	-- Apertou: golpeia na hora, para onde a mira aponta. Continuar
+	-- segurando carrega o arremesso.
 	local function holdStarted()
 		if not canAttack() then
 			return
 		end
-		pressedAt = os.clock()
+		local now = os.clock()
+		pressedAt = now
 		drawSentAt = nil
+		if now >= stabReadyAt then
+			stabReadyAt = now + MysteryModeConfig.StabCooldown
+			remote:FireServer("Stab", aimDirection())
+			MurderFirstPerson.pulse("Stab")
+		end
 	end
 
-	-- Soltou: rápido é golpe; segurado (com o arremesso pronto) é arremesso.
+	-- Soltou: se segurou o bastante (com o arremesso pronto), arremessa.
 	local function holdEnded()
 		local startedAt = pressedAt
 		pressedAt = nil
@@ -173,12 +181,6 @@ local function run(remote: RemoteEvent, container: Instance, playerGui: PlayerGu
 			stabReadyAt = now + MysteryModeConfig.StabCooldown
 			remote:FireServer("Throw", aimDirection())
 			MurderFirstPerson.pulse("Throw")
-			return
-		end
-		if now >= stabReadyAt then
-			stabReadyAt = now + MysteryModeConfig.StabCooldown
-			remote:FireServer("Stab")
-			MurderFirstPerson.pulse("Stab")
 		end
 	end
 

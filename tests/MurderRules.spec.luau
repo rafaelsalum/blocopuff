@@ -99,6 +99,27 @@ check("stab too far to the side fails", not MurderRules.inStabReach(4, -1, 0, -1
 check("stab right on top counts", MurderRules.inStabReach(0, 0, 0, -1, 5, 70))
 check("no look direction: only right on top", not MurderRules.inStabReach(0, -3, 0, 0, 5, 70))
 
+-- Golpe pela mira: entre dois ao alcance, vale o que está mais perto da
+-- linha da mira (cosseno maior).
+check("aim straight ahead scores 1", math.abs(MurderRules.aimCosine(0, -4, 0, -1) - 1) < 1e-6)
+check("aim to the side scores less", MurderRules.aimCosine(2, -3, 0, -1) < MurderRules.aimCosine(0.5, -3, 0, -1))
+check("aim with no offset scores 1", MurderRules.aimCosine(0, 0, 0, -1) == 1)
+
+-- Faca arremessada em 3D: o trecho percorrido no quadro (de p, na direção
+-- d, até `reach`) acerta o corpo (raio 2.5 na horizontal, de 3 abaixo a 2
+-- acima da raiz)?
+local function hits(px, py, pz, dx, dy, dz, reach, tx, ty, tz)
+	return MurderRules.knifeHitsBody(px, py, pz, dx, dy, dz, reach, tx, ty, tz, 2.5, 3, 2)
+end
+local up = math.sqrt(0.5)
+check("throw straight hits a body ahead", hits(0, 0, 0, 0, 0, -1, 10, 0, 0, -6))
+check("throw straight misses a body behind", not hits(0, 0, 0, 0, 0, -1, 10, 0, 0, 6))
+check("throw straight misses a body beyond the step", not hits(0, 0, 0, 0, 0, -1, 4, 0, 0, -8))
+check("throw upward passes over a body ahead", not hits(0, 0, 0, 0, up, -up, 20, 0, 0, -12))
+check("throw upward hits someone on the stairs above", hits(0, 0, 0, 0, up, -up, 20, 0, 8, -8))
+check("throw downward hits someone below", hits(0, 10, 0, 0, -up, -up, 20, 0, 3, -7))
+check("throw to the side misses", not hits(0, 0, 0, 0, 0, -1, 10, 4, 0, -6))
+
 -- Moedas.
 check("bag has a cap", MurderRules.collect(10, 10) == nil)
 check("bag fills one by one", MurderRules.collect(3, 10) == 4)

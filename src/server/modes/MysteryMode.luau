@@ -54,6 +54,10 @@ local COINS_ATTRIBUTE = "MysteryCoins"
 local PICKUP_CHECK_SECONDS = 0.2
 -- Mostrar a faca (carregando o arremesso) no máximo a cada tanto.
 local DRAW_MIN_INTERVAL = 0.15
+-- Altura dos olhos acima da raiz do corpo.
+local EYE_HEIGHT = 1.5
+-- Fração da recarga do golpe que o servidor exige.
+local STAB_COOLDOWN_SLACK = 0.8
 
 local random = Random.new()
 local remote: RemoteEvent? = nil
@@ -295,18 +299,20 @@ local function murdererReady(): Combatant?
 end
 
 -- Golpe de perto: o primeiro alvo à frente, ao alcance e sem parede no meio.
-local function tryStab(): boolean
+local function tryStab(aim: Vector3?): boolean
 	local current = murdererReady()
 	local layout = wing
 	if current == nil or layout == nil then
 		return false
 	end
 	local now = os.clock()
-	if not MurderRules.actionReady(elapsed(), MysteryModeConfig.StartGrace, lastStabAt, MysteryModeConfig.StabCooldown, now) then
+	-- Um pouco de folga: o cliente espera a recarga inteira, mas a rede pode
+	-- aproximar dois cliques.
+	if not MurderRules.actionReady(elapsed(), MysteryModeConfig.StartGrace, lastStabAt, MysteryModeConfig.StabCooldown * STAB_COOLDOWN_SLACK, now) then
 		return false
 	end
 	lastStabAt = now
-	local target = MurderKnife.stabTarget(current, aliveOthers(), layout.folder)
+	local target = MurderKnife.stabTarget(current, aliveOthers(), layout.folder, aim)
 	if target == nil then
 		return false
 	end
@@ -343,7 +349,8 @@ local function tryThrow(direction: Vector3)
 		send(player, "ThrowCooldown", MysteryModeConfig.ThrowCooldown)
 	end
 	MurderKnife.throw({
-		origin = root.Position + Vector3.new(0, 0.5, 0),
+		-- Dos olhos, de onde sai a mira em primeira pessoa.
+		origin = root.Position + Vector3.new(0, EYE_HEIGHT, 0),
 		direction = direction,
 		obstacles = layout.folder,
 		targets = aliveOthers,
@@ -395,8 +402,8 @@ local function onRemote(player: Player, action: unknown, value: unknown)
 		drawKnife(current)
 	elseif action == "Stab" then
 		drawKnife(current)
-		tryStab()
-	elseif action == "Throw" and typeof(value) == "Vector3" and isFiniteVector(value) and Vector3.new(value.X, 0, value.Z).Magnitude > 1e-3 then
+		tryStab(if typeof(value) == "Vector3" and isFiniteVector(value) then value else nil)
+	elseif action == "Throw" and typeof(value) == "Vector3" and isFiniteVector(value) and value.Magnitude > 1e-3 then
 		-- O arremesso vale mesmo logo depois de um "Draw" (a faca já está
 		-- à vista desde a carga).
 		lastDrawRequestAt = 0
