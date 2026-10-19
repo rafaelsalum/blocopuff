@@ -11,8 +11,11 @@ local Workspace = game:GetService("Workspace")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local MysteryModeConfig = require(ReplicatedStorage.Shared.config.MysteryModeConfig)
+local MansionWingLayout = require(ReplicatedStorage.Shared.modules.MansionWingLayout)
 local MurderMansionPlan = require(script.Parent.Parent.data.MurderMansionPlan)
 local MurderMansionProps = require(script.Parent.MurderMansionProps)
+local MurderMansionCover = require(script.Parent.MurderMansionCover)
+local MansionDoors = require(script.Parent.MansionDoors)
 
 type Plan = MurderMansionPlan.Plan
 type Room = MurderMansionPlan.Room
@@ -224,6 +227,28 @@ local function outerWalls(parent: Instance, plan: Plan, bounds: MurderMansionPla
 	wall(parent, toWorld(bounds.maxX, midZ, level), depth, "Z", height, COLORS.exterior)
 end
 
+-- Portas duplas do Casarão (MansionDoors) em cada vão entre cômodos: o
+-- MansionDoorController de cada cliente abre quem chega perto, com rangido,
+-- e fecha batendo. As folhas não colidem nem bloqueiam tiros e facas, mas
+-- fechadas escondem quem está no cômodo ao lado.
+local function doors(parent: Instance, plan: Plan, toWorld: (number, number, number) -> Vector3)
+	local doorways: { MansionWingLayout.Doorway } = {}
+	for index, door in ipairs(plan.doors) do
+		local alongZ = door.axis == "Z"
+		table.insert(doorways, {
+			name = `MurderDoor{index}`,
+			center = toWorld(door.x, door.z, door.level),
+			along = if alongZ then Vector3.zAxis else Vector3.xAxis,
+			normal = if alongZ then Vector3.xAxis else Vector3.zAxis,
+			size = Vector2.new(plan.doorWidth, plan.doorHeight),
+		})
+	end
+	local model = Instance.new("Model")
+	model.Name = "Doors"
+	model.Parent = parent
+	MansionDoors.build(model, doorways)
+end
+
 local function boundsOf(plan: Plan): MurderMansionPlan.Area
 	local bounds = { minX = math.huge, maxX = -math.huge, minZ = math.huge, maxZ = -math.huge }
 	for _, room in ipairs(plan.rooms) do
@@ -306,7 +331,9 @@ function MurderMansionBuilder.build(): WingLayout
 			lamp(folder, sconce, lampColor, SCONCE_BRIGHTNESS, SCONCE_RANGE).Size = Vector3.new(1, 1, 1)
 		end
 		MurderMansionProps.furnish(folder, room, roomCenter)
+		MurderMansionCover.place(folder, room, roomCenter)
 	end
+	doors(folder, plan, toWorld)
 	for _, stair in ipairs(plan.stairs) do
 		staircase(folder, stair, plan, toWorld)
 	end

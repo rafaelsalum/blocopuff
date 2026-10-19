@@ -9,6 +9,7 @@
 -- cortinas, sempre deixando o jogador parcialmente visível.
 
 local MurderMansionPlan = require(script.Parent.Parent.data.MurderMansionPlan)
+local MysteryAssets = require(script.Parent.MysteryAssets)
 
 type Room = MurderMansionPlan.Room
 type Facing = "N" | "S" | "E" | "W"
@@ -62,6 +63,8 @@ type Builder = {
 	closet: (rx: number, rz: number, facing: Facing) -> (),
 	plant: (rx: number, rz: number) -> (),
 	portrait: (rx: number, rz: number, facing: Facing, color: Color3) -> (),
+	model: (name: string, rx: number, rz: number, facing: Facing, scale: number, fallbackSize: Vector3, color: Color3) -> (),
+	decor: (name: string, rx: number, rz: number, facing: Facing, scale: number, lift: number) -> (),
 }
 
 local function builderFor(parent: Instance, origin: Vector3): Builder
@@ -116,6 +119,25 @@ local function builderFor(parent: Instance, origin: Vector3): Builder
 		local canvas = part(parent, "Portrait", Vector3.new(4, 5, 0.2), CFrame.lookAt(base + front * 0.1, base + front * 2), color, Enum.Material.SmoothPlastic)
 		canvas.CanCollide = false
 	end
+	-- Modelo pronto do Casarão (MysteryAssets) com uma caixa invisível que
+	-- bloqueia passagem, tiros e facas; sem o modelo, uma caixa simples.
+	builder.model = function(name, rx, rz, facing, scale, fallbackSize, color)
+		local model = MysteryAssets.clone(name)
+		if model == nil then
+			builder.box(name, rx, rz, fallbackSize, color, Enum.Material.SmoothPlastic)
+			return
+		end
+		MysteryAssets.place(model, origin + Vector3.new(rx, 0, rz), FACING[facing], scale, parent)
+		local cframe, size = model:GetBoundingBox()
+		MysteryAssets.blocker(model, "Block", size, cframe)
+	end
+	-- Enfeite pronto sem colisão (candelabros sobre a mesa).
+	builder.decor = function(name, rx, rz, facing, scale, lift)
+		local model = MysteryAssets.clone(name)
+		if model ~= nil then
+			MysteryAssets.place(model, origin + Vector3.new(rx, lift, rz), FACING[facing], scale, parent)
+		end
+	end
 	return builder
 end
 
@@ -132,6 +154,8 @@ local FURNISH: { [string]: (b: Builder) -> () } = {
 	end,
 	dining = function(b)
 		b.box("DiningTable", 0, -14, Vector3.new(16, 3, 5), COLORS.wood)
+		b.decor("Candelabra", -4.5, -14, "S", 0.6, 3)
+		b.decor("Candelabra", 4.5, -14, "S", 0.6, 3)
 		for _, x in ipairs({ -6, -2, 2, 6 }) do
 			b.box("Chair", x, -10.3, Vector3.new(2, 4, 2), COLORS.darkWood)
 		end
@@ -152,13 +176,13 @@ local FURNISH: { [string]: (b: Builder) -> () } = {
 		b.box("Pillar", 8, -10, Vector3.new(2, 14, 2), COLORS.stone, Enum.Material.Marble)
 		b.box("Pillar", 8, 10, Vector3.new(2, 14, 2), COLORS.stone, Enum.Material.Marble)
 		b.box("Pillar", -6, -10, Vector3.new(2, 14, 2), COLORS.stone, Enum.Material.Marble)
-		b.box("GrandPiano", 11, -14, Vector3.new(7, 4, 4), COLORS.black, Enum.Material.SmoothPlastic)
+		b.model("GrandPiano", 10.5, -14, "W", 0.4, Vector3.new(7, 4, 4), COLORS.black)
 		b.soft("Curtain", 10, 17.3, Vector3.new(8, 12, 0.4), COLORS.red, 0.3)
 		b.box("FoldingScreen", -10, -14, Vector3.new(6, 7, 0.5), COLORS.cream, Enum.Material.Fabric)
 		b.rug(1, 0, 16, 18, COLORS.velvet)
 	end,
 	hall = function(b)
-		b.box("GrandClock", -13.5, 15.5, Vector3.new(3, 10, 2), COLORS.darkWood)
+		b.model("GrandfatherClock", -13.5, 15.6, "N", 1.2, Vector3.new(3, 10, 2), COLORS.darkWood)
 		b.box("Bench", -11, -15, Vector3.new(6, 2, 2), COLORS.wood)
 		b.box("Bench", 11, -15, Vector3.new(6, 2, 2), COLORS.wood)
 		b.closet(12, 15, "N")
@@ -200,7 +224,7 @@ local FURNISH: { [string]: (b: Builder) -> () } = {
 		b.plant(-8, 15)
 	end,
 	music = function(b)
-		b.box("Piano", 9, -14, Vector3.new(7, 4, 4), COLORS.black, Enum.Material.SmoothPlastic)
+		b.model("GrandPiano", 10.5, -14, "W", 0.4, Vector3.new(7, 4, 4), COLORS.black)
 		b.box("Harp", 13, 12, Vector3.new(2, 6, 2), COLORS.gold, Enum.Material.SmoothPlastic)
 		b.box("Chair", 6, 12, Vector3.new(2, 4, 2), COLORS.darkWood)
 		b.box("Chair", 9, 9, Vector3.new(2, 4, 2), COLORS.darkWood)

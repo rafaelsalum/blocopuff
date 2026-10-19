@@ -448,6 +448,12 @@ local function buildCellar(parent: Instance, wing: Wing)
 	folder.Parent = parent
 end
 
+-- Móveis reaproveitados na Ala do Assassinato (MurderMansionCover).
+MansionWingDecor.bookshelf = bookshelf
+MansionWingDecor.chest = chest
+MansionWingDecor.coveredFurniture = coveredFurniture
+MansionWingDecor.barrel = barrel
+
 function MansionWingDecor.build(parent: Instance, wing: Wing, style: BuildingConfig)
 	local rng = Random.new(SEED)
 	buildLibrary(parent, wing, style, rng)
