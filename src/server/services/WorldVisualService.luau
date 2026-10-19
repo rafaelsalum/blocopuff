@@ -17,16 +17,21 @@ local COLOR_CORRECTION_NAME = "BlocoPuffColorCorrection"
 -- atmosfera). O jogo agora acontece dentro de um prédio fechado.
 local LEGACY_LIGHTING_NAMES = { "BlocoPuffSky", "BlocoPuffAtmosphere" }
 
--- Base de interior suave e uniforme: a luz ambiente e o difuso do ambiente
--- iluminam a cena por igual; lustres e arandelas (BuildingService) são só
--- acentos fracos. Brilho especular baixo evita reflexos estourados nos
--- personagens com a tecnologia Future.
+-- Interior com contraste: luz ambiente quente e mais baixa para que lustres,
+-- arandelas e velas criem poças de luz e sombras com a tecnologia Future.
+-- O especular moderado deixa os materiais PBR (MaterialService) com brilho
+-- de verniz, mármore e metal sem estourar nos personagens.
 -- Lighting.Technology = Future é definido em default.project.json.
-local INTERIOR_AMBIENT = Color3.fromRGB(96, 90, 86)
-local INTERIOR_OUTDOOR_AMBIENT = Color3.fromRGB(96, 90, 86)
-local INTERIOR_BRIGHTNESS = 0.5
-local INTERIOR_ENVIRONMENT_DIFFUSE = 0.3
-local INTERIOR_ENVIRONMENT_SPECULAR = 0.08
+local INTERIOR_AMBIENT = Color3.fromRGB(80, 70, 64)
+local INTERIOR_OUTDOOR_AMBIENT = Color3.fromRGB(80, 70, 64)
+local INTERIOR_BRIGHTNESS = 0.7
+local INTERIOR_ENVIRONMENT_DIFFUSE = 0.45
+local INTERIOR_ENVIRONMENT_SPECULAR = 0.35
+local INTERIOR_SHADOW_SOFTNESS = 0.25
+-- Reforço das luzes pontuais do mundo, que foram calibradas para a base
+-- antiga, mais clara.
+local POINT_LIGHT_BOOST = 1.3
+local POINT_LIGHT_BOOSTED_ATTRIBUTE = "WorldVisualBoosted"
 
 type LightingSnapshot = {
 	Ambient: Color3,
@@ -34,6 +39,7 @@ type LightingSnapshot = {
 	Brightness: number,
 	EnvironmentDiffuseScale: number,
 	EnvironmentSpecularScale: number,
+	ShadowSoftness: number,
 }
 
 type WorldPalette = {
@@ -49,6 +55,7 @@ local WorldVisualService = {}
 local bloom: BloomEffect? = nil
 local colorCorrection: ColorCorrectionEffect? = nil
 local previousLighting: LightingSnapshot? = nil
+local lightConnection: RBXScriptConnection? = nil
 
 local function isOwned(instance: Instance): boolean
 	return instance:GetAttribute(GENERATED_BY_ATTRIBUTE) == SERVICE_NAME
@@ -78,6 +85,11 @@ local function stopOwnedVisuals()
 	bloom = nil
 	colorCorrection = nil
 
+	if lightConnection ~= nil then
+		lightConnection:Disconnect()
+		lightConnection = nil
+	end
+
 	local snapshot = previousLighting
 	if snapshot ~= nil then
 		Lighting.Ambient = snapshot.Ambient
@@ -85,6 +97,7 @@ local function stopOwnedVisuals()
 		Lighting.Brightness = snapshot.Brightness
 		Lighting.EnvironmentDiffuseScale = snapshot.EnvironmentDiffuseScale
 		Lighting.EnvironmentSpecularScale = snapshot.EnvironmentSpecularScale
+		Lighting.ShadowSoftness = snapshot.ShadowSoftness
 		previousLighting = nil
 	end
 end
@@ -96,12 +109,32 @@ local function applyInteriorLighting()
 		Brightness = Lighting.Brightness,
 		EnvironmentDiffuseScale = Lighting.EnvironmentDiffuseScale,
 		EnvironmentSpecularScale = Lighting.EnvironmentSpecularScale,
+		ShadowSoftness = Lighting.ShadowSoftness,
 	}
 	Lighting.Ambient = INTERIOR_AMBIENT
 	Lighting.OutdoorAmbient = INTERIOR_OUTDOOR_AMBIENT
 	Lighting.Brightness = INTERIOR_BRIGHTNESS
 	Lighting.EnvironmentDiffuseScale = INTERIOR_ENVIRONMENT_DIFFUSE
 	Lighting.EnvironmentSpecularScale = INTERIOR_ENVIRONMENT_SPECULAR
+	Lighting.ShadowSoftness = INTERIOR_SHADOW_SOFTNESS
+end
+
+-- Cada luz é reforçada uma única vez, inclusive as criadas depois (salas do
+-- Casarão, Torre e salas secretas são montadas ao longo da partida). Luzes
+-- apagadas (brilho 0, como alarmes) ficam como estão.
+local function boostPointLight(instance: Instance)
+	if not instance:IsA("PointLight") or instance:GetAttribute(POINT_LIGHT_BOOSTED_ATTRIBUTE) ~= nil then
+		return
+	end
+	instance:SetAttribute(POINT_LIGHT_BOOSTED_ATTRIBUTE, true)
+	instance.Brightness *= POINT_LIGHT_BOOST
+end
+
+local function boostWorldLights(worldRoot: Model)
+	for _, descendant in ipairs(worldRoot:GetDescendants()) do
+		boostPointLight(descendant)
+	end
+	lightConnection = worldRoot.DescendantAdded:Connect(boostPointLight)
 end
 
 function WorldVisualService.start(worldRoot: Model, _palette: WorldPalette)
@@ -113,20 +146,21 @@ function WorldVisualService.start(worldRoot: Model, _palette: WorldPalette)
 	destroyOwned(Lighting, BLOOM_NAME)
 	destroyOwned(Lighting, COLOR_CORRECTION_NAME)
 	applyInteriorLighting()
+	boostWorldLights(worldRoot)
 
 	local newBloom = Instance.new("BloomEffect")
 	newBloom.Name = BLOOM_NAME
-	newBloom.Intensity = 0.1
-	newBloom.Size = 12
-	newBloom.Threshold = 1.6
+	newBloom.Intensity = 0.18
+	newBloom.Size = 18
+	newBloom.Threshold = 1.35
 	newBloom:SetAttribute(GENERATED_BY_ATTRIBUTE, SERVICE_NAME)
 	newBloom.Parent = Lighting
 
 	local newColorCorrection = Instance.new("ColorCorrectionEffect")
 	newColorCorrection.Name = COLOR_CORRECTION_NAME
-	newColorCorrection.Brightness = 0
-	newColorCorrection.Contrast = 0.05
-	newColorCorrection.Saturation = 0
+	newColorCorrection.Brightness = 0.03
+	newColorCorrection.Contrast = 0.12
+	newColorCorrection.Saturation = 0.05
 	newColorCorrection.TintColor = Color3.fromRGB(255, 248, 240)
 	newColorCorrection:SetAttribute(GENERATED_BY_ATTRIBUTE, SERVICE_NAME)
 	newColorCorrection.Parent = Lighting

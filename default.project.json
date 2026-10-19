@@ -42,6 +42,71 @@
         "Technology": "Future",
         "GlobalShadows": true
       }
+    },
+    "MaterialService": {
+      "$className": "MaterialService",
+      "$properties": {
+        "PlasterName": "BlocoPuffPlaster",
+        "WoodPlanksName": "BlocoPuffWoodPlanks",
+        "WoodName": "BlocoPuffWood",
+        "SlateName": "BlocoPuffSlate",
+        "FabricName": "BlocoPuffFabric"
+      },
+      "BlocoPuffPlaster": {
+        "$className": "MaterialVariant",
+        "$properties": {
+          "BaseMaterial": "Plaster",
+          "ColorMap": "rbxassetid://79903747969216",
+          "NormalMap": "rbxassetid://128471457623184",
+          "RoughnessMap": "rbxassetid://108775468475069",
+          "StudsPerTile": 14,
+          "MaterialPattern": "Organic"
+        }
+      },
+      "BlocoPuffWoodPlanks": {
+        "$className": "MaterialVariant",
+        "$properties": {
+          "BaseMaterial": "WoodPlanks",
+          "ColorMap": "rbxassetid://81677458742312",
+          "NormalMap": "rbxassetid://95826893731693",
+          "RoughnessMap": "rbxassetid://95545364611561",
+          "StudsPerTile": 16,
+          "MaterialPattern": "Regular"
+        }
+      },
+      "BlocoPuffWood": {
+        "$className": "MaterialVariant",
+        "$properties": {
+          "BaseMaterial": "Wood",
+          "ColorMap": "rbxassetid://105123724688008",
+          "NormalMap": "rbxassetid://94391074081351",
+          "RoughnessMap": "rbxassetid://82939928143978",
+          "StudsPerTile": 8,
+          "MaterialPattern": "Regular"
+        }
+      },
+      "BlocoPuffSlate": {
+        "$className": "MaterialVariant",
+        "$properties": {
+          "BaseMaterial": "Slate",
+          "ColorMap": "rbxassetid://136145763366743",
+          "NormalMap": "rbxassetid://135492322166604",
+          "RoughnessMap": "rbxassetid://93193619283395",
+          "StudsPerTile": 12,
+          "MaterialPattern": "Organic"
+        }
+      },
+      "BlocoPuffFabric": {
+        "$className": "MaterialVariant",
+        "$properties": {
+          "BaseMaterial": "Fabric",
+          "ColorMap": "rbxassetid://93737823534325",
+          "NormalMap": "rbxassetid://125960881980656",
+          "RoughnessMap": "rbxassetid://86203454986455",
+          "StudsPerTile": 6,
+          "MaterialPattern": "Regular"
+        }
+      }
     }
   }
 }
