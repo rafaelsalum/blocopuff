@@ -28,6 +28,9 @@ local SLOT_Z = 5.5
 local WIDTH = 5
 local HEIGHT = 6.5
 local SHELF_HEIGHT = 7.5
+-- Moeda atrás de cada cobertura (do lado da parede): pegar exige sair do
+-- miolo do cômodo.
+local COIN_BEHIND = 3
 
 local COLORS = {
 	frame = Color3.fromRGB(74, 48, 32),
@@ -130,10 +133,12 @@ local function build(parent: Instance, kind: Kind, base: Vector3, facing: Vector
 	end
 end
 
-function MurderMansionCover.place(parent: Instance, room: Room, roomCenter: Vector3)
+-- Monta as coberturas do cômodo e devolve os pontos do chão atrás delas.
+function MurderMansionCover.place(parent: Instance, room: Room, roomCenter: Vector3): { Vector3 }
+	local spots: { Vector3 } = {}
 	local entries = LAYOUT[room.id]
 	if entries == nil then
-		return
+		return spots
 	end
 	-- Semente por cômodo: os mesmos livros e caixotes em todo servidor.
 	local rng = Random.new(SEED + #room.id * 31 + room.minX + room.minZ)
@@ -145,8 +150,10 @@ function MurderMansionCover.place(parent: Instance, room: Room, roomCenter: Vect
 		-- Frente virada para o meio do cômodo.
 		local facing = Vector3.new(0, 0, -math.sign(slot.Y))
 		build(folder, entry.kind, base, facing, rng)
+		table.insert(spots, base - facing * COIN_BEHIND)
 	end
 	folder.Parent = parent
+	return spots
 end
 
 return table.freeze(MurderMansionCover)

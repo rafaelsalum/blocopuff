@@ -14,6 +14,17 @@ return table.freeze({
 	["🪜 ESCADARIA"] = "🪜 STAIRCASE",
 	["🎹 SALA DE MÚSICA"] = "🎹 MUSIC ROOM",
 	["🎯 TREINO"] = "🎯 TRAINING",
+	-- Placas da Ala do Assassinato (MurderMansionDecor)
+	["🍷 SALA DE JANTAR"] = "🍷 DINING ROOM",
+	["🍳 COZINHA"] = "🍳 KITCHEN",
+	["💃 SALÃO DE BAILE"] = "💃 BALLROOM",
+	["🚪 HALL DE ENTRADA"] = "🚪 ENTRANCE HALL",
+	["☕ SALA DE ESTAR"] = "☕ LIVING ROOM",
+	["🌙 QUARTO DO BARÃO"] = "🌙 BARON'S BEDROOM",
+	["👑 CORREDOR DOS RETRATOS"] = "👑 PORTRAIT HALL",
+	["🧳 QUARTO DE HÓSPEDES"] = "🧳 GUEST ROOM",
+	["🎲 SALA DE JOGOS"] = "🎲 GAME ROOM",
+	["🌿 ESTUFA"] = "🌿 GREENHOUSE",
 
 	-- Passagens secretas
 	["PASSAGEM SECRETA!"] = "SECRET PASSAGE!",

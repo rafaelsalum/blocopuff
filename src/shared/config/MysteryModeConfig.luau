@@ -10,9 +10,6 @@ export type WingConfig = {
 	-- Centro do chão do térreo da Ala (longe da Arena, do Casarão e da
 	-- Torre). A planta dos cômodos é a de MurderMansionPlan.
 	Center: Vector3,
-	-- Luz de cada cômodo.
-	LightBrightness: number,
-	LightRange: number,
 }
 
 export type MysteryModeConfig = {
@@ -62,8 +59,6 @@ export type MysteryModeConfig = {
 local MysteryModeConfig: MysteryModeConfig = {
 	Wing = table.freeze({
 		Center = Vector3.new(-420, 100, 420),
-		LightBrightness = 0.9,
-		LightRange = 36,
 	}),
 	Duration = 180,
 	MinHumans = 2,

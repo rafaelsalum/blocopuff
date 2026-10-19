@@ -15,6 +15,8 @@ local MansionWingLayout = require(ReplicatedStorage.Shared.modules.MansionWingLa
 local MurderMansionPlan = require(script.Parent.Parent.data.MurderMansionPlan)
 local MurderMansionProps = require(script.Parent.MurderMansionProps)
 local MurderMansionCover = require(script.Parent.MurderMansionCover)
+local MurderMansionDecor = require(script.Parent.MurderMansionDecor)
+local MansionConfig = require(ReplicatedStorage.Shared.config.MansionConfig)
 local MansionDoors = require(script.Parent.MansionDoors)
 
 type Plan = MurderMansionPlan.Plan
@@ -32,6 +34,9 @@ export type WingLayout = {
 	randomPoint: (random: Random) -> Vector3,
 	-- Um ponto do chão sorteado no miolo livre de um cômodo da planta.
 	randomPointIn: (roomId: string, random: Random) -> Vector3?,
+	-- Pontos do chão atrás das coberturas e junto das portas, para as
+	-- moedas que pedem um pouco de risco (MysteryCoins).
+	coinSpots: { Vector3 },
 	-- Altura do chão do andar em que `position` está.
 	floorAt: (position: Vector3) -> number,
 	-- Posição no mundo de um ponto da planta.
@@ -47,24 +52,23 @@ local RAILING_HEIGHT = 3.5
 -- Abertura da passagem secreta e altura do corredor escondido.
 local PASSAGE_GAP_HEIGHT = 8
 local PASSAGE_HEIGHT = 9
--- Arandelas de parede (além do lustre do meio).
-local SCONCE_HEIGHT = 8
--- Lustre longe do teto (colado na laje, a luz quase não aparece).
-local CHANDELIER_HEIGHT = 9
-local SCONCE_BRIGHTNESS = 0.5
-local SCONCE_RANGE = 18
+-- Lâmpadas pequenas e fracas da passagem secreta (o resto da luz é do
+-- acabamento do Casarão, MurderMansionDecor).
+local PASSAGE_LAMP_SIZE = 0.9
+local PASSAGE_LAMP_BRIGHTNESS = 0.8
+local PASSAGE_LAMP_RANGE = 16
+-- Moedas junto das portas: tantos studs para dentro de cada cômodo.
+local DOOR_COIN_INSET = 4
 
 local COLORS = {
-	floorGround = Color3.fromRGB(146, 104, 70),
-	floorUpper = Color3.fromRGB(104, 70, 52),
+	floorGround = MansionConfig.FloorColor,
+	floorUpper = MansionConfig.FloorColor,
 	wallGround = Color3.fromRGB(184, 144, 128),
 	wallUpper = Color3.fromRGB(116, 104, 140),
 	exterior = Color3.fromRGB(150, 118, 112),
 	roof = Color3.fromRGB(52, 42, 48),
 	stair = Color3.fromRGB(96, 62, 40),
 	railing = Color3.fromRGB(70, 46, 30),
-	lamp = Color3.fromRGB(255, 220, 160),
-	greenhouse = Color3.fromRGB(190, 255, 190),
 	passage = Color3.fromRGB(60, 50, 46),
 	passageLight = Color3.fromRGB(255, 170, 110),
 }
@@ -183,7 +187,8 @@ local function secretPassage(parent: Instance, passage: MurderMansionPlan.Passag
 	wall(parent, toWorld(passage.minX, (passage.minZ + passage.maxZ) / 2, 0), depth, "Z", PASSAGE_HEIGHT, COLORS.passage)
 	wall(parent, toWorld(passage.maxX, (passage.minZ + passage.maxZ) / 2, 0), depth, "Z", PASSAGE_HEIGHT, COLORS.passage)
 	for _, x in ipairs({ passage.fromX, passage.toX, (passage.fromX + passage.toX) / 2 }) do
-		lamp(parent, toWorld(x, (passage.minZ + passage.maxZ) / 2, 0) + Vector3.new(0, PASSAGE_HEIGHT - 1.5, 0), COLORS.passageLight, 1.2, 16)
+		local bulb = lamp(parent, toWorld(x, (passage.minZ + passage.maxZ) / 2, 0) + Vector3.new(0, PASSAGE_HEIGHT - 1.5, 0), COLORS.passageLight, PASSAGE_LAMP_BRIGHTNESS, PASSAGE_LAMP_RANGE)
+		bulb.Size = Vector3.one * PASSAGE_LAMP_SIZE
 	end
 end
 
@@ -315,6 +320,7 @@ function MurderMansionBuilder.build(): WingLayout
 
 	local roomCenters: { Vector3 } = {}
 	local openRooms: { Room } = {}
+	local coinSpots: { Vector3 } = {}
 	for _, room in ipairs(plan.rooms) do
 		local roomCenter = toWorld((room.minX + room.maxX) / 2, (room.minZ + room.maxZ) / 2, room.level)
 		table.insert(roomCenters, roomCenter)
@@ -322,18 +328,19 @@ function MurderMansionBuilder.build(): WingLayout
 		if room.level == 1 then
 			upperSlab(folder, room, plan, toWorld)
 		end
-		local lampColor = if room.id == "greenhouse" then COLORS.greenhouse else COLORS.lamp
-		lamp(folder, roomCenter + Vector3.new(0, CHANDELIER_HEIGHT, 0), lampColor, config.LightBrightness, config.LightRange)
-		-- Arandelas nas paredes norte e sul, para os cantos não ficarem escuros.
-		local halfDepth = (room.maxZ - room.minZ) / 2 - 1.2
-		for _, side in ipairs({ -1, 1 }) do
-			local sconce = roomCenter + Vector3.new(-6 * side, SCONCE_HEIGHT, side * halfDepth)
-			lamp(folder, sconce, lampColor, SCONCE_BRIGHTNESS, SCONCE_RANGE).Size = Vector3.new(1, 1, 1)
-		end
 		MurderMansionProps.furnish(folder, room, roomCenter)
-		MurderMansionCover.place(folder, room, roomCenter)
+		for _, spot in ipairs(MurderMansionCover.place(folder, room, roomCenter)) do
+			table.insert(coinSpots, spot)
+		end
 	end
 	doors(folder, plan, toWorld)
+	MurderMansionDecor.decorate(folder, plan, toWorld)
+	for _, door in ipairs(plan.doors) do
+		local inward = if door.axis == "Z" then Vector3.xAxis else Vector3.zAxis
+		local point = toWorld(door.x, door.z, door.level)
+		table.insert(coinSpots, point - inward * DOOR_COIN_INSET)
+		table.insert(coinSpots, point + inward * DOOR_COIN_INSET)
+	end
 	for _, stair in ipairs(plan.stairs) do
 		staircase(folder, stair, plan, toWorld)
 	end
@@ -351,6 +358,7 @@ function MurderMansionBuilder.build(): WingLayout
 		floorY = center.Y,
 		plan = plan,
 		roomCenters = roomCenters,
+		coinSpots = coinSpots,
 		randomPoint = function(random: Random): Vector3
 			local room = openRooms[random:NextInteger(1, #openRooms)]
 			local area = MurderMansionPlan.openArea(room)

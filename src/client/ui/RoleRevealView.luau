@@ -17,7 +17,11 @@ local T = Lang.t
 local GUI_NAME = "BlocoPuffRoleReveal"
 local DISPLAY_ORDER = 30
 local CARD_SIZE = Vector2.new(520, 300)
-local BADGE_SIZE = Vector2.new(300, 56)
+-- Selo do papel no canto superior esquerdo, logo abaixo do contador de
+-- moedas (MysteryModeController, 18,16 com 44 de altura): no meio do topo ele
+-- cobria o cronômetro da partida.
+local BADGE_SIZE = Vector2.new(220, 44)
+local BADGE_POSITION = UDim2.fromOffset(18, 70)
 -- Faixa no topo: a tela de resultado ocupa o centro.
 local REVEAL_SIZE = Vector2.new(640, 96)
 local SPIN_ORDER = { "Innocent", "Sheriff", "Murderer" }
@@ -115,8 +119,12 @@ function RoleRevealView.create(playerGui: PlayerGui): RoleRevealHandle
 	local title = textLabel(card, "Title", Enum.Font.FredokaOne, 54, UDim2.fromScale(0.05, 0.5), UDim2.fromScale(0.9, 0.2))
 	local goal = textLabel(card, "Goal", Enum.Font.GothamBold, 22, UDim2.fromScale(0.07, 0.74), UDim2.fromScale(0.86, 0.18))
 
-	local badge, badgeStroke = panel(gui, "RoleBadge", BADGE_SIZE, Vector2.new(0.5, 0), UDim2.new(0.5, 0, 0, 64))
-	local badgeLabel = textLabel(badge, "Label", Enum.Font.FredokaOne, 26, UDim2.fromScale(0.05, 0.1), UDim2.fromScale(0.9, 0.8))
+	-- Tela própria, dentro da área segura (abaixo da barra do Roblox), como o
+	-- HUD do modo; a roleta e o painel do fim ocupam a tela inteira.
+	local badgeGui = UiTheme.createScreenGui(GUI_NAME .. "Badge", playerGui, DISPLAY_ORDER)
+	local badge, badgeStroke = panel(badgeGui, "RoleBadge", BADGE_SIZE, Vector2.zero, BADGE_POSITION)
+	badgeStroke.Thickness = 3
+	local badgeLabel = textLabel(badge, "Label", Enum.Font.FredokaOne, 22, UDim2.fromScale(0.05, 0.12), UDim2.fromScale(0.9, 0.76))
 
 	local reveal, revealStroke = panel(gui, "Reveal", REVEAL_SIZE, Vector2.new(0.5, 0), UDim2.new(0.5, 0, 0, 8))
 	local revealTitle = textLabel(reveal, "Winner", Enum.Font.FredokaOne, 34, UDim2.fromScale(0.04, 0.06), UDim2.fromScale(0.92, 0.5))
