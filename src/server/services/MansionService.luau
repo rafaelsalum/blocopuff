@@ -37,6 +37,8 @@ type Opening = {
 	point: Vector3,
 	size: Vector2,
 	label: string?,
+	-- Janela: o vão começa a esta altura do piso.
+	sill: number?,
 }
 
 -- Face interna de uma parede, de `a` até `b` (Y ignorado).
@@ -59,6 +61,12 @@ local CHANDELIER_DROP = 6
 local PLAQUE_DISTANCE = MansionPlaque.MaxDistance
 local STATUE_COLOR = Color3.fromRGB(255, 209, 102)
 local GRASS_COLOR = Color3.fromRGB(88, 148, 80)
+local WINDOW_GLASS_COLOR = Color3.fromRGB(196, 214, 236)
+local WINDOW_GLASS_TRANSPARENCY = 0.75
+local WINDOW_FRAME_COLOR = Color3.fromRGB(92, 60, 38)
+local WINDOW_PANE_WIDTH = 5.5
+-- Altura da travessa (fração da altura do vão).
+local WINDOW_TRANSOM_HEIGHT = 0.7
 
 local MansionService = {}
 
@@ -99,6 +107,31 @@ local function eastDoorway(name: string): Doorway
 	error(`Unknown wing doorway {name}`)
 end
 
+-- Vão do janelão da parede norte, com o peitoril acima do piso.
+local function towerWindowHole(mansion: Mansion, thickness: number): Box
+	local window = MansionConfig.TowerWindow
+	local point = Vector3.new(window.CenterX, mansion.floorY + window.Sill, mansion.minZ)
+	return WallBuilder.hole(point, Vector3.new(0, 0, 1), Vector3.xAxis, thickness, window.Size)
+end
+
+-- Vidro levemente azulado com caixilhos de madeira (montantes e uma
+-- travessa), no meio da espessura da parede. Não deixa sair pela janela.
+local function createTowerWindowGlass(parent: Instance, hole: Box)
+	local size = hole.max - hole.min
+	local center = (hole.min + hole.max) / 2
+	BuildingDecor.createPart(parent, "TowerWindowGlass", Vector3.new(size.X, size.Y, 0.3), CFrame.new(center), WINDOW_GLASS_COLOR, {
+		material = Enum.Material.Glass,
+		collide = true,
+		transparency = WINDOW_GLASS_TRANSPARENCY,
+	})
+	local panes = math.max(1, math.round(size.X / WINDOW_PANE_WIDTH))
+	for index = 1, panes - 1 do
+		local x = hole.min.X + size.X * index / panes
+		BuildingDecor.createPart(parent, "TowerWindowMullion", Vector3.new(0.4, size.Y, 0.5), CFrame.new(x, center.Y, center.Z), WINDOW_FRAME_COLOR, { material = Enum.Material.Wood })
+	end
+	BuildingDecor.createPart(parent, "TowerWindowTransom", Vector3.new(size.X, 0.4, 0.5), CFrame.new(center.X, hole.min.Y + size.Y * WINDOW_TRANSOM_HEIGHT, center.Z), WINDOW_FRAME_COLOR, { material = Enum.Material.Wood })
+end
+
 -- Piso, teto e paredes externas. A oeste, a parede leste do prédio da arena
 -- já fecha o trecho da galeria; aqui só entram as pontas e o pedaço acima
 -- do telhado do prédio (o Casarão tem pé-direito mais alto).
@@ -114,7 +147,9 @@ local function createShell(parent: Instance, mansion: Mansion, building: Buildin
 
 	WallBuilder.createBox(parent, "MansionFloor", box(mansion.minX, floorY - 1, mansion.minZ - t, mansion.maxX + t, floorY, mansion.maxZ + t), MansionConfig.FloorColor, Enum.Material.WoodPlanks)
 	WallBuilder.createBox(parent, "MansionCeiling", box(westMinX, topY, mansion.minZ - t, mansion.maxX + t, topY + 1, mansion.maxZ + t), MansionConfig.CeilingColor, Enum.Material.Plaster)
-	WallBuilder.createBox(parent, "MansionWallNorth", box(westMinX, floorY - 1, mansion.minZ - t, mansion.maxX + t, topY, mansion.minZ), wallColor, Enum.Material.Plaster)
+	local northHole = towerWindowHole(mansion, t)
+	WallBuilder.createWallWithHoles(parent, "MansionWallNorth", box(westMinX, floorY - 1, mansion.minZ - t, mansion.maxX + t, topY, mansion.minZ), { northHole }, wallColor, Enum.Material.Plaster)
+	createTowerWindowGlass(parent, northHole)
 	WallBuilder.createBox(parent, "MansionWallSouth", box(westMinX, floorY - 1, mansion.maxZ, mansion.maxX + t, topY, mansion.maxZ + t), wallColor, Enum.Material.Plaster)
 	-- Parede leste com as portas para a ala nova (MansionWingLayout).
 	local eastHoles: { Box } = {}
@@ -172,10 +207,11 @@ local function decorateFace(parent: Instance, mansion: Mansion, face: Face, styl
 	for _, opening in ipairs(face.openings) do
 		local offset = (opening.point - origin):Dot(along)
 		if math.abs(offset) + opening.size.X / 2 <= length / 2 then
-			table.insert(gaps, { offset = offset, frame = true, width = opening.size.X, height = opening.size.Y })
+			local sill = opening.sill or 0
+			table.insert(gaps, { offset = offset, frame = true, width = opening.size.X, height = opening.size.Y, sill = sill })
 			local label = opening.label
 			if label ~= nil then
-				local position = origin + (along * offset) + (face.inward * 0.55) + Vector3.new(0, mansion.floorY + opening.size.Y + 2.6, 0)
+				local position = origin + (along * offset) + (face.inward * 0.55) + Vector3.new(0, mansion.floorY + sill + opening.size.Y + 2.6, 0)
 				MansionPlaque.create(parent, `{face.name}Plaque`, CFrame.fromMatrix(position, along, Vector3.yAxis), label, style)
 			end
 		end
@@ -215,6 +251,7 @@ local function getFaces(mansion: Mansion, withWing: boolean): { Face }
 	local leftArch, rightArch = northPartition.arches[1], northPartition.arches[2]
 	local arch = archSize()
 	local passage = MansionConfig.PassageSize
+	local towerWindow = MansionConfig.TowerWindow
 	local function at(x: number, z: number): Vector3
 		return Vector3.new(x, 0, z)
 	end
@@ -255,7 +292,9 @@ local function getFaces(mansion: Mansion, withWing: boolean): { Face }
 			opening(hallEast, mansion.center.Z, arch, Lang.t("🐶 JARDIM DO BARÃO")),
 		} },
 		-- Salão da Coleção (norte)
-		{ name = "CollectionNorth", a = at(x0, z0), b = at(x1, z0), inward = toSouth, color = colors.Collection, openings = {} },
+		{ name = "CollectionNorth", a = at(x0, z0), b = at(x1, z0), inward = toSouth, color = colors.Collection, openings = {
+			{ point = at(towerWindow.CenterX, z0), size = towerWindow.Size, label = Lang.t("🕰️ TORRE DO RELÓGIO"), sill = towerWindow.Sill },
+		} },
 		{ name = "CollectionWest", a = at(x0, z0), b = at(x0, north - half), inward = toEast, color = colors.Collection, openings = {} },
 		{ name = "CollectionEast", a = at(x1, z0), b = at(x1, north - half), inward = toWest, color = colors.Collection, openings = if withWing then { wingOpening("LibraryDoor") } else {} },
 		{ name = "CollectionSouth", a = at(x0, north - half), b = at(x1, north - half), inward = toNorth, color = colors.Collection, openings = {

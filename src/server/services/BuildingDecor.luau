@@ -58,6 +58,9 @@ export type DoorGap = {
 	frame: boolean,
 	width: number?,
 	height: number?,
+	-- Peitoril: o vão começa a esta altura do piso (janela). Sem ele, desce
+	-- até o chão (porta).
+	sill: number?,
 }
 
 local WAINSCOT_HEIGHT = 4.5
@@ -179,9 +182,14 @@ local function gapHeight(gap: DoorGap): number
 	return gap.height or DOOR_SIZE.Y
 end
 
+local function gapSill(gap: DoorGap): number
+	return gap.sill or 0
+end
+
 -- Mesmo painel, recortado em volta dos vãos de porta (cada um com a sua
 -- largura): um pedaço entre cada vão e, se o painel passar do topo de um
--- vão (`gapBottom` + altura do vão), um pedaço por cima dele.
+-- vão (`gapBottom` + peitoril + altura do vão), um pedaço por cima dele; com
+-- peitoril, também um pedaço por baixo.
 local function panelAroundGaps(
 	parent: Instance,
 	segment: WallSegment,
@@ -207,7 +215,11 @@ local function panelAroundGaps(
 		if left - cursor > 0.05 then
 			panel(parent, segment, name, (cursor + left) / 2, left - cursor, y0, height, thickness, color, material)
 		end
-		local gapTop = gapBottom + gapHeight(gap)
+		local sillTop = gapBottom + gapSill(gap)
+		if sillTop > y0 then
+			panel(parent, segment, `{name}Sill`, gap.offset, gapWidth(gap), y0, math.min(height, sillTop - y0), thickness, color, material)
+		end
+		local gapTop = sillTop + gapHeight(gap)
 		if y0 + height > gapTop then
 			local bottom = math.max(y0, gapTop)
 			panel(parent, segment, `{name}Lintel`, gap.offset, gapWidth(gap), bottom, (y0 + height) - bottom, thickness, color, material)
@@ -377,12 +389,13 @@ local function createDoorwayFrame(parent: Instance, segment: WallSegment, gap: D
 	local width = gapWidth(gap)
 	local height = gapHeight(gap)
 	local offset = gap.offset
+	local base = floorY + gapSill(gap)
 	for _, side in ipairs({ -1, 1 }) do
 		BuildingDecor.createPart(
 			parent,
 			`{segment.name}DoorwayJamb`,
 			Vector3.new(jambWidth, height + 0.6, depth),
-			BuildingDecor.wallCFrame(segment, offset + (side * ((width + jambWidth) / 2)), floorY + ((height + 0.6) / 2), depth / 2),
+			BuildingDecor.wallCFrame(segment, offset + (side * ((width + jambWidth) / 2)), base + ((height + 0.6) / 2), depth / 2),
 			style.TrimColor,
 			{ material = Enum.Material.Wood }
 		)
@@ -391,7 +404,7 @@ local function createDoorwayFrame(parent: Instance, segment: WallSegment, gap: D
 		parent,
 		`{segment.name}DoorwayLintel`,
 		Vector3.new(width + (jambWidth * 2), 0.6, depth),
-		BuildingDecor.wallCFrame(segment, offset, floorY + height + 0.3, depth / 2),
+		BuildingDecor.wallCFrame(segment, offset, base + height + 0.3, depth / 2),
 		style.TrimColor,
 		{ material = Enum.Material.Wood }
 	)
@@ -399,10 +412,20 @@ local function createDoorwayFrame(parent: Instance, segment: WallSegment, gap: D
 		parent,
 		`{segment.name}DoorwayCrest`,
 		Vector3.new(1.2, 0.8, 0.2),
-		BuildingDecor.wallCFrame(segment, offset, floorY + height + 1.1, 0.5),
+		BuildingDecor.wallCFrame(segment, offset, base + height + 1.1, 0.5),
 		style.BrassColor,
 		{ material = Enum.Material.Metal }
 	)
+	if gapSill(gap) > 0 then
+		BuildingDecor.createPart(
+			parent,
+			`{segment.name}WindowSill`,
+			Vector3.new(width + (jambWidth * 2) + 0.6, 0.4, 1.2),
+			BuildingDecor.wallCFrame(segment, offset, base - 0.2, 0.6),
+			style.TrimColor,
+			{ material = Enum.Material.Wood }
+		)
+	end
 end
 
 local function getFeatureOffsets(length: number): { number }

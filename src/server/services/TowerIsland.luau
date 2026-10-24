@@ -27,9 +27,10 @@ local TURRET_RADIUS = 6
 local TURRET_HEIGHT = 36
 local TURRET_ROOF_HEIGHT = 20
 local TURRET_INSET = 9
--- Ponte coberta: da muralha até a parede norte do Casarão.
+-- Ponte coberta: da muralha até a parede norte do Casarão, chegando por
+-- baixo do janelão do Salão da Coleção (o telhado não tapa a vista).
 local BRIDGE_END_Z = -67
-local BRIDGE_END_Y = 134
+local BRIDGE_END_Y = 122
 local BRIDGE_WIDTH = 12
 local BRIDGE_PILLAR_SPACING = 13
 local BRIDGE_ROOF_HEIGHT = 11

@@ -147,3 +147,7 @@ Cada entrega é testada no Studio com capturas, e o commit é feito quando o don
   - **Atingido:** é empurrado só rampa abaixo (`RaceRules.downhillPush`) e fica tonto por 1 s, andando a 5, com estrelinhas na cabeça (`RaceDizzy`).
   - **Contas puras testadas no Lune:** `bandHits`, `handSweeps` e `downhillPush`.
   - **Studio:** os quatro tipos e o ponteiro apareceram na mesma corrida. O golpe e a tontura foram conferidos, e a velocidade volta a 16 depois.
+- **Fechamento da 5F.**
+  - **Vista da torre:** janelão de vidro com caixilhos de madeira, peitoril acima da vitrine de Puffs e placa "🕰️ TORRE DO RELÓGIO" na parede norte do Salão da Coleção. Pela janela se vê a torre inteira. O `BuildingDecor` ganhou vãos com peitoril (`DoorGap.sill`). A ponte coberta desceu para chegar por baixo da janela sem tapar a vista.
+  - **Corrida com bots (Studio, rodada de 60 s):** os 3 bots subiram sem travar, num ritmo de cerca de 1,7 studs de altura por segundo, levando golpes e tontura pelo caminho. Chegaram a 90–103 dos 120. Na rodada normal (150 s), isso leva ao topo em uns 75 s.
+  - **Tela final:** conferida, mostra "Ninguém chegou ao topo da torre".

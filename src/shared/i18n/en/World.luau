@@ -7,6 +7,7 @@
 return table.freeze({
 	-- Placas das salas do Casarão
 	["✨ SALÃO DA COLEÇÃO"] = "✨ COLLECTION HALL",
+	["🕰️ TORRE DO RELÓGIO"] = "🕰️ CLOCK TOWER",
 	["👥 PONTO DE ENCONTRO"] = "👥 MEETING POINT",
 	["🐶 JARDIM DO BARÃO"] = "🐶 BARON'S GARDEN",
 	["🏠 SALÃO PRINCIPAL"] = "🏠 GRAND HALL",

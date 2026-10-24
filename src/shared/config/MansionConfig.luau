@@ -51,6 +51,10 @@ export type MansionConfig = {
 	PassageOffsets: { number },
 	-- Largura e altura das portas da galeria (abaixo do Hall da Fama).
 	PassageSize: Vector2,
+	-- Janelão do Salão da Coleção virado para a Torre do Relógio (Fase 5F):
+	-- centro em X, largura × altura do vão e altura do peitoril (acima da
+	-- vitrine de Puffs).
+	TowerWindow: { CenterX: number, Size: Vector2, Sill: number },
 	FloorColor: Color3,
 	HallRugColor: Color3,
 	WallpaperColors: { [string]: Color3 },
@@ -71,6 +75,7 @@ local MansionConfig: MansionConfig = {
 	PartitionThickness = 1.5,
 	PassageOffsets = table.freeze({ -22.5, 0, 22.5 }),
 	PassageSize = Vector2.new(8, 10.5),
+	TowerWindow = table.freeze({ CenterX = 176, Size = Vector2.new(22, 12), Sill = 5.5 }),
 	FloorColor = Color3.fromRGB(140, 96, 60),
 	HallRugColor = Color3.fromRGB(122, 34, 40),
 	WallpaperColors = table.freeze({
