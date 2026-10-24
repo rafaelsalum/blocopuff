@@ -3,9 +3,9 @@
 -- Cenário fantástico da Torre do Relógio Encantada (Fase 5F.2): gárgulas na
 -- mureta do terraço e no portão da ilha, tochas acesas na mureta da rampa,
 -- árvores secas e retorcidas na beira da ilha, chafariz no gramado, velas
--- flutuantes ao longo da subida, morcegos em volta do campanário e névoa
--- fria embaixo da ilha. Velas e morcegos ficam parados no servidor; quem os
--- anima é o cliente (TowerAmbienceController), pelas tags abaixo.
+-- flutuantes ao longo da subida e morcegos em volta do campanário. Velas e
+-- morcegos ficam parados no servidor; quem os anima é o cliente
+-- (TowerAmbienceController), pelas tags abaixo.
 
 local CollectionService = game:GetService("CollectionService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -46,7 +46,6 @@ local CANDLE_ARCH_GAP = 0.08
 local BAT_COUNT = 6
 local BAT_SIZE = 3.5
 local BELFRY_ORBIT_HEIGHT = 36
-local MIST_DEPTH = 18
 
 local COLORS = TowerKit.COLORS
 local part = TowerKit.part
@@ -185,31 +184,6 @@ local function buildBats(model: Instance, center: Vector3, topY: number)
 	end
 end
 
-local function buildMist(model: Instance, center: Vector3)
-	local radius = RaceConfig.Tower.IslandRadius
-	local holder = part(model, "Mist", Vector3.new(radius * 2.2, 1, radius * 2.2), CFrame.new(center - Vector3.new(0, MIST_DEPTH, 0)), Color3.new(1, 1, 1), Enum.Material.SmoothPlastic)
-	holder.Transparency = 1
-	TowerKit.decor(holder)
-	local mist = Instance.new("ParticleEmitter")
-	mist.Name = "ColdMist"
-	mist.Texture = "rbxasset://textures/particles/smoke_main.dds"
-	mist.Color = ColorSequence.new(Color3.fromRGB(205, 218, 236))
-	mist.LightEmission = 0.15
-	mist.Size = NumberSequence.new(28, 46)
-	mist.Transparency = NumberSequence.new({
-		NumberSequenceKeypoint.new(0, 1),
-		NumberSequenceKeypoint.new(0.3, 0.6),
-		NumberSequenceKeypoint.new(1, 1),
-	})
-	mist.Lifetime = NumberRange.new(10, 14)
-	mist.Rate = 8
-	mist.Speed = NumberRange.new(1, 3)
-	mist.SpreadAngle = Vector2.new(180, 180)
-	mist.Rotation = NumberRange.new(0, 360)
-	mist.RotSpeed = NumberRange.new(-6, 6)
-	mist.Parent = holder
-end
-
 -- Monta os enfeites da torre já construída (`pointAt` = meio da rampa na
 -- volta `t`).
 function TowerDecor.build(parent: Instance, center: Vector3, topY: number, pointAt: (number) -> Vector3)
@@ -221,7 +195,6 @@ function TowerDecor.build(parent: Instance, center: Vector3, topY: number, point
 	buildFountain(model, center)
 	buildCandles(model, center, pointAt)
 	buildBats(model, center, topY)
-	buildMist(model, center)
 	model.Parent = parent
 end
 

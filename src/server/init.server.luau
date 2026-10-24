@@ -54,6 +54,8 @@ local MansionLockService = require(script.services.MansionLockService)
 local RelicService = require(script.services.RelicService)
 local MansionLifeService = require(script.services.MansionLifeService)
 local MansionAmbienceService = require(script.services.MansionAmbienceService)
+local OutdoorService = require(script.services.OutdoorService)
+local DayCycleService = require(script.services.DayCycleService)
 
 local WORLD_NAME = "BlocoPuffWorld"
 local GENERATED_BY_ATTRIBUTE = "GeneratedBy"
@@ -106,6 +108,20 @@ print("[BlocoPuff] Mansion lobby built")
 -- todo (Fase 5F).
 TowerBuilder.get()
 print("[BlocoPuff] Clock tower island built")
+
+-- Lado de fora: terreno, lago, montanhas e floresta em volta de tudo que já
+-- foi construído (monta em segundo plano), e o céu na hora de Brasília.
+-- Opcional: é só cenário.
+local outdoorOk, outdoorFailure = pcall(OutdoorService.start, world)
+if not outdoorOk then
+	warn(string.format("[BlocoPuff] Outdoors unavailable: %s", tostring(outdoorFailure)))
+end
+local dayCycleOk, dayCycleFailure = pcall(DayCycleService.start)
+if dayCycleOk then
+	print("[BlocoPuff] Day cycle following Brasilia time")
+else
+	warn(string.format("[BlocoPuff] Day cycle unavailable: %s", tostring(dayCycleFailure)))
+end
 
 AdminService.start()
 print("[BlocoPuff] Secure admin panel initialized")

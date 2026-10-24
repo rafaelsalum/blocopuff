@@ -1,11 +1,12 @@
 --!strict
 
--- Ilha de pedra flutuante da Torre do Relógio Encantada (Fase 5F): gramado
--- com pátio de laje em volta da torre, penhasco pendurado embaixo (cones de
--- rocha virados), muralha baixa com ameias, torrinhas de telhado pontudo
--- azul e a ponte coberta que sobe até a porta do fundo do Saguão da Torre
--- (TowerHallLayout), por onde quem está no lobby passeia na ilha. A muralha
--- e a ponte têm uma barreira invisível por cima (ninguém pula para fora).
+-- Terraço da Torre do Relógio Encantada (Fase 5F), assentado no chão da
+-- floresta (OutdoorService): gramado com pátio de laje em volta da torre,
+-- muralha baixa com ameias, torrinhas de telhado pontudo azul e a ponte
+-- coberta, sobre pilares de pedra, que sobe até a porta do fundo do Saguão
+-- da Torre (TowerHallLayout), por onde quem está no lobby passeia em volta
+-- da torre. A muralha e a ponte têm uma barreira invisível por cima
+-- (ninguém pula para fora).
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
@@ -15,10 +16,6 @@ local TowerKit = require(script.Parent.TowerKit)
 
 local GROUND_THICKNESS = 4
 local COURTYARD_FRACTION = 0.76
-local CLIFF_HEIGHT = 110
-local HANGING_ROCKS = 3
-local HANGING_ROCK_RADIUS = 24
-local HANGING_ROCK_HEIGHT = 55
 local RIM_SEGMENTS = 32
 local RIM_HEIGHT = 4
 local RIM_THICKNESS = 2
@@ -36,6 +33,10 @@ local FENCE_HEIGHT = 16
 local BRIDGE_WIDTH = 12
 local BRIDGE_PILLAR_SPACING = 13
 local BRIDGE_ROOF_HEIGHT = 11
+-- Pilares de pedra embaixo da ponte: descem até abaixo do chão (o terreno
+-- esconde o pé).
+local BRIDGE_PIER_THICKNESS = 2.5
+local BRIDGE_PIER_DEPTH = 30
 
 local COLORS = TowerKit.COLORS
 local part = TowerKit.part
@@ -47,13 +48,6 @@ local function buildGround(model: Instance, center: Vector3, radius: number)
 	cylinder(model, "IslandGround", radius, GROUND_THICKNESS, center - Vector3.new(0, GROUND_THICKNESS / 2, 0), COLORS.grass, Enum.Material.Grass)
 	-- Pátio de laje um pouco acima do gramado (sem degrau sensível).
 	cylinder(model, "Courtyard", radius * COURTYARD_FRACTION, GROUND_THICKNESS, center - Vector3.new(0, GROUND_THICKNESS / 2 - 0.1, 0), COLORS.stoneLight, Enum.Material.Slate)
-	local underside = center - Vector3.new(0, GROUND_THICKNESS, 0)
-	TowerKit.decor(TowerKit.cone(model, "Cliff", radius - 2, CLIFF_HEIGHT, underside, COLORS.rock, Enum.Material.Rock, true))
-	for index = 1, HANGING_ROCKS do
-		local angle = (index - 0.5) * 2 * math.pi / HANGING_ROCKS + 0.4
-		local offset = Vector3.new(math.cos(angle), 0, math.sin(angle)) * (radius * 0.55)
-		TowerKit.decor(TowerKit.cone(model, "HangingRock", HANGING_ROCK_RADIUS, HANGING_ROCK_HEIGHT, underside + offset, COLORS.rock, Enum.Material.Rock, true))
-	end
 end
 
 -- Parede invisível de `from` a `to`, com o pé na altura deles.
@@ -124,6 +118,12 @@ local function buildBridge(model: Instance, from: Vector3, to: Vector3)
 		for _, side in ipairs({ -1, 1 }) do
 			local foot = (CFrame.lookAt(along, along + (to - from)) * CFrame.new(side * (BRIDGE_WIDTH / 2 - 0.5), BRIDGE_ROOF_HEIGHT / 2, 0)).Position
 			TowerKit.decor(part(model, "BridgePost", Vector3.new(1, BRIDGE_ROOF_HEIGHT, 1), CFrame.new(foot), COLORS.wood, Enum.Material.Wood))
+		end
+		-- As pontas apoiam no Saguão e no terraço.
+		if index > 0 and index < pillars - 1 then
+			local flat = Vector3.new(to.X - from.X, 0, to.Z - from.Z)
+			local pier = CFrame.lookAt(along, along + flat) * CFrame.new(0, -1.5 - BRIDGE_PIER_DEPTH / 2, 0)
+			TowerKit.decor(part(model, "BridgePier", Vector3.new(BRIDGE_WIDTH - 2, BRIDGE_PIER_DEPTH, BRIDGE_PIER_THICKNESS), pier, COLORS.stone, Enum.Material.Cobblestone))
 		end
 	end
 	-- Telhado de duas águas de ardósia.
