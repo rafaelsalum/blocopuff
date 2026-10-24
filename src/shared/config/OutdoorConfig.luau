@@ -69,6 +69,20 @@ export type ForestConfig = {
 	ShadowRadius: number,
 }
 
+-- Postes de lampião antigos, de ferro, em volta das construções.
+export type LampConfig = {
+	-- Distância entre postes e afastamento das paredes.
+	Spacing: number,
+	WallOffset: number,
+	PostHeight: number,
+	LightRange: number,
+	LightBrightness: number,
+	LightColor: Rgb,
+	-- Acendem ao entardecer e apagam de manhã (hora de Brasília).
+	OnHour: number,
+	OffHour: number,
+}
+
 -- Um momento do dia: o céu passa de um para o outro aos poucos.
 export type LightKey = {
 	hour: number,
@@ -91,6 +105,7 @@ export type DayCycleConfig = {
 export type OutdoorConfig = {
 	Terrain: TerrainConfig,
 	Forest: ForestConfig,
+	Lamps: LampConfig,
 	DayCycle: DayCycleConfig,
 }
 
@@ -136,29 +151,39 @@ local OutdoorConfig: OutdoorConfig = {
 		DeadChance = 0.04,
 		ShadowRadius = 450,
 	}),
+	Lamps = table.freeze({
+		Spacing = 30,
+		WallOffset = 12,
+		PostHeight = 11,
+		LightRange = 30,
+		LightBrightness = 1.4,
+		LightColor = { 255, 168, 92 },
+		OnHour = 17.6,
+		OffHour = 6.4,
+	}),
 	DayCycle = table.freeze({
 		UtcOffsetHours = -3,
 		UpdateSeconds = 5,
 		Keys = table.freeze({
-			-- Noite: luar fraco e azulado, névoa mais fechada.
+			-- Noite: luar azulado, claro o bastante para ver o mapa.
 			table.freeze({
 				hour = 0,
-				brightness = 0.35,
-				outdoorAmbient = { 34, 40, 62 },
-				atmosphereColor = { 26, 32, 48 },
-				atmosphereDecay = { 20, 24, 40 },
-				atmosphereDensity = 0.36,
-				atmosphereHaze = 0,
+				brightness = 1.2,
+				outdoorAmbient = { 140, 150, 185 },
+				atmosphereColor = { 74, 86, 118 },
+				atmosphereDecay = { 50, 60, 92 },
+				atmosphereDensity = 0.28,
+				atmosphereHaze = 0.6,
 				atmosphereGlare = 0,
 			}),
 			table.freeze({
 				hour = 4.8,
-				brightness = 0.35,
-				outdoorAmbient = { 34, 40, 62 },
-				atmosphereColor = { 26, 32, 48 },
-				atmosphereDecay = { 20, 24, 40 },
-				atmosphereDensity = 0.36,
-				atmosphereHaze = 0,
+				brightness = 1.2,
+				outdoorAmbient = { 140, 150, 185 },
+				atmosphereColor = { 74, 86, 118 },
+				atmosphereDecay = { 50, 60, 92 },
+				atmosphereDensity = 0.28,
+				atmosphereHaze = 0.6,
 				atmosphereGlare = 0,
 			}),
 			-- Amanhecer rosado, com neblina no vale.
@@ -217,12 +242,12 @@ local OutdoorConfig: OutdoorConfig = {
 			}),
 			table.freeze({
 				hour = 19.4,
-				brightness = 0.35,
-				outdoorAmbient = { 34, 40, 62 },
-				atmosphereColor = { 26, 32, 48 },
-				atmosphereDecay = { 20, 24, 40 },
-				atmosphereDensity = 0.36,
-				atmosphereHaze = 0,
+				brightness = 1.2,
+				outdoorAmbient = { 140, 150, 185 },
+				atmosphereColor = { 74, 86, 118 },
+				atmosphereDecay = { 50, 60, 92 },
+				atmosphereDensity = 0.28,
+				atmosphereHaze = 0.6,
 				atmosphereGlare = 0,
 			}),
 		}),

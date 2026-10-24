@@ -17,6 +17,7 @@ Avaliação no Studio em 24/10/2026:
 - **Lago** a leste do Casarão, visto das janelas da ala leste e da Torre.
 - **Montanhas** em anel em volta de tudo, com cristas irregulares e pedra no alto.
 - **Floresta de pinheiros** mais fechada perto do Casarão, rala nas encostas, com clareiras e algumas árvores secas, e sem árvore no gramado das construções, na água, em encosta íngreme ou acima da linha das árvores.
+- **Postes de lampião antigos** de ferro em volta do Casarão e no portão da Torre, acesos à noite.
 - **Céu na hora de Brasília (UTC−3):** amanhecer rosado, dia claro, tarde dourada, pôr do sol e noite com luar, estrelas e névoa azulada. Todos no servidor veem a mesma hora. A luz de dentro do Casarão não muda: lá dentro quem ilumina são os lustres.
 
 Fora do escopo: a fachada do Casarão, que continua sendo a caixa de paredes de hoje.
@@ -35,6 +36,7 @@ Fora do escopo: a fachada do Casarão, que continua sendo a caixa de paredes de 
   - `DayCycle`: a hora de Brasília e a luz de cada hora, passando aos poucos de um momento do dia para o outro.
 - Serviços:
   - `OutdoorService`: lê onde estão o prédio da Arena, o Casarão, o Saguão e a ponte da Torre, a ilha e a Ala do Assassinato, monta o terreno (`OutdoorTerrain`) e planta a floresta (`ForestAssets`). Roda em segundo plano depois que a Torre fica pronta. É só cenário: a partida não espera por ele.
+  - `OutdoorLamps`: monta os postes e os acende e apaga pela hora (`LampLayout`, puro, diz onde ficam e quando acendem).
   - `DayCycleService`: a cada 5 s ajusta o sol (`ClockTime`), a luz do sol, a luz ambiente de fora e a névoa (`Atmosphere`). Para testar, o atributo `ClockOverride` (0 a 24) no `Lighting` fixa a hora.
 
 ## Andamento
@@ -47,9 +49,14 @@ Fora do escopo: a fachada do Casarão, que continua sendo a caixa de paredes de 
 - **Floresta:** 1.166 árvores (cerca de 2.400 peças), plantadas em cerca de 10 s, sem colisão nem raycast. Só as que ficam até 450 studs do Casarão fazem sombra. 4% são árvores secas.
 - **Torre:** a ilha deixou de flutuar. O penhasco pendurado e a névoa de baixo saíram, e a ponte coberta ganhou pilares de pedra.
 - **Céu:** oito momentos do dia em `OutdoorConfig.DayCycle.Keys`. O céu do place já escurece com estrelas à noite e foi mantido.
-- **Testes no Lune:** `TerrainShape` (24 checagens), `ForestPlan` (13) e `DayCycle` (17).
+- **Noite mais clara e lampiões (out/2026).** A primeira noite ficou escura demais para ver o mapa.
+  - A noite agora tem luar mais forte (luz do sol 1,2 e luz ambiente de fora azulada, 140, 150, 185) e névoa mais clara, para as árvores e o chão aparecerem.
+  - **Lampiões:** 41 postes antigos com base de pedra, poste de ferro preto e lanterna de vidro com chama. Ficam em volta do Casarão e da Arena, a 12 studs das paredes e a no máximo 30 entre si, menos no caminho da ponte. Há também um de cada lado do portão da Torre.
+  - Cada lampião tem uma luz quente (alcance 30, sem sombra). Eles acendem às 17h36 e apagam às 6h24, pela hora de Brasília.
+- **Testes no Lune:** `TerrainShape` (24 checagens), `ForestPlan` (13), `DayCycle` (17) e `LampLayout` (12).
 - **Studio:**
-  - Vistas conferidas às 10h, 12h, 17h36 e 21h.
+  - Vistas conferidas às 10h, 12h, 17h36 e 21h. Na noite nova dá para ver o chão, as árvores, a Torre e a ponte, com as poças de luz dos lampiões.
+  - Os lampiões ficam apagados ao meio-dia e às 6h30, e acesos às 18h e na hora real (20h40).
   - Pela janela do Saguão da Torre se vê a floresta.
   - A leitura dos voxels não achou terreno dentro da Arena, do Casarão nem da área da Ala do Assassinato. Sem erros no console.
 
