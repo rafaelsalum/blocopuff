@@ -51,6 +51,7 @@ local MatchQueueController = require(script.controllers.MatchQueueController)
 local InviteController = require(script.controllers.InviteController)
 local DashController = require(script.controllers.DashController)
 local WorldTextLocalizer = require(script.controllers.WorldTextLocalizer)
+local TowerAmbienceController = require(script.controllers.TowerAmbienceController)
 
 print("[BlocoPuff] Client initialized")
 
@@ -347,4 +348,12 @@ local worldTextOk, worldTextErr = pcall(function()
 end)
 if not worldTextOk then
 	warn(string.format("[BlocoPuff] Failed to start world text localizer: %s", tostring(worldTextErr)))
+end
+
+-- Velas flutuantes e morcegos da Torre do Relógio (Fase 5F.2).
+local towerAmbienceOk, towerAmbienceErr = pcall(function()
+	TowerAmbienceController.start()
+end)
+if not towerAmbienceOk then
+	warn(string.format("[BlocoPuff] Failed to start tower ambience: %s", tostring(towerAmbienceErr)))
 end

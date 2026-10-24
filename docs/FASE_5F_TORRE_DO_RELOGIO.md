@@ -132,3 +132,9 @@ Cada entrega é testada no Studio com capturas, e o commit é feito quando o don
   - **Topo:** bloco do relógio com 4 mostradores (hora de Brasília), pináculos, campanário com sino que toca a cada chegada, e telhado cônico de ardósia com ponta dourada.
   - **Modelos e montagem:** o cone vem da Creator Store (malha 703458158), recriado por código. A torre fica de pé desde a partida do servidor (`TowerBuilder.get`).
   - **Empurrão:** sem componente para fora (`PushOutward = 0`, vertical 14).
+- **5F.2 — cenário fantástico.**
+  - **Modelos da Creator Store** (`TowerAssets`): só a malha e a textura, recriadas por código; os scripts e interfaces que vinham com os modelos ficam de fora. São eles: grifo sem textura como gárgula de pedra, tocha, árvore seca, árvore retorcida, vela e morcego.
+  - **Gárgulas:** 5 na mureta do terraço e 2 nos pilares do portão da ilha.
+  - **Tochas:** 16 com fogo na mureta da rampa, metade com luz.
+  - **Ilha:** 6 árvores no gramado, chafariz com jato d'água e névoa fria embaixo.
+  - **Velas e morcegos:** 20 velas flutuam ao longo da subida e 6 morcegos voam em volta do campanário. Quem anima é o cliente (`TowerAmbienceController`), só com a câmera perto da torre.

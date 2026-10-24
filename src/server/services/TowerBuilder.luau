@@ -5,14 +5,15 @@
 -- rampa larga em espiral com mureta e ameias na borda de fora, barreira
 -- invisível até a volta de cima (ninguém pula para fora), contrafortes,
 -- patamares de checkpoint com arco e estandarte, e o terraço do topo cercado,
--- com o relógio de 4 faces e o campanário (TowerSpire). A geometria vem de
--- RaceRules; aqui só se criam as peças.
+-- com o relógio de 4 faces e o campanário (TowerSpire), e os enfeites
+-- (TowerDecor). A geometria vem de RaceRules; aqui só se criam as peças.
 
 local Workspace = game:GetService("Workspace")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local RaceConfig = require(ReplicatedStorage.Shared.config.RaceConfig)
 local RaceRules = require(script.Parent.Parent.data.RaceRules)
+local TowerDecor = require(script.Parent.TowerDecor)
 local TowerIsland = require(script.Parent.TowerIsland)
 local TowerKit = require(script.Parent.TowerKit)
 local TowerSpire = require(script.Parent.TowerSpire)
@@ -300,6 +301,7 @@ function TowerBuilder.build(): TowerLayout
 	end
 	buildTop(folder, layout, columnRadius)
 	layout.bell = TowerSpire.build(folder, Vector3.new(center.X, topY, center.Z))
+	TowerDecor.build(folder, center, topY, pointAt)
 
 	local world = Workspace:FindFirstChild("BlocoPuffWorld")
 	folder.Parent = if world ~= nil then world else Workspace
