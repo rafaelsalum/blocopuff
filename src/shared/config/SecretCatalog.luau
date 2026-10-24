@@ -26,6 +26,8 @@ local ENTRIES: { SecretDefinition } = {
 	secret("por_um_fio", "Por um Fio", "Venceu com quase nada de arena de pé", "Vencer quando quase não sobra chão…"),
 	secret("mestre_quadros", "Mestre dos Quadros", "Revelou as passagens dos dois andares na mesma partida", "Todos os quadros guardam algo…"),
 	secret("puff_perdido", "Puff Perdido", "Achou o Puff escondido no lobby", "Algo brilha num canto do lobby…"),
+	-- Fase 5C.4: todos os cômodos do Mapa do Casarão (MansionMapConfig).
+	secret("explorador", "Explorador", "Conheceu todos os cômodos do Casarão", "Quem conhece cada canto do Casarão?…"),
 }
 
 local byId: { [string]: SecretDefinition } = {}

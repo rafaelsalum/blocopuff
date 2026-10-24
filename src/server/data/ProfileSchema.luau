@@ -80,6 +80,9 @@ export type Profile = {
 	mysteries: { [string]: number },
 	-- Salas Secretas do Barão com o prêmio pego (5C.3): id → os.time(). Opcional.
 	baronRooms: { [string]: number },
+	-- Cômodos do Casarão já visitados, para o Mapa (5C.4): id → os.time().
+	-- Opcional.
+	rooms: { [string]: number },
 	-- Vida no Casarão (5C.4): Fantasminhas pegos e presentes do Barão no
 	-- dia `ghostDay` / `baraoGiftDay`. Opcionais, sem versão.
 	ghostDay: number,
@@ -164,6 +167,7 @@ function ProfileSchema.default(now: number): Profile
 		dailyRelicCount = 0,
 		mysteries = {},
 		baronRooms = {},
+		rooms = {},
 		ghostDay = 0,
 		ghostCount = 0,
 		baraoGiftDay = 0,
@@ -253,6 +257,7 @@ end
 
 -- Ids dos mistérios (MysteryConfig) são curtos.
 local MAX_MYSTERY_ID = 16
+local MAX_ROOM_ID = 16
 
 local function readRelics(raw: unknown, now: number): { [string]: number }
 	return readDatedIds(raw, now, RelicCatalog.MaxIdLength)
@@ -352,6 +357,7 @@ function ProfileSchema.fromStored(raw: unknown, now: number): (Profile, boolean)
 		profile.dailyRelicCount = cleanNumber(data.dailyRelicCount, 0)
 		profile.mysteries = readDatedIds(data.mysteries, now, MAX_MYSTERY_ID)
 		profile.baronRooms = readDatedIds(data.baronRooms, now, MAX_MYSTERY_ID)
+		profile.rooms = readDatedIds(data.rooms, now, MAX_ROOM_ID)
 		profile.ghostDay = cleanNumber(data.ghostDay, 0)
 		profile.ghostCount = cleanNumber(data.ghostCount, 0)
 		profile.baraoGiftDay = cleanNumber(data.baraoGiftDay, 0)
@@ -404,6 +410,7 @@ function ProfileSchema.fromStored(raw: unknown, now: number): (Profile, boolean)
 		dailyRelicCount = cleanNumber(data.dailyRelicCount, 0),
 		mysteries = readDatedIds(data.mysteries, now, MAX_MYSTERY_ID),
 		baronRooms = readDatedIds(data.baronRooms, now, MAX_MYSTERY_ID),
+		rooms = readDatedIds(data.rooms, now, MAX_ROOM_ID),
 		ghostDay = cleanNumber(data.ghostDay, 0),
 		ghostCount = cleanNumber(data.ghostCount, 0),
 		baraoGiftDay = cleanNumber(data.baraoGiftDay, 0),
@@ -523,6 +530,7 @@ function ProfileSchema.toStored(profile: Profile): { [string]: any }
 		dailyRelicCount = profile.dailyRelicCount,
 		mysteries = table.clone(profile.mysteries),
 		baronRooms = table.clone(profile.baronRooms),
+		rooms = table.clone(profile.rooms),
 		ghostDay = profile.ghostDay,
 		ghostCount = profile.ghostCount,
 		baraoGiftDay = profile.baraoGiftDay,

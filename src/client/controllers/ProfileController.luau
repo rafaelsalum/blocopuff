@@ -12,6 +12,8 @@ local PuffCatalog = require(ReplicatedStorage.Shared.config.PuffCatalog)
 local DailyConfig = require(ReplicatedStorage.Shared.config.DailyConfig)
 local SecretCatalog = require(ReplicatedStorage.Shared.config.SecretCatalog)
 local BaronRoomsConfig = require(ReplicatedStorage.Shared.config.BaronRoomsConfig)
+local MansionMapConfig = require(ReplicatedStorage.Shared.config.MansionMapConfig)
+local MansionMapRules = require(ReplicatedStorage.Shared.modules.MansionMapRules)
 local MysteryConfig = require(ReplicatedStorage.Shared.config.MysteryConfig)
 local RelicCatalog = require(ReplicatedStorage.Shared.config.RelicCatalog)
 local PuffadorConstants = require(ReplicatedStorage.Shared.modules.PuffadorConstants)
@@ -265,6 +267,9 @@ local function parse(raw: unknown): ProfileSnapshot?
 		baronRooms = parseIds(data.baronRooms, function(id: unknown): boolean
 			return typeof(id) == "string" and table.find(BaronRoomsConfig.Ids, id) ~= nil
 		end, #BaronRoomsConfig.Ids) or {},
+		rooms = parseIds(data.rooms, function(id: unknown): boolean
+			return MansionMapRules.isRoom(MansionMapConfig.Rooms, id)
+		end, #MansionMapConfig.Rooms) or {},
 		dailyRelicDay = readNumber(data.dailyRelicDay),
 		dailyRelicCount = readNumber(data.dailyRelicCount),
 		relicEvent = parseRelicEvent(data.relicEvent),

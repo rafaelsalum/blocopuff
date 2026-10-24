@@ -107,6 +107,11 @@ function SecretAchievementService.passageRevealed(player: Player, floor: number)
 end
 
 -- Fim da rodada: `remainingRatio` = parte da arena ainda de pé (0 a 1).
+-- O jogador conheceu todos os cômodos do Mapa do Casarão (MansionMapService).
+function SecretAchievementService.explored(player: Player)
+	grant(player, "explorador")
+end
+
 function SecretAchievementService.roundFinished(winner: Player?, remainingRatio: number)
 	if winner ~= nil and remainingRatio <= NEAR_EMPTY_ARENA then
 		grant(winner, "por_um_fio")

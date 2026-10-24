@@ -50,6 +50,7 @@ local DashService = require(script.services.DashService)
 local PianoService = require(script.services.PianoService)
 local MysteryService = require(script.services.MysteryService)
 local BaronRoomsService = require(script.services.BaronRoomsService)
+local MansionLockService = require(script.services.MansionLockService)
 local RelicService = require(script.services.RelicService)
 local MansionLifeService = require(script.services.MansionLifeService)
 local MansionAmbienceService = require(script.services.MansionAmbienceService)
@@ -253,6 +254,12 @@ if baronRoomsOk then
 	print("[BlocoPuff] Baron's secret rooms ready")
 else
 	warn(string.format("[BlocoPuff] Baron's secret rooms unavailable: %s", tostring(baronRoomsFailure)))
+end
+
+-- Portas trancadas do Casarão (chave e nível; o cenário vem com a ala leste).
+local mansionLocksOk, mansionLocksFailure = pcall(MansionLockService.start)
+if not mansionLocksOk then
+	warn(string.format("[BlocoPuff] Mansion locks unavailable: %s", tostring(mansionLocksFailure)))
 end
 
 -- Telemetria dos cômodos visitados no lobby (5C): RoomEntered e

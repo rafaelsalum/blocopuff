@@ -25,6 +25,7 @@ local TrapVisualController = require(script.controllers.TrapVisualController)
 local StormController = require(script.controllers.StormController)
 local SlipperyController = require(script.controllers.SlipperyController)
 local MansionDoorController = require(script.controllers.MansionDoorController)
+local MansionLockController = require(script.controllers.MansionLockController)
 local AtticController = require(script.controllers.AtticController)
 local ResultsController = require(script.controllers.ResultsController)
 local TelemetryController = require(script.controllers.TelemetryController)
@@ -41,6 +42,7 @@ local ChallengesController = require(script.controllers.ChallengesController)
 local ModeController = require(script.controllers.ModeController)
 local MysteryModeController = require(script.controllers.MysteryModeController)
 local RelicController = require(script.controllers.RelicController)
+local MansionMapController = require(script.controllers.MansionMapController)
 local MysteryController = require(script.controllers.MysteryController)
 local BaronRoomsController = require(script.controllers.BaronRoomsController)
 local MansionLifeController = require(script.controllers.MansionLifeController)
@@ -159,6 +161,14 @@ if not mansionDoorOk then
 	warn(string.format("[BlocoPuff] Failed to start mansion doors: %s", tostring(mansionDoorErr)))
 end
 
+-- Portas trancadas: chave ou nível.
+local mansionLockOk, mansionLockErr = pcall(function()
+	MansionLockController.start()
+end)
+if not mansionLockOk then
+	warn(string.format("[BlocoPuff] Failed to start mansion locks: %s", tostring(mansionLockErr)))
+end
+
 -- Sótão escuro: lanterna na mão de quem está lá.
 local atticOk, atticErr = pcall(function()
 	AtticController.start()
@@ -266,6 +276,14 @@ local relicsOk, relicsErr = pcall(function()
 end)
 if not relicsOk then
 	warn(string.format("[BlocoPuff] Failed to start relic controller: %s", tostring(relicsErr)))
+end
+
+-- Mapa do Casarão (5C.4).
+local mapOk, mapErr = pcall(function()
+	MansionMapController.start()
+end)
+if not mapOk then
+	warn(string.format("[BlocoPuff] Failed to start mansion map: %s", tostring(mapErr)))
 end
 
 -- Mistérios do Barão (5C.3).

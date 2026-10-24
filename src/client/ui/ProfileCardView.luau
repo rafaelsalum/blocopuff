@@ -74,7 +74,7 @@ end
 -- `onPuffdex`: abre o PUFFDEX (botão ✨). `onMachine`: abre a PUFF MACHINE (🎰).
 -- `onChallenges`: abre os DESAFIOS (📋). `onParty`: abre a PARTY (👥).
 -- `onInvite`: convida amigos com recompensa (💌). `onAlbum`: abre o ÁLBUM
--- DO CASARÃO (📜).
+-- DO CASARÃO (📜). `onMap`: abre o MAPA DO CASARÃO (🗺️).
 function ProfileCardView.new(
 	playerGui: PlayerGui,
 	onRanking: () -> (),
@@ -83,7 +83,8 @@ function ProfileCardView.new(
 	onChallenges: () -> (),
 	onParty: () -> (),
 	onInvite: () -> (),
-	onAlbum: () -> ()
+	onAlbum: () -> (),
+	onMap: () -> ()
 ): ProfileCardViewHandle
 	local screenGui = UiTheme.createScreenGui(GUI_NAME, playerGui, 12)
 
@@ -173,6 +174,7 @@ function ProfileCardView.new(
 		{ name = "MachineButton", text = "🎰", variant = "Gold", action = onMachine },
 		{ name = "ChallengesButton", text = "📋", variant = "Success", action = onChallenges },
 		{ name = "AlbumButton", text = "📜", variant = "Gold", action = onAlbum },
+		{ name = "MapButton", text = "🗺️", variant = "Success", action = onMap },
 		{ name = "PartyButton", text = "👥", variant = "Primary", action = onParty },
 		{ name = "InviteButton", text = "💌", variant = "Success", action = onInvite },
 	}

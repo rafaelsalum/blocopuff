@@ -5,7 +5,8 @@
 -- outro jogador, um bot ou o Barão passeando) chega perto, para o lado
 -- oposto de quem chegou, com rangido, e fecha batendo quando todos saem (a
 -- batida avisa os lustres perto, MansionSignals). As folhas não têm
--- colisão: a animação é só visual e cada cliente anima a sua.
+-- colisão: a animação é só visual e cada cliente anima a sua. Uma porta
+-- trancada (MansionLockConfig) só abre uma fresta para quem não tem acesso.
 
 local CollectionService = game:GetService("CollectionService")
 local Players = game:GetService("Players")
@@ -14,6 +15,7 @@ local RunService = game:GetService("RunService")
 local Workspace = game:GetService("Workspace")
 
 local MansionConfig = require(ReplicatedStorage.Shared.config.MansionConfig)
+local MansionLockConfig = require(ReplicatedStorage.Shared.config.MansionLockConfig)
 local StateAttributeNames = require(ReplicatedStorage.Shared.types.StateAttributeNames)
 local BaraoWalk = require(ReplicatedStorage.Shared.modules.BaraoWalk)
 local MansionSignals = require(script.Parent.Parent.effects.MansionSignals)
@@ -43,7 +45,7 @@ type Door = {
 	center: Vector3,
 	normal: Vector3,
 	leaves: { Leaf },
-	-- 0 fechada, 1 aberta.
+	-- 0 fechada, 1 aberta (a fresta de uma porta trancada fica no meio).
 	progress: number,
 	target: number,
 	lastNear: number,
@@ -211,20 +213,29 @@ local function nearest(door: Door, positions: { Vector3 }): Vector3?
 	return best
 end
 
+-- Até onde a porta abre para este jogador.
+local function openFraction(door: Door): number
+	local lock = door.model:GetAttribute(MansionLockConfig.LockAttribute)
+	if typeof(lock) ~= "string" then
+		return 1
+	end
+	local player = Players.LocalPlayer
+	local access = player ~= nil and player:GetAttribute(MansionLockConfig.AccessAttributePrefix .. lock) == true
+	return if access then 1 else MansionLockConfig.CrackFraction
+end
+
 local function scan(clock: number)
 	local positions = collectRoots()
 	for _, door in pairs(doors) do
 		local who = nearest(door, positions)
 		if who ~= nil then
 			door.lastNear = clock
-			if door.target == 0 then
-				if door.progress <= 0 then
-					chooseSwing(door, who)
-					playSound(door, CONFIG.CreakSoundId, CONFIG.CreakSpeed)
-				end
-				door.target = 1
+			if door.target == 0 and door.progress <= 0 then
+				chooseSwing(door, who)
+				playSound(door, CONFIG.CreakSoundId, CONFIG.CreakSpeed)
 			end
-		elseif door.target == 1 and clock - door.lastNear >= CONFIG.CloseDelay then
+			door.target = openFraction(door)
+		elseif door.target > 0 and clock - door.lastNear >= CONFIG.CloseDelay then
 			door.target = 0
 		end
 	end
@@ -242,7 +253,7 @@ local function step(deltaTime: number)
 			doors[model] = nil
 		elseif door.progress ~= door.target then
 			if door.target > door.progress then
-				door.progress = math.min(1, door.progress + deltaTime / CONFIG.OpenTime)
+				door.progress = math.min(door.target, door.progress + deltaTime / CONFIG.OpenTime)
 			else
 				door.progress = math.max(0, door.progress - deltaTime / CONFIG.CloseTime)
 				if door.progress <= 0 then

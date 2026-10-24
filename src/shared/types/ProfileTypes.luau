@@ -119,6 +119,8 @@ export type ProfileSnapshot = {
 	mysteries: { string },
 	-- Salas Secretas do Barão com o prêmio pego (ids do BaronRoomsConfig).
 	baronRooms: { string },
+	-- Cômodos do Casarão já visitados (ids do MansionMapConfig), para o Mapa.
+	rooms: { string },
 	-- Eventos desta atualização (para comemorar uma vez só).
 	dailyReward: DailyReward?,
 	completedChallenges: { string }?,

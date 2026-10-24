@@ -96,6 +96,28 @@ O jogador passa a:
   - o relógio da torre bate a cada poucos minutos;
   - trovão e relâmpago pelas janelas durante a Tempestade da partida (5.7), para quem está no lobby também sentir.
 - **Mapa do Casarão** (modal): os cômodos aparecem conforme o jogador entra neles, com "% explorado" e onde estão os amigos da Party. Chegar a 100% dá a conquista "Explorador".
+- *Andamento (out/2026):*
+  - **Portas trancadas:**
+    - a porta da Escadaria para a Sala de Música só abre com a Chave de Latão, que fica na Biblioteca;
+    - a nova **Sala dos Troféus do Vovô Puff** (prateleiras de taças, um Puff dourado no pedestal e um lustre) fica atrás de uma porta dupla no meio da parede leste da Escadaria e só abre a partir do nível 10 ou com qualquer prestígio;
+    - em cada vão trancado há uma barreira invisível e uma placa com o cadeado ("🔒 CHAVE DE LATÃO", "🔒 NÍVEL 10");
+    - o servidor publica o acesso de cada jogador a partir do perfil (`MansionLockService`), e o cliente de quem tem acesso tira a colisão da barreira (`MansionLockController`);
+    - quem não tem acesso vê a porta abrir só uma fresta, ouve uma batida e recebe o aviso de onde achar a chave ou de qual nível falta;
+    - quem já está dentro sempre consegue sair;
+    - a liberação é feita no cliente, como nas Salas Secretas do Barão: dá para burlar com exploit, o que é aceitável para um cômodo de cenário;
+    - o retrato do Barão Filhote, que ficava no meio da parede leste da Escadaria, passou para o lado da porta nova.
+  - **Mapa do Casarão:**
+    - o botão 🗺️ no cartão do perfil abre a planta, andar por andar (Térreo, Sótão, Porão);
+    - os cômodos visitados aparecem com ícone e nome, os que faltam aparecem escuros com "?", e as Salas Secretas só aparecem depois de visitadas;
+    - mostra o "% explorado", você e os amigos da Party;
+    - os cômodos visitados ficam no perfil (`rooms`, protegido pelo `ProfileGuard`);
+    - contam os 11 cômodos que não são secretos, incluindo a Música e a Sala dos Troféus, que pedem a chave e o nível;
+    - completar dá a conquista secreta "Explorador" (5 🎟).
+  - **Trovão no lobby:** a Tempestade da partida (5.7) já escurece o céu, faz chover e troveja para todos os clientes, inclusive para quem está no Casarão.
+  - **Testado no Studio:**
+    - a porta trancada barra quem não tem acesso, abre só a fresta e mostra o aviso;
+    - com acesso, o jogador passa, e sem acesso quem está dentro consegue sair;
+    - uma volta pelo Casarão encheu o mapa de 10/11 até 100% e deu a conquista.
 - **Obby do Sótão** (opcional, se sobrar tempo): percurso curto no telhado e no sótão, com cronômetro e ranking semanal ("mais rápido do Casarão").
 
 ---
@@ -145,7 +167,7 @@ Referência da economia: a Puff Machine custa 5 🎟 e uma vitória rende 3. O C
   - nada animado pelo servidor além do Barão e do Fantasminha.
 - **Sons:** os sons embutidos do Roblox são poucos. Portas (rangido e batida), relógio, piano, risinho do fantasma e coleta usam áudios gratuitos do Creator Store, com os IDs em config, como nas armadilhas.
 - **Telemetria:** `LobbyTime`, `RoomEntered`, `RelicFound`, `RoomSetCompleted`, `AlbumCompleted`, `DailyRelicFound`, `PageFound`, `PuzzleSolved`, `SecretRoomOpened`, `GhostCaught`, `QueueTicketTeleport` e `QueueTicketMissed` (partida perdida apesar da ficha).
-  - *Andamento (out/2026):* entraram `LobbyTime` (segundos no lobby antes de cada partida, desde a entrada ou desde o fim da anterior), `RoomEntered` (primeira visita na sessão a cada cômodo, ala, Sótão, Porão e salas do Barão; valor = segundos desde a entrada), `SecretRoomOpened` (primeira visita ao Escritório e à Sala do Tesouro do Barão), `QueueTicketTeleport` e `QueueTicketMissed` (no início da partida, para quem tinha a ficha e estava fora do mirante). Ainda faltam as portas trancadas, o mapa do Casarão e o trovão do lobby.
+  - *Andamento (out/2026):* entraram `LobbyTime` (segundos no lobby antes de cada partida, desde a entrada ou desde o fim da anterior), `RoomEntered` (primeira visita na sessão a cada cômodo, ala, Sótão, Porão e salas do Barão; valor = segundos desde a entrada), `SecretRoomOpened` (primeira visita ao Escritório e à Sala do Tesouro do Barão), `QueueTicketTeleport` e `QueueTicketMissed` (no início da partida, para quem tinha a ficha e estava fora do mirante). O Mapa registra `MapRoomDiscovered` (valor: quantos cômodos o jogador já conhece; contexto: o cômodo novo).
 
 ---
 
@@ -154,7 +176,7 @@ Referência da economia: a Puff Machine custa 5 🎟 e uma vitória rende 3. O C
 - [ ] Quem tem a Ficha pode passear pelo Casarão inteiro e entra na partida sem perder a vez.
 - [ ] Ninguém é levado para a partida sem o aviso de 15 s.
 - [ ] Portas abrem e fecham com som, para cada jogador no seu ritmo, sem prender ninguém.
-- [ ] Portas trancadas e de nível só abrem para quem tem a chave ou o nível.
+- [x] Portas trancadas e de nível só abrem para quem tem a chave ou o nível.
 - [ ] Relíquias, páginas, mistérios e cômodos visitados ficam salvos e nunca somem, nem com falha de salvamento.
 - [ ] Cada prêmio do Casarão sai uma vez só (exceto Relíquia do Dia, Fantasminha e presente do Barão, que têm limite diário).
 - [ ] O Álbum mostra o que falta com dicas, sem entregar o lugar.

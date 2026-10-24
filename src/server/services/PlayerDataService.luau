@@ -53,6 +53,7 @@ local OnboardingRules = require(script.Parent.Parent.data.OnboardingRules)
 local SecretCatalog = require(ReplicatedStorage.Shared.config.SecretCatalog)
 local BaronRoomsConfig = require(ReplicatedStorage.Shared.config.BaronRoomsConfig)
 local MysteryConfig = require(ReplicatedStorage.Shared.config.MysteryConfig)
+local MansionMapConfig = require(ReplicatedStorage.Shared.config.MansionMapConfig)
 local RelicCatalog = require(ReplicatedStorage.Shared.config.RelicCatalog)
 local ProgressionConfig = require(ReplicatedStorage.Shared.config.ProgressionConfig)
 local LevelCurve = require(ReplicatedStorage.Shared.modules.LevelCurve)
@@ -200,6 +201,12 @@ local function snapshotOf(entry: Entry, award: XpAward?, events: Events?): Profi
 			table.insert(baronRooms, id)
 		end
 	end
+	local rooms: { string } = {}
+	for _, room in ipairs(MansionMapConfig.Rooms) do
+		if profile.rooms[room.id] ~= nil then
+			table.insert(rooms, room.id)
+		end
+	end
 	local challenges = {}
 	for _, state in ipairs(profile.challenges.list) do
 		table.insert(challenges, table.clone(state))
@@ -223,6 +230,7 @@ local function snapshotOf(entry: Entry, award: XpAward?, events: Events?): Profi
 		dailyRelicCount = profile.dailyRelicCount,
 		mysteries = mysteries,
 		baronRooms = baronRooms,
+		rooms = rooms,
 		award = award,
 		newPuffs = if events ~= nil then nonEmpty(events.newPuffs) else nil,
 		dailyReward = if events ~= nil then events.dailyReward else nil,

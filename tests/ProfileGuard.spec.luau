@@ -197,6 +197,16 @@ do
 	check("normal baron rooms save has no anomalies", #none == 0 and fresh.baronRooms.Treasure == 9)
 end
 
+-- Mapa do Casarão: cômodo visitado nunca some.
+do
+	local stored = profile({ rooms = { GrandHall = 7, Library = 8 } })
+	local merged, anomalies = ProfileGuard.mergeForSave(stored, profile({ rooms = { GrandHall = 7, Music = 9 } }))
+	check("visited rooms are restored", merged.rooms.Library == 8 and merged.rooms.Music == 9)
+	check("visited rooms anomaly reported", table.find(anomalies, "rooms+1") ~= nil)
+	local fresh, none = ProfileGuard.mergeForSave(stored, profile({ rooms = { GrandHall = 7, Library = 8, Music = 9 } }))
+	check("normal visited rooms save has no anomalies", #none == 0 and fresh.rooms.Music == 9)
+end
+
 -- Limites do dia (Fantasminha, presente do Barão): não dá para burlar.
 do
 	local stored = profile({ ghostDay = 20, ghostCount = 4, baraoGiftDay = 20, baraoGiftCount = 2 })

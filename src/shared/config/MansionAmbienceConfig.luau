@@ -80,7 +80,8 @@ MansionAmbienceConfig.Portraits = table.freeze({
 	portrait("vovoa", "Vovó Puff", "GrandHall", "S", 55, "Grandma", Color3.fromRGB(255, 182, 214), Color3.fromRGB(110, 104, 190)),
 	portrait("bisavo", "Bisavô Explorador", "Library", "W", 31, "Explorer", Color3.fromRGB(255, 214, 140), Color3.fromRGB(70, 132, 104)),
 	portrait("tia", "Tia Puff, a Cantora", "Music", "S", 9, "Singer", Color3.fromRGB(196, 150, 255), Color3.fromRGB(170, 80, 120)),
-	portrait("barao", "Barão Filhote", "StairHall", "E", 24, "Puppy", Color3.fromRGB(176, 110, 60), Color3.fromRGB(96, 150, 196)),
+	-- Ao lado da porta da Sala dos Troféus (que fica no meio da parede).
+	portrait("barao", "Barão Filhote", "StairHall", "E", 12, "Puppy", Color3.fromRGB(176, 110, 60), Color3.fromRGB(96, 150, 196)),
 	portrait("fantasma", "Primo Fantasma", "Attic", "W", 60, "Ghost", Color3.fromRGB(236, 242, 255), Color3.fromRGB(70, 64, 120)),
 } :: { Portrait })
 

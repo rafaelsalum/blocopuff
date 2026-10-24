@@ -4,7 +4,8 @@
 -- cômodo cada jogador fora da partida está. A primeira visita de cada
 -- cômodo na sessão manda RoomEntered (valor: segundos de sessão; contexto:
 -- o cômodo); a primeira entrada numa sala secreta do Barão também manda
--- SecretRoomOpened.
+-- SecretRoomOpened. O cômodo de cada segundo também vai para o Mapa do
+-- Casarão (MansionMapService), que salva os cômodos novos no perfil.
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -12,9 +13,11 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local BaronRoomsLayout = require(ReplicatedStorage.Shared.modules.BaronRoomsLayout)
 local MansionLayout = require(ReplicatedStorage.Shared.modules.MansionLayout)
 local MansionWingLayout = require(ReplicatedStorage.Shared.modules.MansionWingLayout)
+local TrophyRoomLayout = require(ReplicatedStorage.Shared.modules.TrophyRoomLayout)
 local StateAttributeNames = require(ReplicatedStorage.Shared.types.StateAttributeNames)
 local LobbyRooms = require(script.Parent.Parent.data.LobbyRooms)
 local TelemetryService = require(script.Parent.TelemetryService)
+local MansionMapService = require(script.Parent.MansionMapService)
 
 type Zone = LobbyRooms.Zone
 
@@ -49,6 +52,7 @@ local function buildZones(): { Zone }
 			table.insert(zones, boxZone(room.id, tunnel, true))
 		end
 	end
+	table.insert(zones, boxZone("Trophy", TrophyRoomLayout.get().room))
 	local wing = MansionWingLayout.get()
 	local wingBox = { minX = wing.minX, maxX = wing.maxX, minZ = wing.minZ, maxZ = wing.maxZ }
 	table.insert(zones, boxZone("Attic", { minX = wingBox.minX, maxX = wingBox.maxX, minZ = wingBox.minZ, maxZ = wingBox.maxZ, minY = wing.atticFloorY - FLOOR_SLACK, maxY = wing.atticCeilingY }))
@@ -76,6 +80,9 @@ local function check(zones: { Zone })
 			local position = root.Position
 			local zone = LobbyRooms.zoneAt(zones, position.X, position.Y, position.Z)
 			local seen = visited[player]
+			if zone ~= nil then
+				MansionMapService.seen(player, zone.name)
+			end
 			if zone ~= nil and seen ~= nil and LobbyRooms.firstVisit(seen, zone.name) then
 				local seconds = math.floor(now - (joinedAt[player] or now))
 				TelemetryService.lobbyEvent(player, "RoomEntered", seconds, zone.name)
@@ -97,6 +104,7 @@ function LobbyRoomTelemetry.start()
 		return
 	end
 	started = true
+	MansionMapService.start()
 	local zones = buildZones()
 	for _, player in ipairs(Players:GetPlayers()) do
 		track(player)
