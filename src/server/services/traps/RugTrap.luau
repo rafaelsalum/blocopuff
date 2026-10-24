@@ -308,7 +308,7 @@ end
 
 -- Efeito ao fim do aviso: quem está em cima escorrega para o lado da
 -- franja. Devolve quantos escorregaram.
-function RugTrap.trigger(fringe: BasePart, shooter: Combatant?, _isCurrent: () -> boolean): number
+function RugTrap.trigger(fringe: BasePart, shooter: Combatant?, _isCurrent: () -> boolean, source: KnockbackService.HitSource?): number
 	local rug = rugs[fringe]
 	if rug == nil then
 		return 0
@@ -318,7 +318,7 @@ function RugTrap.trigger(fringe: BasePart, shooter: Combatant?, _isCurrent: () -
 	for _, combatant in ipairs(CombatantRegistry.all()) do
 		if combatant ~= shooter and KnockbackService.isActiveParticipant(combatant) then
 			local root = CombatantRegistry.getRoot(combatant)
-			if root ~= nil and isOnRug(rug, root.Position) and KnockbackService.slide(shooter, combatant, velocity, CONFIG.SlideDuration) then
+			if root ~= nil and isOnRug(rug, root.Position) and KnockbackService.slide(shooter, combatant, velocity, CONFIG.SlideDuration, source) then
 				affected += 1
 			end
 		end

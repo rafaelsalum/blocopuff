@@ -103,6 +103,9 @@ export type RoundDelta = ProfileStats
 -- conquistas secretas (4.3).
 local CURRENT_VERSION = 5
 local MAX_STAT = 1e9
+-- Armadilhas acionadas numa rodada (todas as janelas, tapetes, lustres e a
+-- lareira com todos os usos cabem com folga).
+local MAX_TRAP_TRIGGERS = 80
 -- Datas (os.time) e UserIds passam de 1e9: teto do maior inteiro exato.
 local MAX_EXACT = 2 ^ 53 - 1
 local MAX_ROUND_KEY_LENGTH = 80
@@ -441,6 +444,9 @@ local function roundLimits(): { [string]: number }
 		botWins = 1,
 		raceMatches = 1,
 		raceWins = 1,
+		-- Folga acima de todos os usos de todas as armadilhas numa rodada.
+		trapsTriggered = MAX_TRAP_TRIGGERS,
+		trapKnockouts = GameConfig.MaximumPlayers - 1,
 	}
 end
 

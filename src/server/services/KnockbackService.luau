@@ -19,9 +19,17 @@ local CombatantRegistry = require(script.Parent.CombatantRegistry)
 
 type Combatant = CombatantRegistry.Combatant
 
+-- De que armadilha veio o empurrão (para os Momentos Puff, as conquistas
+-- e a telemetria da derrubada). Tiro não tem origem.
+export type HitSource = {
+	kind: string,
+	id: string,
+}
+
 type LastHit = {
 	attacker: Combatant,
 	clock: number,
+	source: HitSource?,
 }
 
 export type HitSender = (player: Player, kind: string, value: any) -> ()
@@ -110,9 +118,9 @@ end
 
 -- Empurrão vindo de outra fonte (armadilhas do Casarão), com as mesmas
 -- regras do disparo: só participantes vivos, respeita a proteção da Segunda
--- Chance e credita a derrubada a `attacker` (nil: ninguém leva o crédito).
--- Devolve se o empurrão foi aplicado.
-local function deliver(attacker: Combatant?, victim: Combatant, kind: string, value: any): boolean
+-- Chance e credita a derrubada a `attacker` (nil: ninguém leva o crédito),
+-- lembrando a armadilha (`source`). Devolve se o empurrão foi aplicado.
+local function deliver(attacker: Combatant?, victim: Combatant, kind: string, value: any, source: HitSource?): boolean
 	if sendToPlayer == nil or not isActiveParticipant(victim) then
 		return false
 	end
@@ -122,26 +130,26 @@ local function deliver(attacker: Combatant?, victim: Combatant, kind: string, va
 		return false
 	end
 	if attacker ~= nil and attacker ~= victim then
-		lastHits[victim] = { attacker = attacker, clock = now }
+		lastHits[victim] = { attacker = attacker, clock = now, source = source }
 	end
 	notify(victim, kind, value)
 	return true
 end
 
-function KnockbackService.push(attacker: Combatant?, victim: Combatant, velocity: Vector3): boolean
-	return deliver(attacker, victim, "Knockback", velocity)
+function KnockbackService.push(attacker: Combatant?, victim: Combatant, velocity: Vector3, source: HitSource?): boolean
+	return deliver(attacker, victim, "Knockback", velocity, source)
 end
 
 -- Escorregão (Tapete Puxado): só na horizontal, por `duration` segundos, sem
 -- tirar o jogador do chão (a gravidade continua valendo). Mesmas regras de
 -- `push`.
-function KnockbackService.slide(attacker: Combatant?, victim: Combatant, velocity: Vector3, duration: number): boolean
-	return deliver(attacker, victim, "Slide", { velocity = Vector3.new(velocity.X, 0, velocity.Z), duration = duration })
+function KnockbackService.slide(attacker: Combatant?, victim: Combatant, velocity: Vector3, duration: number, source: HitSource?): boolean
+	return deliver(attacker, victim, "Slide", { velocity = Vector3.new(velocity.X, 0, velocity.Z), duration = duration }, source)
 end
 
 -- Credita uma queda de `victim` a `attacker` sem empurrar (ex.: o chão
 -- caiu debaixo dele por causa de uma armadilha).
-function KnockbackService.markAttacker(victim: Combatant, attacker: Combatant)
+function KnockbackService.markAttacker(victim: Combatant, attacker: Combatant, source: HitSource?)
 	if attacker == victim or not isActiveParticipant(victim) then
 		return
 	end
@@ -150,19 +158,22 @@ function KnockbackService.markAttacker(victim: Combatant, attacker: Combatant)
 	if immuneUntil ~= nil and now < immuneUntil then
 		return
 	end
-	lastHits[victim] = { attacker = attacker, clock = now }
+	lastHits[victim] = { attacker = attacker, clock = now, source = source }
 end
 
--- Quem empurrou `victim` por último, se foi há pouco tempo.
-function KnockbackService.getRecentAttacker(victim: Combatant): Combatant?
+-- Quem empurrou `victim` por último, se foi há pouco tempo, e de que
+-- armadilha (nil: foi tiro).
+function KnockbackService.getRecentHit(victim: Combatant): (Combatant?, HitSource?)
 	local hit = lastHits[victim]
-	if hit == nil then
-		return nil
+	if hit == nil or os.clock() - hit.clock > GameConfig.Knockback.CreditWindow then
+		return nil, nil
 	end
-	if os.clock() - hit.clock > GameConfig.Knockback.CreditWindow then
-		return nil
-	end
-	return hit.attacker
+	return hit.attacker, hit.source
+end
+
+function KnockbackService.getRecentAttacker(victim: Combatant): Combatant?
+	local attacker = KnockbackService.getRecentHit(victim)
+	return attacker
 end
 
 function KnockbackService.protect(combatant: Combatant, seconds: number)

@@ -27,6 +27,10 @@ export type ProfileStats = {
 	-- Corrida da Torre do Relógio (Fase 5D.2).
 	raceMatches: number,
 	raceWins: number,
+	-- Armadilhas do Casarão (Fase 5.8): acionadas de longe e humanos
+	-- derrubados por elas.
+	trapsTriggered: number,
+	trapKnockouts: number,
 }
 
 -- Desafio do dia (4.3): progresso e se já foi concluído (os tickets saem
@@ -149,6 +153,8 @@ local ProfileTypes = {
 		"botWins",
 		"raceMatches",
 		"raceWins",
+		"trapsTriggered",
+		"trapKnockouts",
 	}),
 }
 

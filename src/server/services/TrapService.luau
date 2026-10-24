@@ -19,6 +19,10 @@
 --     o aviso normal e sem crédito (StormSchedule).
 -- Cada tipo (traps/*) faz o próprio efeito e a própria aparência. O estado
 -- vai em atributos da peça-alvo (TrapConstants) para os clientes desenharem.
+-- Fase 5.8: cada empurrão leva a origem (tipo e id da armadilha) até o
+-- crédito da derrubada (TrapMoments); a telemetria ganha o tempo até a
+-- primeira armadilha da rodada (TrapFirst) e quantas armadilhas a
+-- Tempestade acionou (StormTraps).
 
 local CollectionService = game:GetService("CollectionService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -29,6 +33,7 @@ local TrapConstants = require(ReplicatedStorage.Shared.modules.TrapConstants)
 local KnockbackService = require(script.Parent.KnockbackService)
 local ProjectileService = require(script.Parent.ProjectileService)
 local TelemetryService = require(script.Parent.TelemetryService)
+local TrapMoments = require(script.Parent.TrapMoments)
 local StormSchedule = require(script.Parent.Parent.data.StormSchedule)
 local CombatantRegistry = require(script.Parent.CombatantRegistry)
 local ArenaService = require(script.Parent.ArenaService)
@@ -39,6 +44,7 @@ local WindowTrap = require(script.Parent.traps.WindowTrap)
 
 type TrapState = TrapConstants.TrapState
 type Combatant = CombatantRegistry.Combatant
+type HitSource = KnockbackService.HitSource
 
 -- O que cada tipo de armadilha precisa oferecer.
 type Behavior = {
@@ -46,8 +52,8 @@ type Behavior = {
 	-- Efeito ao fim do aviso; devolve quantos jogadores atingiu. `shooter`
 	-- é nil quando ninguém acionou (bloco derrubado pelo próprio jogo).
 	-- `isCurrent()` diz se a armadilha continua neste acionamento (a rodada
-	-- não acabou), para efeitos com atraso.
-	trigger: (part: BasePart, shooter: Combatant?, isCurrent: () -> boolean) -> number,
+	-- não acabou), para efeitos com atraso. `source` vai em cada empurrão.
+	trigger: (part: BasePart, shooter: Combatant?, isCurrent: () -> boolean, source: HitSource) -> number,
 	-- Volta a aparência de pronta.
 	restore: (part: BasePart) -> (),
 	-- A peça-alvo da armadilha presa a `block`, se houver (ela dispara
@@ -98,6 +104,15 @@ local listeningToBlocks = false
 -- antiga param sozinhos.
 local stormToken = 0
 local stormRandom = Random.new()
+-- Jogadores que já acionaram a primeira armadilha da rodada (telemetria
+-- TrapFirst: quanto tempo cada um leva para usar uma armadilha).
+local firstLogged: { [Player]: boolean } = {}
+-- Folga depois da Tempestade para contar o que ela acionou.
+local STORM_REPORT_SLACK = 1
+-- Relatório da Tempestade ainda não enviado (a rodada pode acabar antes do
+-- fim dela: aí ele vai no fim da rodada).
+type StormReport = { audience: { Player }, fired: { [string]: number } }
+local pendingStorm: StormReport? = nil
 
 local function setState(trap: Trap, state: TrapState, by: Combatant?)
 	trap.state = state
@@ -228,7 +243,8 @@ local function fire(trap: Trap, shooter: Combatant?, token: number, forced: bool
 	local function isCurrent(): boolean
 		return active and trap.token == token
 	end
-	local ok, result = pcall(trap.behavior.trigger, trap.part, shooter, isCurrent)
+	local source: HitSource = { kind = trap.kind, id = trap.id }
+	local ok, result = pcall(trap.behavior.trigger, trap.part, shooter, isCurrent, source)
 	if not ok then
 		warn(`[BlocoPuff] Trap {trap.kind} failed: {result}`)
 	end
@@ -257,6 +273,12 @@ local function onSurfaceHit(shooter: Combatant, instance: Instance, _position: V
 		return
 	end
 	logEvent(shooter, "TrapTriggered", math.floor(distance), telemetryKind(trap), trap.id)
+	local player = shooter.player
+	if player ~= nil and not firstLogged[player] then
+		firstLogged[player] = true
+		logEvent(shooter, "TrapFirst", TelemetryService.roundElapsed(), telemetryKind(trap), trap.id)
+	end
+	TrapMoments.triggered(shooter, trap.kind)
 	arm(trap, shooter, false)
 end
 
@@ -280,15 +302,37 @@ local function onBlockDestroyed(block: Part, by: Combatant?)
 	end
 end
 
+-- Telemetria do fim da Tempestade, para quem estava vivo quando ela chegou.
+-- Vai uma vez só: no fim da Tempestade ou no fim da rodada, o que vier antes.
+local function reportStorm(report: StormReport)
+	if pendingStorm ~= report then
+		return
+	end
+	pendingStorm = nil
+	local windows = report.fired[TrapConstants.Window] or 0
+	local chandeliers = report.fired[TrapConstants.Chandelier] or 0
+	for _, player in ipairs(report.audience) do
+		if player.Parent ~= nil then
+			TelemetryService.event(player, "StormTraps", windows + chandeliers, `Windows{windows}`, `Chandeliers{chandeliers}`)
+		end
+	end
+end
+
 function TrapService.beginRound()
 	active = true
 	stormToken += 1
+	pendingStorm = nil
+	table.clear(firstLogged)
 	resetAll()
 end
 
 function TrapService.endRound()
+	if pendingStorm ~= nil then
+		reportStorm(pendingStorm)
+	end
 	active = false
 	stormToken += 1
+	table.clear(firstLogged)
 	resetAll()
 end
 
@@ -307,11 +351,13 @@ local function readyOfKind(kind: string): { Trap }
 	return ready
 end
 
-local function scheduleStorm(list: { Trap }, times: { number }, token: number)
+-- `fired` conta, por tipo, o que a Tempestade acionou de fato.
+local function scheduleStorm(list: { Trap }, times: { number }, token: number, fired: { [string]: number })
 	for index, trap in ipairs(list) do
 		task.delay(times[index], function()
 			-- Um jogador pode ter acionado essa armadilha nesse meio tempo.
 			if active and stormToken == token and trap.state == TrapConstants.Ready then
+				fired[trap.kind] = (fired[trap.kind] or 0) + 1
 				arm(trap, nil, false)
 			end
 		end)
@@ -320,8 +366,9 @@ end
 
 -- Tempestade do Caos Final, que dura `duration` segundos: as janelas
 -- prontas estouram uma por vez e os lustres pendurados caem em sequência,
--- sem crédito. Tapetes e lareira continuam com os jogadores.
-function TrapService.storm(duration: number)
+-- sem crédito. Tapetes e lareira continuam com os jogadores. No fim, conta
+-- para `audience` (os vivos na chegada) quantas armadilhas ela acionou.
+function TrapService.storm(duration: number, audience: { Player })
 	if not active then
 		return
 	end
@@ -329,8 +376,11 @@ function TrapService.storm(duration: number)
 	local windows = readyOfKind(TrapConstants.Window)
 	local chandeliers = readyOfKind(TrapConstants.Chandelier)
 	local plan = StormSchedule.plan(#windows, #chandeliers, duration, TrapConfig.Storm)
-	scheduleStorm(windows, plan.windows, stormToken)
-	scheduleStorm(chandeliers, plan.chandeliers, stormToken)
+	local report: StormReport = { audience = audience, fired = {} }
+	pendingStorm = report
+	scheduleStorm(windows, plan.windows, stormToken, report.fired)
+	scheduleStorm(chandeliers, plan.chandeliers, stormToken, report.fired)
+	task.delay(duration + STORM_REPORT_SLACK, reportStorm, report)
 end
 
 -- Depois que a arena restaura os blocos fora da rodada (fim do intervalo,

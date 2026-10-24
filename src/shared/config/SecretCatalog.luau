@@ -28,6 +28,10 @@ local ENTRIES: { SecretDefinition } = {
 	secret("puff_perdido", "Puff Perdido", "Achou o Puff escondido no lobby", "Algo brilha num canto do lobby…"),
 	-- Fase 5C.4: todos os cômodos do Mapa do Casarão (MansionMapConfig).
 	secret("explorador", "Explorador", "Conheceu todos os cômodos do Casarão", "Quem conhece cada canto do Casarão?…"),
+	-- Fase 5.8: armadilhas do Casarão (TrapMoments).
+	secret("vidraceiro", "Vidraceiro", "Quebrou 5 janelas de longe na mesma partida", "Vidro bom é vidro quebrado de longe…"),
+	secret("puxa_tapete", "Puxa-Tapete", "Derrubou alguém puxando o tapete", "Tem tapete que não segura ninguém…"),
+	secret("lustre_na_cabeca", "Lustre na Cabeça", "Derrubou 2 jogadores com o mesmo lustre", "Um lustre, duas vítimas…"),
 }
 
 local byId: { [string]: SecretDefinition } = {}

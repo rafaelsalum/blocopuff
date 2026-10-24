@@ -31,6 +31,7 @@ local ResultTypes = require(ReplicatedStorage.Shared.types.ResultTypes)
 local CombatantRegistry = require(script.Parent.CombatantRegistry)
 local BotFillService = require(script.Parent.BotFillService)
 local StreamPreload = require(script.Parent.StreamPreload)
+local TrapMoments = require(script.Parent.TrapMoments)
 local ModeRegistry = require(script.Parent.Parent.modes.ModeRegistry)
 local RoundModeTypes = require(script.Parent.Parent.modes.RoundModeTypes)
 local ModeRotation = require(script.Parent.Parent.data.ModeRotation)
@@ -354,7 +355,7 @@ end
 
 -- Credita a derrubada a quem empurrou o combatente por último, se foi há pouco.
 local function creditKnockout(victim: Combatant)
-	local attacker = KnockbackService.getRecentAttacker(victim)
+	local attacker, source = KnockbackService.getRecentHit(victim)
 	KnockbackService.forget(victim)
 	if attacker == nil or attacker == victim or participants[attacker] == nil then
 		return
@@ -366,6 +367,10 @@ local function creditKnockout(victim: Combatant)
 	end
 	if usedSecondChance[attacker] then
 		recordComeback(attacker, "Knockout")
+	end
+	-- Derrubada por armadilha: Momento Puff, conquistas e desafios (5.8).
+	if source ~= nil then
+		TrapMoments.knockout(attacker, victim, source)
 	end
 end
 
@@ -643,6 +648,7 @@ local function beginRound(timings: RoundTimings): boolean
 	KnockbackService.beginRound(currentRoundId)
 	PuffMomentService.beginRound()
 	RoundStatsService.beginRound()
+	TrapMoments.beginRound()
 	SecretAchievementService.beginRound()
 	PlayerDataService.roundStarted(humans)
 	TelemetryService.roundStarted(humans, #bots, currentMode.id)
@@ -805,6 +811,8 @@ local function commitProfiles(result: ResultTypes.RoundResult)
 				botWins = outcome.stats.botWins,
 				raceMatches = if currentMode.id == "Race" then 1 else 0,
 				raceWins = if currentMode.id == "Race" and won then 1 else 0,
+				trapsTriggered = extra.trapsTriggered,
+				trapKnockouts = extra.trapKnockouts,
 			}
 			-- O XP usa os mesmos números já limitados que vão para o perfil
 			-- (o applyRound limita de novo e registra as anomalias).
@@ -880,6 +888,7 @@ local function publishResult(): ResultTypes.RoundResult
 		warn(string.format("[BlocoPuff] Secret achievements check failed: %s", tostring(secretsFailure)))
 	end
 	RoundStatsService.endRound()
+	TrapMoments.endRound()
 	if remote == nil then
 		return result
 	end

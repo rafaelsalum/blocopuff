@@ -14,6 +14,8 @@ return table.freeze({
 	["Abra o cofre do Barão"] = "Open the Baron's Vault",
 	["Reconstrua 3 blocos"] = "Rebuild 3 blocks",
 	["Dê a Volta por Cima"] = "Pull off a Comeback",
+	["Acione 3 armadilhas de longe"] = "Trigger 3 traps from afar",
+	["Derrube alguém com uma armadilha"] = "Knock someone out with a trap",
 
 	-- SecretCatalog: nomes, descrições e hints das conquistas secretas
 	["Passagem Oculta"] = "Hidden Passage",
@@ -35,6 +37,18 @@ return table.freeze({
 	["Puff Perdido"] = "Lost Puff",
 	["Achou o Puff escondido no lobby"] = "Found the Puff hidden in the lobby",
 	["Algo brilha num canto do lobby…"] = "Something sparkles in a lobby corner...",
+
+	["Vidraceiro"] = "Glazier",
+	["Quebrou 5 janelas de longe na mesma partida"] = "Broke 5 windows from afar in one match",
+	["Vidro bom é vidro quebrado de longe…"] = "The best glass is glass broken from afar...",
+
+	["Puxa-Tapete"] = "Rug Puller",
+	["Derrubou alguém puxando o tapete"] = "Knocked someone out by pulling the rug",
+	["Tem tapete que não segura ninguém…"] = "Some rugs can't hold anyone...",
+
+	["Lustre na Cabeça"] = "Chandelier Crash",
+	["Derrubou 2 jogadores com o mesmo lustre"] = "Knocked out 2 players with the same chandelier",
+	["Um lustre, duas vítimas…"] = "One chandelier, two victims...",
 
 	-- ReferralConfig: mensagem de convite com recompensa
 	["Vem derrubar blocos comigo no Bloco Puff!"] = "Come destroy blocks with me in BlocoPuff!",

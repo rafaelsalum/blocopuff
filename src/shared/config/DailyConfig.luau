@@ -4,7 +4,7 @@
 --
 -- Desafios: 3 por dia, um de cada nível (fácil, médio, difícil), sempre de
 -- gameplay (Barão, corredores, blocos, cofre, Top 3, derrubadas,
--- exploração), nunca "fique online X minutos". O progresso sai das
+-- exploração, armadilhas), nunca "fique online X minutos". O progresso sai das
 -- estatísticas da rodada calculadas pelo servidor. Concluir dá tickets na
 -- hora, sem botão de resgatar.
 --
@@ -55,6 +55,9 @@ local DailyConfig: DailyConfig = {
 		challenge("vault1", "Abra o cofre do Barão", "vaultsOpened", 1, 4, "Hard"),
 		challenge("build3", "Reconstrua 3 blocos", "blocksBuilt", 3, 4, "Hard"),
 		challenge("comeback1", "Dê a Volta por Cima", "comebacks", 1, 4, "Hard"),
+		-- Fase 5.8: armadilhas do Casarão.
+		challenge("traps3", "Acione 3 armadilhas de longe", "trapsTriggered", 3, 2, "Easy"),
+		challenge("trapko1", "Derrube alguém com uma armadilha", "trapKnockouts", 1, 4, "Hard"),
 	} :: { ChallengeDefinition }),
 }
 

@@ -202,11 +202,11 @@ local function markSneeze(combatant: Combatant)
 	end
 end
 
-local function sneeze(combatant: Combatant, flat: Vector3, inward: Vector3, shooter: Combatant?): boolean
+local function sneeze(combatant: Combatant, flat: Vector3, inward: Vector3, shooter: Combatant?, source: KnockbackService.HitSource?): boolean
 	local knockback = GameConfig.Knockback
 	local direction = if flat.Magnitude > 0.1 then flat.Unit else inward
 	local velocity = (direction * knockback.HorizontalSpeed * CONFIG.SneezeMultiplier) + Vector3.new(0, knockback.VerticalSpeed * CONFIG.SneezeLift, 0)
-	if not KnockbackService.push(shooter, combatant, velocity) then
+	if not KnockbackService.push(shooter, combatant, velocity, source) then
 		return false
 	end
 	markSneeze(combatant)
@@ -215,7 +215,7 @@ end
 
 -- Quem está na nuvem e pode espirrar agora espirra. Devolve quantos. Quem
 -- atirou nunca espirra (como nas outras armadilhas), mesmo se entrar nela.
-local function sweep(center: Vector3, inward: Vector3, shooter: Combatant?): number
+local function sweep(center: Vector3, inward: Vector3, shooter: Combatant?, source: KnockbackService.HitSource?): number
 	local now = os.clock()
 	local count = 0
 	for _, combatant in ipairs(CombatantRegistry.all()) do
@@ -227,7 +227,7 @@ local function sweep(center: Vector3, inward: Vector3, shooter: Combatant?): num
 			-- Só do lado de dentro da parede (atrás dela passa o corredor secreto).
 			local inside = offset:Dot(inward) >= -CONFIG.CloudOffset
 			if inside and offset.Y >= -CLOUD_BELOW and offset.Y <= CONFIG.CloudHeight and flat.Magnitude <= CONFIG.CloudRadius then
-				if sneeze(combatant, flat, inward, shooter) then
+				if sneeze(combatant, flat, inward, shooter, source) then
 					lastSneeze[combatant.id] = now
 					count += 1
 				end
@@ -239,7 +239,7 @@ end
 
 -- Efeito ao fim do aviso: a nuvem fica CloudDuration segundos. Devolve
 -- quantos espirraram logo no começo (telemetria).
-function FireplaceTrap.trigger(mouth: BasePart, shooter: Combatant?, isCurrent: () -> boolean): number
+function FireplaceTrap.trigger(mouth: BasePart, shooter: Combatant?, isCurrent: () -> boolean, source: KnockbackService.HitSource?): number
 	local center = mouths[mouth]
 	if center == nil then
 		return 0
@@ -247,7 +247,7 @@ function FireplaceTrap.trigger(mouth: BasePart, shooter: Combatant?, isCurrent: 
 	local inwardValue = mouth:GetAttribute(TrapConstants.InwardAttribute)
 	local inward = if typeof(inwardValue) == "Vector3" then inwardValue else Vector3.zAxis
 	local endsAt = os.clock() + CONFIG.CloudDuration
-	local first = sweep(center, inward, shooter)
+	local first = sweep(center, inward, shooter, source)
 	task.spawn(function()
 		while true do
 			task.wait(SWEEP_INTERVAL)
@@ -256,7 +256,7 @@ function FireplaceTrap.trigger(mouth: BasePart, shooter: Combatant?, isCurrent: 
 			end
 			-- Quem atirou e saiu do jogo não leva crédito pelos espirros.
 			local credit = if shooter ~= nil and CombatantRegistry.isPresent(shooter) then shooter else nil
-			local ok, failure = pcall(sweep, center, inward, credit)
+			local ok, failure = pcall(sweep, center, inward, credit, source)
 			if not ok then
 				warn(`[BlocoPuff] Fireplace sneeze failed: {failure}`)
 			end

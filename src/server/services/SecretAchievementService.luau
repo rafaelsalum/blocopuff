@@ -107,6 +107,19 @@ function SecretAchievementService.passageRevealed(player: Player, floor: number)
 end
 
 -- Fim da rodada: `remainingRatio` = parte da arena ainda de pé (0 a 1).
+-- Conquistas das armadilhas (Fase 5.8), decididas pelo TrapMoments.
+local TRAP_FEATS: { [string]: boolean } = {
+	vidraceiro = true,
+	puxa_tapete = true,
+	lustre_na_cabeca = true,
+}
+
+function SecretAchievementService.trapFeat(player: Player, secretId: string)
+	if TRAP_FEATS[secretId] then
+		grant(player, secretId)
+	end
+end
+
 -- O jogador conheceu todos os cômodos do Mapa do Casarão (MansionMapService).
 function SecretAchievementService.explored(player: Player)
 	grant(player, "explorador")

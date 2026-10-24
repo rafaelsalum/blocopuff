@@ -107,7 +107,7 @@ Soma-se ao Caos Final de hoje, em que blocos piscam em vermelho e caem:
 - um trovão abre a Tempestade e outros soam a cada 6 a 10 s, com um clarão leve, sem flash forte;
 - as luzes do térreo oscilam devagar entre 60% e 100% do brilho.
 
-Tudo volta ao normal quando o Caos acaba. No Studio, num Caos de 20 s: 5 janelas e o único lustre ainda pendurado (o outro já tinha sido derrubado por um bot) caíram sem crédito, e escurecimento, chuva, trovão, luzes e anúncio funcionaram. A telemetria de quantas armadilhas a Tempestade aciona fica para a 5.8.
+Tudo volta ao normal quando o Caos acaba. No Studio, num Caos de 20 s: 5 janelas e o único lustre ainda pendurado (o outro já tinha sido derrubado por um bot) caíram sem crédito, e escurecimento, chuva, trovão, luzes e anúncio funcionaram. A telemetria de quantas armadilhas a Tempestade aciona entrou na 5.8 (`StormTraps`).
 
 ### 5.8 Momentos Puff, conquistas, telemetria e ajuste
 
@@ -119,6 +119,26 @@ Tudo volta ao normal quando o Caos acaba. No Studio, num Caos de 20 s: 5 janelas
   - desafios diários com armadilhas.
 - **Telemetria:** acionamentos por tipo, distância do disparo, vítimas, derrubadas causadas, tempo até a primeira armadilha e quantas armadilhas são acionadas na Tempestade.
 - **Ajuste:** números finais definidos no playtest (ver a tabela abaixo).
+
+**Andamento:** entregue para as armadilhas (out/2026). Cada armadilha agora carrega a sua origem (`{kind, id}`) até o empurrão: `TrapBlocks`, janelas, tapetes, lustres e lareira passam a origem para o `KnockbackService`, que guarda junto com o último golpe (`getRecentHit`). Quando alguém é eliminado, o `RoundService` vê se o golpe que valeu veio de uma armadilha e chama `TrapMoments.knockout`. As regras puras ficam em `data/TrapMomentRules` (15 testes no Lune). Bots acionam e derrubam, mas só jogadores ganham alguma coisa.
+- **Momentos Puff:** quem acionou a armadilha que derrubou alguém (humano ou bot) ganha o momento do tipo dela: "VIDRAÇA! 💨", "PUXOU O TAPETE! 🧶", "LUSTRE! 💡" ou "ATCHIM! 🤧", com subtítulo para quem fez e para quem vê.
+- **Conquistas secretas** (`SecretCatalog`):
+  - **Vidraceiro:** 5 janelas acionadas de longe na mesma partida;
+  - **Puxa-Tapete:** derrubar alguém com o tapete;
+  - **Lustre na Cabeça:** 2 derrubados pelo mesmo lustre na mesma partida.
+- **Desafios diários** (`DailyConfig`):
+  - "Acione 3 armadilhas de longe" (fácil, 2 tickets);
+  - "Derrube alguém com uma armadilha" (difícil, 4 tickets).
+
+  Eles usam duas estatísticas novas do perfil, `trapsTriggered` e `trapKnockouts`, com teto por rodada no `ProfileSchema` (80 e o máximo de jogadores menos 1). Derrubar bot não conta para o desafio, como nas derrubadas comuns.
+- **Telemetria** (além de `TrapTriggered` com a distância, `TrapAffected` e `TrapSupportLost`, que já existiam):
+  - `TrapFirst`: segundos de rodada até cada jogador acionar a primeira armadilha;
+  - `TrapKnockout`: derrubada causada, com tipo e armadilha;
+  - `StormTraps`: quantas janelas e lustres a Tempestade acionou, para quem estava vivo quando ela chegou. Vai no fim da Tempestade ou, se a rodada acabar antes, no fim da rodada.
+
+No Studio, numa Arena com 3 bots, tiro de 32 studs na janela North:24: saiu `TrapTriggered` e `TrapFirst` (12 s), mesmo com um bot tendo acionado outra janela antes, e `StormTraps` no fim da rodada (5 janelas e 2 lustres), sem erros no console. Os dois casos foram corrigidos nesse teste: o `TrapFirst` era um por rodada e se perdia quando um bot acionava antes, e o `StormTraps` de uma rodada que acabou antes da Tempestade saía na rodada seguinte. A derrubada por armadilha (momento, conquistas e `TrapKnockout`) foi verificada pelos testes das regras e pela leitura do caminho, mas não ao vivo, porque montar uma eliminação por armadilha no Studio depende de posicionar a vítima na hora certa.
+
+Fica para depois: os Momentos Puff, as conquistas e a telemetria do Casarão Vivo (5C), e o ajuste fino dos números no playtest.
 
 ### Fase 5C — Casarão Vivo (lobby)
 

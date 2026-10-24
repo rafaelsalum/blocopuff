@@ -13,6 +13,7 @@ local CombatantRegistry = require(script.Parent.Parent.CombatantRegistry)
 local GameConfig = require(ReplicatedStorage.Shared.config.GameConfig)
 
 type Combatant = CombatantRegistry.Combatant
+export type HitSource = KnockbackService.HitSource
 
 -- Folga ao conferir quem está em cima de um bloco que vai cair.
 local STANDING_MARGIN = 0.5
@@ -54,8 +55,9 @@ function TrapBlocks.intactNear(floor: number, center: Vector3, radius: number): 
 end
 
 -- Os blocos piscam por `delay` segundos e caem; quem estiver em cima na
--- hora cai por causa de `shooter` (nil: ninguém leva o crédito).
-function TrapBlocks.drop(blocks: { Part }, shooter: Combatant?, delay: number, isCurrent: () -> boolean)
+-- hora cai por causa de `shooter` (nil: ninguém leva o crédito), pela
+-- armadilha `source`.
+function TrapBlocks.drop(blocks: { Part }, shooter: Combatant?, delay: number, isCurrent: () -> boolean, source: HitSource?)
 	if #blocks == 0 then
 		return
 	end
@@ -88,7 +90,7 @@ function TrapBlocks.drop(blocks: { Part }, shooter: Combatant?, delay: number, i
 			-- Só leva o crédito quem estava em cima de um bloco que caiu mesmo.
 			if ArenaService.collapseBlock(block, shooter) and shooter ~= nil then
 				for _, victim in ipairs(standing[block] or {}) do
-					KnockbackService.markAttacker(victim, shooter)
+					KnockbackService.markAttacker(victim, shooter, source)
 				end
 			end
 		end
@@ -98,7 +100,7 @@ end
 -- Empurrão de impacto para longe de `center` (na horizontal), para quem
 -- estiver a até `radius` studs e entre `below` e `above` studs de altura em
 -- relação a `center`. Devolve quantos foram empurrados.
-function TrapBlocks.pushAway(center: Vector3, radius: number, below: number, above: number, multiplier: number, lift: number, shooter: Combatant?): number
+function TrapBlocks.pushAway(center: Vector3, radius: number, below: number, above: number, multiplier: number, lift: number, shooter: Combatant?, source: HitSource?): number
 	local knockback = GameConfig.Knockback
 	local random = Random.new()
 	local affected = 0
@@ -111,7 +113,7 @@ function TrapBlocks.pushAway(center: Vector3, radius: number, below: number, abo
 				local angle = random:NextNumber(0, math.pi * 2)
 				local direction = if flat.Magnitude > 0.1 then flat.Unit else Vector3.new(math.cos(angle), 0, math.sin(angle))
 				local velocity = (direction * knockback.HorizontalSpeed * multiplier) + Vector3.new(0, knockback.VerticalSpeed * lift, 0)
-				if KnockbackService.push(shooter, combatant, velocity) then
+				if KnockbackService.push(shooter, combatant, velocity, source) then
 					affected += 1
 				end
 			end

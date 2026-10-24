@@ -56,6 +56,7 @@ type Rain = {
 	shooter: Combatant?,
 	isCurrent: () -> boolean,
 	lastCredit: number,
+	source: KnockbackService.HitSource?,
 }
 
 local WindowTrap = {}
@@ -139,7 +140,7 @@ local function gustAt(frame: Frame, position: Vector3): (number, number)
 	return strength, lateral / halfWidth
 end
 
-local function pushPlayers(frame: Frame, shooter: Combatant?): number
+local function pushPlayers(frame: Frame, shooter: Combatant?, source: KnockbackService.HitSource?): number
 	local knockback = GameConfig.Knockback
 	local affected = 0
 	for _, combatant in ipairs(CombatantRegistry.all()) do
@@ -150,7 +151,7 @@ local function pushPlayers(frame: Frame, shooter: Combatant?): number
 				local direction = (frame.inward + (frame.along * side * CONFIG.Spread)).Unit
 				local velocity = (direction * knockback.HorizontalSpeed * strength)
 					+ Vector3.new(0, knockback.VerticalSpeed * strength * CONFIG.LiftFactor, 0)
-				if KnockbackService.push(shooter, combatant, velocity) then
+				if KnockbackService.push(shooter, combatant, velocity, source) then
 					affected += 1
 				end
 			end
@@ -224,16 +225,16 @@ local function rollVariant(): WindowVariant
 end
 
 -- Ventania: rajada e blocos soltos. Devolve quantos empurrou.
-local function gust(frame: Frame, shooter: Combatant?, isCurrent: () -> boolean): number
-	local affected = pushPlayers(frame, shooter)
-	TrapBlocks.drop(looseBlocks(frame), shooter, CONFIG.LooseBlockDelay, isCurrent)
+local function gust(frame: Frame, shooter: Combatant?, isCurrent: () -> boolean, source: KnockbackService.HitSource?): number
+	local affected = pushPlayers(frame, shooter, source)
+	TrapBlocks.drop(looseBlocks(frame), shooter, CONFIG.LooseBlockDelay, isCurrent, source)
 	return affected
 end
 
 -- Pombos: o bando atravessa a faixa em PigeonFlightTime (o cliente desenha
 -- o voo pelo mesmo relógio). Quem está no trecho da faixa onde o bando
 -- está leva esbarrões. Devolve quantos estavam na faixa no começo.
-local function pigeons(frame: Frame, shooter: Combatant?, isCurrent: () -> boolean): number
+local function pigeons(frame: Frame, shooter: Combatant?, isCurrent: () -> boolean, source: KnockbackService.HitSource?): number
 	local knockback = GameConfig.Knockback
 	local bumps: { [number]: number } = {}
 	local lastBump: { [number]: number } = {}
@@ -254,7 +255,7 @@ local function pigeons(frame: Frame, shooter: Combatant?, isCurrent: () -> boole
 					local direction = (frame.inward + (frame.along * side)).Unit
 					local velocity = (direction * knockback.HorizontalSpeed * CONFIG.PigeonBumpMultiplier)
 						+ Vector3.new(0, knockback.VerticalSpeed * CONFIG.PigeonBumpLift, 0)
-					if KnockbackService.push(shooter, combatant, velocity) then
+					if KnockbackService.push(shooter, combatant, velocity, source) then
 						bumps[combatant.id] = count + 1
 						lastBump[combatant.id] = now
 					end
@@ -322,7 +323,7 @@ local function stepRains(dt: number)
 				-- Não tira o crédito de quem empurrou por último.
 				local recent = KnockbackService.getRecentAttacker(combatant)
 				if root ~= nil and (recent == nil or recent == shooter) and WindowGeometry.inRain(entry.frame, root.Position) then
-					KnockbackService.markAttacker(combatant, shooter)
+					KnockbackService.markAttacker(combatant, shooter, entry.source)
 				end
 			end
 		end
@@ -342,9 +343,9 @@ end
 
 -- Chuva: o chão em frente fica escorregadio por RainDuration. Devolve
 -- quantos estavam nele no começo.
-local function startRain(glass: BasePart, frame: Frame, shooter: Combatant?, isCurrent: () -> boolean): number
+local function startRain(glass: BasePart, frame: Frame, shooter: Combatant?, isCurrent: () -> boolean, source: KnockbackService.HitSource?): number
 	glass:SetAttribute(TrapConstants.WindowRainUntilAttribute, Workspace:GetServerTimeNow() + CONFIG.RainDuration)
-	activeRains[glass] = { frame = frame, endsAt = os.clock() + CONFIG.RainDuration, shooter = shooter, isCurrent = isCurrent, lastCredit = 0 }
+	activeRains[glass] = { frame = frame, endsAt = os.clock() + CONFIG.RainDuration, shooter = shooter, isCurrent = isCurrent, lastCredit = 0, source = source }
 	if rainConnection == nil then
 		rainConnection = RunService.Heartbeat:Connect(function(dt: number)
 			local ok, failure = pcall(stepRains, dt)
@@ -366,7 +367,7 @@ end
 
 -- Efeito ao fim do aviso, conforme a variação da rodada. Devolve quantos
 -- jogadores foram atingidos.
-function WindowTrap.trigger(glass: BasePart, shooter: Combatant?, isCurrent: () -> boolean): number
+function WindowTrap.trigger(glass: BasePart, shooter: Combatant?, isCurrent: () -> boolean, source: KnockbackService.HitSource?): number
 	setBroken(glass, true)
 	task.delay(CONFIG.RechargeTime * (1 - CONFIG.BoardedFraction), function()
 		if isCurrent() then
@@ -380,11 +381,11 @@ function WindowTrap.trigger(glass: BasePart, shooter: Combatant?, isCurrent: () 
 	end
 	local variant = WindowGeometry.variantOf(glass)
 	if variant == "Pigeons" then
-		return pigeons(frame, shooter, isCurrent)
+		return pigeons(frame, shooter, isCurrent, source)
 	elseif variant == "Rain" then
-		return startRain(glass, frame, shooter, isCurrent)
+		return startRain(glass, frame, shooter, isCurrent, source)
 	end
-	return gust(frame, shooter, isCurrent)
+	return gust(frame, shooter, isCurrent, source)
 end
 
 -- Vidro inteiro, sem tábuas e sem chuva. A primeira vez, sorteia a

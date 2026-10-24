@@ -191,7 +191,7 @@ end
 
 -- Efeito ao fim do aviso (o lustre acabou de chegar ao chão). Devolve
 -- quantos foram empurrados.
-function ChandelierTrap.trigger(hitbox: BasePart, shooter: Combatant?, isCurrent: () -> boolean): number
+function ChandelierTrap.trigger(hitbox: BasePart, shooter: Combatant?, isCurrent: () -> boolean, source: TrapBlocks.HitSource?): number
 	local chandelier = chandeliers[hitbox]
 	if chandelier == nil then
 		return 0
@@ -204,9 +204,10 @@ function ChandelierTrap.trigger(hitbox: BasePart, shooter: Combatant?, isCurrent
 		IMPACT_ABOVE,
 		CONFIG.ImpactMultiplier,
 		CONFIG.ImpactLift,
-		shooter
+		shooter,
+		source
 	)
-	TrapBlocks.drop(TrapBlocks.intactNear(CONFIG.Floor, chandelier.impact, CONFIG.HoleRadius), shooter, CONFIG.HoleDelay, isCurrent)
+	TrapBlocks.drop(TrapBlocks.intactNear(CONFIG.Floor, chandelier.impact, CONFIG.HoleRadius), shooter, CONFIG.HoleDelay, isCurrent, source)
 	return affected
 end
 

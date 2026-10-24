@@ -5,7 +5,9 @@
 --   * VaultConquered: pegou o Puffador do Cofre;
 --   * Comeback (Volta por Cima): depois de usar a Segunda Chance, derrubou
 --     alguém ou venceu a rodada;
---   * SecretDiscovery: revelou uma passagem secreta.
+--   * SecretDiscovery: revelou uma passagem secreta;
+--   * TrapWindow, TrapRug, TrapChandelier, TrapFireplace: uma armadilha
+--     acionada por ele derrubou alguém (Fase 5.8, TrapMoments).
 -- Cada jogador conta no máximo uma vez por tipo por rodada. Cofre e
 -- descoberta já têm faixa própria (VaultController/SecretPassageController),
 -- então só os outros são anunciados aqui; todos vão para a telemetria.
@@ -16,13 +18,17 @@ local PuffadorConstants = require(ReplicatedStorage.Shared.modules.PuffadorConst
 local TelemetryService = require(script.Parent.TelemetryService)
 local MatchAudience = require(script.Parent.MatchAudience)
 
-export type MomentKind = "BaraoEscape" | "VaultConquered" | "Comeback" | "SecretDiscovery"
+export type MomentKind = "BaraoEscape" | "VaultConquered" | "Comeback" | "SecretDiscovery" | "TrapWindow" | "TrapRug" | "TrapChandelier" | "TrapFireplace"
 
 local ANNOUNCED: { [MomentKind]: boolean } = {
 	BaraoEscape = true,
 	Comeback = true,
 	VaultConquered = false,
 	SecretDiscovery = false,
+	TrapWindow = true,
+	TrapRug = true,
+	TrapChandelier = true,
+	TrapFireplace = true,
 }
 
 local PuffMomentService = {}

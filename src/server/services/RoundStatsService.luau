@@ -19,6 +19,9 @@ export type RoundCounters = {
 	shots: number,
 	-- Derrubadas de bots RoboPuff (valem menos XP e não contam no perfil).
 	botKnockouts: number,
+	-- Armadilhas acionadas de longe e humanos derrubados por elas (5.8).
+	trapsTriggered: number,
+	trapKnockouts: number,
 }
 
 local RoundStatsService = {}
@@ -36,6 +39,8 @@ local function empty(): RoundCounters
 		comebacks = 0,
 		shots = 0,
 		botKnockouts = 0,
+		trapsTriggered = 0,
+		trapKnockouts = 0,
 	}
 end
 
@@ -83,6 +88,14 @@ end
 
 function RoundStatsService.botKnockout(combatant: Combatant)
 	add(combatant, "botKnockouts")
+end
+
+function RoundStatsService.trapTriggered(combatant: Combatant)
+	add(combatant, "trapsTriggered")
+end
+
+function RoundStatsService.trapKnockout(combatant: Combatant)
+	add(combatant, "trapKnockouts")
 end
 
 -- Cópia dos contadores do combatente nesta rodada (zeros se não fez nada).

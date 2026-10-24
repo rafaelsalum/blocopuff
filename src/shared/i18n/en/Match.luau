@@ -186,6 +186,19 @@ return table.freeze({
 	["%s venceu depois da Segunda Chance"] = "%s won after Second Chance",
 	["%s voltou da Segunda Chance e derrubou alguém"] = "%s came back from Second Chance and knocked someone out",
 	["Alguém"] = "Someone",
+	-- Derrubadas por armadilha (Fase 5.8)
+	["VIDRAÇA!"] = "SHATTERED!",
+	["Sua janela derrubou alguém"] = "Your window knocked someone out",
+	["%s derrubou alguém com uma janela"] = "%s knocked someone out with a window",
+	["PUXOU O TAPETE!"] = "RUG PULLED!",
+	["Você puxou o tapete e derrubou alguém"] = "You pulled the rug and knocked someone out",
+	["%s puxou o tapete e derrubou alguém"] = "%s pulled the rug and knocked someone out",
+	["LUSTRE!"] = "CHANDELIER!",
+	["Seu lustre derrubou alguém"] = "Your chandelier knocked someone out",
+	["%s derrubou alguém com um lustre"] = "%s knocked someone out with a chandelier",
+	["ATCHIM!"] = "ACHOO!",
+	["A fuligem da lareira derrubou alguém"] = "The fireplace soot knocked someone out",
+	["%s derrubou alguém com a fuligem da lareira"] = "%s knocked someone out with fireplace soot",
 
 	-- MODO CONSTRUIR (Build Mode)
 	["MODO CONSTRUIR"] = "BUILD MODE",

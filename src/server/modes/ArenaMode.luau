@@ -78,7 +78,7 @@ local function tick(context: TickContext)
 		return
 	end
 	FinalChaosService.begin(context.climaxDuration)
-	TrapService.storm(context.climaxDuration)
+	TrapService.storm(context.climaxDuration, context.alivePlayers())
 	ReplicatedState.setFinalChaos(true)
 	TelemetryService.finalChaosStarted(context.alivePlayers())
 	print(string.format("[BlocoPuff] Round %d entered Final Chaos (%ds)", context.roundId, context.climaxDuration))
