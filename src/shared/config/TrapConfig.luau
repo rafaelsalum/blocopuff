@@ -169,11 +169,48 @@ export type FireplaceConfig = TrapRules & {
 	SneezeSoundId: string,
 }
 
+-- Tempestade do Caos Final (5.7): as janelas prontas estouram sozinhas,
+-- uma por vez, e os lustres pendurados caem em sequência, sem crédito.
+-- No cliente, o céu escurece, as luzes do térreo piscam de leve e trovões
+-- soam de vez em quando (StormController).
+export type StormConfig = {
+	-- Respiro depois do anúncio antes da primeira janela (s).
+	StartDelay: number,
+	-- Intervalo máximo entre duas janelas (s); com o Caos curto, as janelas
+	-- se espremem para caber todas.
+	WindowInterval: number,
+	-- Quando cai o primeiro lustre (s depois do começo) e o intervalo entre
+	-- eles.
+	ChandelierStart: number,
+	ChandelierInterval: number,
+	-- Fração final do Caos sem acionamentos novos (dá tempo do efeito).
+	QuietTail: number,
+	-- Cliente: trovão do anúncio, trovões seguintes e o intervalo entre
+	-- eles (s).
+	AnnounceThunderId: string,
+	RumbleThunderId: string,
+	RumbleInterval: NumberRange,
+	ThunderVolume: number,
+	-- Chuva em volta do prédio, baixinha.
+	RainVolume: number,
+	-- Escurecimento do céu (ColorCorrection) e quanto tempo leva (s).
+	DarkenBrightness: number,
+	DarkenSaturation: number,
+	DarkenTint: Color3,
+	DarkenTime: number,
+	-- Clarão do relâmpago: só um pouco mais claro, sem flash forte.
+	LightningBrightness: number,
+	-- Luzes do térreo: brilho mínimo (fração do normal) da oscilação suave.
+	FlickerMin: number,
+	FlickerSpeed: number,
+}
+
 export type TrapConfig = {
 	Window: WindowConfig,
 	Rug: RugConfig,
 	Chandelier: ChandelierConfig,
 	Fireplace: FireplaceConfig,
+	Storm: StormConfig,
 }
 
 local Window: WindowConfig = table.freeze({
@@ -303,11 +340,32 @@ local Fireplace: FireplaceConfig = table.freeze({
 	SneezeSoundId = "rbxassetid://9119304380",
 })
 
+local Storm: StormConfig = table.freeze({
+	StartDelay = 2,
+	WindowInterval = 2.5,
+	ChandelierStart = 4,
+	ChandelierInterval = 5,
+	QuietTail = 3,
+	AnnounceThunderId = "rbxassetid://9120021794",
+	RumbleThunderId = "rbxassetid://9120021539",
+	RumbleInterval = NumberRange.new(6, 10),
+	ThunderVolume = 0.6,
+	RainVolume = 0.25,
+	DarkenBrightness = -0.08,
+	DarkenSaturation = -0.3,
+	DarkenTint = Color3.fromRGB(205, 215, 240),
+	DarkenTime = 3,
+	LightningBrightness = 0.05,
+	FlickerMin = 0.6,
+	FlickerSpeed = 3,
+})
+
 local TrapConfig: TrapConfig = table.freeze({
 	Window = Window,
 	Rug = Rug,
 	Chandelier = Chandelier,
 	Fireplace = Fireplace,
+	Storm = Storm,
 })
 
 return TrapConfig

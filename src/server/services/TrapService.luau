@@ -13,7 +13,10 @@
 --     atirador nunca é afetado pela própria armadilha);
 --   * uma armadilha presa a um bloco (lustre) também dispara, com o mesmo
 --     aviso, quando esse bloco cai: o crédito vai para quem derrubou o
---     bloco (ninguém, se foi o próprio jogo).
+--     bloco (ninguém, se foi o próprio jogo);
+--   * na Tempestade do Caos Final (5.7) as janelas prontas estouram
+--     sozinhas, uma por vez, e os lustres pendurados caem em sequência, com
+--     o aviso normal e sem crédito (StormSchedule).
 -- Cada tipo (traps/*) faz o próprio efeito e a própria aparência. O estado
 -- vai em atributos da peça-alvo (TrapConstants) para os clientes desenharem.
 
@@ -26,6 +29,7 @@ local TrapConstants = require(ReplicatedStorage.Shared.modules.TrapConstants)
 local KnockbackService = require(script.Parent.KnockbackService)
 local ProjectileService = require(script.Parent.ProjectileService)
 local TelemetryService = require(script.Parent.TelemetryService)
+local StormSchedule = require(script.Parent.Parent.data.StormSchedule)
 local CombatantRegistry = require(script.Parent.CombatantRegistry)
 local ArenaService = require(script.Parent.ArenaService)
 local ChandelierTrap = require(script.Parent.traps.ChandelierTrap)
@@ -90,6 +94,10 @@ local started = false
 local connections: { RBXScriptConnection } = {}
 local trapsFolder: Folder? = nil
 local listeningToBlocks = false
+-- Muda a cada rodada: os acionamentos agendados da Tempestade de uma rodada
+-- antiga param sozinhos.
+local stormToken = 0
+local stormRandom = Random.new()
 
 local function setState(trap: Trap, state: TrapState, by: Combatant?)
 	trap.state = state
@@ -274,12 +282,55 @@ end
 
 function TrapService.beginRound()
 	active = true
+	stormToken += 1
 	resetAll()
 end
 
 function TrapService.endRound()
 	active = false
+	stormToken += 1
 	resetAll()
+end
+
+-- As armadilhas de `kind` prontas agora, em ordem sorteada.
+local function readyOfKind(kind: string): { Trap }
+	local ready: { Trap } = {}
+	for _, trap in pairs(traps) do
+		if trap.kind == kind and trap.state == TrapConstants.Ready then
+			table.insert(ready, trap)
+		end
+	end
+	for index = #ready, 2, -1 do
+		local other = stormRandom:NextInteger(1, index)
+		ready[index], ready[other] = ready[other], ready[index]
+	end
+	return ready
+end
+
+local function scheduleStorm(list: { Trap }, times: { number }, token: number)
+	for index, trap in ipairs(list) do
+		task.delay(times[index], function()
+			-- Um jogador pode ter acionado essa armadilha nesse meio tempo.
+			if active and stormToken == token and trap.state == TrapConstants.Ready then
+				arm(trap, nil, false)
+			end
+		end)
+	end
+end
+
+-- Tempestade do Caos Final, que dura `duration` segundos: as janelas
+-- prontas estouram uma por vez e os lustres pendurados caem em sequência,
+-- sem crédito. Tapetes e lareira continuam com os jogadores.
+function TrapService.storm(duration: number)
+	if not active then
+		return
+	end
+	stormToken += 1
+	local windows = readyOfKind(TrapConstants.Window)
+	local chandeliers = readyOfKind(TrapConstants.Chandelier)
+	local plan = StormSchedule.plan(#windows, #chandeliers, duration, TrapConfig.Storm)
+	scheduleStorm(windows, plan.windows, stormToken)
+	scheduleStorm(chandeliers, plan.chandeliers, stormToken)
 end
 
 -- Depois que a arena restaura os blocos fora da rodada (fim do intervalo,
@@ -328,6 +379,7 @@ end
 
 function TrapService.stop()
 	active = false
+	stormToken += 1
 	resetAll()
 	ProjectileService.setSurfaceHitHandler(HANDLER_KEY, nil)
 	for _, connection in ipairs(connections) do

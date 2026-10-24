@@ -105,8 +105,8 @@ return table.freeze({
 	["%s · acompanhe os jogadores restantes"] = "%s · watch the remaining players",
 
 	-- AVISOS DE CAOS FINAL (Final Chaos Announcements)
-	["CAOS FINAL!"] = "FINAL CHAOS!",
-	["Sem Segunda Chance · blocos vermelhos vão cair"] = "No Second Chance · red blocks will fall",
+	["⛈️ A TEMPESTADE CHEGOU!"] = "⛈️ THE STORM HAS COME!",
+	["Sem Segunda Chance · blocos vermelhos, janelas e lustres vão cair"] = "No Second Chance · red blocks, windows and chandeliers will fall",
 
 	-- AVISOS DE SEGUNDA CHANCE (Second Chance Announcements)
 	["SEGUNDA CHANCE!"] = "SECOND CHANCE!",

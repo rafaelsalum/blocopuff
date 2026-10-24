@@ -287,8 +287,8 @@ local function renderActive(currentView: HudViewHandle)
 		showAnnouncement(
 			currentView,
 			string.format("%d:chaos", cached.roundId),
-			T("CAOS FINAL!"),
-			T("Sem Segunda Chance · blocos vermelhos vão cair"),
+			T("⛈️ A TEMPESTADE CHEGOU!"),
+			T("Sem Segunda Chance · blocos vermelhos, janelas e lustres vão cair"),
 			"Danger",
 			3,
 			"Chaos",

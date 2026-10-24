@@ -101,6 +101,14 @@ Soma-se ao Caos Final de hoje, em que blocos piscam em vermelho e caem:
 - **embaixo:** as luzes piscam suavemente, sem flash forte, e os lustres que ainda estiverem pendurados caem em sequência, com o aviso normal;
 - os tapetes e a lareira continuam acionáveis pelos jogadores.
 
+**Andamento:** entregue (out/2026). O anúncio do Caos Final virou "⛈️ A TEMPESTADE CHEGOU!" ("Sem Segunda Chance · blocos vermelhos, janelas e lustres vão cair"). No servidor, `TrapService.storm` pega as janelas e os lustres prontos no começo do Caos, em ordem sorteada, e aciona cada um com o aviso normal e sem crédito. As janelas saem a cada 2,5 s a partir de 2 s; os lustres a cada 5 s a partir de 4 s. Num Caos curto, os intervalos encolhem para tudo caber antes dos últimos 3 s (`StormSchedule`, com testes no Lune). Uma armadilha que um jogador acionar nesse meio tempo sai da fila. No cliente (`StormController`):
+- o céu escurece e fica azulado em 3 s (ColorCorrection);
+- chove baixinho em volta do prédio;
+- um trovão abre a Tempestade e outros soam a cada 6 a 10 s, com um clarão leve, sem flash forte;
+- as luzes do térreo oscilam devagar entre 60% e 100% do brilho.
+
+Tudo volta ao normal quando o Caos acaba. No Studio, num Caos de 20 s: 5 janelas e o único lustre ainda pendurado (o outro já tinha sido derrubado por um bot) caíram sem crédito, e escurecimento, chuva, trovão, luzes e anúncio funcionaram. A telemetria de quantas armadilhas a Tempestade aciona fica para a 5.8.
+
 ### 5.8 Momentos Puff, conquistas, telemetria e ajuste
 
 - **Momentos Puff:** "VIDRAÇA! 💨", "PUXOU O TAPETE! 🧶", "LUSTRE! 💡" e "ATCHIM! 🤧", quando uma armadilha derruba alguém.
@@ -162,7 +170,7 @@ Referência: o disparo empurra hoje 62 de velocidade na horizontal e 26 na verti
 - [ ] Nenhuma armadilha do andar de baixo joga alguém direto para fora da arena.
 - [ ] Recarga e limite por rodada funcionam e são restaurados a cada rodada.
 - [ ] A proteção da Segunda Chance vale contra armadilhas.
-- [ ] A Tempestade aciona janelas e lustres em sequência legível, sem crédito.
+- [x] A Tempestade aciona janelas e lustres em sequência legível, sem crédito.
 - [ ] Sem flash forte nem controles invertidos.
 - [ ] Desempenho mobile estável com várias armadilhas ao mesmo tempo.
 

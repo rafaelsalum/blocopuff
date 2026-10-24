@@ -22,6 +22,7 @@ local MusicController = require(script.controllers.MusicController)
 local VaultController = require(script.controllers.VaultController)
 local KnockbackController = require(script.controllers.KnockbackController)
 local TrapVisualController = require(script.controllers.TrapVisualController)
+local StormController = require(script.controllers.StormController)
 local SlipperyController = require(script.controllers.SlipperyController)
 local MansionDoorController = require(script.controllers.MansionDoorController)
 local AtticController = require(script.controllers.AtticController)
@@ -132,6 +133,14 @@ local trapsOk, trapsErr = pcall(function()
 end)
 if not trapsOk then
 	warn(string.format("[BlocoPuff] Failed to start mansion trap effects: %s", tostring(trapsErr)))
+end
+
+-- Tempestade do Caos Final: céu, chuva, trovões e luzes do térreo.
+local stormOk, stormErr = pcall(function()
+	StormController.start()
+end)
+if not stormOk then
+	warn(string.format("[BlocoPuff] Failed to start storm effects: %s", tostring(stormErr)))
 end
 
 -- Chão molhado da Chuva (janelas): pouca tração no próprio personagem.
