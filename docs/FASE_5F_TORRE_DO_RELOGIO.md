@@ -138,3 +138,12 @@ Cada entrega é testada no Studio com capturas, e o commit é feito quando o don
   - **Tochas:** 16 com fogo na mureta da rampa, metade com luz.
   - **Ilha:** 6 árvores no gramado, chafariz com jato d'água e névoa fria embaixo.
   - **Velas e morcegos:** 20 velas flutuam ao longo da subida e 6 morcegos voam em volta do campanário. Quem anima é o cliente (`TowerAmbienceController`), só com a câmera perto da torre.
+- **5F.3 — obstáculos novos.**
+  - **Saco embaralhado:** os tipos saem de um saco (`RaceConfig.Hazards.Bag`), então os quatro aparecem na mesma corrida.
+  - **Caldeirões** (`HazardProps`): rolam de lado junto com os barris, maiores e mais lentos, com a boca verde borbulhando.
+  - **Engrenagens de latão** (`HazardGears`): caem girando, com sombra de aviso, no lugar dos caixotes, baús e quadros.
+  - **Livros voadores** (`HazardBooks`): um bando cruza a rampa de dentro para fora na altura do peito, depois de um brilho roxo na coluna. Pulando, passa por cima.
+  - **Ponteiro gigante** (`HazardClockHand`): na terceira volta, sai devagar da coluna (o aviso), varre o trecho rente ao chão e volta, alternando o sentido a cada 7 s, com um mostrador na coluna marcando o trecho.
+  - **Atingido:** é empurrado só rampa abaixo (`RaceRules.downhillPush`) e fica tonto por 1 s, andando a 5, com estrelinhas na cabeça (`RaceDizzy`).
+  - **Contas puras testadas no Lune:** `bandHits`, `handSweeps` e `downhillPush`.
+  - **Studio:** os quatro tipos e o ponteiro apareceram na mesma corrida. O golpe e a tontura foram conferidos, e a velocidade volta a 16 depois.

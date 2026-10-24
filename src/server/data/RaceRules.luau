@@ -160,4 +160,43 @@ function RaceRules.inArc(angle: number, from: number, to: number): boolean
 	return (angle - from) % full <= span
 end
 
+-- Obstáculo em faixa (bando de livros): acerta quem está dentro da faixa
+-- (`along` no comprimento, `across` na largura, em relação ao meio dela) e
+-- não pulou por cima. `heightAbove` é a altura da raiz acima da rampa.
+function RaceRules.bandHits(along: number, across: number, heightAbove: number, halfLength: number, halfWidth: number, clearHeight: number): boolean
+	return math.abs(along) <= halfLength and math.abs(across) <= halfWidth and heightAbove > -2 and heightAbove < clearHeight
+end
+
+-- Diferença de `to` para `from` em radianos, entre -pi e pi.
+local function angleDelta(from: number, to: number): number
+	return math.atan2(math.sin(to - from), math.cos(to - from))
+end
+
+-- O ponteiro gigante girou de `previous` para `current` neste passo: acerta
+-- quem está entre os dois ângulos, no comprimento do ponteiro, no chão (não
+-- pulando por cima).
+function RaceRules.handSweeps(previous: number, current: number, angle: number, radius: number, innerRadius: number, outerRadius: number, heightAbove: number, clearHeight: number): boolean
+	if radius < innerRadius or radius > outerRadius or heightAbove <= -2 or heightAbove >= clearHeight then
+		return false
+	end
+	local swept = angleDelta(previous, current)
+	local offset = angleDelta(previous, angle)
+	-- Folga de meio stud de cada lado (a largura do ponteiro).
+	local slack = 0.75 / math.max(radius, 1)
+	if swept >= 0 then
+		return offset >= -slack and offset <= swept + slack
+	end
+	return offset <= slack and offset >= swept - slack
+end
+
+-- Empurrão de quem é atingido: rampa abaixo (contra a tangente de subida,
+-- só na horizontal) e um pouco para cima. Nunca para fora da torre.
+function RaceRules.downhillPush(tangentX: number, tangentZ: number, downhill: number, vertical: number): (number, number, number)
+	local length = math.sqrt(tangentX * tangentX + tangentZ * tangentZ)
+	if length < 1e-6 then
+		return 0, vertical, 0
+	end
+	return -tangentX / length * downhill, vertical, -tangentZ / length * downhill
+end
+
 return table.freeze(RaceRules)

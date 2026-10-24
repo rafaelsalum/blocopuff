@@ -32,8 +32,10 @@ export type HazardConfig = {
 	-- Intervalo (s) entre obstáculos no começo e no fim da corrida.
 	SlowInterval: number,
 	FastInterval: number,
-	-- Chance de o obstáculo ser um barril (o resto cai do alto).
-	BarrelChance: number,
+	-- Saco de obstáculos (Fase 5F.3): cada rodada do saco sorteia a ordem e
+	-- usa todos, então os quatro tipos aparecem na mesma corrida.
+	-- "Barrel", "Cauldron", "Gears" e "Books".
+	Bag: { string },
 	BarrelRadius: number,
 	-- Tempo (s) para o barril descer uma volta inteira.
 	BarrelSecondsPerTurn: number,
@@ -45,11 +47,38 @@ export type HazardConfig = {
 	DropHeight: number,
 	DropFallTime: number,
 	DropHitRadius: number,
+	-- Caldeirão que rola rampa abaixo (maior e mais lento que o barril).
+	CauldronRadius: number,
+	CauldronSecondsPerTurn: number,
+	CauldronHitRadius: number,
+	CauldronClearHeight: number,
+	-- Bando de livros que cruza a rampa de dentro para fora, à frente de um
+	-- corredor, depois do aviso (brilho na coluna).
+	BooksPerFlock: number,
+	BookWarning: number,
+	BookFlightTime: number,
+	-- Altura dos livros acima da rampa e tamanho da faixa que acerta.
+	BookHeight: number,
+	BookHalfLength: number,
+	BookHalfWidth: number,
+	BookClearHeight: number,
+	-- Ponteiro gigante que sai da coluna e varre um trecho da rampa (em
+	-- voltas), de tempos em tempos. Tem que pular na hora certa.
+	ClockHandFromTurn: number,
+	ClockHandToTurn: number,
+	ClockHandPeriod: number,
+	-- Tempo saindo da coluna (o aviso), varrendo e voltando para dentro.
+	ClockHandExtendTime: number,
+	ClockHandSweepTime: number,
+	ClockHandRetractTime: number,
+	ClockHandClearHeight: number,
 	-- Empurrão de quem é atingido: rampa abaixo e um pouco para cima. A mureta
 	-- e a barreira seguram quem for para fora (Fase 5F).
 	PushDownhill: number,
-	PushOutward: number,
 	PushVertical: number,
+	-- Tontura depois de atingido: anda devagar por um instante.
+	DizzySeconds: number,
+	DizzyWalkSpeed: number,
 	-- Imunidade (s) depois de ser atingido, para não levar dois seguidos.
 	HitProtection: number,
 }
@@ -94,7 +123,7 @@ local RaceConfig: RaceConfig = {
 	Hazards = table.freeze({
 		SlowInterval = 3,
 		FastInterval = 1.2,
-		BarrelChance = 0.5,
+		Bag = table.freeze({ "Barrel", "Cauldron", "Gears", "Books", "Barrel", "Gears" }),
 		BarrelRadius = 2.5,
 		BarrelSecondsPerTurn = 7,
 		BarrelHitRadius = 4,
@@ -103,9 +132,28 @@ local RaceConfig: RaceConfig = {
 		DropHeight = 30,
 		DropFallTime = 0.35,
 		DropHitRadius = 6,
+		CauldronRadius = 3,
+		CauldronSecondsPerTurn = 9,
+		CauldronHitRadius = 5,
+		CauldronClearHeight = 6,
+		BooksPerFlock = 5,
+		BookWarning = 1,
+		BookFlightTime = 1.4,
+		BookHeight = 2.5,
+		BookHalfLength = 5.5,
+		BookHalfWidth = 2,
+		BookClearHeight = 6,
+		ClockHandFromTurn = 2.42,
+		ClockHandToTurn = 2.62,
+		ClockHandPeriod = 7,
+		ClockHandExtendTime = 1.2,
+		ClockHandSweepTime = 1.2,
+		ClockHandRetractTime = 0.6,
+		ClockHandClearHeight = 4.8,
 		PushDownhill = 36,
-		PushOutward = 0,
 		PushVertical = 14,
+		DizzySeconds = 1,
+		DizzyWalkSpeed = 5,
 		HitProtection = 1.5,
 	}),
 	Duration = 150,

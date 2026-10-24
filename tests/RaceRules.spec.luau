@@ -114,6 +114,28 @@ check("arc excludes outside", not RaceRules.inArc(1.5, 0, 1))
 check("arc wraps around zero", RaceRules.inArc(0.05, -0.7, 0.14) and RaceRules.inArc(2 * math.pi - 0.3, -0.7, 0.14))
 check("wrapped arc excludes the far side", not RaceRules.inArc(math.pi, -0.7, 0.14))
 
+-- Obstáculos novos (Fase 5F.3).
+check("band hits inside", RaceRules.bandHits(2, 1, 0, 5.5, 2, 6))
+check("band misses beside", not RaceRules.bandHits(7, 1, 0, 5.5, 2, 6))
+check("band misses ahead", not RaceRules.bandHits(2, 3, 0, 5.5, 2, 6))
+check("jumping over the books dodges", not RaceRules.bandHits(0, 0, 6.5, 5.5, 2, 6))
+check("band ignores the turn below", not RaceRules.bandHits(0, 0, -25, 5.5, 2, 6))
+check("hand hits a racer on the floor in its path", RaceRules.handSweeps(0.1, 0.2, 0.15, 40, 30, 54, 3, 4.8))
+check("hand misses a jumping racer", not RaceRules.handSweeps(0.1, 0.2, 0.15, 40, 30, 54, 5.5, 4.8))
+check("hand misses outside its sweep", not RaceRules.handSweeps(0.1, 0.2, 0.4, 40, 30, 54, 3, 4.8))
+check("hand misses beyond its length", not RaceRules.handSweeps(0.1, 0.2, 0.15, 58, 30, 54, 3, 4.8))
+check("hand sweeps back the other way", RaceRules.handSweeps(0.2, 0.1, 0.15, 40, 30, 54, 3, 4.8))
+check("hand sweeps across zero", RaceRules.handSweeps(-0.05, 0.05, 2 * math.pi - 0.01, 40, 30, 54, 3, 4.8))
+do
+	local x, y, z = RaceRules.downhillPush(0, 1, 36, 14)
+	check("push goes against the climb", near(x, 0) and near(z, -36))
+	check("push lifts a little", near(y, 14))
+	local px, _, pz = RaceRules.downhillPush(3, 4, 10, 0)
+	check("push keeps the downhill speed", near(math.sqrt(px * px + pz * pz), 10))
+	local ox, oy, oz = RaceRules.downhillPush(0, 0, 10, 5)
+	check("push without tangent only lifts", near(ox, 0) and near(oy, 5) and near(oz, 0))
+end
+
 print(`{passed} passed, {failures} failed`)
 if failures > 0 then
 	error("RaceRules tests failed")
