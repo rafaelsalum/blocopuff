@@ -36,6 +36,7 @@ local TrainingService = require(script.services.TrainingService)
 local WorldVisualService = require(script.services.WorldVisualService)
 local BuildingService = require(script.services.BuildingService)
 local MansionService = require(script.services.MansionService)
+local TowerBuilder = require(script.services.TowerBuilder)
 local AdminService = require(script.services.AdminService)
 local PhotoModeService = require(script.services.PhotoModeService)
 local CombatantRegistry = require(script.services.CombatantRegistry)
@@ -97,6 +98,11 @@ print("[BlocoPuff] Lobby created")
 -- na parede leste) e do LobbyService (reserva as áreas dos móveis).
 MansionService.create(world, GameConfig.Building)
 print("[BlocoPuff] Mansion lobby built")
+
+-- Torre do Relógio da Corrida numa ilha ao norte do Casarão, de pé o tempo
+-- todo (Fase 5F).
+TowerBuilder.get()
+print("[BlocoPuff] Clock tower island built")
 
 AdminService.start()
 print("[BlocoPuff] Secure admin panel initialized")

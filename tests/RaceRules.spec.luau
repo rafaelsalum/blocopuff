@@ -105,6 +105,15 @@ check("barrel hits close", RaceRules.barrelHits(1, 0, 3, 2.5, 4))
 check("barrel misses far", not RaceRules.barrelHits(6, 0, 3, 2.5, 4))
 check("jumping over the barrel dodges", not RaceRules.barrelHits(1, 5, 3, 2.5, 4))
 
+-- Mureta e barreira da torre (Fase 5F).
+check("parapet sits on the outer edge", near(RaceRules.parapetRadius(42, 24, 2), 55))
+check("barrier stops below the next turn", near(RaceRules.barrierHeight(30, 2, 3.5, 1), 23.5))
+check("barrier never negative", near(RaceRules.barrierHeight(4, 2, 3.5, 1), 0))
+check("arc contains its middle", RaceRules.inArc(0.2, 0, 1))
+check("arc excludes outside", not RaceRules.inArc(1.5, 0, 1))
+check("arc wraps around zero", RaceRules.inArc(0.05, -0.7, 0.14) and RaceRules.inArc(2 * math.pi - 0.3, -0.7, 0.14))
+check("wrapped arc excludes the far side", not RaceRules.inArc(math.pi, -0.7, 0.14))
+
 print(`{passed} passed, {failures} failed`)
 if failures > 0 then
 	error("RaceRules tests failed")

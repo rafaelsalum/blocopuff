@@ -141,4 +141,23 @@ function RaceRules.barrelHits(horizontalDistance: number, heightAbove: number, h
 	return horizontalDistance <= hitRadius and heightAbove < clearHeight and heightAbove > -barrelRadius * 2
 end
 
+-- Raio do meio da mureta: encostada na borda de fora da rampa.
+function RaceRules.parapetRadius(radius: number, rampWidth: number, thickness: number): number
+	return radius + rampWidth / 2 + thickness / 2
+end
+
+-- Altura da barreira invisível em cima da mureta: fecha a borda até perto da
+-- volta de cima da rampa, sem encostar nela (Fase 5F).
+function RaceRules.barrierHeight(climbPerTurn: number, rampThickness: number, parapetHeight: number, headroom: number): number
+	return math.max(0, climbPerTurn - rampThickness - parapetHeight - headroom)
+end
+
+-- `angle` está no arco que vai de `from` a `to` (radianos, sentido
+-- anti-horário, dando a volta no 0 se preciso)?
+function RaceRules.inArc(angle: number, from: number, to: number): boolean
+	local full = 2 * math.pi
+	local span = (to - from) % full
+	return (angle - from) % full <= span
+end
+
 return table.freeze(RaceRules)

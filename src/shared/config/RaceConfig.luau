@@ -5,7 +5,7 @@
 -- iniciais para o playtest.
 
 export type TowerConfig = {
-	-- Centro da base da torre (longe da Arena e do Casarão).
+	-- Centro da base da torre, numa ilha de pedra ao norte do Casarão (Fase 5F).
 	Center: Vector3,
 	-- Distância do centro até o meio da rampa.
 	Radius: number,
@@ -15,10 +15,16 @@ export type TowerConfig = {
 	ClimbPerTurn: number,
 	-- Peças da rampa por volta (mais peças = curva mais lisa).
 	SegmentsPerTurn: number,
-	-- Raio do chão da base e altura da mureta em volta dele.
-	BaseRadius: number,
-	BaseWallHeight: number,
-	-- Raio do patamar do topo (a chegada).
+	-- Mureta de pedra na borda de fora da rampa e do terraço do topo.
+	ParapetHeight: number,
+	ParapetThickness: number,
+	-- Folga entre o alto da barreira invisível e a volta de cima da rampa.
+	BarrierHeadroom: number,
+	-- Altura da barreira invisível em volta do terraço do topo.
+	TopBarrierHeight: number,
+	-- Raio da ilha de pedra em volta da torre.
+	IslandRadius: number,
+	-- Distância máxima do centro para contar a chegada no topo.
 	TopRadius: number,
 }
 
@@ -39,8 +45,8 @@ export type HazardConfig = {
 	DropHeight: number,
 	DropFallTime: number,
 	DropHitRadius: number,
-	-- Empurrão de quem é atingido: rampa abaixo, um pouco para fora da torre
-	-- e para cima (às vezes derruba para a volta de baixo).
+	-- Empurrão de quem é atingido: rampa abaixo e um pouco para cima. A mureta
+	-- e a barreira seguram quem for para fora (Fase 5F).
 	PushDownhill: number,
 	PushOutward: number,
 	PushVertical: number,
@@ -71,16 +77,19 @@ export type RaceConfig = {
 
 local RaceConfig: RaceConfig = {
 	Tower = table.freeze({
-		Center = Vector3.new(-420, 100, 0),
-		Radius = 30,
-		RampWidth = 16,
-		RampThickness = 1.5,
+		Center = Vector3.new(180, 120, -230),
+		Radius = 42,
+		RampWidth = 24,
+		RampThickness = 2,
 		Turns = 4,
-		ClimbPerTurn = 26,
-		SegmentsPerTurn = 20,
-		BaseRadius = 52,
-		BaseWallHeight = 6,
-		TopRadius = 22,
+		ClimbPerTurn = 30,
+		SegmentsPerTurn = 24,
+		ParapetHeight = 3.5,
+		ParapetThickness = 2,
+		BarrierHeadroom = 1,
+		TopBarrierHeight = 14,
+		IslandRadius = 85,
+		TopRadius = 36,
 	}),
 	Hazards = table.freeze({
 		SlowInterval = 3,
@@ -94,9 +103,9 @@ local RaceConfig: RaceConfig = {
 		DropHeight = 30,
 		DropFallTime = 0.35,
 		DropHitRadius = 6,
-		PushDownhill = 32,
-		PushOutward = 12,
-		PushVertical = 28,
+		PushDownhill = 36,
+		PushOutward = 0,
+		PushVertical = 14,
 		HitProtection = 1.5,
 	}),
 	Duration = 150,

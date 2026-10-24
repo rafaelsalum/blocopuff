@@ -48,7 +48,6 @@ local FINISHED_PROTECTION = 600
 -- A posição ao vivo é recalculada a cada tantos tiques.
 local POSITION_EVERY_TICKS = 5
 
-local tower: TowerLayout? = nil
 local racers: { [Combatant]: Racer } = {}
 local order: { Combatant } = {}
 local finishers: { Combatant } = {}
@@ -56,13 +55,9 @@ local running = false
 local generation = 0
 local startedAt = 0
 
+-- A torre fica de pé o tempo todo (montada na partida do servidor).
 local function requireTower(): TowerLayout
-	local current = tower
-	if current == nil then
-		current = TowerBuilder.build()
-		tower = current
-	end
-	return current
+	return TowerBuilder.get()
 end
 
 -- Corredores presentes que ainda não chegaram ao topo.
@@ -159,6 +154,7 @@ local function finishRacer(layout: TowerLayout, combatant: Combatant, racer: Rac
 	racer.bestHeight = layout.topY
 	CombatantRegistry.setAttribute(combatant, ATTR_FINISH_ORDER, #finishers)
 	KnockbackService.protect(combatant, FINISHED_PROTECTION)
+	TowerBuilder.ringBell(layout)
 	local player = combatant.player
 	if player ~= nil then
 		TelemetryService.event(player, "RaceFinish", math.floor(os.clock() - startedAt), tostring(#finishers))
