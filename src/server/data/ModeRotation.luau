@@ -95,6 +95,30 @@ function ModeRotation.pick(cursor: Cursor, input: Input): (string, Cursor)
 	return input.baseMode, { index = normalizedIndex(start + 1, length), last = input.baseMode }
 end
 
+-- O modo da vez na rotação (`cursor`) ficou de fora? Devolve esse modo e o
+-- motivo ("Vote", "Beginner", "Unavailable" ou "Repeat"); nil se ele é o
+-- escolhido (`picked`) ou se não há sequência. Para a telemetria
+-- (ModeSkipped).
+function ModeRotation.skipped(cursor: Cursor, input: Input, picked: string): (string?, string?)
+	local sequence = input.sequence
+	if #sequence == 0 then
+		return nil, nil
+	end
+	local start = normalizedIndex(cursor.index, #sequence)
+	local scheduled = sequence[start]
+	if scheduled == picked then
+		return nil, nil
+	end
+	if mostVoted(input, start) ~= nil then
+		return scheduled, "Vote"
+	elseif input.hasBeginner then
+		return scheduled, "Beginner"
+	elseif input.available[scheduled] ~= true then
+		return scheduled, "Unavailable"
+	end
+	return scheduled, "Repeat"
+end
+
 -- Porta do mirante por onde o jogador entrou: a de `z` mais perto da
 -- posição dele (as portas ficam na mesma parede). nil sem portas.
 function ModeRotation.nearestDoor(passages: { number }, z: number): number?

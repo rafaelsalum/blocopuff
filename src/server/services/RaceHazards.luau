@@ -19,6 +19,7 @@ local RaceRules = require(script.Parent.Parent.data.RaceRules)
 local TowerBuilder = require(script.Parent.TowerBuilder)
 local CombatantRegistry = require(script.Parent.CombatantRegistry)
 local KnockbackService = require(script.Parent.KnockbackService)
+local TelemetryService = require(script.Parent.TelemetryService)
 local HazardBooks = require(script.Parent.HazardBooks)
 local HazardClockHand = require(script.Parent.HazardClockHand)
 local HazardContext = require(script.Parent.HazardContext)
@@ -32,6 +33,7 @@ type Context = HazardContext.Context
 
 -- Barril ou caldeirão descendo a rampa.
 type Roller = {
+	kind: string,
 	model: Model,
 	t: number,
 	roll: number,
@@ -70,13 +72,17 @@ function RaceHazards.turnsAt(tower: TowerLayout, position: Vector3): number
 end
 
 -- Empurra rampa abaixo e deixa tonto (se o empurrão valeu).
-local function hit(tower: TowerLayout, combatant: Combatant, t: number)
+local function hit(tower: TowerLayout, combatant: Combatant, t: number, kind: string)
 	local hazards = RaceConfig.Hazards
 	local tangent = tower.tangentAt(t)
 	local x, y, z = RaceRules.downhillPush(tangent.X, tangent.Z, hazards.PushDownhill, hazards.PushVertical)
 	if KnockbackService.push(nil, combatant, Vector3.new(x, y, z)) then
 		KnockbackService.protect(combatant, hazards.HitProtection)
 		RaceDizzy.apply(combatant, hazards.DizzySeconds, hazards.DizzyWalkSpeed)
+		local player = combatant.player
+		if player ~= nil then
+			TelemetryService.event(player, "RaceHazardHit", nil, kind, string.format("%.1f", t))
+		end
 	end
 end
 
@@ -94,8 +100,8 @@ local function contextFor(tower: TowerLayout, current: number): Context
 			return running and generation == current
 		end,
 		racers = racers,
-		hit = function(combatant: Combatant, t: number)
-			hit(tower, combatant, t)
+		hit = function(combatant: Combatant, t: number, kind: string)
+			hit(tower, combatant, t, kind)
 		end,
 		turnsAt = function(position: Vector3)
 			return RaceHazards.turnsAt(tower, position)
@@ -118,6 +124,7 @@ local function spawnRoller(tower: TowerLayout, cauldron: boolean)
 	local radius = if cauldron then hazards.CauldronRadius else hazards.BarrelRadius
 	local model = if cauldron then HazardProps.cauldron(radius) else HazardProps.barrel(radius)
 	local roller: Roller = {
+		kind = if cauldron then "Cauldron" else "Barrel",
 		model = model,
 		t = tower.spiral.turns,
 		roll = 0,
@@ -155,7 +162,7 @@ local function stepRollers(dt: number)
 				local offset = root.Position - cframe.Position
 				local horizontal = Vector3.new(offset.X, 0, offset.Z).Magnitude
 				if RaceRules.barrelHits(horizontal, offset.Y, roller.hitRadius, roller.radius, roller.clearHeight) then
-					hit(tower, combatant, roller.t)
+					hit(tower, combatant, roller.t, roller.kind)
 				end
 			end
 		end

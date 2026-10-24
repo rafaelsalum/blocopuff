@@ -54,6 +54,11 @@ local lastRoundParticipants: { [Player]: boolean } = {}
 local connections: { RBXScriptConnection } = {}
 local lastFloor: { [Player]: number } = {}
 local roundToken = 0
+-- Modo da rodada em andamento (ModeStarted/ModeFinished/ModeQuit, Fase 5D).
+local roundMode = ""
+-- Desde quando o jogador está no lobby (entrou no jogo ou voltou de uma
+-- partida), para o LobbyTime (Fase 5C).
+local lobbySince: { [Player]: number } = {}
 
 local function getDevice(player: Player): Device
 	return devices[player] or "Unknown"
@@ -136,14 +141,21 @@ end
 -- `participants` são os jogadores; `bots`, os RoboPuffs que completaram a
 -- partida (Fase 5B). O contexto `Bots{n}` separa as partidas com bots nas
 -- análises de retenção e vitória.
-function TelemetryService.roundStarted(participants: { Player }, bots: number?)
+function TelemetryService.roundStarted(participants: { Player }, bots: number?, mode: string?)
 	roundActive = true
 	roundStartClock = os.clock()
 	roundBots = bots or 0
+	roundMode = mode or ""
 	table.clear(counters)
 	for _, player in ipairs(participants) do
 		counters[player] = { shots = 0, playerHits = 0, blockHits = 0, blocksDestroyed = 0, vaultShots = 0, dashes = 0 }
 		log(player, "RoundStarted", #participants + roundBots, `Bots{roundBots}`)
+		log(player, "ModeStarted", #participants + roundBots, roundMode, `Bots{roundBots}`)
+		local since = lobbySince[player]
+		if since ~= nil then
+			log(player, "LobbyTime", math.floor(roundStartClock - since), roundMode)
+		end
+		lobbySince[player] = nil
 		-- Rematch: jogou a rodada anterior e continuou para esta.
 		if lastRoundParticipants[player] then
 			log(player, "Rematch", 1)
@@ -246,6 +258,14 @@ function TelemetryService.lobbyEvent(player: Player, eventName: string, value: n
 	log(player, eventName, value, context, detail)
 end
 
+-- O modo da vez na rotação ficou de fora (`reason`: "Vote", "Beginner",
+-- "Unavailable" ou "Repeat"), registrado para quem vai jogar.
+function TelemetryService.modeSkipped(players: { Player }, skippedMode: string, reason: string, playedMode: string)
+	for _, player in ipairs(players) do
+		log(player, "ModeSkipped", 1, skippedMode, `{reason}>{playedMode}`)
+	end
+end
+
 function TelemetryService.roundElapsed(): number
 	return elapsed()
 end
@@ -309,20 +329,29 @@ end
 function TelemetryService.leftMidRound(player: Player)
 	if roundActive then
 		log(player, "LeftMidRound", elapsed())
+		log(player, "ModeQuit", elapsed(), roundMode)
 	end
 	counters[player] = nil
 	lastRoundParticipants[player] = nil
 end
 
--- `outcome` por jogador: "Win", "Draw" ou "Loss".
-function TelemetryService.roundFinished(outcomes: { [Player]: string })
+-- `outcome` por jogador: "Win", "Draw" ou "Loss"; `positions`, a posição
+-- de cada um no resultado (para o BotMatchFinished).
+function TelemetryService.roundFinished(outcomes: { [Player]: string }, positions: { [Player]: number }?)
 	if not roundActive then
 		return
 	end
 	local duration = elapsed()
+	local now = os.clock()
 	for player, outcome in pairs(outcomes) do
 		local current = counters[player]
 		log(player, "RoundFinished", duration, outcome, `Bots{roundBots}`)
+		log(player, "ModeFinished", duration, roundMode, outcome)
+		local position = if positions ~= nil then positions[player] else nil
+		if roundBots > 0 and position ~= nil then
+			log(player, "BotMatchFinished", position, roundMode, `Bots{roundBots}`)
+		end
+		lobbySince[player] = now
 		if outcome == "Win" then
 			log(player, "RoundWon", duration, `Bots{roundBots}`)
 		end
@@ -367,7 +396,14 @@ function TelemetryService.start(remotesFolder: Folder?)
 	else
 		warn("[BlocoPuff] Telemetry: remotes folder not found; device reports disabled")
 	end
+	for _, player in ipairs(Players:GetPlayers()) do
+		lobbySince[player] = os.clock()
+	end
+	table.insert(connections, Players.PlayerAdded:Connect(function(player)
+		lobbySince[player] = os.clock()
+	end))
 	table.insert(connections, Players.PlayerRemoving:Connect(function(player)
+		lobbySince[player] = nil
 		devices[player] = nil
 		lastDeviceReport[player] = nil
 		counters[player] = nil

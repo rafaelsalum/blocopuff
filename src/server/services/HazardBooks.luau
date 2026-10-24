@@ -71,7 +71,7 @@ local function checkHits(context: Context, bandAngle: number, frontRadius: numbe
 			local along = angleDelta(bandAngle, math.atan2(offset.Z, offset.X)) * radius
 			if RaceRules.bandHits(along, radius - frontRadius, root.Position.Y - rampY, hazards.BookHalfLength, hazards.BookHalfWidth, hazards.BookClearHeight) then
 				already[combatant] = true
-				context.hit(combatant, t)
+				context.hit(combatant, t, "Books")
 			end
 		end
 	end

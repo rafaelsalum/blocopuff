@@ -12,6 +12,26 @@ export type WingConfig = {
 	Center: Vector3,
 }
 
+-- Som curto (biblioteca licenciada ProSoundEffects).
+export type KnifeSound = {
+	Id: string,
+	Volume: number,
+	-- Mais rápido encurta o som.
+	Speed: number,
+}
+
+export type SoundsConfig = {
+	-- Faca: sacar, golpe no ar, golpe que acerta e arremesso.
+	Draw: KnifeSound,
+	Swing: KnifeSound,
+	Hit: KnifeSound,
+	Throw: KnifeSound,
+	-- Música (APM) dos últimos segundos da partida, só para quem joga.
+	FinalMusicId: string,
+	FinalMusicSeconds: number,
+	FinalMusicVolume: number,
+}
+
 export type MysteryModeConfig = {
 	Wing: WingConfig,
 	Duration: number,
@@ -54,6 +74,7 @@ export type MysteryModeConfig = {
 	-- Assassino a cada partida (e um bot faz o Assassino), para dar para
 	-- testar. Fora do Studio o Assassino é sempre humano.
 	StudioSoloTest: boolean,
+	Sounds: SoundsConfig,
 }
 
 local MysteryModeConfig: MysteryModeConfig = {
@@ -83,6 +104,15 @@ local MysteryModeConfig: MysteryModeConfig = {
 	MaxCoinTickets = 2,
 	CoinPickupRadius = 4,
 	StudioSoloTest = true,
+	Sounds = table.freeze({
+		Draw = table.freeze({ Id = "rbxassetid://9113453296", Volume = 0.6, Speed = 1.6 }),
+		Swing = table.freeze({ Id = "rbxassetid://9125620110", Volume = 0.7, Speed = 1.8 }),
+		Hit = table.freeze({ Id = "rbxassetid://9119747138", Volume = 0.6, Speed = 1.2 }),
+		Throw = table.freeze({ Id = "rbxassetid://9125619884", Volume = 0.8, Speed = 1.3 }),
+		FinalMusicId = "rbxassetid://1846059805",
+		FinalMusicSeconds = 30,
+		FinalMusicVolume = 0.45,
+	}),
 }
 
 return table.freeze(MysteryModeConfig)

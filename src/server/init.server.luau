@@ -37,6 +37,8 @@ local WorldVisualService = require(script.services.WorldVisualService)
 local BuildingService = require(script.services.BuildingService)
 local MansionService = require(script.services.MansionService)
 local TowerBuilder = require(script.services.TowerBuilder)
+local LobbyRoomTelemetry = require(script.services.LobbyRoomTelemetry)
+local MurderChatFilter = require(script.services.MurderChatFilter)
 local AdminService = require(script.services.AdminService)
 local PhotoModeService = require(script.services.PhotoModeService)
 local CombatantRegistry = require(script.services.CombatantRegistry)
@@ -251,6 +253,18 @@ if baronRoomsOk then
 	print("[BlocoPuff] Baron's secret rooms ready")
 else
 	warn(string.format("[BlocoPuff] Baron's secret rooms unavailable: %s", tostring(baronRoomsFailure)))
+end
+
+-- Telemetria dos cômodos visitados no lobby (5C): RoomEntered e
+-- SecretRoomOpened. Opcional.
+local roomTelemetryOk, roomTelemetryFailure = pcall(LobbyRoomTelemetry.start)
+if not roomTelemetryOk then
+	warn(string.format("[BlocoPuff] Lobby room telemetry unavailable: %s", tostring(roomTelemetryFailure)))
+end
+
+local chatFilterOk, chatFilterFailure = pcall(MurderChatFilter.start)
+if not chatFilterOk then
+	warn(string.format("[BlocoPuff] Murder chat filter unavailable: %s", tostring(chatFilterFailure)))
 end
 
 -- Ambiente do Casarão (5C.4): retratos com olhos e os lustres que balançam.

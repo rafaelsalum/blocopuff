@@ -14,7 +14,11 @@ local RunService = game:GetService("RunService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local MysteryModeConfig = require(ReplicatedStorage.Shared.config.MysteryModeConfig)
+local MurderRules = require(script.Parent.Parent.data.MurderRules)
+local ProfileSchema = require(script.Parent.Parent.data.ProfileSchema)
 local CombatantRegistry = require(script.Parent.CombatantRegistry)
+local PlayerDataService = require(script.Parent.PlayerDataService)
+local TelemetryService = require(script.Parent.TelemetryService)
 local MurderMansionBuilder = require(script.Parent.MurderMansionBuilder)
 
 type Combatant = CombatantRegistry.Combatant
@@ -139,6 +143,27 @@ function MysteryCoins.stop()
 		coin:Destroy()
 	end
 	table.clear(coins)
+end
+
+-- Moedas viram tickets (com teto) para os humanos que terminaram a partida.
+function MysteryCoins.pay(order: { Combatant }, collected: { [Combatant]: number })
+	for _, combatant in ipairs(order) do
+		local player = combatant.player
+		local tickets = MurderRules.coinTickets(collected[combatant] or 0, MysteryModeConfig.CoinsPerTicket, MysteryModeConfig.MaxCoinTickets)
+		if player ~= nil and player.Parent ~= nil and tickets > 0 then
+			local before, balance, saved = 0, 0, false
+			PlayerDataService.update(player, function(profile, canSave)
+				before = profile.tickets
+				local updated = ProfileSchema.withTickets(profile, tickets)
+				balance = updated.tickets
+				saved = canSave
+				return updated, nil
+			end)
+			if saved then
+				TelemetryService.ticketsEarned(player, before, balance, "MysteryCoins")
+			end
+		end
+	end
 end
 
 return table.freeze(MysteryCoins)

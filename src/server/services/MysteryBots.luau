@@ -42,6 +42,8 @@ export type Context = {
 	droppedGun: () -> Vector3?,
 	-- Só no teste solo do Studio: o bot que faz o Assassino.
 	driver: MurdererDriver?,
+	-- Um bot desistiu da rota depois de travar demais.
+	onStuck: ((bot: Combatant) -> ())?,
 }
 
 type Mode = "Wander" | "Flee" | "Gun"
@@ -196,6 +198,10 @@ local function innocentTick(nav: Nav, context: Context, bot: Combatant, state: B
 	end
 	local route = state.route
 	if route == nil or not MysteryBotNav.step(nav, bot, route, now) then
+		local onStuck = context.onStuck
+		if route ~= nil and route.gaveUp and onStuck ~= nil then
+			onStuck(bot)
+		end
 		wanderGoal(nav, state, position, now)
 	end
 end

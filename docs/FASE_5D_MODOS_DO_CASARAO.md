@@ -180,6 +180,7 @@ Valores de partida para o playtest. Ficam em `config/ModeRotationConfig`, `confi
   - a chegada ao topo da Corrida é conferida pela posição no servidor, não por um toque do cliente.
 - **Desempenho no celular:** a torre e a Ala do Mistério seguem o mesmo orçamento de peças e de luz do Casarão (5C); com três mapas no servidor, avaliar o `StreamingEnabled` (já previsto na 5C).
 - **Telemetria:** `ModeStarted`, `ModeFinished`, `ModeSkipped` (com o motivo), `ModeQuit` (saiu no meio, por modo), `RaceCheckpoint`, `RaceFinish` (tempo e posição), `RaceHazardHit`, `MysteryRoleAssigned`, `MysteryScare`, `MysteryMisfire` (Detetive acertou Morador), `MysteryGunPickup`, `MysteryResult` (quem venceu e como).
+  - *Andamento (out/2026):* entraram `ModeStarted` (modo e bots), `ModeFinished` (duração, modo e resultado), `ModeSkipped` (modo da rotação que não saiu, com o motivo `Vote`, `Beginner`, `Unavailable` ou `Repeat` e o modo jogado) e `ModeQuit`. `RaceHazardHit` leva o obstáculo (`Barrel`, `Cauldron`, `Gears`, `Books`, `ClockHand`) e a volta da rampa. Os eventos `Mystery*` deram lugar aos `Murder*` da 5E. Ainda faltam as estatísticas por modo do Assassinato no perfil.
 
 ---
 

@@ -26,13 +26,11 @@ local MysteryModeConfig = require(ReplicatedStorage.Shared.config.MysteryModeCon
 local EliminationTypes = require(ReplicatedStorage.Shared.types.EliminationTypes)
 local RoundModeTypes = require(script.Parent.RoundModeTypes)
 local MurderRules = require(script.Parent.Parent.data.MurderRules)
-local ProfileSchema = require(script.Parent.Parent.data.ProfileSchema)
 local services = script.Parent.Parent.services
 local CombatantRegistry = require(services.CombatantRegistry)
 local KnockbackService = require(services.KnockbackService)
 local PuffadorService = require(services.PuffadorService)
 local ProjectileService = require(services.ProjectileService)
-local PlayerDataService = require(services.PlayerDataService)
 local TelemetryService = require(services.TelemetryService)
 local MurderMansionBuilder = require(services.MurderMansionBuilder)
 local MysteryCoins = require(services.MysteryCoins)
@@ -40,6 +38,7 @@ local MysteryBots = require(services.MysteryBots)
 local MurderKnife = require(services.MurderKnife)
 local MurderGhosts = require(services.MurderGhosts)
 local MurderGunDrop = require(services.MurderGunDrop)
+local MurderTelemetry = require(services.MurderTelemetry)
 
 type BeginContext = RoundModeTypes.BeginContext
 type TickContext = RoundModeTypes.TickContext
@@ -230,6 +229,10 @@ local function removeDroppedGun()
 	end
 end
 
+local function nameOf(combatant: Combatant?): string
+	return if combatant ~= nil then combatant.name else ""
+end
+
 -- A arma cai onde o portador estava (ou onde foi vista por último, ou no
 -- meio da Ala); qualquer Inocente humano vivo pega.
 local function dropGun(at: Vector3?)
@@ -238,6 +241,7 @@ local function dropGun(at: Vector3?)
 		return
 	end
 	removeDroppedGun()
+	MurderTelemetry.event(order, gunHolder, "MurderGunDropped")
 	gunHolder = nil
 	-- No chão do andar em que caiu (a Ala tem dois andares).
 	local position = at or lastGunPosition or layout.randomPoint(random)
@@ -313,6 +317,11 @@ local function tryStab(aim: Vector3?): boolean
 	end
 	lastStabAt = now
 	local target = MurderKnife.stabTarget(current, aliveOthers(), layout.folder, aim)
+	-- O bot Assassino do teste solo golpeia o ar sem parar enquanto persegue:
+	-- só o golpe de humano no ar faz barulho.
+	if target ~= nil or current.player ~= nil then
+		MurderKnife.playSound(current, if target ~= nil then MysteryModeConfig.Sounds.Hit else MysteryModeConfig.Sounds.Swing)
+	end
 	if target == nil then
 		return false
 	end
@@ -348,6 +357,7 @@ local function tryThrow(direction: Vector3)
 		TelemetryService.event(player, "MurderThrow", math.floor(elapsed()))
 		send(player, "ThrowCooldown", MysteryModeConfig.ThrowCooldown)
 	end
+	MurderKnife.playSound(current, MysteryModeConfig.Sounds.Throw)
 	MurderKnife.throw({
 		-- Dos olhos, de onde sai a mira em primeira pessoa.
 		origin = root.Position + Vector3.new(0, EYE_HEIGHT, 0),
@@ -373,6 +383,11 @@ local function drawKnife(current: Combatant)
 	lastDrawRequestAt = now
 	if not MurderKnife.isEquipped(current) then
 		MurderKnife.setEquipped(current, true)
+		MurderKnife.playSound(current, MysteryModeConfig.Sounds.Draw)
+		local player = current.player
+		if player ~= nil then
+			TelemetryService.event(player, "MurderKnifeEquip")
+		end
 	end
 	lastDrawAt = now
 end
@@ -680,6 +695,9 @@ local function beginBots(bots: { Combatant }, _humans: { Player })
 			return if gunPart ~= nil then gunPart.Position else nil
 		end,
 		driver = driver,
+		onStuck = function(bot: Combatant)
+			MurderTelemetry.event(order, bot, "MurderBotStuck")
+		end,
 	})
 end
 
@@ -693,31 +711,6 @@ end
 
 local function getRemainingFloorRatio(): number
 	return 1
-end
-
--- Moedas viram tickets (com teto) para os humanos que terminaram a partida.
-local function payCoins()
-	for _, combatant in ipairs(order) do
-		local player = combatant.player
-		local tickets = MurderRules.coinTickets(coins[combatant] or 0, MysteryModeConfig.CoinsPerTicket, MysteryModeConfig.MaxCoinTickets)
-		if player ~= nil and player.Parent ~= nil and tickets > 0 then
-			local before, balance, saved = 0, 0, false
-			PlayerDataService.update(player, function(profile, canSave)
-				before = profile.tickets
-				local updated = ProfileSchema.withTickets(profile, tickets)
-				balance = updated.tickets
-				saved = canSave
-				return updated, nil
-			end)
-			if saved then
-				TelemetryService.ticketsEarned(player, before, balance, "MysteryCoins")
-			end
-		end
-	end
-end
-
-local function nameOf(combatant: Combatant?): string
-	return if combatant ~= nil then combatant.name else ""
 end
 
 -- No fim, todos ficam sabendo quem era quem.
@@ -747,7 +740,7 @@ local function finish()
 		return
 	end
 	stopRound()
-	payCoins()
+	MysteryCoins.pay(order, coins)
 	reveal()
 end
 

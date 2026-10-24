@@ -128,6 +128,26 @@ check("no doors, no vote", ModeRotation.nearestDoor({}, 0) == nil)
 local counted = ModeRotation.tally({ "Race", "", "Mystery", "Race" })
 check("tally counts votes and skips blanks", counted.Race == 2 and counted.Mystery == 1 and counted[""] == nil)
 
+-- Modo da vez que ficou de fora (telemetria ModeSkipped).
+do
+	local cursor: ModeRotation.Cursor = { index = 4, last = "Arena" }
+	local plain = input(ALL)
+	local mode, reason = ModeRotation.skipped(cursor, plain, (ModeRotation.pick(cursor, plain)))
+	check("scheduled mode played: nothing skipped", mode == nil and reason == nil)
+	local byVote = voted({ Race = 2 })
+	mode, reason = ModeRotation.skipped(cursor, byVote, (ModeRotation.pick(cursor, byVote)))
+	check("vote skips the scheduled mode", mode == "Mystery" and reason == "Vote")
+	local beginner = input(ALL, true)
+	mode, reason = ModeRotation.skipped(cursor, beginner, (ModeRotation.pick(cursor, beginner)))
+	check("beginner skips the scheduled mode", mode == "Mystery" and reason == "Beginner")
+	local missing = input(noMystery)
+	mode, reason = ModeRotation.skipped(cursor, missing, (ModeRotation.pick(cursor, missing)))
+	check("unavailable mode is reported", mode == "Mystery" and reason == "Unavailable")
+	local repeatCursor: ModeRotation.Cursor = { index = 2, last = "Race" }
+	mode, reason = ModeRotation.skipped(repeatCursor, plain, (ModeRotation.pick(repeatCursor, plain)))
+	check("a new mode does not repeat", mode == "Race" and reason == "Repeat")
+end
+
 -- Novato: só as primeiras partidas.
 check("beginner below the limit", ModeRotation.isBeginner(2, 3))
 check("not a beginner at the limit", not ModeRotation.isBeginner(3, 3))

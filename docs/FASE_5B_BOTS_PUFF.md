@@ -120,6 +120,7 @@ Laço no servidor a cada `BotBrain.TickSeconds = 0.2`, no máximo 3 bots.
 
 - `RoundStarted` e `RoundFinished` ganham o contexto `Bots{n}` e `Humans{n}`, para separar a retenção e a taxa de vitória das partidas com bots.
 - Eventos novos: `BotFillStarted` (tempo esperando sozinho), `BotReplacedByHuman`, `BotMatchFinished` (posição do humano).
+  - *Andamento (out/2026):* `BotMatchFinished` passou a ser registrado no fim de toda partida com bots, com a posição do humano, o modo e o número de bots (`Bots{n}`).
 - Nenhum `LogCustomEvent` é chamado com bot.
 
 ---

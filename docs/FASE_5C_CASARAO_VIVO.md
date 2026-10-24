@@ -145,6 +145,7 @@ Referência da economia: a Puff Machine custa 5 🎟 e uma vitória rende 3. O C
   - nada animado pelo servidor além do Barão e do Fantasminha.
 - **Sons:** os sons embutidos do Roblox são poucos. Portas (rangido e batida), relógio, piano, risinho do fantasma e coleta usam áudios gratuitos do Creator Store, com os IDs em config, como nas armadilhas.
 - **Telemetria:** `LobbyTime`, `RoomEntered`, `RelicFound`, `RoomSetCompleted`, `AlbumCompleted`, `DailyRelicFound`, `PageFound`, `PuzzleSolved`, `SecretRoomOpened`, `GhostCaught`, `QueueTicketTeleport` e `QueueTicketMissed` (partida perdida apesar da ficha).
+  - *Andamento (out/2026):* entraram `LobbyTime` (segundos no lobby antes de cada partida, desde a entrada ou desde o fim da anterior), `RoomEntered` (primeira visita na sessão a cada cômodo, ala, Sótão, Porão e salas do Barão; valor = segundos desde a entrada), `SecretRoomOpened` (primeira visita ao Escritório e à Sala do Tesouro do Barão), `QueueTicketTeleport` e `QueueTicketMissed` (no início da partida, para quem tinha a ficha e estava fora do mirante). Ainda faltam as portas trancadas, o mapa do Casarão e o trovão do lobby.
 
 ---
 

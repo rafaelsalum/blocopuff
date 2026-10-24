@@ -35,6 +35,8 @@ export type Route = {
 	-- Destino (para refazer a rota depois de travar).
 	goal: string,
 	stuckCount: number,
+	-- Desistiu de vez depois de travar demais (telemetria MurderBotStuck).
+	gaveUp: boolean,
 	lastPosition: Vector3,
 	lastMovedAt: number,
 }
@@ -97,7 +99,7 @@ function MysteryBotNav.plan(nav: Nav, position: Vector3, goal: string, final: Ve
 	end
 	-- Já está no cômodo de saída: não precisa ir ao centro dele antes.
 	local index = if #path > 1 and from == MysteryBotNav.roomOf(nav, position) then 2 else 1
-	return { path = path, index = index, final = final, goal = goal, stuckCount = 0, lastPosition = position, lastMovedAt = now }
+	return { path = path, index = index, final = final, goal = goal, stuckCount = 0, gaveUp = false, lastPosition = position, lastMovedAt = now }
 end
 
 local function arrived(nav: Nav, position: Vector3, target: Vector3, distance: number): boolean
@@ -123,6 +125,7 @@ function MysteryBotNav.step(nav: Nav, bot: Combatant, route: Route, now: number)
 		humanoid.Jump = true
 		route.stuckCount += 1
 		if route.stuckCount > MAX_STUCK then
+			route.gaveUp = true
 			return false
 		end
 		local fresh = MysteryBotNav.plan(nav, position, route.goal, route.final, now)

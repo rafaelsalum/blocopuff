@@ -23,6 +23,8 @@ return table.freeze({
 	["FACA"] = "KNIFE",
 	["🔪 faca liberada em %ds"] = "🔪 knife ready in %ds",
 	["💰 %d/%d"] = "💰 %d/%d",
+	["SACO CHEIO!"] = "BAG FULL!",
+	["Você já pegou todas as moedas desta partida"] = "You've collected every coin you can this match",
 	["A ARMA DO XERIFE CAIU!"] = "THE SHERIFF'S GUN DROPPED!",
 	["Qualquer Inocente pode pegar e virar o Herói"] = "Any Innocent can grab it and become the Hero",
 	["ALGUÉM PEGOU A ARMA"] = "SOMEONE GRABBED THE GUN",

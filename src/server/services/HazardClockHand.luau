@@ -114,7 +114,7 @@ local function checkHits(context: Context, previous: number, current: number, in
 			local heightAbove = root.Position.Y - context.tower.pointAt(t).Y
 			if RaceRules.handSweeps(previous, current, angle, radius, innerRadius, outerRadius, heightAbove, clearHeight) then
 				already[combatant] = true
-				context.hit(combatant, t)
+				context.hit(combatant, t, "ClockHand")
 			end
 		end
 	end

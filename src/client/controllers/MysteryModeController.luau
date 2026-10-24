@@ -4,8 +4,9 @@
 -- (só o próprio jogador sabe o seu), a primeira pessoa com a mão e o item
 -- na tela (MurderFirstPerson), a faca do Assassino (o clique ou toque golpeia
 -- na hora; segurar e soltar arremessa para onde a mira aponta; no celular,
--- um botão só, no lugar do botão de tiro), o contador de moedas, os avisos
--- da arma caída e do Herói e a revelação de quem era quem no fim.
+-- um botão só, no lugar do botão de tiro), o contador de moedas com o aviso
+-- de saco cheio, os avisos da arma caída e do Herói, a música dos últimos
+-- segundos (MysteryFinalMusic) e a revelação de quem era quem no fim.
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
@@ -23,6 +24,7 @@ local ResponsiveScale = require(script.Parent.Parent.ui.ResponsiveScale)
 local RoleRevealView = require(script.Parent.Parent.ui.RoleRevealView)
 local FireButtonView = require(script.Parent.Parent.ui.FireButtonView)
 local MurderFirstPerson = require(script.Parent.MurderFirstPerson)
+local MysteryFinalMusic = require(script.Parent.MysteryFinalMusic)
 local NotificationManager = require(script.Parent.Parent.notifications.NotificationManager)
 
 local T = Lang.t
@@ -131,6 +133,8 @@ local function run(remote: RemoteEvent, container: Instance, playerGui: PlayerGu
 	-- Ataque em andamento: quando começou (nil: solto).
 	local pressedAt: number? = nil
 	local drawSentAt: number? = nil
+	-- Moedas no último refresh (para avisar uma vez quando o saco enche).
+	local lastCoins = 0
 	local view = RoleRevealView.create(playerGui)
 	local hud = createHud(playerGui)
 
@@ -256,7 +260,13 @@ local function run(remote: RemoteEvent, container: Instance, playerGui: PlayerGu
 			view.setBadge(nil)
 		end
 		local coins = localPlayer:GetAttribute(COINS_ATTRIBUTE)
-		hud.coinsLabel.Text = T("💰 %d/%d", if typeof(coins) == "number" then coins else 0, MysteryModeConfig.MaxCoinsPerPlayer)
+		local coinCount = if typeof(coins) == "number" then coins else 0
+		local maxCoins = MysteryModeConfig.MaxCoinsPerPlayer
+		hud.coinsLabel.Text = T("💰 %d/%d", coinCount, maxCoins)
+		if playing and coinCount >= maxCoins and lastCoins < maxCoins then
+			notify("Banner", "mystery-bag", "🎒", T("SACO CHEIO!"), T("Você já pegou todas as moedas desta partida"), "Gold", 3)
+		end
+		lastCoins = coinCount
 	end
 
 	-- Faca liberada em tantos segundos (só o Assassino vê).
@@ -362,6 +372,7 @@ function MysteryModeController.start()
 			warn("[BlocoPuff] MysteryModeController: remote, state container or PlayerGui not found")
 			return
 		end
+		MysteryFinalMusic.start(container)
 		run(remote, container, playerGui)
 	end)
 end

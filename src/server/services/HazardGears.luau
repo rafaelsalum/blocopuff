@@ -117,7 +117,7 @@ function HazardGears.drop(context: Context, target: CombatantRegistry.Combatant)
 				local offset = victimRoot.Position - spot
 				local horizontal = Vector3.new(offset.X, 0, offset.Z).Magnitude
 				if horizontal <= hazards.DropHitRadius and math.abs(offset.Y) <= HIT_HEIGHT then
-					context.hit(combatant, t)
+					context.hit(combatant, t, "Gears")
 				end
 			end
 		end

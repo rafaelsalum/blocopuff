@@ -6,6 +6,7 @@
 -- atinge o primeiro que encontrar. Tudo simulado no servidor; o modo decide
 -- quem pode golpear, as recargas e o que acontece com o alvo.
 
+local Debris = game:GetService("Debris")
 local RunService = game:GetService("RunService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerStorage = game:GetService("ServerStorage")
@@ -42,6 +43,9 @@ local BODY_BELOW_ROOT = 3
 local BODY_ABOVE_ROOT = 2
 -- A mira do golpe pode se afastar até 110° da frente do corpo.
 local AIM_MIN_COSINE = math.cos(math.rad(110))
+-- Até onde se ouve a faca (studs) e quanto tempo o som fica no corpo (s).
+local SOUND_RANGE = 60
+local SOUND_LIFETIME = 3
 
 local MurderKnife = {}
 
@@ -268,6 +272,23 @@ function MurderKnife.throw(throw: Throw)
 end
 
 -- Fim da partida: some com as facas (na mão, na mochila e no ar).
+-- Som da faca saindo do corpo de `combatant` (quem está por perto ouve).
+function MurderKnife.playSound(combatant: Combatant, sound: MysteryModeConfig.KnifeSound)
+	local root = CombatantRegistry.getRoot(combatant)
+	if root == nil then
+		return
+	end
+	local instance = Instance.new("Sound")
+	instance.Name = "KnifeSound"
+	instance.SoundId = sound.Id
+	instance.Volume = sound.Volume
+	instance.PlaybackSpeed = sound.Speed
+	instance.RollOffMaxDistance = SOUND_RANGE
+	instance.Parent = root
+	instance:Play()
+	Debris:AddItem(instance, SOUND_LIFETIME)
+end
+
 function MurderKnife.clear()
 	for combatant in pairs(tools) do
 		MurderKnife.take(combatant)

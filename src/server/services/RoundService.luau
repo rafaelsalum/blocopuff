@@ -259,7 +259,12 @@ end
 
 -- Decide o modo da partida com os jogadores escalados e anda a rotação.
 local function chooseMode(selected: { Player })
-	local modeId, nextCursor = ModeRotation.pick(modeCursor, rotationInput(selected))
+	local input = rotationInput(selected)
+	local modeId, nextCursor = ModeRotation.pick(modeCursor, input)
+	local skippedMode, reason = ModeRotation.skipped(modeCursor, input, modeId)
+	if skippedMode ~= nil and reason ~= nil then
+		TelemetryService.modeSkipped(selected, skippedMode, reason, modeId)
+	end
 	modeCursor = nextCursor
 	currentMode = ModeRegistry.get(modeId) or baseMode()
 	ReplicatedState.setRoundMode(currentMode.id)
@@ -598,6 +603,7 @@ local function beginRound(timings: RoundTimings): boolean
 		return false
 	end
 	local bots = BotFillService.takeForRound(botSlots)
+	MatchQueueService.reportTickets(selected)
 	MatchQueueService.setOpen(false)
 	currentRoundId += 1
 	currentRoundStartedAt = os.time()
@@ -627,7 +633,7 @@ local function beginRound(timings: RoundTimings): boolean
 	RoundStatsService.beginRound()
 	SecretAchievementService.beginRound()
 	PlayerDataService.roundStarted(humans)
-	TelemetryService.roundStarted(humans, #bots)
+	TelemetryService.roundStarted(humans, #bots, currentMode.id)
 	currentMode.begin({
 		roundId = currentRoundId,
 		combatants = participantOrder,
@@ -824,7 +830,7 @@ local function commitProfiles(result: ResultTypes.RoundResult)
 	end
 end
 
-local function publishResult()
+local function publishResult(): ResultTypes.RoundResult
 	local remote = resultRemote
 	local snapshots: { RoundResultBuilder.ParticipantSnapshot } = {}
 	local winnerCombatant: Combatant? = nil
@@ -863,7 +869,7 @@ local function publishResult()
 	end
 	RoundStatsService.endRound()
 	if remote == nil then
-		return
+		return result
 	end
 	-- Só quem jogou vê o resultado; o lobby segue sem interrupção.
 	local ok, failure = pcall(function()
@@ -876,6 +882,7 @@ local function publishResult()
 	if not ok then
 		warn(string.format("[BlocoPuff] Could not publish round result: %s", tostring(failure)))
 	end
+	return result
 end
 
 local function runEnding(timings: RoundTimings)
@@ -896,7 +903,7 @@ local function runEnding(timings: RoundTimings)
 		end
 	end
 	PuffMomentService.endRound()
-	publishResult()
+	local result = publishResult()
 	-- Mesma regra de empate do resultado: tempo esgotado com vários vivos
 	-- ou os últimos caindo no mesmo instante.
 	local survivors = 0
@@ -920,7 +927,15 @@ local function runEnding(timings: RoundTimings)
 			outcomes[player] = if won then "Win" elseif inDraw then "Draw" else "Loss"
 		end
 	end
-	TelemetryService.roundFinished(outcomes)
+	local positions: { [Player]: number } = {}
+	for player in pairs(outcomes) do
+		for _, entry in ipairs(result.entries) do
+			if entry.userId == player.UserId then
+				positions[player] = entry.position
+			end
+		end
+	end
+	TelemetryService.roundFinished(outcomes, positions)
 	PuffadorService.endRound()
 	disconnectParticipantDeathHandlers()
 

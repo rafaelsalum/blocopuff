@@ -412,6 +412,21 @@ end
 
 
 
+-- Telemetria da Ficha (Fase 5C), na hora de escalar a partida: quem estava
+-- com a ficha fora do mirante foi levado para ela (QueueTicketTeleport) ou
+-- ficou de fora apesar da ficha (QueueTicketMissed).
+function MatchQueueService.reportTickets(selected: { Player })
+	local chosen: { [Player]: boolean } = {}
+	for _, player in ipairs(selected) do
+		chosen[player] = true
+	end
+	for player in pairs(tickets) do
+		if not inZone[player] then
+			TelemetryService.lobbyEvent(player, if chosen[player] then "QueueTicketTeleport" else "QueueTicketMissed", 1)
+		end
+	end
+end
+
 -- Na espera (WaitingForPlayers/Countdown) o aviso de "sozinho" vale; na
 -- partida, não.
 function MatchQueueService.setOpen(value: boolean)

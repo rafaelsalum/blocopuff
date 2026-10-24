@@ -14,8 +14,9 @@ export type Context = {
 	-- A corrida que lançou o obstáculo ainda está valendo?
 	isLive: () -> boolean,
 	racers: () -> { CombatantRegistry.Combatant },
-	-- Atinge `combatant`, que está na volta `t` da rampa.
-	hit: (combatant: CombatantRegistry.Combatant, t: number) -> (),
+	-- Atinge `combatant`, que está na volta `t` da rampa, com o obstáculo
+	-- `kind` (para a telemetria RaceHazardHit).
+	hit: (combatant: CombatantRegistry.Combatant, t: number, kind: string) -> (),
 	-- Volta (t) da rampa mais perto de `position`.
 	turnsAt: (position: Vector3) -> number,
 	-- Peça que some quando a corrida para.
