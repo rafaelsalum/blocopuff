@@ -32,6 +32,8 @@ export type Highlight = {
 
 export type RoundResult = {
 	roundId: number,
+	-- Modo da rodada ("Arena", "Race" ou "Mystery"): muda o texto do painel.
+	mode: string,
 	winnerUserId: number,
 	winnerName: string,
 	draw: boolean,

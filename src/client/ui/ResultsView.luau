@@ -111,9 +111,20 @@ local function plural(count: number, singular: string, pluralForm: string): stri
 	return string.format("%d %s", count, word)
 end
 
+-- Subtítulo de quem venceu e de quando ninguém venceu, conforme o modo.
+local function modeLines(mode: string): (string, string)
+	if mode == "Race" then
+		return T("Você chegou primeiro ao topo da torre"), T("Ninguém chegou ao topo da torre")
+	elseif mode == "Mystery" then
+		return T("Você venceu a rodada"), T("Rodada encerrada")
+	end
+	return T("Você foi o último na arena"), T("Ninguém sobrou na arena")
+end
+
 local function describe(result: RoundResult, mine: ResultEntry?, localUserId: number): (string, string, Color3)
+	local wonLine, nobodyLine = modeLines(result.mode)
 	if result.winnerUserId ~= 0 and result.winnerUserId == localUserId then
-		return T("VITÓRIA!"), T("Você foi o último na arena"), UiTheme.Colors.Gold
+		return T("VITÓRIA!"), wonLine, UiTheme.Colors.Gold
 	elseif result.draw then
 		local survivors = 0
 		for _, entry in ipairs(result.entries) do
@@ -128,7 +139,7 @@ local function describe(result: RoundResult, mine: ResultEntry?, localUserId: nu
 	elseif result.winnerUserId ~= 0 then
 		return T("FIM DA RODADA"), T("%s venceu a rodada", result.winnerName), UiTheme.Colors.Brand
 	end
-	return T("FIM DA RODADA"), if mine ~= nil then T("Ninguém sobrou na arena") else T("Rodada encerrada"), UiTheme.Colors.Brand
+	return T("FIM DA RODADA"), if mine ~= nil then nobodyLine else T("Rodada encerrada"), UiTheme.Colors.Brand
 end
 
 local function highlightDetail(highlight: Highlight): string

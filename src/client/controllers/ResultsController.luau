@@ -98,6 +98,7 @@ local function parseResult(raw: unknown): RoundResult?
 	end
 	return {
 		roundId = roundId,
+		mode = asString(data.mode) or "Arena",
 		winnerUserId = winnerUserId,
 		winnerName = asString(data.winnerName) or "",
 		draw = data.draw == true,

@@ -103,8 +103,9 @@ local function pickHighlight(entries: { ResultEntry }, kind: string, title: stri
 end
 
 -- `ranking`: posições decididas pelo modo (Corrida: ordem de chegada e
--- altura). Sem ela, a posição vem da ordem de eliminação.
-function RoundResultBuilder.build(roundId: number, snapshots: { ParticipantSnapshot }, winner: Combatant?, ranking: { [Combatant]: number }?): RoundResult
+-- altura). Sem ela, a posição vem da ordem de eliminação. `mode` é o modo
+-- da rodada (o painel escreve o texto conforme ele).
+function RoundResultBuilder.build(roundId: number, snapshots: { ParticipantSnapshot }, winner: Combatant?, ranking: { [Combatant]: number }?, mode: string): RoundResult
 	local entries: { ResultEntry } = {}
 	local comebacks: { [number]: number } = {}
 	local tiedPositions = resolveTies(snapshots)
@@ -186,6 +187,7 @@ function RoundResultBuilder.build(roundId: number, snapshots: { ParticipantSnaps
 
 	return {
 		roundId = roundId,
+		mode = mode,
 		winnerUserId = if winner ~= nil then winner.id else 0,
 		winnerName = if winner ~= nil then winner.name else "",
 		-- Com posições do modo (Corrida), não há empate: quem não venceu perdeu.

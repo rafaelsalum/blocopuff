@@ -848,7 +848,7 @@ local function publishResult()
 			end
 		end
 	end
-	local result = RoundResultBuilder.build(currentRoundId, snapshots, winnerCombatant, currentMode.getRanking())
+	local result = RoundResultBuilder.build(currentRoundId, snapshots, winnerCombatant, currentMode.getRanking(), currentMode.id)
 	local committed, commitFailure = pcall(commitProfiles, result)
 	if not committed then
 		warn(string.format("[BlocoPuff] Could not save round to profiles: %s", tostring(commitFailure)))

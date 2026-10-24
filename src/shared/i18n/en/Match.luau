@@ -127,6 +127,9 @@ return table.freeze({
 	["%s venceu a rodada"] = "%s won the round",
 	["Ninguém sobrou na arena"] = "Nobody survived in the arena",
 	["Rodada encerrada"] = "Round ended",
+	["Você chegou primeiro ao topo da torre"] = "You reached the top of the tower first",
+	["Ninguém chegou ao topo da torre"] = "Nobody reached the top of the tower",
+	["Você venceu a rodada"] = "You won the round",
 
 	-- PAINEL DE RESULTADOS - PESSOAL (Results Panel - Personal)
 	["Você: <font color=\"#FFD166\">#%d</font> de %d  ·  %s  ·  %s"] = "You: <font color=\"#FFD166\">#%d</font> of %d  ·  %s  ·  %s",
