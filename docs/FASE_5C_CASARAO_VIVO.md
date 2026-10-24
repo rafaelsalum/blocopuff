@@ -111,13 +111,25 @@ O jogador passa a:
     - os cômodos visitados aparecem com ícone e nome, os que faltam aparecem escuros com "?", e as Salas Secretas só aparecem depois de visitadas;
     - mostra o "% explorado", você e os amigos da Party;
     - os cômodos visitados ficam no perfil (`rooms`, protegido pelo `ProfileGuard`);
-    - contam os 11 cômodos que não são secretos, incluindo a Música e a Sala dos Troféus, que pedem a chave e o nível;
+    - contam os 12 cômodos que não são secretos, incluindo a Música e a Sala dos Troféus, que pedem a chave e o nível, e o Saguão da Torre;
     - completar dá a conquista secreta "Explorador" (5 🎟).
+  - **Saguão da Torre e passeio na ilha:**
+    - sala nova do lado de fora da parede norte do Salão da Coleção, a oeste do janelão (a vista para a torre continua livre);
+    - a porta dupla fica entre dois pedestais da vitrine de Puffs; dentro há o relógio grande de parede, bancos, lustre, duas janelas para a torre e a placa "🏁 A RAMPA SÓ ABRE NA CORRIDA";
+    - a porta do fundo abre para a ponte coberta, que agora desce (cerca de 15°) do Saguão até o portão da muralha da ilha; a ponte antiga, só de enfeite e por baixo do janelão, saiu;
+    - o portão da muralha e os pilares com gárgula foram virados para a ponte (o ângulo vem de `TowerHallLayout`);
+    - quem está no lobby passeia pela ilha, em volta da torre; a muralha, a ponte e os cantos do portão têm barreira invisível alta (ninguém pula para fora, nem de cima do corrimão ou dos pilares);
+    - a rampa tem um portão mágico na largada: no servidor ele não colide (os bots passam), e cada cliente liga a colisão para quem não está correndo na Corrida (`RaceStartGateController`); para quem corre, ele some;
+    - quem ainda está na rampa quando a Corrida acaba consegue descer (o portão só segura quem está de fora);
+    - a telemetria registra `RoomEntered` para `TowerHall` e `TowerIsland`; o Saguão entra no Mapa (a ilha não).
   - **Trovão no lobby:** a Tempestade da partida (5.7) já escurece o céu, faz chover e troveja para todos os clientes, inclusive para quem está no Casarão.
   - **Testado no Studio:**
     - a porta trancada barra quem não tem acesso, abre só a fresta e mostra o aviso;
     - com acesso, o jogador passa, e sem acesso quem está dentro consegue sair;
-    - uma volta pelo Casarão encheu o mapa de 10/11 até 100% e deu a conquista.
+    - uma volta pelo Casarão encheu o mapa de 10/11 até 100% e deu a conquista;
+    - caminhando do Saguão, o jogador passa pela porta, desce a ponte e chega à ilha;
+    - pulando contra a muralha, as laterais da ponte e os cantos do portão, ninguém cai;
+    - o portão da largada barra quem está no lobby, deixa passar quem corre e solta quem ficou na rampa.
 - **Obby do Sótão** (opcional, se sobrar tempo): percurso curto no telhado e no sótão, com cronômetro e ranking semanal ("mais rápido do Casarão").
 
 ---

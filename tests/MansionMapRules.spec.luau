@@ -20,13 +20,13 @@ end
 local ROOMS = MansionMapConfig.Rooms
 
 local count, total = MansionMapRules.progress(ROOMS, {})
-check("nothing visited", count == 0 and total == 11)
+check("nothing visited", count == 0 and total == 12)
 check("zero percent", MansionMapRules.percent(ROOMS, {}) == 0)
 
 local some = { GrandHall = 1, Library = 2, Study = 3 }
 count, total = MansionMapRules.progress(ROOMS, some)
-check("secret rooms do not count", count == 2 and total == 11)
-check("percent rounds down", MansionMapRules.percent(ROOMS, some) == 18)
+check("secret rooms do not count", count == 2 and total == 12)
+check("percent rounds down", MansionMapRules.percent(ROOMS, some) == 16)
 check("not complete", not MansionMapRules.complete(ROOMS, some))
 
 local all: { [string]: number } = {}
@@ -38,9 +38,9 @@ end
 check("all public rooms complete the map", MansionMapRules.complete(ROOMS, all))
 check("hundred percent", MansionMapRules.percent(ROOMS, all) == 100)
 all.Music = nil
-check("one missing is not complete", not MansionMapRules.complete(ROOMS, all) and MansionMapRules.percent(ROOMS, all) == 90)
+check("one missing is not complete", not MansionMapRules.complete(ROOMS, all) and MansionMapRules.percent(ROOMS, all) == 91)
 
-check("known room", MansionMapRules.isRoom(ROOMS, "Trophy"))
+check("known room", MansionMapRules.isRoom(ROOMS, "Trophy") and MansionMapRules.isRoom(ROOMS, "TowerHall"))
 check("unknown room", not MansionMapRules.isRoom(ROOMS, "Arena"))
 check("non string room", not MansionMapRules.isRoom(ROOMS, 3))
 check("empty map is never complete", not MansionMapRules.complete({}, {}))

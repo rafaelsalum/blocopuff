@@ -12,6 +12,7 @@ local BaronRoomsLayout = require(ReplicatedStorage.Shared.modules.BaronRoomsLayo
 local MansionLayout = require(ReplicatedStorage.Shared.modules.MansionLayout)
 local MansionWingLayout = require(ReplicatedStorage.Shared.modules.MansionWingLayout)
 local TrophyRoomLayout = require(ReplicatedStorage.Shared.modules.TrophyRoomLayout)
+local TowerHallLayout = require(ReplicatedStorage.Shared.modules.TowerHallLayout)
 
 type MapFloor = MansionMapConfig.MapFloor
 
@@ -56,6 +57,8 @@ function MansionMapLayout.rects(): { MapRect }
 			table.insert(rects, rect(id, "Main", wingRoom))
 		elseif id == "Trophy" then
 			table.insert(rects, rect(id, "Main", TrophyRoomLayout.get().room))
+		elseif id == "TowerHall" then
+			table.insert(rects, rect(id, "Main", TowerHallLayout.get().room))
 		elseif id == "Attic" or id == "Cellar" then
 			table.insert(rects, rect(id, if id == "Attic" then "Attic" else "Cellar", wing))
 		elseif id == "Study" or id == "Treasure" then

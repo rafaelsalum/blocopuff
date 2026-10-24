@@ -17,12 +17,14 @@ local MansionConfig = require(ReplicatedStorage.Shared.config.MansionConfig)
 local BuildingLayout = require(ReplicatedStorage.Shared.modules.BuildingLayout)
 local MansionLayout = require(ReplicatedStorage.Shared.modules.MansionLayout)
 local MansionWingLayout = require(ReplicatedStorage.Shared.modules.MansionWingLayout)
+local TowerHallLayout = require(ReplicatedStorage.Shared.modules.TowerHallLayout)
 local Lang = require(ReplicatedStorage.Shared.i18n.Lang)
 local BuildingDecor = require(script.Parent.BuildingDecor)
 local LobbyService = require(script.Parent.LobbyService)
 local MansionDoors = require(script.Parent.MansionDoors)
 local MansionPlaque = require(script.Parent.MansionPlaque)
 local MansionWing = require(script.Parent.MansionWing)
+local TowerHallBuilder = require(script.Parent.TowerHallBuilder)
 local WallBuilder = require(script.Parent.WallBuilder)
 
 type BuildingConfig = GameConfig.BuildingConfig
@@ -114,6 +116,13 @@ local function towerWindowHole(mansion: Mansion, thickness: number): Box
 	return WallBuilder.hole(point, Vector3.new(0, 0, 1), Vector3.xAxis, thickness, window.Size)
 end
 
+-- Porta do Saguão da Torre na parede norte (sobra meio stud de cada lado
+-- da espessura, como os outros vãos).
+local function towerHallHole(): Box
+	local hole = TowerHallLayout.get().hole
+	return box(hole.minX, hole.minY, hole.minZ - 0.5, hole.maxX, hole.maxY, hole.maxZ + 0.5)
+end
+
 -- Vidro levemente azulado com caixilhos de madeira (montantes e uma
 -- travessa), no meio da espessura da parede. Não deixa sair pela janela.
 local function createTowerWindowGlass(parent: Instance, hole: Box)
@@ -135,7 +144,7 @@ end
 -- Piso, teto e paredes externas. A oeste, a parede leste do prédio da arena
 -- já fecha o trecho da galeria; aqui só entram as pontas e o pedaço acima
 -- do telhado do prédio (o Casarão tem pé-direito mais alto).
-local function createShell(parent: Instance, mansion: Mansion, building: BuildingConfig, withWing: boolean)
+local function createShell(parent: Instance, mansion: Mansion, building: BuildingConfig, withWing: boolean, withHall: boolean)
 	local t = building.WallThickness
 	local floorY = mansion.floorY
 	local topY = mansion.ceilingY
@@ -148,7 +157,7 @@ local function createShell(parent: Instance, mansion: Mansion, building: Buildin
 	WallBuilder.createBox(parent, "MansionFloor", box(mansion.minX, floorY - 1, mansion.minZ - t, mansion.maxX + t, floorY, mansion.maxZ + t), MansionConfig.FloorColor, Enum.Material.WoodPlanks)
 	WallBuilder.createBox(parent, "MansionCeiling", box(westMinX, topY, mansion.minZ - t, mansion.maxX + t, topY + 1, mansion.maxZ + t), MansionConfig.CeilingColor, Enum.Material.Plaster)
 	local northHole = towerWindowHole(mansion, t)
-	WallBuilder.createWallWithHoles(parent, "MansionWallNorth", box(westMinX, floorY - 1, mansion.minZ - t, mansion.maxX + t, topY, mansion.minZ), { northHole }, wallColor, Enum.Material.Plaster)
+	WallBuilder.createWallWithHoles(parent, "MansionWallNorth", box(westMinX, floorY - 1, mansion.minZ - t, mansion.maxX + t, topY, mansion.minZ), if withHall then { northHole, towerHallHole() } else { northHole }, wallColor, Enum.Material.Plaster)
 	createTowerWindowGlass(parent, northHole)
 	WallBuilder.createBox(parent, "MansionWallSouth", box(westMinX, floorY - 1, mansion.maxZ, mansion.maxX + t, topY, mansion.maxZ + t), wallColor, Enum.Material.Plaster)
 	-- Parede leste com as portas para a ala nova (MansionWingLayout).
@@ -230,7 +239,7 @@ end
 
 -- Todas as faces internas, sala por sala, com os vãos e as placas que dizem
 -- para onde cada passagem leva.
-local function getFaces(mansion: Mansion, withWing: boolean): { Face }
+local function getFaces(mansion: Mansion, withWing: boolean, withHall: boolean): { Face }
 	local colors = MansionConfig.WallpaperColors
 	local rooms = mansion.rooms
 	local hall = rooms.GrandHall
@@ -273,6 +282,14 @@ local function getFaces(mansion: Mansion, withWing: boolean): { Face }
 	end
 	local x0, x1 = mansion.minX, mansion.maxX
 	local z0, z1 = mansion.minZ, mansion.maxZ
+	local collectionNorth: { Opening } = {
+		{ point = at(towerWindow.CenterX, z0), size = towerWindow.Size, label = Lang.t("🕰️ TORRE DO RELÓGIO"), sill = towerWindow.Sill },
+	}
+	if withHall then
+		-- As placas da porta do Saguão da Torre são do TowerHallBuilder.
+		local hallDoor = TowerHallLayout.get().doorway
+		table.insert(collectionNorth, opening(hallDoor.center.X, z0, hallDoor.size, nil))
+	end
 	-- Normais das faces (apontam para dentro da sala).
 	local toWest = Vector3.new(-1, 0, 0)
 	local toEast = Vector3.new(1, 0, 0)
@@ -292,9 +309,7 @@ local function getFaces(mansion: Mansion, withWing: boolean): { Face }
 			opening(hallEast, mansion.center.Z, arch, Lang.t("🐶 JARDIM DO BARÃO")),
 		} },
 		-- Salão da Coleção (norte)
-		{ name = "CollectionNorth", a = at(x0, z0), b = at(x1, z0), inward = toSouth, color = colors.Collection, openings = {
-			{ point = at(towerWindow.CenterX, z0), size = towerWindow.Size, label = Lang.t("🕰️ TORRE DO RELÓGIO"), sill = towerWindow.Sill },
-		} },
+		{ name = "CollectionNorth", a = at(x0, z0), b = at(x1, z0), inward = toSouth, color = colors.Collection, openings = collectionNorth },
 		{ name = "CollectionWest", a = at(x0, z0), b = at(x0, north - half), inward = toEast, color = colors.Collection, openings = {} },
 		{ name = "CollectionEast", a = at(x1, z0), b = at(x1, north - half), inward = toWest, color = colors.Collection, openings = if withWing then { wingOpening("LibraryDoor") } else {} },
 		{ name = "CollectionSouth", a = at(x0, north - half), b = at(x1, north - half), inward = toNorth, color = colors.Collection, openings = {
@@ -485,10 +500,15 @@ function MansionService.create(worldRoot: Model, building: BuildingConfig): Mode
 	if not wingOk then
 		warn(`[BlocoPuff] Mansion east wing unavailable: {wingFailure}`)
 	end
-	createShell(model, mansion, building, wingOk)
+	-- O Saguão da Torre também é opcional: sem ele, a parede norte fica fechada.
+	local hallOk, hallFailure = pcall(TowerHallBuilder.build, model, building)
+	if not hallOk then
+		warn(`[BlocoPuff] Tower hall unavailable: {hallFailure}`)
+	end
+	createShell(model, mansion, building, wingOk, hallOk)
 	createPartitions(model, mansion)
 	MansionDoors.build(model, MansionDoors.partitionDoorways(mansion))
-	for _, face in ipairs(getFaces(mansion, wingOk)) do
+	for _, face in ipairs(getFaces(mansion, wingOk, hallOk)) do
 		decorateFace(model, mansion, face, building, rng)
 	end
 	createCeiling(model, mansion, building)

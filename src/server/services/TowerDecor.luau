@@ -11,6 +11,7 @@ local CollectionService = game:GetService("CollectionService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local RaceConfig = require(ReplicatedStorage.Shared.config.RaceConfig)
+local TowerHallLayout = require(ReplicatedStorage.Shared.modules.TowerHallLayout)
 local TowerAmbienceNames = require(ReplicatedStorage.Shared.modules.TowerAmbienceNames)
 local RaceRules = require(script.Parent.Parent.data.RaceRules)
 local TowerAssets = require(script.Parent.TowerAssets)
@@ -67,7 +68,7 @@ local function buildGargoyles(model: Instance, center: Vector3, topY: number)
 		TowerAssets.place(model, "Gargoyle", GARGOYLE_HEIGHT, ring(center, angle, radius, topY + tower.ParapetHeight), outwardOf(angle))
 	end
 	-- Portão da ilha (lado do Casarão): dois pilares com gárgula em cima.
-	local gateAngle = math.pi / 2
+	local gateAngle = TowerHallLayout.get().gateAngle
 	local gateRadius = tower.IslandRadius - 2
 	for _, side in ipairs({ -1, 1 }) do
 		local angle = gateAngle + side * math.rad(8)

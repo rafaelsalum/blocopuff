@@ -55,6 +55,7 @@ local InviteController = require(script.controllers.InviteController)
 local DashController = require(script.controllers.DashController)
 local WorldTextLocalizer = require(script.controllers.WorldTextLocalizer)
 local TowerAmbienceController = require(script.controllers.TowerAmbienceController)
+local RaceStartGateController = require(script.controllers.RaceStartGateController)
 
 print("[BlocoPuff] Client initialized")
 
@@ -383,4 +384,12 @@ local towerAmbienceOk, towerAmbienceErr = pcall(function()
 end)
 if not towerAmbienceOk then
 	warn(string.format("[BlocoPuff] Failed to start tower ambience: %s", tostring(towerAmbienceErr)))
+end
+
+-- Portão mágico da largada da rampa da torre (só abre para quem corre).
+local raceGateOk, raceGateErr = pcall(function()
+	RaceStartGateController.start()
+end)
+if not raceGateOk then
+	warn(string.format("[BlocoPuff] Failed to start race start gate: %s", tostring(raceGateErr)))
 end

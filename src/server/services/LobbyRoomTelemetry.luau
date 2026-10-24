@@ -14,6 +14,8 @@ local BaronRoomsLayout = require(ReplicatedStorage.Shared.modules.BaronRoomsLayo
 local MansionLayout = require(ReplicatedStorage.Shared.modules.MansionLayout)
 local MansionWingLayout = require(ReplicatedStorage.Shared.modules.MansionWingLayout)
 local TrophyRoomLayout = require(ReplicatedStorage.Shared.modules.TrophyRoomLayout)
+local TowerHallLayout = require(ReplicatedStorage.Shared.modules.TowerHallLayout)
+local RaceConfig = require(ReplicatedStorage.Shared.config.RaceConfig)
 local StateAttributeNames = require(ReplicatedStorage.Shared.types.StateAttributeNames)
 local LobbyRooms = require(script.Parent.Parent.data.LobbyRooms)
 local TelemetryService = require(script.Parent.TelemetryService)
@@ -24,6 +26,8 @@ type Zone = LobbyRooms.Zone
 local CHECK_SECONDS = 1
 -- Folga abaixo do piso e acima do teto de cada andar.
 local FLOOR_SLACK = 1.5
+-- Altura da zona da ilha da torre acima do chão dela.
+local ISLAND_HEIGHT = 20
 
 local LobbyRoomTelemetry = {}
 
@@ -53,6 +57,19 @@ local function buildZones(): { Zone }
 		end
 	end
 	table.insert(zones, boxZone("Trophy", TrophyRoomLayout.get().room))
+	table.insert(zones, boxZone("TowerHall", TowerHallLayout.get().room))
+	-- A ilha da torre (com a ponte): quadrado em volta da muralha, do chão até
+	-- acima da largada. Não entra no mapa.
+	local tower = RaceConfig.Tower
+	local reach = tower.IslandRadius
+	table.insert(zones, boxZone("TowerIsland", {
+		minX = tower.Center.X - reach,
+		maxX = tower.Center.X + reach,
+		minY = tower.Center.Y - FLOOR_SLACK,
+		maxY = tower.Center.Y + ISLAND_HEIGHT,
+		minZ = tower.Center.Z - reach,
+		maxZ = tower.Center.Z + reach,
+	}))
 	local wing = MansionWingLayout.get()
 	local wingBox = { minX = wing.minX, maxX = wing.maxX, minZ = wing.minZ, maxZ = wing.maxZ }
 	table.insert(zones, boxZone("Attic", { minX = wingBox.minX, maxX = wingBox.maxX, minZ = wingBox.minZ, maxZ = wingBox.maxZ, minY = wing.atticFloorY - FLOOR_SLACK, maxY = wing.atticCeilingY }))

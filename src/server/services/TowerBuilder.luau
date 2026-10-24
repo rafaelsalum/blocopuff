@@ -8,10 +8,12 @@
 -- com o relógio de 4 faces e o campanário (TowerSpire), e os enfeites
 -- (TowerDecor). A geometria vem de RaceRules; aqui só se criam as peças.
 
+local CollectionService = game:GetService("CollectionService")
 local Workspace = game:GetService("Workspace")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local RaceConfig = require(ReplicatedStorage.Shared.config.RaceConfig)
+local TowerAmbienceNames = require(ReplicatedStorage.Shared.modules.TowerAmbienceNames)
 local RaceRules = require(script.Parent.Parent.data.RaceRules)
 local TowerDecor = require(script.Parent.TowerDecor)
 local TowerIsland = require(script.Parent.TowerIsland)
@@ -60,6 +62,9 @@ local TOP_WALL_SEGMENTS = 24
 -- Fração do caminho do centro do topo até o fim da rampa (ponto final dos
 -- bots, fora do relógio do meio).
 local FINISH_POINT_FRACTION = 0.6
+-- Portão mágico da largada (do pé da coluna até a mureta, na volta 0).
+local START_GATE_HEIGHT = 16
+local START_GATE_COLOR = Color3.fromRGB(170, 120, 255)
 
 local COLORS = TowerKit.COLORS
 local part = TowerKit.part
@@ -129,6 +134,27 @@ local function buildRamp(folder: Folder, layout: TowerLayout)
 			part(folder, "Skirt", Vector3.new(tower.ParapetThickness, height, (floorTo - floorFrom).Magnitude + tower.ParapetThickness), base * CFrame.new(0, height / 2, 0), COLORS.stoneDark, Enum.Material.Cobblestone)
 		end
 	end
+end
+
+-- Portão mágico no começo da rampa: quem está no lobby passeia na ilha,
+-- mas não sobe. No servidor ele não colide (os bots da Corrida passam); cada
+-- cliente liga a colisão para quem não está correndo (RaceStartGateController).
+local function buildStartGate(folder: Folder, layout: TowerLayout, columnRadius: number)
+	local tower = RaceConfig.Tower
+	local outer = RaceRules.parapetRadius(tower.Radius, tower.RampWidth, tower.ParapetThickness) + tower.ParapetThickness / 2
+	local start = layout.pointAt(0)
+	local outward = outwardAt(layout.center, start)
+	local forward = layout.tangentAt(0)
+	local flatForward = Vector3.new(forward.X, 0, forward.Z).Unit
+	local width = outer - columnRadius
+	local foot = Vector3.new(layout.center.X, start.Y, layout.center.Z) + outward * (columnRadius + width / 2)
+	local position = foot + Vector3.new(0, START_GATE_HEIGHT / 2, 0)
+	local gate = part(folder, "StartGate", Vector3.new(width, START_GATE_HEIGHT, 0.6), CFrame.lookAt(position, position + flatForward), START_GATE_COLOR, Enum.Material.ForceField)
+	gate.Transparency = 0.2
+	gate.CanCollide = false
+	gate.CanQuery = false
+	gate.CanTouch = false
+	CollectionService:AddTag(gate, TowerAmbienceNames.StartGateTag)
 end
 
 -- Contrafortes de fora, do chão da ilha até acima do terraço, com pináculo.
@@ -295,6 +321,7 @@ function TowerBuilder.build(): TowerLayout
 	cylinder(folder, "Column", columnRadius, columnHeight, center + Vector3.new(0, columnHeight / 2, 0), COLORS.stone, Enum.Material.Cobblestone)
 	buildWindows(folder, layout, columnRadius)
 	buildRamp(folder, layout)
+	buildStartGate(folder, layout, columnRadius)
 	buildButtresses(folder, center, topY)
 	for index = 1, #checkpointHeights do
 		table.insert(layout.checkpointCFrames, buildCheckpoint(folder, layout, index, index))

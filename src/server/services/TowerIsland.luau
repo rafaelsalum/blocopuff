@@ -3,11 +3,14 @@
 -- Ilha de pedra flutuante da Torre do Relógio Encantada (Fase 5F): gramado
 -- com pátio de laje em volta da torre, penhasco pendurado embaixo (cones de
 -- rocha virados), muralha baixa com ameias, torrinhas de telhado pontudo
--- azul e a ponte coberta de enfeite até a parede norte do Casarão.
+-- azul e a ponte coberta que sobe até a porta do fundo do Saguão da Torre
+-- (TowerHallLayout), por onde quem está no lobby passeia na ilha. A muralha
+-- e a ponte têm uma barreira invisível por cima (ninguém pula para fora).
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local RaceConfig = require(ReplicatedStorage.Shared.config.RaceConfig)
+local TowerHallLayout = require(ReplicatedStorage.Shared.modules.TowerHallLayout)
 local TowerKit = require(script.Parent.TowerKit)
 
 local GROUND_THICKNESS = 4
@@ -19,18 +22,17 @@ local HANGING_ROCK_HEIGHT = 55
 local RIM_SEGMENTS = 32
 local RIM_HEIGHT = 4
 local RIM_THICKNESS = 2
--- A muralha abre na direção do Casarão (+Z), onde chega a ponte.
-local GATE_ANGLE = math.pi / 2
+-- A muralha abre onde chega a ponte (ângulo do TowerHallLayout).
 local GATE_HALF_WIDTH = math.rad(7)
 local TURRET_ANGLES = { math.rad(30), math.rad(150), math.rad(225), math.rad(315) }
 local TURRET_RADIUS = 6
 local TURRET_HEIGHT = 36
 local TURRET_ROOF_HEIGHT = 20
 local TURRET_INSET = 9
--- Ponte coberta: da muralha até a parede norte do Casarão, chegando por
--- baixo do janelão do Salão da Coleção (o telhado não tapa a vista).
-local BRIDGE_END_Z = -67
-local BRIDGE_END_Y = 122
+-- Altura da barreira invisível acima da muralha e das grades da ponte (alta o
+-- bastante para não dar pulo por cima nem de cima do corrimão ou dos pilares
+-- do portão).
+local FENCE_HEIGHT = 16
 local BRIDGE_WIDTH = 12
 local BRIDGE_PILLAR_SPACING = 13
 local BRIDGE_ROOF_HEIGHT = 11
@@ -54,20 +56,47 @@ local function buildGround(model: Instance, center: Vector3, radius: number)
 	end
 end
 
-local function buildRim(model: Instance, center: Vector3, radius: number)
+-- Parede invisível de `from` a `to`, com o pé na altura deles.
+local function fence(model: Instance, from: Vector3, to: Vector3, height: number)
+	local base = CFrame.lookAt((from + to) / 2, to)
+	local wall = part(model, "Fence", Vector3.new(1, height, (to - from).Magnitude + 1), base * CFrame.new(0, height / 2, 0), COLORS.stone, Enum.Material.SmoothPlastic)
+	wall.Transparency = 1
+	wall.CanTouch = false
+	wall.CanQuery = false
+end
+
+-- Muralha em volta, com o vão do portão centrado em `gateAngle`. Os cantos
+-- entre o fim da muralha e as grades da ponte também ficam fechados.
+local function buildRim(model: Instance, center: Vector3, radius: number, gateAngle: number, railEnds: { Vector3 })
 	local wallRadius = radius - RIM_THICKNESS
-	local step = 2 * math.pi / RIM_SEGMENTS
-	for index = 1, RIM_SEGMENTS do
-		local fromAngle = (index - 1) * step
-		local toAngle = index * step
-		local middle = (fromAngle + toAngle) / 2
-		local nearGate = math.abs(math.atan2(math.sin(middle - GATE_ANGLE), math.cos(middle - GATE_ANGLE))) < GATE_HALF_WIDTH
-		if not nearGate then
-			local from = center + Vector3.new(math.cos(fromAngle), 0, math.sin(fromAngle)) * wallRadius
-			local to = center + Vector3.new(math.cos(toAngle), 0, math.sin(toAngle)) * wallRadius
-			TowerKit.wall(model, from, to, RIM_HEIGHT, RIM_THICKNESS, COLORS.stoneDark, 2)
-		end
+	local segments = RIM_SEGMENTS - 1
+	local from = gateAngle + GATE_HALF_WIDTH
+	local step = (2 * math.pi - 2 * GATE_HALF_WIDTH) / segments
+	local lift = Vector3.new(0, RIM_HEIGHT, 0)
+	local function ring(angle: number): Vector3
+		return center + Vector3.new(math.cos(angle), 0, math.sin(angle)) * wallRadius
 	end
+	for index = 1, segments do
+		local a, b = ring(from + (index - 1) * step), ring(from + index * step)
+		TowerKit.wall(model, a, b, RIM_HEIGHT, RIM_THICKNESS, COLORS.stoneDark, 2)
+		fence(model, a + lift, b + lift, FENCE_HEIGHT)
+	end
+	for _, rimEnd in ipairs({ ring(gateAngle + GATE_HALF_WIDTH), ring(gateAngle - GATE_HALF_WIDTH) }) do
+		local nearest = railEnds[1]
+		for _, railEnd in ipairs(railEnds) do
+			if (railEnd - rimEnd).Magnitude < (nearest - rimEnd).Magnitude then
+				nearest = railEnd
+			end
+		end
+		fence(model, rimEnd, Vector3.new(nearest.X, rimEnd.Y, nearest.Z), RIM_HEIGHT + FENCE_HEIGHT)
+	end
+end
+
+-- Pontas das grades da ponte do lado da ilha.
+local function railEnds(gate: Vector3, toward: Vector3): { Vector3 }
+	local flat = Vector3.new(toward.X - gate.X, 0, toward.Z - gate.Z).Unit
+	local right = flat:Cross(Vector3.yAxis) * (BRIDGE_WIDTH / 2 - 0.3)
+	return { gate + right, gate - right }
 end
 
 local function buildTurret(model: Instance, base: Vector3)
@@ -105,6 +134,9 @@ local function buildBridge(model: Instance, from: Vector3, to: Vector3)
 	for _, side in ipairs({ -1, 1 }) do
 		local rail = deck * CFrame.new(side * (BRIDGE_WIDTH / 2 - 0.3), 1.5, 0)
 		part(model, "BridgeRail", Vector3.new(0.6, 3, length), rail, COLORS.wood, Enum.Material.Wood)
+		local edge = deck * CFrame.new(side * (BRIDGE_WIDTH / 2 - 0.3), 0, 0)
+		local half = edge.LookVector * (length / 2)
+		fence(model, edge.Position - half, edge.Position + half, FENCE_HEIGHT)
 	end
 end
 
@@ -114,15 +146,13 @@ function TowerIsland.build(parent: Instance, center: Vector3)
 	local model = Instance.new("Model")
 	model.Name = "TowerIsland"
 	buildGround(model, center, radius)
-	buildRim(model, center, radius)
+	local hall = TowerHallLayout.get()
+	buildRim(model, center, radius, hall.gateAngle, railEnds(hall.bridgeTo, hall.bridgeFrom))
 	for _, angle in ipairs(TURRET_ANGLES) do
 		local base = center + Vector3.new(math.cos(angle), 0, math.sin(angle)) * (radius - TURRET_INSET)
 		buildTurret(model, base)
 	end
-	local gate = center + Vector3.new(math.cos(GATE_ANGLE), 0, math.sin(GATE_ANGLE)) * radius
-	if gate.Z < BRIDGE_END_Z then
-		buildBridge(model, gate, Vector3.new(gate.X, BRIDGE_END_Y, BRIDGE_END_Z))
-	end
+	buildBridge(model, hall.bridgeTo, hall.bridgeFrom)
 	model.Parent = parent
 end
 

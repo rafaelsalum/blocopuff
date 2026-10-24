@@ -6,7 +6,7 @@
 -- Salas Secretas do Barão (`secret`) só aparecem depois de visitadas e não
 -- contam (dependem dos mistérios). Os ids são os nomes dos cômodos nos
 -- layouts (MansionLayout, MansionWingLayout, TrophyRoomLayout,
--- BaronRoomsLayout) e ficam salvos nos perfis: nunca renomeie.
+-- TowerHallLayout, BaronRoomsLayout) e ficam salvos nos perfis: nunca renomeie.
 -- Sem dependências (os testes do Lune carregam este arquivo direto).
 
 export type MapFloor = "Main" | "Attic" | "Cellar"
@@ -36,6 +36,7 @@ MansionMapConfig.Rooms = table.freeze({
 	room("StairHall", "Escadaria", "👣", "Main"),
 	room("Music", "Sala de Música", "🎹", "Main"),
 	room("Trophy", "Sala dos Troféus", "🏆", "Main"),
+	room("TowerHall", "Saguão da Torre", "🕰️", "Main"),
 	room("Study", "Gabinete do Vovô Puff", "📖", "Main", true),
 	room("Attic", "Sótão", "🕯️", "Attic"),
 	room("Cellar", "Porão", "🍷", "Cellar"),
