@@ -77,6 +77,17 @@ check("finishers first in order", ranked[3] == 1 and ranked[2] == 2)
 check("then by height", ranked[4] == 3)
 check("same height ties", ranked[1] == 4 and ranked[5] == 4)
 
+-- Desempate: na mesma altura, quem chegou nela primeiro fica na frente.
+local tieBroken = RaceRules.rank({
+	{ id = 1, finishOrder = nil, bestHeight = 180, reachedAt = 52 },
+	{ id = 2, finishOrder = nil, bestHeight = 180, reachedAt = 47 },
+	{ id = 3, finishOrder = nil, bestHeight = 160, reachedAt = 30 },
+	{ id = 4, finishOrder = nil, bestHeight = 180, reachedAt = 52 },
+})
+check("earlier at the same height ranks first", tieBroken[2] == 1)
+check("later at the same height comes after", tieBroken[1] == 2 and tieBroken[4] == 2)
+check("lower height still behind", tieBroken[3] == 4)
+
 -- Subida possível: andar, pular e ser empurrado passam; teletransporte não.
 check("normal climb is plausible", RaceRules.plausibleRise(120, 125, 0.2, 60))
 check("falling is always plausible", RaceRules.plausibleRise(150, 110, 0.2, 60))

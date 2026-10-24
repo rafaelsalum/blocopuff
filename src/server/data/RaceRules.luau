@@ -24,6 +24,9 @@ export type RankEntry = {
 	finishOrder: number?,
 	-- Maior altura alcançada na corrida.
 	bestHeight: number,
+	-- Quando (segundos de corrida) alcançou essa altura: na mesma altura,
+	-- fica na frente quem chegou nela primeiro (nil = empata).
+	reachedAt: number?,
 }
 
 local RaceRules = {}
@@ -110,12 +113,18 @@ function RaceRules.rank(entries: { RankEntry }): { [number]: number }
 			positions[entry.id] = entry.finishOrder
 		end
 	end
+	local function reached(entry: RankEntry): number
+		return entry.reachedAt or math.huge
+	end
 	table.sort(climbers, function(a, b)
-		return a.bestHeight > b.bestHeight
+		if a.bestHeight ~= b.bestHeight then
+			return a.bestHeight > b.bestHeight
+		end
+		return reached(a) < reached(b)
 	end)
 	for index, entry in ipairs(climbers) do
 		local previous = climbers[index - 1]
-		if previous ~= nil and previous.bestHeight == entry.bestHeight then
+		if previous ~= nil and previous.bestHeight == entry.bestHeight and reached(previous) == reached(entry) then
 			positions[entry.id] = positions[previous.id]
 		else
 			positions[entry.id] = finishers + index

@@ -36,6 +36,9 @@ type Racer = {
 	-- checkpoint, enquanto a posição nova ainda chega do cliente.
 	graceUntil: number,
 	finishOrder: number?,
+	-- Segundos de corrida em que alcançou a maior altura (inteira): desempata
+	-- o pódio de quem está na mesma altura.
+	reachedAt: number,
 }
 
 local ATTR_CHECKPOINT = StateAttributeNames.PlayerRaceCheckpoint
@@ -104,7 +107,7 @@ local function rankPositions(): { [Combatant]: number }
 	for _, combatant in ipairs(order) do
 		local racer = racers[combatant]
 		if racer ~= nil and CombatantRegistry.isPresent(combatant) then
-			table.insert(entries, { id = combatant.id, finishOrder = finishOrder[combatant], bestHeight = math.floor(racer.bestHeight) })
+			table.insert(entries, { id = combatant.id, finishOrder = finishOrder[combatant], bestHeight = math.floor(racer.bestHeight), reachedAt = racer.reachedAt })
 			byId[combatant.id] = combatant
 		end
 	end
@@ -178,6 +181,9 @@ local function updateRacer(layout: TowerLayout, combatant: Combatant, racer: Rac
 		return
 	end
 	racer.lastHeight = height
+	if math.floor(height) > math.floor(racer.bestHeight) then
+		racer.reachedAt = os.clock() - startedAt
+	end
 	racer.bestHeight = math.max(racer.bestHeight, height)
 
 	local reached = RaceRules.nextCheckpoint(racer.checkpoint, RaceRules.checkpointFor(height, layout.checkpointHeights, RaceConfig.ReachTolerance))
@@ -234,7 +240,7 @@ local function begin(context: BeginContext)
 	for _, combatant in ipairs(context.combatants) do
 		local root = CombatantRegistry.getRoot(combatant)
 		local startHeight = if root ~= nil then root.Position.Y else layout.center.Y
-		racers[combatant] = { checkpoint = 0, bestHeight = layout.center.Y, lastHeight = startHeight, graceUntil = os.clock() + TELEPORT_GRACE, finishOrder = nil }
+		racers[combatant] = { checkpoint = 0, bestHeight = layout.center.Y, lastHeight = startHeight, graceUntil = os.clock() + TELEPORT_GRACE, finishOrder = nil, reachedAt = 0 }
 		table.insert(order, combatant)
 		CombatantRegistry.setAttribute(combatant, ATTR_CHECKPOINT, 0)
 		CombatantRegistry.setAttribute(combatant, ATTR_POSITION, 0)
