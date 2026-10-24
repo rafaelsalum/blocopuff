@@ -30,6 +30,7 @@ local ProfileSchema = require(script.Parent.Parent.data.ProfileSchema)
 local ResultTypes = require(ReplicatedStorage.Shared.types.ResultTypes)
 local CombatantRegistry = require(script.Parent.CombatantRegistry)
 local BotFillService = require(script.Parent.BotFillService)
+local StreamPreload = require(script.Parent.StreamPreload)
 local ModeRegistry = require(script.Parent.Parent.modes.ModeRegistry)
 local RoundModeTypes = require(script.Parent.Parent.modes.RoundModeTypes)
 local ModeRotation = require(script.Parent.Parent.data.ModeRotation)
@@ -60,6 +61,8 @@ local RESPAWN_FALL_GRACE = 1
 -- Top 3 só conta no perfil em partidas com pelo menos 4 participantes.
 local TOP3_MIN_PARTICIPANTS = 4
 local TICK_INTERVAL = 1
+-- Espera máxima (s) para o mapa carregar no cliente antes do teletransporte.
+local STREAM_PRELOAD_TIMEOUT = 4
 
 -- Atributos autoritativos escritos pelo servidor em cada Player (ou no corpo
 -- do bot), usados pelo cliente para saber se participa da rodada atual sem
@@ -272,6 +275,15 @@ end
 
 local function teleportParticipantsToMap(combatants: { Combatant })
 	local spawnCFrames = currentMode.getSpawnCFrames(#combatants)
+	-- Carrega o mapa em volta de cada jogador antes de mandá-lo para lá.
+	local preload: { { player: Player, position: Vector3 } } = {}
+	for index, combatant in ipairs(combatants) do
+		local cframe = spawnCFrames[index]
+		if cframe ~= nil and combatant.player ~= nil then
+			table.insert(preload, { player = combatant.player, position = cframe.Position })
+		end
+	end
+	StreamPreload.around(preload, STREAM_PRELOAD_TIMEOUT)
 
 	for index, combatant in ipairs(combatants) do
 		local cframe = spawnCFrames[index]

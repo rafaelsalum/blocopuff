@@ -24,8 +24,6 @@ export type TowerConfig = {
 	TopBarrierHeight: number,
 	-- Raio da ilha de pedra em volta da torre.
 	IslandRadius: number,
-	-- Distância máxima do centro para contar a chegada no topo.
-	TopRadius: number,
 }
 
 export type HazardConfig = {
@@ -118,7 +116,6 @@ local RaceConfig: RaceConfig = {
 		BarrierHeadroom = 1,
 		TopBarrierHeight = 14,
 		IslandRadius = 85,
-		TopRadius = 36,
 	}),
 	Hazards = table.freeze({
 		SlowInterval = 3,

@@ -147,6 +147,18 @@ do
 	check("push without tangent only lifts", near(ox, 0) and near(oy, 5) and near(oz, 0))
 end
 
+-- Chegada: só no terraço, dentro da mureta (raio do terraço), nunca na
+-- faixa de dentro da rampa logo abaixo, nem pulando nela.
+do
+	local tower = { radius = 42, rampWidth = 24, parapetThickness = 2 }
+	local terrace = RaceRules.terraceRadius(tower.radius, tower.rampWidth, tower.parapetThickness)
+	check("terrace is inside the top wall", near(terrace, 27))
+	check("standing on the terrace finishes", RaceRules.reachedTop(242, 20, 239, terrace))
+	check("terrace edge finishes", RaceRules.reachedTop(242, 27, 239, terrace))
+	check("jumping on the ramp inner lane does not finish", not RaceRules.reachedTop(243, 31, 239, terrace))
+	check("ramp just below the top does not finish", not RaceRules.reachedTop(238, 20, 239, terrace))
+end
+
 print(`{passed} passed, {failures} failed`)
 if failures > 0 then
 	error("RaceRules tests failed")

@@ -198,7 +198,9 @@ local function updateRacer(layout: TowerLayout, combatant: Combatant, racer: Rac
 
 	local horizontal = Vector3.new(position.X - layout.center.X, 0, position.Z - layout.center.Z).Magnitude
 	local allCheckpoints = racer.checkpoint >= #layout.checkpointHeights
-	if allCheckpoints and height >= layout.topY - RaceConfig.ReachTolerance and horizontal <= RaceConfig.Tower.TopRadius then
+	local tower = RaceConfig.Tower
+	local terrace = RaceRules.terraceRadius(tower.Radius, tower.RampWidth, tower.ParapetThickness)
+	if allCheckpoints and RaceRules.reachedTop(height, horizontal, layout.topY - RaceConfig.ReachTolerance, terrace) then
 		finishRacer(layout, combatant, racer)
 		return
 	end

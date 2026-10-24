@@ -155,6 +155,18 @@ function RaceRules.parapetRadius(radius: number, rampWidth: number, thickness: n
 	return radius + rampWidth / 2 + thickness / 2
 end
 
+-- Raio do terraço do topo para contar a chegada: dentro da mureta dele (que
+-- fica na borda da coluna), com um stud de folga. A rampa começa na borda
+-- da coluna, então quem pula na faixa de dentro dela não conta.
+function RaceRules.terraceRadius(radius: number, rampWidth: number, thickness: number): number
+	return radius - rampWidth / 2 - thickness - 1
+end
+
+-- Chegou ao topo: no terraço (dentro de `terraceRadius`) e na altura dele.
+function RaceRules.reachedTop(height: number, horizontal: number, topY: number, terraceRadius: number): boolean
+	return height >= topY and horizontal <= terraceRadius
+end
+
 -- Altura da barreira invisível em cima da mureta: fecha a borda até perto da
 -- volta de cima da rampa, sem encostar nela (Fase 5F).
 function RaceRules.barrierHeight(climbPerTurn: number, rampThickness: number, parapetHeight: number, headroom: number): number
