@@ -52,6 +52,8 @@ export type Mansion = {
 	passages: { number },
 	-- X da face da parede da galeria voltada para o Casarão.
 	galleryWallX: number,
+	-- Porta principal na parede sul: centro no piso, na face de dentro.
+	frontDoor: { center: Vector3, size: Vector2 },
 }
 
 local MansionLayout = {}
@@ -111,6 +113,7 @@ function MansionLayout.get(): Mansion
 		} :: { Partition }),
 		passages = passages,
 		galleryWallX = wallX,
+		frontDoor = table.freeze({ center = Vector3.new(minX + config.FrontDoor.OffsetX, gallery.floorY, maxZ), size = config.FrontDoor.Size }),
 	}
 	cached = mansion
 	return mansion

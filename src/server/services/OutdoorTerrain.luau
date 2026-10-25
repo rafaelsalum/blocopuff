@@ -50,17 +50,19 @@ local function setLook(terrain: Terrain)
 	terrain.WaterWaveSpeed = WATER_WAVE_SPEED
 end
 
-type Column = { height: number, material: Enum.Material, carved: boolean, wet: boolean }
+-- `floor`: abaixo dela a coluna fica vazia (uma sala enterrada embaixo).
+type Column = { height: number, floor: number, material: Enum.Material, carved: boolean, wet: boolean }
 
 local function sampleColumn(shape: Shape, x: number, z: number, half: number): Column
-	if TerrainShape.isCarved(shape, x, z, half) then
-		return { height = -math.huge, material = Enum.Material.Air, carved = true, wet = false }
+	local carveTop = TerrainShape.carveTop(shape, x, z, half)
+	if carveTop == math.huge then
+		return { height = -math.huge, floor = -math.huge, material = Enum.Material.Air, carved = true, wet = false }
 	end
 	local height = TerrainShape.heightAt(shape, x, z)
 	local slope = TerrainShape.slopeAt(shape, x, z, SLOPE_STEP)
 	local name = TerrainShape.materialAt(shape, x, z, height, slope)
 	local wet = TerrainShape.inLake(shape, x, z) and height < shape.terrain.Lake.WaterY
-	return { height = height, material = (Enum.Material :: any)[name], carved = false, wet = wet }
+	return { height = height, floor = carveTop or -math.huge, material = (Enum.Material :: any)[name], carved = false, wet = wet }
 end
 
 -- Escreve o pedaço que começa em (x0, z0), com `cells` colunas de lado.
@@ -98,7 +100,7 @@ local function writeChunk(terrain: Terrain, shape: Shape, settings: Settings, x0
 				local column = columns[i][k]
 				local material, occupancy = Enum.Material.Air, 0
 				if not column.carved then
-					local solid = math.clamp((column.height - bottom) / resolution, 0, 1)
+					local solid = math.clamp((column.height - bottom) / resolution, 0, 1) - math.clamp((column.floor - bottom) / resolution, 0, 1)
 					if solid > 0 then
 						material = if column.height - bottom > DEEP_DEPTH + resolution then Enum.Material.Ground else column.material
 						occupancy = solid

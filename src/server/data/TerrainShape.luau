@@ -46,12 +46,15 @@ export type Zone = {
 	blend: number,
 }
 
--- Retângulo sem terreno nenhum (o poço da Arena, que fica abaixo do chão).
+-- Retângulo sem terreno (o poço da Arena, que fica abaixo do chão). Sem
+-- `top`, a coluna inteira fica vazia; com `top`, só abaixo dessa altura (uma
+-- sala enterrada com chão por cima).
 export type Carve = {
 	minX: number,
 	maxX: number,
 	minZ: number,
 	maxZ: number,
+	top: number?,
 }
 
 -- Caminho de pedra de (ax, az) a (bx, bz), com meia largura `halfWidth`
@@ -198,6 +201,20 @@ end
 
 -- A coluna de terreno com centro em (x, z) e meia largura `half` encosta em
 -- algum retângulo sem terreno?
+-- Até que altura a coluna em (x, z), com meia largura `half`, fica sem
+-- terreno: nil (nada escavado), math.huge (a coluna inteira) ou o `top` mais
+-- alto dos recortes que ela encosta.
+function TerrainShape.carveTop(shape: Shape, x: number, z: number, half: number): number?
+	local top: number? = nil
+	for _, carve in ipairs(shape.carves) do
+		if x + half > carve.minX and x - half < carve.maxX and z + half > carve.minZ and z - half < carve.maxZ then
+			local reach = carve.top or math.huge
+			top = if top == nil then reach else math.max(top, reach)
+		end
+	end
+	return top
+end
+
 function TerrainShape.isCarved(shape: Shape, x: number, z: number, half: number): boolean
 	for _, carve in ipairs(shape.carves) do
 		if x + half > carve.minX and x - half < carve.maxX and z + half > carve.minZ and z - half < carve.maxZ then

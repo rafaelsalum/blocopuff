@@ -359,3 +359,7 @@ MatchTestControls.start()
 
 -- Só ativo no Studio: cenas para capas e thumbnails da loja.
 PhotoModeService.start()
+
+-- Por último: as janelas de verdade do castelo, depois que tudo já foi
+-- pendurado nas paredes por dentro.
+CastleExterior.openWindows(world)

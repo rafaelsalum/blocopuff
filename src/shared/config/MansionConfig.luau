@@ -55,6 +55,12 @@ export type MansionConfig = {
 	-- centro em X, largura × altura do vão e altura do peitoril (acima da
 	-- vitrine de Puffs).
 	TowerWindow: { CenterX: number, Size: Vector2, Sill: number },
+	-- Porta principal (Fase 5H.2) na parede sul do Ponto de Encontro, para
+	-- os jardins do castelo: centro em X a partir da parede oeste do
+	-- Casarão e largura × altura do vão. Lá fora, a escadaria desce até o
+	-- chão (FrontStairs).
+	FrontDoor: { OffsetX: number, Size: Vector2 },
+	FrontStairs: { Landing: number, Width: number, Rise: number, Run: number },
 	FloorColor: Color3,
 	HallRugColor: Color3,
 	WallpaperColors: { [string]: Color3 },
@@ -76,6 +82,9 @@ local MansionConfig: MansionConfig = {
 	PassageOffsets = table.freeze({ -22.5, 0, 22.5 }),
 	PassageSize = Vector2.new(8, 10.5),
 	TowerWindow = table.freeze({ CenterX = 176, Size = Vector2.new(22, 12), Sill = 5.5 }),
+	-- Entre os sofás do Ponto de Encontro e os alvos do Treino.
+	FrontDoor = table.freeze({ OffsetX = 45, Size = Vector2.new(10, 14) }),
+	FrontStairs = table.freeze({ Landing = 8, Width = 18, Rise = 1, Run = 2 }),
 	FloorColor = Color3.fromRGB(140, 96, 60),
 	HallRugColor = Color3.fromRGB(122, 34, 40),
 	WallpaperColors = table.freeze({

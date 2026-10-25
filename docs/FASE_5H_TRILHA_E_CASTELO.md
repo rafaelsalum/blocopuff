@@ -46,7 +46,7 @@ As fachadas são medidas com raios de fora para dentro, numa grade de 2 studs (`
 
 - **Revestimento de pedra.** Fica rente à parede, juntado em retângulos. Não tampa janela, porta, vidro nem passagem secreta.
 - **Embasamento de pedra escura.** Cobre o vão entre o chão e o piso do Casarão, que fica acima do chão. Ele não é colocado onde algo passa por baixo, como o túnel do Barão.
-- **Janelas góticas acesas.** Têm moldura, arco pontudo, mainel e peitoril, e só vão em trechos de parede cheia.
+- **Janelas góticas de verdade.** Têm moldura, arco pontudo, mainel e peitoril, e só vão em trechos de parede cheia. Desde a 5H.2 são recortadas na parede (ver seção 3).
 - **Contrafortes.** Também só em parede cheia, entre as janelas.
 
 ### Silhueta
@@ -62,7 +62,37 @@ As fachadas são medidas com raios de fora para dentro, numa grade de 2 studs (`
 - Para o escritório do Barão foi feita só a torrinha do canto norte, porque a do sul entraria no túnel e no tesouro.
 - O prédio da Arena tem os corredores secretos encostados por fora. A medição dele tem alcance maior, para achar a parede principal atrás dos corredores. As torres têm raio 7 para não invadir os corredores.
 - Tudo é enfeite (não colide, não recebe raio nem toque), exceto o corpo das torres e o pé dos contrafortes. Quem passeia lá fora esbarra neles.
-- Os lampiões em volta do Casarão desviam das torres (`CastleExterior.footprints`, usado no `OutdoorService`).
+- Os lampiões em volta do Casarão desviam das torres e da escadaria (`CastleExterior.blocks`, usado no `OutdoorService`).
+
+## 3. Fase 5H.2 — Entrada principal, valetas e janelas de verdade
+
+### Entrada digna
+
+- **Porta.** Fica na parede sul do Ponto de Encontro, em x ≈ 125 (`MansionConfig.FrontDoor`), longe dos alvos do Treino. Tem as mesmas folhas de porta do Casarão (`MansionDoors`) e a placa "🌲 JARDINS DO CASTELO" por dentro.
+- **Escadaria.** É montada pelo `CastleEntrance` a partir da planta pura `FrontStairs` (testada em `tests/FrontStairs.spec.luau`):
+  - patamar no nível do piso e degraus de 1 stud até o chão;
+  - balaustradas, pilares com bola de pedra, portal com arco pontudo, placa "🏰 CASARÃO DO BARÃO", estandartes e um lampião de cada lado do pé.
+- **Caminho da frente.** Um caminho de pedra iluminado (`OutdoorConfig.FrontPath`) sai do pé da escada e vai até o lago.
+- **Fachada.** Ela deixa o vão da porta livre (`clear`) e não põe janela nem contraforte no portal (`reserve`).
+
+### Valetas e parede atravessável
+
+- **Escavação por sala.** O terreno não é mais escavado na caixa inteira do prédio da Arena, só sala por sala. Os nichos enterrados só tiram o terreno abaixo de 4 studs do chão (`Carve.top`, `TerrainShape.carveTop`).
+- **Calçada de pedra.** As pontas dos corredores secretos saem do chão. Como o terreno é escavado em células de 4 studs, ficava ali um vão sem fundo encostado na parede: quem caía voltava para dentro. Agora uma calçada de pedra sólida (`BuildingAprons`, no `OutdoorService`) cobre essas faces.
+- **Conferência no Studio.** Raios do céu em volta de todas as construções: 0 buracos em 23.622 pontos.
+- **Embasamento.** O embasamento de pedra das fachadas agora colide. Era só enfeite, e por isso dava para atravessar a parede.
+
+### Janelas de verdade
+
+- **Recorte.** O `CastleWindows` recorta cada janela (CSG, `GeometryService:SubtractAsync`) na parede, no papel de parede, no lambri, nos rodapés e no revestimento de pedra.
+- **Moldura e vidro.** O vão recebe vidro claro e mainel, com moldura de pedra por fora e de madeira por dentro.
+- **Quando roda.** Só no fim do `init.server.luau`, em segundo plano, depois que todos os serviços montaram suas peças.
+- **Peças invisíveis às consultas.** Os acabamentos têm `CanQuery` desligado. Durante o recorte, as peças do prédio e do Casarão ficam consultáveis, e depois voltam ao que eram.
+- **Onde não abre.**
+  - na frente de quadro, estante, placa, porta, móvel ou alvo do Treino;
+  - em peça com tag ou atributo (passagens secretas, armadilhas);
+  - em parede grossa demais.
+- **Resultado no Studio.** Abrem 22 das 40 janelas, e de dentro se vê o céu, a floresta e o castelo.
 
 ## Progresso
 
@@ -76,5 +106,12 @@ As fachadas são medidas com raios de fora para dentro, numa grade de 2 studs (`
   - **Lampiões:** fora das torres.
   - **Console:** sem erros.
 - [x] Testes Lune (31 specs), build do Rojo e `graphify update`.
-- [ ] Testar em celular: são cerca de 1.140 peças a mais, a maioria sem colisão.
+- [x] 5H.2 testado no Studio:
+  - sair pela porta da frente e voltar andando;
+  - escadaria e portal;
+  - sem valetas em volta;
+  - janelas vistas de dentro e de fora;
+  - console sem erros.
+- [x] Testes Lune (32 specs), build do Rojo e `graphify update`.
+- [ ] Testar em celular: são cerca de 1.140 peças a mais, a maioria sem colisão, mais os recortes das janelas.
 - [ ] Ouvir as faixas em partidas reais e ajustar os volumes em `MusicConfig`.

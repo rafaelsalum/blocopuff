@@ -12,8 +12,10 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local OutdoorConfig = require(ReplicatedStorage.Shared.config.OutdoorConfig)
+local CastleEntrance = require(script.Parent.CastleEntrance)
 local CastleFacade = require(script.Parent.CastleFacade)
 local CastleTowers = require(script.Parent.CastleTowers)
+local CastleWindows = require(script.Parent.CastleWindows)
 
 local MODEL_NAME = "CastleExterior"
 local TOWER_SINK = 4
@@ -28,14 +30,30 @@ local WALL = 2
 local TOWER_CLEARANCE = 0.5
 -- Folga para a ponta da ameia não encostar na parede de cima.
 local WALL_GAP = 0.05
+-- Janelas: peitoril acima do piso de cada andar e altura do vão.
+local WINDOW_SILL = 4
+local WINDOW_HEIGHT = 7
+local ATTIC_WINDOW_SILL = 3
+local ATTIC_WINDOW_HEIGHT = 6
+-- No prédio da Arena, as janelas ficam acima dos corredores secretos.
+local BUILDING_WINDOW_DROP = 12
+-- Folga em volta da porta principal sem revestimento, e em volta do portal
+-- sem janela nem contraforte.
+local DOOR_CLEAR = 0.3
+local PORTAL_RESERVE = 9
 
 type Face = CastleFacade.Face
+type Area = CastleFacade.Area
+type WindowBand = CastleFacade.WindowBand
 type Volume = { minX: number, maxX: number, minZ: number, maxZ: number, top: number }
-export type Footprint = { center: Vector3, radius: number }
+-- Retângulo no chão ocupado pelo castelo por fora (torres e escadaria).
+export type Block = { minX: number, maxX: number, minZ: number, maxZ: number }
 
 local CastleExterior = {}
 
-local footprints: { Footprint } = {}
+local blocks: { Block } = {}
+-- Janelas escolhidas na montagem, esperando o resto do mundo ficar pronto.
+local pending: { model: Model, spots: { CastleFacade.WindowSpot }, targets: { Instance } }? = nil
 
 local function bounds(instance: Instance?): Volume?
 	if instance == nil then
@@ -61,7 +79,9 @@ end
 
 -- Fachada de um lado do volume: "N" (z mínimo), "S", "W" (x mínimo) ou "E",
 -- de `from` a `to` studs ao longo dela (padrão: inteira).
-local function face(volume: Volume, side: string, bottom: number, reach: number, plinthTop: number, from: number?, to: number?): Face
+type Extras = { windows: { WindowBand }?, clear: { Area }?, reserve: { Area }? }
+
+local function face(volume: Volume, side: string, bottom: number, reach: number, plinthTop: number, from: number?, to: number?, extras: Extras?): Face
 	local origin: Vector3, along: Vector3, normal: Vector3, length: number
 	if side == "N" then
 		origin, along, normal, length = Vector3.new(volume.minX, 0, volume.minZ), Vector3.xAxis, -Vector3.zAxis, volume.maxX - volume.minX
@@ -83,6 +103,9 @@ local function face(volume: Volume, side: string, bottom: number, reach: number,
 		top = volume.top - WALL_GAP,
 		reach = reach,
 		plinthTop = plinthTop,
+		windows = if extras ~= nil and extras.windows ~= nil then extras.windows else {},
+		clear = if extras ~= nil and extras.clear ~= nil then extras.clear else {},
+		reserve = if extras ~= nil and extras.reserve ~= nil then extras.reserve else {},
 	}
 end
 
@@ -111,7 +134,7 @@ local function cornerTower(parent: Instance, name: string, volume: Volume, dx: n
 	local offset = math.max(0, radius / math.sqrt(2) - WALL + TOWER_CLEARANCE)
 	local center = Vector3.new(cornerX + dx * offset, 0, cornerZ + dz * offset)
 	CastleTowers.round(parent, name, { center = center, radius = radius, bottom = ground - TOWER_SINK, top = top, roofHeight = roofHeight })
-	table.insert(footprints, { center = center, radius = radius })
+	table.insert(blocks, { minX = center.X - radius, maxX = center.X + radius, minZ = center.Z - radius, maxZ = center.Z + radius })
 end
 
 function CastleExterior.build(world: Instance): Model?
@@ -119,7 +142,7 @@ function CastleExterior.build(world: Instance): Model?
 	if existing ~= nil then
 		existing:Destroy()
 	end
-	table.clear(footprints)
+	table.clear(blocks)
 	local mansionModel = world:FindFirstChild("Mansion")
 	local buildingModel = world:FindFirstChild("Building")
 	local wingModel = find(mansionModel, "MansionWing")
@@ -151,22 +174,42 @@ function CastleExterior.build(world: Instance): Model?
 	params.FilterType = Enum.RaycastFilterType.Include
 	params.FilterDescendantsInstances = { buildingModel, mansionModel }
 
+	-- Entrada principal: escadaria e portal na frente da porta da parede sul.
+	local entrance = CastleEntrance.build(model, ground)
+	local stairs = entrance.plan
+	table.insert(blocks, { minX = stairs.minX - 2, maxX = stairs.maxX + 2, minZ = entrance.wallZ, maxZ = stairs.foot.z })
+
 	-- Fachadas de fora; os trechos onde encosta outro volume ficam de fora.
-	local function dress(volume: Volume, side: string, from: number?, to: number?, reach: number?, bottom: number?, plinthTop: number?)
-		CastleFacade.build(model, face(volume, side, bottom or ground - FACADE_SINK, reach or REACH, plinthTop or floorTop, from, to), params)
+	-- Cada fachada devolve onde abrir janelas; abrem todas no fim.
+	local spots: { CastleFacade.WindowSpot } = {}
+	local function dress(volume: Volume, side: string, from: number?, to: number?, reach: number?, bottom: number?, plinthTop: number?, extras: Extras?)
+		for _, spot in ipairs(CastleFacade.build(model, face(volume, side, bottom or ground - FACADE_SINK, reach or REACH, plinthTop or floorTop, from, to, extras), params)) do
+			table.insert(spots, spot)
+		end
 	end
+	local mainFloor = { { bottom = floorTop + WINDOW_SILL, height = WINDOW_HEIGHT } }
+	local buildingRow = { { bottom = building.top - BUILDING_WINDOW_DROP, height = WINDOW_HEIGHT } }
 	local outer = { minX = buildingOuter.minX, maxX = building.maxX, minZ = buildingOuter.minZ, maxZ = buildingOuter.maxZ, top = building.top }
-	dress(outer, "W", nil, nil, BUILDING_REACH)
-	dress(outer, "N", nil, mansion.minX - outer.minX, BUILDING_REACH)
-	dress(outer, "S", nil, mansion.minX - outer.minX, BUILDING_REACH)
-	dress(mansion, "S")
+	dress(outer, "W", nil, nil, BUILDING_REACH, nil, nil, { windows = buildingRow })
+	dress(outer, "N", nil, mansion.minX - outer.minX, BUILDING_REACH, nil, nil, { windows = buildingRow })
+	dress(outer, "S", nil, mansion.minX - outer.minX, BUILDING_REACH, nil, nil, { windows = buildingRow })
+	-- Fachada sul do Casarão, com a porta principal (sem revestimento no
+	-- vão) e o portal (sem janela nem contraforte em volta).
+	local door = entrance.door
+	local doorAlong = door.center.X - mansion.minX
+	local doorTop = floorTop + door.size.Y
+	dress(mansion, "S", nil, nil, nil, nil, nil, {
+		windows = mainFloor,
+		clear = { { from = doorAlong - door.size.X / 2 - DOOR_CLEAR, to = doorAlong + door.size.X / 2 + DOOR_CLEAR, bottom = floorTop - DOOR_CLEAR, top = doorTop + DOOR_CLEAR } },
+		reserve = { { from = doorAlong - door.size.X / 2 - PORTAL_RESERVE, to = doorAlong + door.size.X / 2 + PORTAL_RESERVE, bottom = -math.huge, top = math.huge } },
+	})
 	-- As pontas da parede oeste do Casarão que sobram ao lado do prédio.
 	dress(mansion, "W", 0, building.minZ - mansion.minZ)
 	dress(mansion, "W", building.maxZ - mansion.minZ, mansion.maxZ - mansion.minZ)
 	if hall ~= nil then
 		-- A fachada norte do Casarão em dois pedaços, um de cada lado do Saguão.
-		dress(mansion, "N", 0, hall.minX - mansion.minX)
-		dress(mansion, "N", hall.maxX - mansion.minX, mansion.maxX - mansion.minX)
+		dress(mansion, "N", 0, hall.minX - mansion.minX, nil, nil, nil, { windows = mainFloor })
+		dress(mansion, "N", hall.maxX - mansion.minX, mansion.maxX - mansion.minX, nil, nil, nil, { windows = mainFloor })
 		local hallOutside = { minX = hall.minX, maxX = hall.maxX, minZ = hall.minZ, maxZ = mansion.minZ, top = hall.top }
 		dress(hallOutside, "N")
 		dress(hallOutside, "W")
@@ -175,12 +218,14 @@ function CastleExterior.build(world: Instance): Model?
 		cornerTower(model, "TowerGateWest", hallOutside, -1, -1, 3.5, hall.top + 6, 11, ground)
 		cornerTower(model, "TowerGateEast", hallOutside, 1, -1, 3.5, hall.top + 6, 11, ground)
 	else
-		dress(mansion, "N")
+		dress(mansion, "N", nil, nil, nil, nil, nil, { windows = mainFloor })
 	end
 
+	-- A ala leste tem dois andares: o térreo e o sótão.
+	local wingRows = { mainFloor[1], { bottom = mansion.top + ATTIC_WINDOW_SILL, height = ATTIC_WINDOW_HEIGHT } }
 	if wing ~= nil then
-		dress(wing, "N")
-		dress(wing, "S")
+		dress(wing, "N", nil, nil, nil, nil, nil, { windows = wingRows })
+		dress(wing, "S", nil, nil, nil, nil, nil, { windows = wingRows })
 		-- Fachada leste da ala: inteira onde não encosta anexo; onde encosta,
 		-- só o pedaço acima do telhado do anexo.
 		local cuts: { Volume } = {}
@@ -194,11 +239,11 @@ function CastleExterior.build(world: Instance): Model?
 		end)
 		local cursor = wing.minZ
 		for _, annex in ipairs(cuts) do
-			dress(wing, "E", cursor - wing.minZ, annex.minZ - wing.minZ)
-			dress(wing, "E", annex.minZ - wing.minZ, annex.maxZ - wing.minZ, nil, annex.top)
+			dress(wing, "E", cursor - wing.minZ, annex.minZ - wing.minZ, nil, nil, nil, { windows = wingRows })
+			dress(wing, "E", annex.minZ - wing.minZ, annex.maxZ - wing.minZ, nil, annex.top, nil, { windows = { wingRows[2] } })
 			cursor = annex.maxZ
 		end
-		dress(wing, "E", cursor - wing.minZ, wing.maxZ - wing.minZ)
+		dress(wing, "E", cursor - wing.minZ, wing.maxZ - wing.minZ, nil, nil, nil, { windows = wingRows })
 		battlements(model, wing, {})
 		cornerTower(model, "TowerNorthEast", wing, 1, -1, 9, wing.top + 18, 30, ground)
 		cornerTower(model, "TowerSouthEast", wing, 1, 1, 9, wing.top + 18, 30, ground)
@@ -253,13 +298,33 @@ function CastleExterior.build(world: Instance): Model?
 	CastleTowers.gable(model, mansion.minX, mansion.maxX, mansion.minZ, mansion.maxZ, mansion.top)
 
 	model.Parent = world
+	pending = { model = model, spots = spots, targets = { buildingModel :: Instance, mansionModel } }
 	return model
 end
 
--- Pés das torres redondas (centro no chão e raio), para quem planta coisas
--- lá fora (os lampiões) desviar delas.
-function CastleExterior.footprints(): { Footprint }
-	return table.clone(footprints)
+-- Abre as janelas de verdade (recorte nas paredes), em segundo plano.
+-- Chamar no fim da subida do servidor: só abre onde, por dentro, nada foi
+-- pendurado na parede (estações, armadilhas, retratos, relíquias).
+function CastleExterior.openWindows(world: Instance)
+	local job = pending
+	pending = nil
+	if job == nil then
+		return
+	end
+	task.spawn(function()
+		local ok, opened = pcall(CastleWindows.open, job.model, job.spots, job.targets, world)
+		if ok then
+			print(`[BlocoPuff] Castle windows opened: {opened} of {#job.spots}`)
+		else
+			warn(`[BlocoPuff] Castle windows unavailable: {opened}`)
+		end
+	end)
+end
+
+-- Retângulos no chão ocupados pelas torres e pela escadaria, para quem
+-- planta coisas lá fora (os lampiões) desviar deles.
+function CastleExterior.blocks(): { Block }
+	return table.clone(blocks)
 end
 
 return table.freeze(CastleExterior)

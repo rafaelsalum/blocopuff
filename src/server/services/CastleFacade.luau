@@ -2,9 +2,10 @@
 
 -- Fachadas de castelo nas paredes de fora do Casarão e do prédio da Arena:
 -- um revestimento de pedra rente à parede (sem tampar janela, porta ou vão),
--- janelas góticas de enfeite com arco pontudo e contrafortes nos trechos de
--- parede cheia. Cada fachada é medida com raios de fora para dentro numa
--- grade (FacadeGrid). Tudo aqui é enfeite, exceto o pé dos contrafortes.
+-- um embasamento sólido embaixo do piso e contrafortes nos trechos de
+-- parede cheia. Também escolhe onde abrir as janelas góticas (quem abre de
+-- verdade é o CastleWindows). Cada fachada é medida com raios de fora para
+-- dentro numa grade (FacadeGrid). O revestimento é só enfeite.
 
 local FacadeGrid = require(script.Parent.Parent.data.FacadeGrid)
 local TowerKit = require(script.Parent.TowerKit)
@@ -24,14 +25,15 @@ local STONE_TRIM = Color3.fromRGB(176, 172, 162)
 local PLINTH = Color3.fromRGB(104, 100, 96)
 local PLINTH_OUT = 1.2
 local PLINTH_SINK = 3
-local GLASS = Color3.fromRGB(196, 128, 58)
-local LEAD = Color3.fromRGB(40, 38, 40)
+-- Quanto o embasamento pode passar do piso (não sobe numa porta).
+local PLINTH_OVERLAP = 0.5
 
 local WINDOW_COLS = 2
-local WINDOW_ROWS = 4
 local WINDOW_SPACING = 8
 local WINDOW_OFFSET = 3
-local WINDOW_TOP_MARGIN = 3
+-- Parede cheia em volta da janela (moldura e ponta do arco), em células.
+local WINDOW_MARGIN_ROWS = 1
+local WINDOW_ARCH_ROWS = 2
 local BUTTRESS_SPACING = 8
 local BUTTRESS_OFFSET = 7
 local BUTTRESS_DEPTH = 2.4
@@ -50,7 +52,22 @@ export type Face = {
 	reach: number,
 	-- Abaixo desta altura, o vão embaixo da parede vira embasamento de pedra.
 	plinthTop: number,
+	-- Faixas de janelas: altura do peitoril e altura do vão (sem o arco).
+	windows: { WindowBand },
+	-- Trechos sem revestimento nenhum (a porta principal).
+	clear: { Area },
+	-- Trechos sem janela nem contraforte (o portal da porta principal).
+	reserve: { Area },
 }
+
+-- Retângulo na fachada: de `from` a `to` studs ao longo dela, entre as
+-- alturas `bottom` e `top`.
+export type Area = { from: number, to: number, bottom: number, top: number }
+export type WindowBand = { bottom: number, height: number }
+
+-- Janela escolhida: centro do vão na face de fora da parede (-Z local
+-- aponta para fora) e largura × altura do vão retangular.
+export type WindowSpot = { frame: CFrame, size: Vector2 }
 
 export type Measured = { face: Face, grid: FacadeGrid.Grid }
 
@@ -75,11 +92,26 @@ local function cellPoint(face: Face, col: number, row: number): Vector3
 	return Vector3.new(face.origin.X, y, face.origin.Z) + face.along * along
 end
 
+-- A célula (col, row) cai em algum dos trechos?
+local function inAreas(areas: { Area }, face: Face, col: number, row: number): boolean
+	local along = (col - 0.5) * CELL
+	local y = face.bottom + (row - 0.5) * CELL
+	for _, area in ipairs(areas) do
+		if along >= area.from and along <= area.to and y >= area.bottom and y <= area.top then
+			return true
+		end
+	end
+	return false
+end
+
 -- Mede a fachada: profundidade da parede em cada célula (0 = vão).
 function CastleFacade.measure(face: Face, params: RaycastParams): Measured
 	local cols = math.max(1, math.floor(face.length / CELL))
 	local rows = math.max(1, math.floor((face.top - face.bottom) / CELL))
 	local grid = FacadeGrid.new(cols, rows, function(col: number, row: number): number
+		if inAreas(face.clear, face, col, row) then
+			return 0
+		end
 		local start = cellPoint(face, col, row) + face.normal * RAY_START
 		local hit = workspace:Raycast(start, -face.normal * (face.reach + RAY_START), params)
 		if hit == nil or not hit.Instance:IsA("BasePart") or skipped(hit.Instance) or hit.Normal:Dot(face.normal) < FACING_MIN then
@@ -124,7 +156,7 @@ local function plinth(parent: Instance, measured: Measured, overlap: OverlapPara
 	local base = FacadeGrid.new(grid.cols, grid.rows, function(col: number, row: number): number
 		local first = firstSolid[col]
 		local rowTop = face.bottom + row * CELL
-		if first <= row or rowTop > face.plinthTop + CELL then
+		if first <= row or rowTop > face.plinthTop + PLINTH_OVERLAP then
 			return 0
 		end
 		-- Embaixo do piso pode passar um túnel: o embasamento não o tampa.
@@ -139,49 +171,47 @@ local function plinth(parent: Instance, measured: Measured, overlap: OverlapPara
 		local frame, size = panelFrame(face, rect.col0, rect.col1, rect.row0, rect.row1, rect.key, PLINTH_OUT / 2)
 		-- Desce um pouco para dentro do chão.
 		local sunk = frame * CFrame.new(0, -PLINTH_SINK / 2, 0)
-		TowerKit.decor(TowerKit.part(parent, "CastlePlinth", Vector3.new(size.X, size.Y + PLINTH_SINK, PLINTH_OUT), sunk, PLINTH, Enum.Material.Cobblestone))
+		-- Sólido: fecha o vão embaixo do piso (ninguém entra por baixo do Casarão).
+		local stone = TowerKit.decor(TowerKit.part(parent, "CastlePlinth", Vector3.new(size.X, size.Y + PLINTH_SINK, PLINTH_OUT), sunk, PLINTH, Enum.Material.Cobblestone))
+		stone.CanCollide = true
 	end
 end
 
 local function skin(parent: Instance, measured: Measured)
 	for _, rect in ipairs(FacadeGrid.rects(measured.grid)) do
 		local frame, size = panelFrame(measured.face, rect.col0, rect.col1, rect.row0, rect.row1, rect.key, SKIN_THICKNESS / 2)
-		TowerKit.decor(TowerKit.part(parent, "CastleStone", Vector3.new(size.X, size.Y, SKIN_THICKNESS), frame, STONE, Enum.Material.Cobblestone))
+		local stone = TowerKit.decor(TowerKit.part(parent, "CastleStone", Vector3.new(size.X, size.Y, SKIN_THICKNESS), frame, STONE, Enum.Material.Cobblestone))
+		-- Visível para as consultas: o CastleWindows recorta as janelas nele.
+		stone.CanQuery = true
 	end
 end
 
--- Janela gótica: moldura clara, vidro aceso, mainel e arco pontudo (um
--- quadrado girado 45 graus em cima).
-local function window(parent: Instance, frame: CFrame, size: Vector2)
-	local lift = SKIN_THICKNESS
-	local surround = TowerKit.part(parent, "CastleWindowFrame", Vector3.new(size.X + 1, size.Y + 1, 0.3), frame * CFrame.new(0, 0, -lift - 0.15), STONE_TRIM, Enum.Material.Limestone)
-	TowerKit.decor(surround)
-	local glass = TowerKit.part(parent, "CastleWindowGlass", Vector3.new(size.X - 0.6, size.Y - 0.6, 0.2), frame * CFrame.new(0, 0, -lift - 0.35), GLASS, Enum.Material.Neon)
-	TowerKit.decor(glass)
-	local arch = size.X / math.sqrt(2)
-	local top = frame * CFrame.new(0, size.Y / 2, 0)
-	TowerKit.decor(TowerKit.part(parent, "CastleWindowArch", Vector3.new(arch + 0.7, arch + 0.7, 0.3), top * CFrame.new(0, 0, -lift - 0.15) * CFrame.Angles(0, 0, math.rad(45)), STONE_TRIM, Enum.Material.Limestone))
-	TowerKit.decor(TowerKit.part(parent, "CastleWindowArchGlass", Vector3.new(arch - 0.4, arch - 0.4, 0.2), top * CFrame.new(0, 0, -lift - 0.35) * CFrame.Angles(0, 0, math.rad(45)), GLASS, Enum.Material.Neon))
-	TowerKit.decor(TowerKit.part(parent, "CastleWindowMullion", Vector3.new(0.25, size.Y + size.X / 2, 0.25), frame * CFrame.new(0, size.X / 4, -lift - 0.45), LEAD, Enum.Material.Metal))
-	TowerKit.decor(TowerKit.part(parent, "CastleWindowSill", Vector3.new(size.X + 1.6, 0.4, 0.8), frame * CFrame.new(0, -size.Y / 2 - 0.6, -lift - 0.4), STONE_TRIM, Enum.Material.Limestone))
-end
-
-local function windows(parent: Instance, measured: Measured): { number }
+-- Onde cabem janelas em cada faixa: parede cheia em volta do vão e do
+-- arco, fora dos trechos reservados.
+local function windowSpots(measured: Measured): ({ WindowSpot }, { number })
 	local grid = measured.grid
-	local row1 = grid.rows - WINDOW_TOP_MARGIN
-	local row0 = row1 - WINDOW_ROWS + 1
-	if row0 < 2 then
-		return {}
+	local face = measured.face
+	local spots: { WindowSpot } = {}
+	local cols: { number } = {}
+	for _, band in ipairs(face.windows) do
+		local row0 = math.floor((band.bottom - face.bottom) / CELL) + 1
+		local row1 = row0 + math.ceil(band.height / CELL) - 1
+		for _, col in ipairs(FacadeGrid.spots(grid, WINDOW_COLS, row0 - WINDOW_MARGIN_ROWS, row1 + WINDOW_ARCH_ROWS, WINDOW_SPACING, WINDOW_OFFSET)) do
+			local reserved = false
+			for check = col, col + WINDOW_COLS - 1 do
+				for row = row0, row1 do
+					reserved = reserved or inAreas(face.reserve, face, check, row)
+				end
+			end
+			if not reserved then
+				local frame = panelFrame(face, col, col + WINDOW_COLS - 1, row0, row1, grid.keys[row0][col], 0)
+				local center = frame.Position + Vector3.new(0, band.bottom + band.height / 2 - frame.Position.Y, 0)
+				table.insert(spots, { frame = CFrame.lookAt(center, center + face.normal), size = Vector2.new(WINDOW_COLS * CELL - 0.6, band.height) })
+				table.insert(cols, col)
+			end
+		end
 	end
-	-- A ponta do arco também precisa de parede cheia em cima.
-	local spots = FacadeGrid.spots(grid, WINDOW_COLS, row0, math.min(grid.rows, row1 + 2), WINDOW_SPACING, WINDOW_OFFSET)
-	for _, col in ipairs(spots) do
-		local key = grid.keys[row0][col]
-		-- O CFrame olha para fora: -Z local aponta para fora da parede.
-		local frame, size = panelFrame(measured.face, col, col + WINDOW_COLS - 1, row0, row1, key, 0)
-		window(parent, frame, size)
-	end
-	return spots
+	return spots, cols
 end
 
 -- Contraforte: pé largo e um degrau mais raso em cima, com tampo inclinado.
@@ -209,7 +239,7 @@ local function buttresses(parent: Instance, measured: Measured, windowCols: { nu
 	local grid = measured.grid
 	local rows = math.max(2, math.floor(grid.rows * BUTTRESS_FRACTION))
 	for _, col in ipairs(FacadeGrid.spots(grid, 1, 1, rows + 1, BUTTRESS_SPACING, BUTTRESS_OFFSET)) do
-		local clear = true
+		local clear = not inAreas(measured.face.reserve, measured.face, col, 1)
 		for _, windowCol in ipairs(windowCols) do
 			if col >= windowCol - 1 and col <= windowCol + WINDOW_COLS then
 				clear = false
@@ -221,17 +251,17 @@ local function buttresses(parent: Instance, measured: Measured, windowCols: { nu
 	end
 end
 
--- Mede e decora uma fachada.
-function CastleFacade.build(parent: Instance, face: Face, params: RaycastParams): Measured
+-- Mede e reveste uma fachada; devolve onde abrir as janelas.
+function CastleFacade.build(parent: Instance, face: Face, params: RaycastParams): { WindowSpot }
 	local measured = CastleFacade.measure(face, params)
 	skin(parent, measured)
 	local overlap = OverlapParams.new()
 	overlap.FilterType = Enum.RaycastFilterType.Include
 	overlap.FilterDescendantsInstances = params.FilterDescendantsInstances
 	plinth(parent, measured, overlap)
-	local windowCols = windows(parent, measured)
+	local spots, windowCols = windowSpots(measured)
 	buttresses(parent, measured, windowCols)
-	return measured
+	return spots
 end
 
 return table.freeze(CastleFacade)

@@ -134,6 +134,9 @@ export type OutdoorConfig = {
 	Forest: ForestConfig,
 	Lamps: LampConfig,
 	GardenPath: GardenPathConfig,
+	-- Caminho da escadaria da porta principal até a margem do lago (Fase 5H.2):
+	-- os pontos são depois do pé da escadaria.
+	FrontPath: GardenPathConfig,
 	Bounds: BoundsConfig,
 	DayCycle: DayCycleConfig,
 }
@@ -195,6 +198,17 @@ local OutdoorConfig: OutdoorConfig = {
 		Waypoints = table.freeze({
 			table.freeze({ 330, -120 }),
 			table.freeze({ 400, 20 }),
+			table.freeze({ 425, 98 }),
+		}),
+		HalfWidth = 3.5,
+		LampSpacing = 32,
+		LampOffset = 6,
+	}),
+	FrontPath = table.freeze({
+		Waypoints = table.freeze({
+			table.freeze({ 125, 128 }),
+			table.freeze({ 215, 152 }),
+			table.freeze({ 330, 142 }),
 			table.freeze({ 425, 98 }),
 		}),
 		HalfWidth = 3.5,

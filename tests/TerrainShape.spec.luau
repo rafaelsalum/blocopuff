@@ -59,6 +59,15 @@ check("pit is carved", TerrainShape.isCarved(shape, 0, 0, 2))
 check("column touching the pit is carved", TerrainShape.isCarved(shape, 31, 0, 2))
 check("outside the pit is not carved", not TerrainShape.isCarved(shape, 40, 0, 2))
 
+-- Sala enterrada: sem terreno só até o teto dela; a coluna inteira some só
+-- nos recortes sem `top`.
+local ROOM: TerrainShape.Carve = { minX = 100, maxX = 110, minZ = 100, maxZ = 110, top = 90 }
+local buried = TerrainShape.new(TERRAIN, { HOME }, { PIT, ROOM })
+check("buried room keeps ground above its roof", TerrainShape.carveTop(buried, 105, 105, 2) == 90)
+check("open pit empties the whole column", TerrainShape.carveTop(buried, 0, 0, 2) == math.huge)
+check("outside every carve nothing is dug", TerrainShape.carveTop(buried, 200, 200, 2) == nil)
+check("column touching both keeps the deeper dig", TerrainShape.carveTop(TerrainShape.new(TERRAIN, { HOME }, { ROOM, { minX = 108, maxX = 120, minZ = 100, maxZ = 110 } }), 109, 105, 0) == math.huge)
+
 -- Distância até a construção mais perto.
 check("clearance is zero on a building", TerrainShape.clearance(shape, 0, 0) == 0)
 check("clearance grows away from buildings", TerrainShape.clearance(shape, 100, 0) > 40)

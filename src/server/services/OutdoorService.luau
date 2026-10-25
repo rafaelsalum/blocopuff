@@ -13,6 +13,7 @@
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
+local CastleEntrance = require(script.Parent.CastleEntrance)
 local CastleExterior = require(script.Parent.CastleExterior)
 local ForestAssets = require(script.Parent.ForestAssets)
 local ForestPlan = require(script.Parent.Parent.data.ForestPlan)
@@ -43,6 +44,7 @@ type Layout = {
 	wingMax: Vector3,
 	-- Pontos do caminho do jardim, do portão da Torre até o lago.
 	gardenPath: { Vector3 },
+	frontPath: { Vector3 },
 }
 
 local FOLDER_NAME = "Outdoors"
@@ -73,7 +75,19 @@ local TREES_PER_BATCH = 40
 local SLOPE_STEP = 4
 -- Nenhum poste no caminho da ponte da Torre (folga além da meia largura).
 local BRIDGE_LAMP_CLEARANCE = 6
--- Distância mínima entre um lampião e a parede de uma torre do castelo.
+-- Salas do prédio da Arena fora das paredes principais (abaixo do chão).
+local BUILDING_SIDE_ROOMS = { "SecretCorridorNorth", "SecretCorridorSouth", "SecretRoomWest" }
+-- Terra mínima por cima de um nicho enterrado.
+local BURIED_ROOF = 4
+-- Calçada de pedra em volta das salas do prédio que saem do chão: o terreno
+-- é escavado em células de 4 studs e deixava um vão sem fundo encostado na
+-- parede delas. Largura, espessura e quanto fica acima do chão.
+local APRON_WIDTH = 4.5
+local APRON_DEPTH = 2.3
+local APRON_RISE = 0.3
+local APRON_COLOR = Color3.fromRGB(128, 124, 116)
+local APRONS_NAME = "BuildingAprons"
+-- Distância mínima entre um lampião e uma torre ou a escadaria do castelo.
 local TOWER_LAMP_CLEARANCE = 3
 -- Postes do portão da Torre: afastamento para cada lado da ponte e para
 -- fora da muralha.
@@ -102,6 +116,17 @@ local function modelBox(model: Instance?): (CFrame?, Vector3?)
 	return model:GetBoundingBox()
 end
 
+-- Pontos do caminho da frente: do pé da escadaria da porta principal até a
+-- margem do lago.
+local function frontPathPoints(groundY: number): { Vector3 }
+	local foot = CastleEntrance.plan(groundY).foot
+	local points = { Vector3.new(foot.x, groundY, foot.z) }
+	for _, waypoint in ipairs(OutdoorConfig.FrontPath.Waypoints) do
+		table.insert(points, Vector3.new(waypoint[1], groundY, waypoint[2]))
+	end
+	return points
+end
+
 -- Pontos do caminho do jardim: do portão da Torre até a margem do lago.
 local function gardenPathPoints(): { Vector3 }
 	local tower = RaceConfig.Tower
@@ -112,6 +137,100 @@ local function gardenPathPoints(): { Vector3 }
 		table.insert(points, Vector3.new(waypoint[1], tower.Center.Y, waypoint[2]))
 	end
 	return points
+end
+
+-- Salas do prédio da Arena que descem abaixo do chão: o corpo principal
+-- (por dentro das paredes, pelo teto) e os corredores secretos (pelo teto
+-- deles) ficam sem terreno; os nichos enterrados dos corredores e a sala
+-- secreta de fora ficam sem terreno só até o teto deles, com chão por cima.
+local function buildingCarves(building: Instance?, groundY: number): { Carve }
+	local carves: { Carve } = {}
+	if building == nil then
+		return carves
+	end
+	local function partBox(part: Instance?, inset: number, top: number?)
+		if part ~= nil and part:IsA("BasePart") then
+			local low, high = part.Position - part.Size / 2, part.Position + part.Size / 2
+			table.insert(carves, { minX = low.X + inset, maxX = high.X - inset, minZ = low.Z + inset, maxZ = high.Z - inset, top = top })
+		end
+	end
+	partBox(building:FindFirstChild("Ceiling"), GameConfig.Building.WallThickness, nil)
+	for _, roomName in ipairs(BUILDING_SIDE_ROOMS) do
+		local room = building:FindFirstChild(roomName)
+		local ceiling = if room ~= nil then room:FindFirstChild("Ceiling") else nil
+		local center, size = modelBox(room)
+		if ceiling ~= nil and ceiling:IsA("BasePart") and center ~= nil and size ~= nil then
+			local ceilingTop = ceiling.Position.Y + ceiling.Size.Y / 2
+			if ceilingTop > groundY then
+				-- Sobe acima do chão: a coluna inteira dele fica vazia, e o
+				-- que sobra da caixa (nichos) só até abaixo do chão.
+				partBox(ceiling, 0, nil)
+			end
+			local low, high = center.Position - size / 2, center.Position + size / 2
+			table.insert(carves, { minX = low.X, maxX = high.X, minZ = low.Z, maxZ = high.Z, top = math.min(ceilingTop, groundY - BURIED_ROOF) })
+		end
+	end
+	return carves
+end
+
+-- Faixas de calçada (min/max em X e Z) nas faces de fora das salas do
+-- prédio que sobem acima do chão, menos as faces encostadas no corpo
+-- principal.
+local function buildingAprons(building: Instance?, groundY: number): { { min: Vector2, max: Vector2 } }
+	local aprons: { { min: Vector2, max: Vector2 } } = {}
+	local main = if building ~= nil then building:FindFirstChild("Ceiling") else nil
+	if building == nil or main == nil or not main:IsA("BasePart") then
+		return aprons
+	end
+	local mainMin = Vector2.new(main.Position.X - main.Size.X / 2, main.Position.Z - main.Size.Z / 2)
+	local mainMax = Vector2.new(main.Position.X + main.Size.X / 2, main.Position.Z + main.Size.Z / 2)
+	for _, roomName in ipairs(BUILDING_SIDE_ROOMS) do
+		local room = building:FindFirstChild(roomName)
+		local ceiling = if room ~= nil then room:FindFirstChild("Ceiling") else nil
+		if ceiling ~= nil and ceiling:IsA("BasePart") and ceiling.Position.Y + ceiling.Size.Y / 2 > groundY then
+			local low = Vector2.new(ceiling.Position.X - ceiling.Size.X / 2, ceiling.Position.Z - ceiling.Size.Z / 2)
+			local high = Vector2.new(ceiling.Position.X + ceiling.Size.X / 2, ceiling.Position.Z + ceiling.Size.Z / 2)
+			local w = APRON_WIDTH
+			-- As faces em Z cobrem também os cantos.
+			local strips = {
+				{ min = Vector2.new(low.X - w, low.Y), max = Vector2.new(low.X, high.Y) },
+				{ min = Vector2.new(high.X, low.Y), max = Vector2.new(high.X + w, high.Y) },
+				{ min = Vector2.new(low.X - w, low.Y - w), max = Vector2.new(high.X + w, low.Y) },
+				{ min = Vector2.new(low.X - w, high.Y), max = Vector2.new(high.X + w, high.Y + w) },
+			}
+			for _, strip in ipairs(strips) do
+				local touchesMain = strip.min.X < mainMax.X and strip.max.X > mainMin.X and strip.min.Y < mainMax.Y and strip.max.Y > mainMin.Y
+				if not touchesMain then
+					table.insert(aprons, strip)
+				end
+			end
+		end
+	end
+	return aprons
+end
+
+local function buildAprons(parent: Instance, world: Instance, groundY: number)
+	local aprons = buildingAprons(world:FindFirstChild("Building"), groundY)
+	if #aprons == 0 then
+		return
+	end
+	local folder = Instance.new("Folder")
+	folder.Name = APRONS_NAME
+	for _, strip in ipairs(aprons) do
+		local slab = Instance.new("Part")
+		slab.Name = "BuildingApron"
+		slab.Size = Vector3.new(strip.max.X - strip.min.X, APRON_DEPTH, strip.max.Y - strip.min.Y)
+		local center = (strip.min + strip.max) / 2
+		slab.CFrame = CFrame.new(center.X, groundY + APRON_RISE - APRON_DEPTH / 2, center.Y)
+		slab.Anchored = true
+		slab.CanTouch = false
+		slab.Material = Enum.Material.Cobblestone
+		slab.Color = APRON_COLOR
+		slab.TopSurface = Enum.SurfaceType.Smooth
+		slab.BottomSurface = Enum.SurfaceType.Smooth
+		slab.Parent = folder
+	end
+	folder.Parent = parent
 end
 
 -- Chão plano em volta de tudo que já está construído.
@@ -128,11 +247,13 @@ local function buildLayout(world: Instance): Layout
 			local low, high = center.Position - size / 2, center.Position + size / 2
 			table.insert(zones, boxZone(low.X, low.Z, high.X, high.Z, groundY, HOME_BLEND))
 			homeMin, homeMax = homeMin:Min(low), homeMax:Max(high)
-			-- A Arena vai abaixo do chão (o poço): por dentro das paredes do
-			-- prédio não entra terreno.
+			-- A Arena vai abaixo do chão (o poço): dentro das salas do prédio
+			-- não entra terreno. Só as salas: escavar a caixa inteira deixava
+			-- valetas fundas entre as paredes de fora e o chão.
 			if name == "Building" then
-				local wall = GameConfig.Building.WallThickness
-				table.insert(carves, { minX = low.X + wall, maxX = high.X - wall, minZ = low.Z + wall, maxZ = high.Z - wall })
+				for _, carve in ipairs(buildingCarves(world:FindFirstChild(name), groundY)) do
+					table.insert(carves, carve)
+				end
 			end
 		end
 	end
@@ -172,10 +293,13 @@ local function buildLayout(world: Instance): Layout
 	table.insert(zones, boxZone(wing.X + minX, wing.Z + minZ, wing.X + maxX, wing.Z + maxZ, wing.Y - WING_SINK, WING_BLEND))
 
 	local garden = gardenPathPoints()
+	local front = frontPathPoints(groundY)
 	local paths: { Path } = {}
-	for index = 1, #garden - 1 do
-		local a, b = garden[index], garden[index + 1]
-		table.insert(paths, { ax = a.X, az = a.Z, bx = b.X, bz = b.Z, halfWidth = OutdoorConfig.GardenPath.HalfWidth })
+	for _, route in ipairs({ { points = garden, settings = OutdoorConfig.GardenPath }, { points = front, settings = OutdoorConfig.FrontPath } }) do
+		for index = 1, #route.points - 1 do
+			local a, b = route.points[index], route.points[index + 1]
+			table.insert(paths, { ax = a.X, az = a.Z, bx = b.X, bz = b.Z, halfWidth = route.settings.HalfWidth })
+		end
 	end
 
 	if homeMin.X == math.huge then
@@ -188,6 +312,7 @@ local function buildLayout(world: Instance): Layout
 		wingMin = Vector3.new(wing.X + minX, wing.Y, wing.Z + minZ),
 		wingMax = Vector3.new(wing.X + maxX, wing.Y, wing.Z + maxZ),
 		gardenPath = garden,
+		frontPath = front,
 	}
 end
 
@@ -213,6 +338,25 @@ local function gateLamps(feet: { Vector3 }, shape: Shape, gate: Vector3, outward
 	end
 end
 
+-- Lampiões ao longo de um caminho, alternando os lados.
+local function pathLamps(feet: { Vector3 }, shape: Shape, path: { Vector3 }, settings: OutdoorConfig.GardenPathConfig)
+	local travelled, nextLamp, sign = 0, settings.LampSpacing, 1
+	for index = 1, #path - 1 do
+		local a, b = path[index], path[index + 1]
+		local flat = Vector3.new(b.X - a.X, 0, b.Z - a.Z)
+		local length = flat.Magnitude
+		local direction = flat.Unit
+		local side = Vector3.new(-direction.Z, 0, direction.X)
+		while nextLamp <= travelled + length do
+			local along = Vector3.new(a.X, 0, a.Z) + direction * (nextLamp - travelled)
+			table.insert(feet, onGround(shape, along + side * (sign * settings.LampOffset)))
+			sign = -sign
+			nextLamp += settings.LampSpacing
+		end
+		travelled += length
+	end
+end
+
 -- Pés dos postes: em volta do Casarão e da Arena (menos no caminho da
 -- ponte), dos dois lados dos portões da Torre e ao longo do caminho do
 -- jardim, alternando os lados.
@@ -235,29 +379,16 @@ local function lampFeet(layout: Layout): { Vector3 }
 	local tower = RaceConfig.Tower
 	local outward = Vector3.new(path[1].X - tower.Center.X, 0, path[1].Z - tower.Center.Z).Unit
 	gateLamps(feet, shape, path[1] - outward * GARDEN_PATH_START, outward)
-	local travelled, nextLamp, sign = 0, garden.LampSpacing, 1
-	for index = 1, #path - 1 do
-		local a, b = path[index], path[index + 1]
-		local flat = Vector3.new(b.X - a.X, 0, b.Z - a.Z)
-		local length = flat.Magnitude
-		local direction = flat.Unit
-		local side = Vector3.new(-direction.Z, 0, direction.X)
-		while nextLamp <= travelled + length do
-			local along = Vector3.new(a.X, 0, a.Z) + direction * (nextLamp - travelled)
-			table.insert(feet, onGround(shape, along + side * (sign * garden.LampOffset)))
-			sign = -sign
-			nextLamp += garden.LampSpacing
-		end
-		travelled += length
-	end
-	-- Nenhum lampião dentro (ou colado) de uma torre do castelo.
-	local towers = CastleExterior.footprints()
+	pathLamps(feet, shape, path, garden)
+	pathLamps(feet, shape, layout.frontPath, OutdoorConfig.FrontPath)
+	-- Nenhum lampião dentro (ou colado) de uma torre ou da escadaria.
+	local blocks = CastleExterior.blocks()
 	local clear: { Vector3 } = {}
 	for _, foot in ipairs(feet) do
 		local blocked = false
-		for _, tower in ipairs(towers) do
-			local flat = Vector3.new(foot.X - tower.center.X, 0, foot.Z - tower.center.Z)
-			if flat.Magnitude < tower.radius + TOWER_LAMP_CLEARANCE then
+		for _, block in ipairs(blocks) do
+			local margin = TOWER_LAMP_CLEARANCE
+			if foot.X > block.minX - margin and foot.X < block.maxX + margin and foot.Z > block.minZ - margin and foot.Z < block.maxZ + margin then
 				blocked = true
 				break
 			end
@@ -367,6 +498,7 @@ function OutdoorService.start(world: Instance)
 	local margin = bounds.WingMargin
 	local wingFloor = layout.wingMin.Y
 	OutdoorBounds.box(boundsFolder, layout.wingMin.X - margin, layout.wingMin.Z - margin, layout.wingMax.X + margin, layout.wingMax.Z + margin, wingFloor - WING_FENCE_DEPTH, wingFloor + bounds.WingFenceHeight)
+	buildAprons(folder, world, terrain.GroundY)
 	task.spawn(function()
 		local clock = os.clock()
 		local ok, failure = pcall(OutdoorTerrain.build, shape, OutdoorConfig.Terrain)

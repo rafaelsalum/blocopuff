@@ -16,6 +16,8 @@ return table.freeze({
 	["🏆 SALA DOS TROFÉUS"] = "🏆 TROPHY ROOM",
 	["🕰️ SAGUÃO DA TORRE"] = "🕰️ TOWER HALL",
 	["🌉 PONTE DA TORRE"] = "🌉 TOWER BRIDGE",
+	["🌲 JARDINS DO CASTELO"] = "🌲 CASTLE GROUNDS",
+	["🏰 CASARÃO DO BARÃO"] = "🏰 BARON'S MANSION",
 	["🏁 A RAMPA SÓ ABRE NA CORRIDA"] = "🏁 THE RAMP ONLY OPENS IN THE RACE",
 	["🔒 CHAVE DE LATÃO"] = "🔒 BRASS KEY",
 	["🔒 NÍVEL 10"] = "🔒 LEVEL 10",

@@ -159,7 +159,10 @@ local function createShell(parent: Instance, mansion: Mansion, building: Buildin
 	local northHole = towerWindowHole(mansion, t)
 	WallBuilder.createWallWithHoles(parent, "MansionWallNorth", box(westMinX, floorY - 1, mansion.minZ - t, mansion.maxX + t, topY, mansion.minZ), if withHall then { northHole, towerHallHole() } else { northHole }, wallColor, Enum.Material.Plaster)
 	createTowerWindowGlass(parent, northHole)
-	WallBuilder.createBox(parent, "MansionWallSouth", box(westMinX, floorY - 1, mansion.maxZ, mansion.maxX + t, topY, mansion.maxZ + t), wallColor, Enum.Material.Plaster)
+	-- Parede sul com a porta principal para os jardins do castelo.
+	local front = mansion.frontDoor
+	local frontHole = WallBuilder.hole(front.center, Vector3.new(0, 0, -1), Vector3.xAxis, t, front.size)
+	WallBuilder.createWallWithHoles(parent, "MansionWallSouth", box(westMinX, floorY - 1, mansion.maxZ, mansion.maxX + t, topY, mansion.maxZ + t), { frontHole }, wallColor, Enum.Material.Plaster)
 	-- Parede leste com as portas para a ala nova (MansionWingLayout).
 	local eastHoles: { Box } = {}
 	for _, doorway in ipairs(if withWing then eastDoorways() else {}) do
@@ -332,7 +335,9 @@ local function getFaces(mansion: Mansion, withWing: boolean, withHall: boolean):
 			opening(leftArch, south, arch, Lang.t("🏠 SALÃO PRINCIPAL")),
 		} },
 		{ name = "MeetingWest", a = at(x0, south + half), b = at(x0, z1), inward = toEast, color = colors.Meeting, openings = {} },
-		{ name = "MeetingSouth", a = at(x0, z1), b = at(splitX, z1), inward = toNorth, color = colors.Meeting, openings = {} },
+		{ name = "MeetingSouth", a = at(x0, z1), b = at(splitX, z1), inward = toNorth, color = colors.Meeting, openings = {
+			opening(mansion.frontDoor.center.X, z1, mansion.frontDoor.size, Lang.t("🌲 JARDINS DO CASTELO")),
+		} },
 		{ name = "TrainingNorth", a = at(splitX, south + half), b = at(x1, south + half), inward = toSouth, color = colors.Training, openings = {
 			opening(rightArch, south, arch, Lang.t("🐶 JARDIM DO BARÃO")),
 		} },
@@ -507,7 +512,17 @@ function MansionService.create(worldRoot: Model, building: BuildingConfig): Mode
 	end
 	createShell(model, mansion, building, wingOk, hallOk)
 	createPartitions(model, mansion)
-	MansionDoors.build(model, MansionDoors.partitionDoorways(mansion))
+	local doorways = MansionDoors.partitionDoorways(mansion)
+	-- A porta principal, no meio da espessura da parede sul.
+	local front = mansion.frontDoor
+	table.insert(doorways, {
+		name = "FrontDoor",
+		center = front.center + Vector3.new(0, 0, building.WallThickness / 2),
+		along = Vector3.xAxis,
+		normal = Vector3.zAxis,
+		size = front.size,
+	})
+	MansionDoors.build(model, doorways)
 	for _, face in ipairs(getFaces(mansion, wingOk, hallOk)) do
 		decorateFace(model, mansion, face, building, rng)
 	end
