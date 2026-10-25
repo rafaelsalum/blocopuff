@@ -15,6 +15,7 @@ local MysteryModeConfig = require(ReplicatedStorage.Shared.config.MysteryModeCon
 local KnifeMesh = require(ReplicatedStorage.Shared.modules.KnifeMesh)
 local MurderRules = require(script.Parent.Parent.data.MurderRules)
 local CombatantRegistry = require(script.Parent.CombatantRegistry)
+local MurderStabHistory = require(script.Parent.MurderStabHistory)
 
 type Combatant = CombatantRegistry.Combatant
 
@@ -43,6 +44,8 @@ local BODY_BELOW_ROOT = 3
 local BODY_ABOVE_ROOT = 2
 -- A mira do golpe pode se afastar até 110° da frente do corpo.
 local AIM_MIN_COSINE = math.cos(math.rad(110))
+-- Alturas (acima da raiz) da linha livre até o alvo: peito e cabeça.
+local LINE_LIFTS = { 0, 1.5 }
 -- Até onde se ouve a faca (studs) e quanto tempo o som fica no corpo (s).
 local SOUND_RANGE = 60
 local SOUND_LIFETIME = 3
@@ -153,35 +156,78 @@ function MurderKnife.setEquipped(combatant: Combatant, equipped: boolean)
 	end
 end
 
+-- Linha livre do Assassino até o alvo (só paredes e móveis sólidos
+-- param): vale na altura do peito ou na da cabeça, para uma mesa baixa no
+-- meio não salvar ninguém.
+local function clearLine(from: Vector3, to: Vector3, params: RaycastParams): boolean
+	for _, lift in ipairs(LINE_LIFTS) do
+		local lifted = Vector3.new(0, lift, 0)
+		if workspace:Raycast(from + lifted, to - from, params) == nil then
+			return true
+		end
+	end
+	return false
+end
+
+-- A mira vale perto da frente do corpo (em primeira pessoa o corpo gira
+-- com a câmera) agora ou nos últimos `rewind` segundos (no servidor a
+-- virada chega atrasada); fora disso, um cliente alterado golpearia pelas
+-- costas.
+local function aimMatchesBody(attacker: Combatant, flatAim: Vector3, rewind: number): boolean
+	if flatAim.Magnitude <= 1e-3 then
+		return false
+	end
+	for _, front in ipairs(MurderStabHistory.fronts(attacker, rewind)) do
+		if MurderRules.aimCosine(flatAim.X, flatAim.Z, front.X, front.Z) >= AIM_MIN_COSINE then
+			return true
+		end
+	end
+	return false
+end
+
 -- Primeiro alvo ao alcance do golpe: à frente, perto e sem parede no meio.
 -- `aim` é para onde a mira do jogador aponta (sem ela, a frente do corpo);
--- entre vários ao alcance, vale o mais perto da linha da mira.
-function MurderKnife.stabTarget(attacker: Combatant, targets: { Combatant }, obstacles: Instance, aim: Vector3?): Combatant?
+-- entre vários ao alcance, vale o mais perto da linha da mira. Cada alvo é
+-- conferido agora e nas posições dos últimos `rewind` segundos
+-- (MurderStabHistory): o Assassino golpeia o que viu na tela dele. Pelo
+-- mesmo motivo o golpe sai de `origin` (onde o cliente dele se via), se
+-- estiver perto da posição do servidor e sem parede entre as duas.
+function MurderKnife.stabTarget(attacker: Combatant, targets: { Combatant }, obstacles: Instance, aim: Vector3?, rewind: number, origin: Vector3?): Combatant?
 	local root = CombatantRegistry.getRoot(attacker)
 	if root == nil then
 		return nil
 	end
 	local bodyFront = root.CFrame.LookVector
 	local flatAim = if aim ~= nil then Vector3.new(aim.X, 0, aim.Z) else Vector3.zero
-	-- A mira vale perto da frente do corpo (em primeira pessoa o corpo gira
-	-- com a câmera); fora disso, um cliente alterado golpearia pelas costas.
-	local aimUsable = flatAim.Magnitude > 1e-3 and MurderRules.aimCosine(flatAim.X, flatAim.Z, bodyFront.X, bodyFront.Z) >= AIM_MIN_COSINE
-	local look = if aimUsable then flatAim.Unit else bodyFront
+	local look = if aimMatchesBody(attacker, flatAim, rewind) then flatAim.Unit else bodyFront
 	local params = RaycastParams.new()
 	params.FilterType = Enum.RaycastFilterType.Include
 	params.FilterDescendantsInstances = { obstacles }
+	-- Panos, cortinas e folhas das portas não seguram a faca.
+	params.RespectCanCollide = true
+	local from = root.Position
+	if origin ~= nil then
+		local drift = origin - from
+		if MurderRules.originTrusted(drift.X, drift.Y, drift.Z, MysteryModeConfig.StabOriginTolerance) and clearLine(from, origin, params) then
+			from = origin
+		end
+	end
 	local best: Combatant? = nil
 	local bestCosine = -math.huge
 	for _, target in ipairs(targets) do
-		local targetRoot = CombatantRegistry.getRoot(target)
-		if target ~= attacker and targetRoot ~= nil then
-			local offset = targetRoot.Position - root.Position
-			local inReach = math.abs(offset.Y) <= MysteryModeConfig.StabMaxHeight
-				and MurderRules.inStabReach(offset.X, offset.Z, look.X, look.Z, MysteryModeConfig.StabRange, MysteryModeConfig.StabConeDegrees)
-			local cosine = MurderRules.aimCosine(offset.X, offset.Z, look.X, look.Z)
-			if inReach and cosine > bestCosine and workspace:Raycast(root.Position, offset, params) == nil then
-				best = target
-				bestCosine = cosine
+		if target ~= attacker then
+			for _, position in ipairs(MurderStabHistory.recent(target, rewind)) do
+				local offset = position - from
+				local inReach = math.abs(offset.Y) <= MysteryModeConfig.StabMaxHeight
+					and MurderRules.inStabReach(offset.X, offset.Z, look.X, look.Z, MysteryModeConfig.StabRange, MysteryModeConfig.StabConeDegrees, MysteryModeConfig.StabCloseRange)
+				local cosine = MurderRules.aimCosine(offset.X, offset.Z, look.X, look.Z)
+				if inReach and clearLine(from, position, params) then
+					if cosine > bestCosine then
+						best = target
+						bestCosine = cosine
+					end
+					break
+				end
 			end
 		end
 	end

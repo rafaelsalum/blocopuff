@@ -64,6 +64,8 @@ local ISLAND_SINK = 0.4
 -- O terreno da Ala do Assassinato fica entre o fundo e o topo da laje do
 -- térreo (2 studs de espessura).
 local WING_SINK = 1.8
+-- A escavação embaixo da Ala fica um pouco para dentro da borda do piso.
+local WING_CARVE_INSET = 0.5
 -- Quanto o pé da árvore afunda no chão (vezes a escala), para não flutuar
 -- em encosta.
 local TREE_SINK = 0.7
@@ -284,13 +286,20 @@ local function buildLayout(world: Instance): Layout
 	})
 
 	local wing = MysteryModeConfig.Wing.Center
-	local plan = MurderMansionPlan.get()
-	local minX, maxX, minZ, maxZ = math.huge, -math.huge, math.huge, -math.huge
-	for _, room in ipairs(plan.rooms) do
-		minX, maxX = math.min(minX, room.minX), math.max(maxX, room.maxX)
-		minZ, maxZ = math.min(minZ, room.minZ), math.max(maxZ, room.maxZ)
-	end
+	-- Cômodos e corredores das passagens secretas: a cerca em volta não pode
+	-- cortar um corredor no meio.
+	local footprint = MurderMansionPlan.footprint(MurderMansionPlan.get())
+	local minX, maxX, minZ, maxZ = footprint.minX, footprint.maxX, footprint.minZ, footprint.maxZ
 	table.insert(zones, boxZone(wing.X + minX, wing.Z + minZ, wing.X + maxX, wing.Z + maxZ, wing.Y - WING_SINK, WING_BLEND))
+	-- Embaixo do chão da Ala não fica terreno: a grama dele furava o piso
+	-- dos cômodos e dos corredores do térreo. O piso cobre a borda.
+	table.insert(carves, {
+		minX = wing.X + minX + WING_CARVE_INSET,
+		maxX = wing.X + maxX - WING_CARVE_INSET,
+		minZ = wing.Z + minZ + WING_CARVE_INSET,
+		maxZ = wing.Z + maxZ - WING_CARVE_INSET,
+		top = nil,
+	})
 
 	local garden = gardenPathPoints()
 	local front = frontPathPoints(groundY)

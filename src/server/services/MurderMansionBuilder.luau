@@ -3,7 +3,7 @@
 -- Monta a Ala do Assassinato (Fase 5E.2) a partir da planta de
 -- MurderMansionPlan: dois andares de cômodos com portas entre todos os
 -- vizinhos, duas escadas de degraus em lados opostos (com o vão aberto no
--- andar de cima e um guarda-corpo), a passagem secreta atrás das estantes,
+-- andar de cima e um guarda-corpo), as passagens secretas atrás das estantes,
 -- um lustre por cômodo e os móveis de cada um (MurderMansionProps). Fica
 -- longe do lobby, da Arena e da Torre, é montada uma vez e tudo é ancorado.
 
@@ -175,42 +175,56 @@ local function staircase(parent: Instance, stair: MurderMansionPlan.Stair, plan:
 	end
 end
 
--- Corredor escondido do lado de fora da parede norte, com chão, paredes,
--- teto baixo e uma luz fraca.
+-- Corredor escondido do lado de fora da parede da passagem (norte ou sul,
+-- no andar dela), com chão, paredes, teto baixo e uma luz fraca.
 local function secretPassage(parent: Instance, passage: MurderMansionPlan.Passage, toWorld: (number, number, number) -> Vector3)
+	local level = passage.level
 	local width = passage.maxX - passage.minX
 	local depth = passage.maxZ - passage.minZ
-	local middle = toWorld((passage.minX + passage.maxX) / 2, (passage.minZ + passage.maxZ) / 2, 0)
+	local middleZ = (passage.minZ + passage.maxZ) / 2
+	local farZ = if passage.side == "North" then passage.minZ else passage.maxZ
+	local middle = toWorld((passage.minX + passage.maxX) / 2, middleZ, level)
 	part(parent, "PassageFloor", Vector3.new(width, GROUND_THICKNESS, depth), CFrame.new(middle - Vector3.new(0, GROUND_THICKNESS / 2, 0)), COLORS.passage, Enum.Material.Cobblestone)
 	part(parent, "PassageRoof", Vector3.new(width, 1, depth), CFrame.new(middle + Vector3.new(0, PASSAGE_HEIGHT + 0.5, 0)), COLORS.passage, Enum.Material.Slate)
-	wall(parent, toWorld((passage.minX + passage.maxX) / 2, passage.minZ, 0), width, "X", PASSAGE_HEIGHT, COLORS.passage)
-	wall(parent, toWorld(passage.minX, (passage.minZ + passage.maxZ) / 2, 0), depth, "Z", PASSAGE_HEIGHT, COLORS.passage)
-	wall(parent, toWorld(passage.maxX, (passage.minZ + passage.maxZ) / 2, 0), depth, "Z", PASSAGE_HEIGHT, COLORS.passage)
+	wall(parent, toWorld((passage.minX + passage.maxX) / 2, farZ, level), width, "X", PASSAGE_HEIGHT, COLORS.passage)
+	wall(parent, toWorld(passage.minX, middleZ, level), depth, "Z", PASSAGE_HEIGHT, COLORS.passage)
+	wall(parent, toWorld(passage.maxX, middleZ, level), depth, "Z", PASSAGE_HEIGHT, COLORS.passage)
 	for _, x in ipairs({ passage.fromX, passage.toX, (passage.fromX + passage.toX) / 2 }) do
-		local bulb = lamp(parent, toWorld(x, (passage.minZ + passage.maxZ) / 2, 0) + Vector3.new(0, PASSAGE_HEIGHT - 1.5, 0), COLORS.passageLight, PASSAGE_LAMP_BRIGHTNESS, PASSAGE_LAMP_RANGE)
+		local bulb = lamp(parent, toWorld(x, middleZ, level) + Vector3.new(0, PASSAGE_HEIGHT - 1.5, 0), COLORS.passageLight, PASSAGE_LAMP_BRIGHTNESS, PASSAGE_LAMP_RANGE)
 		bulb.Size = Vector3.one * PASSAGE_LAMP_SIZE
 	end
 end
 
--- Parede norte do térreo (z = bounds.minZ) com vãos de `gapWidth` centrados
--- em cada x de `gaps` (em ordem crescente).
-local function northWallWithGaps(parent: Instance, bounds: MurderMansionPlan.Area, gaps: { number }, gapWidth: number, height: number, toWorld: (number, number, number) -> Vector3)
+-- Parede externa em z = `z` do andar `level` com vãos de `gapWidth`
+-- centrados em cada x de `gaps` (em ordem crescente).
+local function wallWithGaps(parent: Instance, bounds: MurderMansionPlan.Area, z: number, level: number, gaps: { number }, gapWidth: number, height: number, toWorld: (number, number, number) -> Vector3)
 	local cursor = bounds.minX
 	for _, gapX in ipairs(gaps) do
 		local gapStart = gapX - gapWidth / 2
 		local length = gapStart - cursor
 		if length > 0 then
-			wall(parent, toWorld(cursor + length / 2, bounds.minZ, 0), length, "X", height, COLORS.exterior)
+			wall(parent, toWorld(cursor + length / 2, z, level), length, "X", height, COLORS.exterior)
 		end
 		-- Verga acima do vão.
-		local lintel = toWorld(gapX, bounds.minZ, 0) + Vector3.new(0, PASSAGE_GAP_HEIGHT + (height - PASSAGE_GAP_HEIGHT) / 2, 0)
+		local lintel = toWorld(gapX, z, level) + Vector3.new(0, PASSAGE_GAP_HEIGHT + (height - PASSAGE_GAP_HEIGHT) / 2, 0)
 		part(parent, "Wall", Vector3.new(gapWidth, height - PASSAGE_GAP_HEIGHT, WALL_THICKNESS), CFrame.new(lintel), COLORS.exterior, Enum.Material.Plaster)
 		cursor = gapX + gapWidth / 2
 	end
 	local rest = bounds.maxX - cursor
 	if rest > 0 then
-		wall(parent, toWorld(cursor + rest / 2, bounds.minZ, 0), rest, "X", height, COLORS.exterior)
+		wall(parent, toWorld(cursor + rest / 2, z, level), rest, "X", height, COLORS.exterior)
 	end
+end
+
+-- Aberturas (x em ordem crescente) das passagens na parede `side` do andar
+-- `level`, com a largura delas (nil: parede inteira).
+local function passageGaps(plan: Plan, level: number, side: "North" | "South"): ({ number }?, number)
+	for _, passage in ipairs(plan.passages) do
+		if passage.level == level and passage.side == side then
+			return { math.min(passage.fromX, passage.toX), math.max(passage.fromX, passage.toX) }, passage.gapWidth
+		end
+	end
+	return nil, 0
 end
 
 local function outerWalls(parent: Instance, plan: Plan, bounds: MurderMansionPlan.Area, level: number, toWorld: (number, number, number) -> Vector3)
@@ -220,14 +234,16 @@ local function outerWalls(parent: Instance, plan: Plan, bounds: MurderMansionPla
 	local midZ = (bounds.minZ + bounds.maxZ) / 2
 	-- As do térreo sobem até o alto da laje de cima (sem fresta para o céu).
 	local height = if level == 0 then plan.floorHeight else plan.wallHeight
-	-- Parede norte do térreo: com as aberturas da passagem secreta.
-	if level == 0 and #plan.passages > 0 then
-		local passage = plan.passages[1]
-		northWallWithGaps(parent, bounds, { passage.fromX, passage.toX }, passage.gapWidth, height, toWorld)
-	else
-		wall(parent, toWorld(midX, bounds.minZ, level), width, "X", height, COLORS.exterior)
+	-- Paredes norte e sul: com as aberturas das passagens secretas do andar.
+	for _, side in ipairs({ "North", "South" } :: { "North" | "South" }) do
+		local z = if side == "North" then bounds.minZ else bounds.maxZ
+		local gaps, gapWidth = passageGaps(plan, level, side)
+		if gaps ~= nil then
+			wallWithGaps(parent, bounds, z, level, gaps, gapWidth, height, toWorld)
+		else
+			wall(parent, toWorld(midX, z, level), width, "X", height, COLORS.exterior)
+		end
 	end
-	wall(parent, toWorld(midX, bounds.maxZ, level), width, "X", height, COLORS.exterior)
 	wall(parent, toWorld(bounds.minX, midZ, level), depth, "Z", height, COLORS.exterior)
 	wall(parent, toWorld(bounds.maxX, midZ, level), depth, "Z", height, COLORS.exterior)
 end

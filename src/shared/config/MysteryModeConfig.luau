@@ -2,7 +2,7 @@
 
 -- Assassinato no Casarão (Fase 5E, docs/FASE_5E_ASSASSINATO_NO_CASARAO.md):
 -- o Assassino tem a faca, o Xerife tem a arma (o Puffador com um tiro e
--- recarga longa) e os Inocentes coletam moedas e fogem. O id do modo
+-- recarga longa) e os Inocentes coletam Cartas do Barão e fogem. O id do modo
 -- continua "Mystery" (rotação, voto e telemetria). Números iniciais para o
 -- playtest.
 
@@ -26,6 +26,8 @@ export type SoundsConfig = {
 	Swing: KnifeSound,
 	Hit: KnifeSound,
 	Throw: KnifeSound,
+	-- Pegar uma Carta do Barão (papel), só para quem pegou.
+	LetterPickup: KnifeSound,
 	-- Música (APM) dos últimos segundos da partida, só para quem joga.
 	FinalMusicId: string,
 	FinalMusicSeconds: number,
@@ -49,6 +51,16 @@ export type MysteryModeConfig = {
 	StabConeDegrees: number,
 	StabCooldown: number,
 	StabMaxHeight: number,
+	-- Colado no Assassino (studs), o golpe pega até quem está do lado.
+	StabCloseRange: number,
+	-- Compensação da rede (s): o golpe confere os alvos onde estavam até o
+	-- ping do Assassino mais `StabRewindBase` atrás, no máximo
+	-- `StabRewindMax` (MurderStabHistory).
+	StabRewindBase: number,
+	StabRewindMax: number,
+	-- Até quantos studs da posição que o servidor conhece vale a que o
+	-- cliente do Assassino manda no golpe (quem corre chega atrasado).
+	StabOriginTolerance: number,
 	-- Faca arremessada: recarga, velocidade, alcance e raio de acerto.
 	ThrowCooldown: number,
 	ThrowSpeed: number,
@@ -64,7 +76,7 @@ export type MysteryModeConfig = {
 	SheriffReload: number,
 	-- Arma caída: raio para pegar.
 	PickupRadius: number,
-	-- Moedas do Barão.
+	-- Cartas do Barão (eram moedas; os nomes seguem "Coin").
 	CoinsPerRound: number,
 	MaxCoinsPerPlayer: number,
 	CoinsPerTicket: number,
@@ -85,10 +97,14 @@ local MysteryModeConfig: MysteryModeConfig = {
 	MinHumans = 2,
 	RoleRevealSeconds = 3,
 	StartGrace = 10,
-	StabRange = 6,
-	StabConeDegrees = 70,
+	StabRange = 7.5,
+	StabConeDegrees = 100,
 	StabCooldown = 0.5,
 	StabMaxHeight = 5,
+	StabCloseRange = 3.5,
+	StabRewindBase = 0.1,
+	StabRewindMax = 0.4,
+	StabOriginTolerance = 4,
 	ThrowCooldown = 4,
 	ThrowSpeed = 70,
 	ThrowRange = 110,
@@ -109,6 +125,7 @@ local MysteryModeConfig: MysteryModeConfig = {
 		Swing = table.freeze({ Id = "rbxassetid://9125620110", Volume = 0.7, Speed = 1.8 }),
 		Hit = table.freeze({ Id = "rbxassetid://9119747138", Volume = 0.6, Speed = 1.2 }),
 		Throw = table.freeze({ Id = "rbxassetid://9125619884", Volume = 0.8, Speed = 1.3 }),
+		LetterPickup = table.freeze({ Id = "rbxassetid://9125557068", Volume = 0.7, Speed = 1.5 }),
 		FinalMusicId = "rbxassetid://1846059805",
 		FinalMusicSeconds = 30,
 		FinalMusicVolume = 0.45,

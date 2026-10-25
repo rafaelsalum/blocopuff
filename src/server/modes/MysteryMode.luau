@@ -36,6 +36,7 @@ local MurderMansionBuilder = require(services.MurderMansionBuilder)
 local MysteryCoins = require(services.MysteryCoins)
 local MysteryBots = require(services.MysteryBots)
 local MurderKnife = require(services.MurderKnife)
+local MurderStabHistory = require(services.MurderStabHistory)
 local MurderGhosts = require(services.MurderGhosts)
 local MurderGunDrop = require(services.MurderGunDrop)
 local MurderTelemetry = require(services.MurderTelemetry)
@@ -303,7 +304,7 @@ local function murdererReady(): Combatant?
 end
 
 -- Golpe de perto: o primeiro alvo à frente, ao alcance e sem parede no meio.
-local function tryStab(aim: Vector3?): boolean
+local function tryStab(aim: Vector3?, origin: Vector3?): boolean
 	local current = murdererReady()
 	local layout = wing
 	if current == nil or layout == nil then
@@ -316,7 +317,10 @@ local function tryStab(aim: Vector3?): boolean
 		return false
 	end
 	lastStabAt = now
-	local target = MurderKnife.stabTarget(current, aliveOthers(), layout.folder, aim)
+	local attacker = current.player
+	local ping = if attacker ~= nil then attacker:GetNetworkPing() else 0
+	local rewind = MurderRules.stabRewind(ping, MysteryModeConfig.StabRewindBase, MysteryModeConfig.StabRewindMax)
+	local target = MurderKnife.stabTarget(current, aliveOthers(), layout.folder, aim, rewind, origin)
 	-- O bot Assassino do teste solo golpeia o ar sem parar enquanto persegue:
 	-- só o golpe de humano no ar faz barulho.
 	if target ~= nil or current.player ~= nil then
@@ -404,7 +408,7 @@ local function sheatheIdleKnife()
 	end
 end
 
-local function onRemote(player: Player, action: unknown, value: unknown)
+local function onRemote(player: Player, action: unknown, value: unknown, extra: unknown)
 	local current = murderer
 	if not running or current == nil or current.player ~= player or not isAlive(current) then
 		return
@@ -417,7 +421,11 @@ local function onRemote(player: Player, action: unknown, value: unknown)
 		drawKnife(current)
 	elseif action == "Stab" then
 		drawKnife(current)
-		tryStab(if typeof(value) == "Vector3" and isFiniteVector(value) then value else nil)
+		-- `extra`: onde o cliente se via ao golpear (MurderKnife.stabTarget confere).
+		tryStab(
+			if typeof(value) == "Vector3" and isFiniteVector(value) then value else nil,
+			if typeof(extra) == "Vector3" and isFiniteVector(extra) then extra else nil
+		)
 	elseif action == "Throw" and typeof(value) == "Vector3" and isFiniteVector(value) and value.Magnitude > 1e-3 then
 		-- O arremesso vale mesmo logo depois de um "Draw" (a faca já está
 		-- à vista desde a carga).
@@ -548,6 +556,7 @@ local function begin(context: BeginContext)
 	if currentMurderer ~= nil then
 		MurderKnife.give(currentMurderer)
 	end
+	MurderStabHistory.start(aliveEveryone)
 	MysteryCoins.start(layout, {
 		eligible = aliveEveryone,
 		collect = collectCoin,
@@ -731,6 +740,7 @@ local function stopRound()
 	PuffadorService.setFireCooldown(nil)
 	MysteryCoins.stop()
 	MurderKnife.clear()
+	MurderStabHistory.stop()
 	MurderGhosts.clear()
 	removeDroppedGun()
 end

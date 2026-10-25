@@ -85,7 +85,57 @@ for _, stair in ipairs(plan.stairs) do
 end
 check("stairs are gentle enough to walk", gentle)
 
-check("one secret passage", #plan.passages == 1)
+-- Passagens secretas (Fase 5I): a da Biblioteca à Cozinha (térreo, norte),
+-- a do Quarto do Barão ao Quarto de Hóspedes (andar de cima, norte) e a do
+-- Salão de Baile à Sala de Estar (térreo, sul).
+check("three secret passages", #plan.passages == 3)
+local passagesOk = true
+local seenWalls: { [string]: boolean } = {}
+for _, passage in ipairs(plan.passages) do
+	local from, to = roomsById[passage.fromRoom], roomsById[passage.toRoom]
+	local wallKey = `{passage.level}:{passage.side}`
+	-- Corredor do lado de fora da parede certa, as duas pontas nos cômodos
+	-- do andar dele e as aberturas no meio da parede de cada um.
+	local outside = if passage.side == "North" then passage.maxZ <= passage.wallZ else passage.minZ >= passage.wallZ
+	local onWall = if passage.side == "North" then from ~= nil and from.minZ == passage.wallZ else from ~= nil and from.maxZ == passage.wallZ
+	passagesOk = passagesOk
+		and from ~= nil
+		and to ~= nil
+		and from.level == passage.level
+		and to.level == passage.level
+		and outside
+		and onWall
+		and passage.fromX > from.minX
+		and passage.fromX < from.maxX
+		and passage.toX > to.minX
+		and passage.toX < to.maxX
+		and passage.minX < passage.fromX
+		and passage.maxX > passage.toX
+		and not seenWalls[wallKey]
+	seenWalls[wallKey] = true
+end
+check("passages run outside their wall between rooms of their floor", passagesOk)
+local passageNodesOk = true
+for _, node in ipairs(plan.nodes) do
+	local index, kind = string.match(node.id, "^passage(%d+):(%a+)$")
+	if index ~= nil then
+		local passage = plan.passages[tonumber(index) :: number]
+		local inward = if passage.side == "North" then 1 else -1
+		passageNodesOk = passageNodesOk and node.level == passage.level
+		if kind == "from" or kind == "to" then
+			passageNodesOk = passageNodesOk and (node.z - passage.wallZ) * inward > 0
+		else
+			passageNodesOk = passageNodesOk and node.z > passage.minZ and node.z < passage.maxZ
+		end
+	end
+end
+check("passage nodes sit on their floor, inside the rooms or the corridor", passageNodesOk)
+local footprint = MurderMansionPlan.footprint(plan)
+local footprintOk = true
+for _, passage in ipairs(plan.passages) do
+	footprintOk = footprintOk and footprint.minZ <= passage.minZ and footprint.maxZ >= passage.maxZ and footprint.minX <= passage.minX and footprint.maxX >= passage.maxX
+end
+check("footprint covers the rooms and every passage corridor", footprintOk and footprint.minX <= -48 and footprint.maxX >= 48)
 
 -- Navegação: tudo alcançável a partir de qualquer cômodo.
 local nodeIds: { [string]: boolean } = {}

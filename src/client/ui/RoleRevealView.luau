@@ -18,7 +18,7 @@ local GUI_NAME = "BlocoPuffRoleReveal"
 local DISPLAY_ORDER = 30
 local CARD_SIZE = Vector2.new(520, 300)
 -- Selo do papel no canto superior esquerdo, logo abaixo do contador de
--- moedas (MysteryModeController, 18,16 com 44 de altura): no meio do topo ele
+-- Cartas do Barão (MysteryModeController, 18,16 com 44 de altura): no meio do topo ele
 -- cobria o cronômetro da partida.
 local BADGE_SIZE = Vector2.new(220, 44)
 local BADGE_POSITION = UDim2.fromOffset(18, 70)
@@ -64,7 +64,7 @@ function RoleRevealView.info(role: string): RoleInfo
 	elseif role == "Hero" then
 		return { icon = "🦸", title = T("HERÓI"), goal = T("Você pegou a arma · acerte o Assassino"), color = UiTheme.Colors.Gold }
 	end
-	return { icon = "😇", title = T("INOCENTE"), goal = T("Fuja, colete moedas e pegue a arma se ela cair"), color = UiTheme.Colors.Green }
+	return { icon = "😇", title = T("INOCENTE"), goal = T("Fuja, colete as Cartas do Barão e pegue a arma se ela cair"), color = UiTheme.Colors.Green }
 end
 
 local function playSound(id: string, volume: number)

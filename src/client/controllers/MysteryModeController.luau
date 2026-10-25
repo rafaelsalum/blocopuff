@@ -4,7 +4,8 @@
 -- (só o próprio jogador sabe o seu), a primeira pessoa com a mão e o item
 -- na tela (MurderFirstPerson), a faca do Assassino (o clique ou toque golpeia
 -- na hora; segurar e soltar arremessa para onde a mira aponta; no celular,
--- um botão só, no lugar do botão de tiro), o contador de moedas com o aviso
+-- um botão só, no lugar do botão de tiro), o contador de Cartas do Barão
+-- (com o som de papel ao pegar e as cartas flutuando, BaronLetterFloat) e o aviso
 -- de saco cheio, os avisos da arma caída e do Herói, a música dos últimos
 -- segundos (MysteryFinalMusic) e a revelação de quem era quem no fim.
 
@@ -25,6 +26,7 @@ local RoleRevealView = require(script.Parent.Parent.ui.RoleRevealView)
 local FireButtonView = require(script.Parent.Parent.ui.FireButtonView)
 local MurderFirstPerson = require(script.Parent.MurderFirstPerson)
 local MysteryFinalMusic = require(script.Parent.MysteryFinalMusic)
+local BaronLetterFloat = require(script.Parent.Parent.effects.BaronLetterFloat)
 local NotificationManager = require(script.Parent.Parent.notifications.NotificationManager)
 
 local T = Lang.t
@@ -154,6 +156,14 @@ local function run(remote: RemoteEvent, container: Instance, playerGui: PlayerGu
 		return if camera ~= nil then camera.CFrame.LookVector else Vector3.zAxis
 	end
 
+	-- Onde o próprio corpo está agora (o servidor recebe atrasado quando
+	-- se corre; o golpe sai daqui se estiver perto do que ele conhece).
+	local function bodyPosition(): Vector3?
+		local character = localPlayer.Character
+		local root = if character ~= nil then character:FindFirstChild("HumanoidRootPart") else nil
+		return if root ~= nil and root:IsA("BasePart") then root.Position else nil
+	end
+
 	-- Apertou: golpeia na hora, para onde a mira aponta. Continuar
 	-- segurando carrega o arremesso.
 	local function holdStarted()
@@ -165,7 +175,7 @@ local function run(remote: RemoteEvent, container: Instance, playerGui: PlayerGu
 		drawSentAt = nil
 		if now >= stabReadyAt then
 			stabReadyAt = now + MysteryModeConfig.StabCooldown
-			remote:FireServer("Stab", aimDirection())
+			remote:FireServer("Stab", aimDirection(), bodyPosition())
 			MurderFirstPerson.pulse("Stab")
 		end
 	end
@@ -262,9 +272,12 @@ local function run(remote: RemoteEvent, container: Instance, playerGui: PlayerGu
 		local coins = localPlayer:GetAttribute(COINS_ATTRIBUTE)
 		local coinCount = if typeof(coins) == "number" then coins else 0
 		local maxCoins = MysteryModeConfig.MaxCoinsPerPlayer
-		hud.coinsLabel.Text = T("💰 %d/%d", coinCount, maxCoins)
+		hud.coinsLabel.Text = T("✉️ %d/%d", coinCount, maxCoins)
+		if playing and coinCount > lastCoins then
+			BaronLetterFloat.playPickup()
+		end
 		if playing and coinCount >= maxCoins and lastCoins < maxCoins then
-			notify("Banner", "mystery-bag", "🎒", T("SACO CHEIO!"), T("Você já pegou todas as moedas desta partida"), "Gold", 3)
+			notify("Banner", "mystery-bag", "🎒", T("SACO CHEIO!"), T("Você já pegou todas as Cartas do Barão desta partida"), "Gold", 3)
 		end
 		lastCoins = coinCount
 	end
@@ -373,6 +386,7 @@ function MysteryModeController.start()
 			return
 		end
 		MysteryFinalMusic.start(container)
+		BaronLetterFloat.start()
 		run(remote, container, playerGui)
 	end)
 end

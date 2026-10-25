@@ -3,9 +3,12 @@
 -- Planta da Ala do Assassinato (Fase 5E.2), sem Roblox: dois andares com
 -- seis cômodos cada (grade 3 x 2), portas entre todos os vizinhos, duas
 -- escadas em lados opostos (Salão de Baile → Sala de Música e Sala de Estar
--- → Estufa) e uma passagem secreta atrás das estantes, da Biblioteca até a
--- Cozinha. Também os pontos de navegação dos bots (centro de cada cômodo,
--- cada porta, os pés e o alto das escadas e a passagem).
+-- → Estufa) e três passagens secretas por corredores do lado de fora das
+-- paredes: da Biblioteca à Cozinha (térreo, norte), do Quarto do Barão ao
+-- Quarto de Hóspedes (andar de cima, norte, Fase 5I) e do Salão de Baile à
+-- Sala de Estar (térreo, sul, Fase 5I). Também os pontos de navegação dos
+-- bots (centro de cada cômodo, cada porta, os pés e o alto das escadas e as
+-- passagens).
 --
 -- Coordenadas locais em studs: x de oeste (−) para leste (+), z de norte
 -- (−) para sul (+), centradas no meio da Ala; `level` 0 é o térreo e 1 o
@@ -48,7 +51,10 @@ export type Stair = {
 export type Passage = {
 	fromRoom: string,
 	toRoom: string,
-	-- Aberturas na parede norte (z = wallZ) atrás das estantes.
+	-- Andar e parede externa (norte ou sul) por onde o corredor passa.
+	level: number,
+	side: "North" | "South",
+	-- Aberturas na parede (z = wallZ) atrás das estantes.
 	fromX: number,
 	toX: number,
 	wallZ: number,
@@ -105,6 +111,13 @@ local STAIR_TOP_Z = 6
 local STAIR_APPROACH = 3
 -- Folga das paredes (e da escada) para nascer, moedas e móveis no meio.
 local OPEN_MARGIN = 9
+-- Passagens secretas: fundo do corredor, largura da abertura e quanto o
+-- corredor passa das aberturas nas pontas.
+local PASSAGE_DEPTH = 6
+local PASSAGE_GAP_WIDTH = 4
+local PASSAGE_END_MARGIN = 4
+-- Nós da passagem: tantos studs para dentro do cômodo a partir da parede.
+local PASSAGE_NODE_INSET = 3
 
 local NAMES: { { string } } = {
 	-- Térreo: norte (oeste, meio, leste), depois sul.
@@ -124,6 +137,12 @@ local NAMES: { { string } } = {
 }
 
 local MurderMansionPlan = {}
+
+-- Para que lado de z fica o lado de dentro da parede da passagem (+1 na
+-- parede norte, -1 na sul).
+function MurderMansionPlan.inward(passage: Passage): number
+	return if passage.side == "North" then 1 else -1
+end
 
 local function buildRooms(): { Room }
 	local rooms: { Room } = {}
@@ -176,20 +195,34 @@ local function buildStairs(): { Stair }
 	}
 end
 
+-- Corredor escondido de `fromRoom` a `toRoom` (no meio de cada cômodo),
+-- do lado de fora da parede `side` do andar `level`.
+local function passageAlong(fromRoom: string, toRoom: string, level: number, side: "North" | "South"): Passage
+	local wallZ = if side == "North" then ROWS[1] else ROWS[#ROWS]
+	local outward = if side == "North" then -PASSAGE_DEPTH else PASSAGE_DEPTH
+	local fromX = (COLUMNS[1] + COLUMNS[2]) / 2
+	local toX = (COLUMNS[3] + COLUMNS[4]) / 2
+	return {
+		fromRoom = fromRoom,
+		toRoom = toRoom,
+		level = level,
+		side = side,
+		fromX = fromX,
+		toX = toX,
+		wallZ = wallZ,
+		gapWidth = PASSAGE_GAP_WIDTH,
+		minX = fromX - PASSAGE_END_MARGIN,
+		maxX = toX + PASSAGE_END_MARGIN,
+		minZ = math.min(wallZ, wallZ + outward),
+		maxZ = math.max(wallZ, wallZ + outward),
+	}
+end
+
 local function buildPassages(): { Passage }
 	return {
-		{
-			fromRoom = "library",
-			toRoom = "kitchen",
-			fromX = -32,
-			toX = 32,
-			wallZ = ROWS[1],
-			gapWidth = 4,
-			minX = -36,
-			maxX = 36,
-			minZ = ROWS[1] - 6,
-			maxZ = ROWS[1],
-		},
+		passageAlong("library", "kitchen", 0, "North"),
+		passageAlong("baronBedroom", "guestBedroom", 1, "North"),
+		passageAlong("ballroom", "lounge", 0, "South"),
 	}
 end
 
@@ -236,14 +269,16 @@ local function buildGraph(rooms: { Room }, doors: { Door }, stairs: { Stair }, p
 	end
 	for index, passage in ipairs(passages) do
 		local corridorZ = (passage.minZ + passage.maxZ) / 2
+		local insideZ = passage.wallZ + MurderMansionPlan.inward(passage) * PASSAGE_NODE_INSET
+		local level = passage.level
 		local fromInside = `passage{index}:from`
 		local fromCorridor = `passage{index}:fromCorridor`
 		local toCorridor = `passage{index}:toCorridor`
 		local toInside = `passage{index}:to`
-		table.insert(nodes, { id = fromInside, x = passage.fromX, z = passage.wallZ + 3, level = 0, room = passage.fromRoom })
-		table.insert(nodes, { id = fromCorridor, x = passage.fromX, z = corridorZ, level = 0, room = nil })
-		table.insert(nodes, { id = toCorridor, x = passage.toX, z = corridorZ, level = 0, room = nil })
-		table.insert(nodes, { id = toInside, x = passage.toX, z = passage.wallZ + 3, level = 0, room = passage.toRoom })
+		table.insert(nodes, { id = fromInside, x = passage.fromX, z = insideZ, level = level, room = passage.fromRoom })
+		table.insert(nodes, { id = fromCorridor, x = passage.fromX, z = corridorZ, level = level, room = nil })
+		table.insert(nodes, { id = toCorridor, x = passage.toX, z = corridorZ, level = level, room = nil })
+		table.insert(nodes, { id = toInside, x = passage.toX, z = insideZ, level = level, room = passage.toRoom })
 		table.insert(edges, { passage.fromRoom, fromInside })
 		table.insert(edges, { fromInside, fromCorridor })
 		table.insert(edges, { fromCorridor, toCorridor })
@@ -279,6 +314,25 @@ function MurderMansionPlan.get(): Plan
 	}
 	cached = plan
 	return plan
+end
+
+-- Retângulo que cobre os cômodos e os corredores das passagens (terreno
+-- aplainado e cerca do lado de fora, OutdoorService).
+function MurderMansionPlan.footprint(plan: Plan): Area
+	local area = { minX = math.huge, maxX = -math.huge, minZ = math.huge, maxZ = -math.huge }
+	local function include(minX: number, maxX: number, minZ: number, maxZ: number)
+		area.minX = math.min(area.minX, minX)
+		area.maxX = math.max(area.maxX, maxX)
+		area.minZ = math.min(area.minZ, minZ)
+		area.maxZ = math.max(area.maxZ, maxZ)
+	end
+	for _, room in ipairs(plan.rooms) do
+		include(room.minX, room.maxX, room.minZ, room.maxZ)
+	end
+	for _, passage in ipairs(plan.passages) do
+		include(passage.minX, passage.maxX, passage.minZ, passage.maxZ)
+	end
+	return area
 end
 
 -- Miolo livre do cômodo (longe das paredes, dos móveis e da escada): onde

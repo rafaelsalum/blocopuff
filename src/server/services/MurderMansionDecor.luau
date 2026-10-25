@@ -108,8 +108,8 @@ local function byId(plan: Plan): { [string]: Room }
 end
 
 -- Vãos de cada face do cômodo: portas (com moldura e a placa do cômodo do
--- outro lado) e a abertura da passagem secreta (sem moldura: as estantes de
--- MurderMansionProps fazem o batente).
+-- outro lado) e as aberturas das passagens secretas, na parede norte ou sul
+-- (sem moldura: as estantes de MurderMansionProps fazem o batente).
 local function openings(plan: Plan, room: Room, rooms: { [string]: Room }): { [string]: { { x: number, z: number, gap: DoorGap, label: string? } } }
 	local result: { [string]: { { x: number, z: number, gap: DoorGap, label: string? } } } = { N = {}, S = {}, W = {}, E = {} }
 	for _, door in ipairs(plan.doors) do
@@ -127,7 +127,7 @@ local function openings(plan: Plan, room: Room, rooms: { [string]: Room }): { [s
 	for _, passage in ipairs(plan.passages) do
 		for _, entry in ipairs({ { passage.fromRoom, passage.fromX }, { passage.toRoom, passage.toX } }) do
 			if entry[1] == room.id then
-				table.insert(result.N, {
+				table.insert(result[if passage.side == "North" then "N" else "S"], {
 					x = entry[2] :: number,
 					z = passage.wallZ,
 					gap = { offset = 0, frame = false, width = passage.gapWidth, height = PASSAGE_GAP_HEIGHT },

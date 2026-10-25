@@ -114,10 +114,14 @@ function MurderRules.actionReady(elapsed: number, grace: number, lastUsed: numbe
 	return lastUsed == nil or now - lastUsed >= cooldown
 end
 
+-- Colado no Assassino (até `closeRange`), vale até este cosseno (pouco
+-- mais de 100° para cada lado): quem passa raspando do lado é pego.
+local CLOSE_STAB_MIN_COSINE = -0.3
+
 -- O alvo está ao alcance da faca: dentro de `range` e até `coneDegrees`/2
--- para cada lado da direção do olhar, no plano (x, z). Colado conta mesmo
--- sem direção.
-function MurderRules.inStabReach(offsetX: number, offsetZ: number, lookX: number, lookZ: number, range: number, coneDegrees: number): boolean
+-- para cada lado da direção do olhar, no plano (x, z). Até `closeRange`
+-- (se houver), vale quase meia-volta. Colado conta mesmo sem direção.
+function MurderRules.inStabReach(offsetX: number, offsetZ: number, lookX: number, lookZ: number, range: number, coneDegrees: number, closeRange: number?): boolean
 	local distance = math.sqrt(offsetX * offsetX + offsetZ * offsetZ)
 	if distance > range then
 		return false
@@ -130,7 +134,27 @@ function MurderRules.inStabReach(offsetX: number, offsetZ: number, lookX: number
 		return false
 	end
 	local cosine = (offsetX * lookX + offsetZ * lookZ) / (distance * lookLength)
+	if closeRange ~= nil and distance <= closeRange and cosine >= CLOSE_STAB_MIN_COSINE then
+		return true
+	end
 	return cosine >= math.cos(math.rad(coneDegrees / 2))
+end
+
+-- Quanto (s) olhar para trás nas posições dos alvos ao conferir o golpe: o
+-- Assassino vê os outros atrasados pela rede (o ping de ida e volta mais a
+-- suavização do cliente, `base`), até `max`. Ping estranho vale zero.
+function MurderRules.stabRewind(ping: number, base: number, max: number): number
+	local usable = if ping == ping and ping > 0 then ping else 0
+	return math.clamp(usable + base, base, max)
+end
+
+-- De onde o golpe sai: a posição que o cliente do Assassino mandou (onde
+-- ele se via ao golpear) vale se estiver a até `tolerance` studs da que o
+-- servidor conhece (que chega atrasada quando ele corre); mais longe que
+-- isso é cliente alterado, e vale a do servidor.
+function MurderRules.originTrusted(offsetX: number, offsetY: number, offsetZ: number, tolerance: number): boolean
+	local squared = offsetX * offsetX + offsetY * offsetY + offsetZ * offsetZ
+	return squared == squared and squared <= tolerance * tolerance
 end
 
 -- Quão perto da linha da mira está um alvo (cosseno do ângulo no plano,

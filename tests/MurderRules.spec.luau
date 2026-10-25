@@ -98,6 +98,26 @@ check("stab to the side within the cone", MurderRules.inStabReach(1.5, -3, 0, -1
 check("stab too far to the side fails", not MurderRules.inStabReach(4, -1, 0, -1, 5, 70))
 check("stab right on top counts", MurderRules.inStabReach(0, 0, 0, -1, 5, 70))
 check("no look direction: only right on top", not MurderRules.inStabReach(0, -3, 0, 0, 5, 70))
+-- Colado no Assassino (até `closeRange`), vale quase meia-volta: quem
+-- passa raspando do lado também é pego; atrás, não.
+check("close target to the side counts", MurderRules.inStabReach(3, -0.5, 0, -1, 7, 100, 3.5))
+check("close target slightly behind the shoulder counts", MurderRules.inStabReach(3, 0.8, 0, -1, 7, 100, 3.5))
+check("close target right behind fails", not MurderRules.inStabReach(0, 3, 0, -1, 7, 100, 3.5))
+check("side target beyond close range needs the cone", not MurderRules.inStabReach(5, -0.5, 0, -1, 7, 100, 3.5))
+check("no close range keeps the cone", not MurderRules.inStabReach(3, -0.5, 0, -1, 7, 100))
+
+-- Rebobinar pela latência: quanto (s) olhar para trás nas posições dos
+-- alvos (o Assassino vê os outros um pouco atrasados).
+check("rewind adds the ping to the base", math.abs(MurderRules.stabRewind(0.1, 0.1, 0.4) - 0.2) < 1e-6)
+check("rewind without ping is the base", math.abs(MurderRules.stabRewind(0, 0.1, 0.4) - 0.1) < 1e-6)
+check("rewind is capped", math.abs(MurderRules.stabRewind(2, 0.1, 0.4) - 0.4) < 1e-6)
+check("rewind ignores a broken ping", math.abs(MurderRules.stabRewind(0 / 0, 0.1, 0.4) - 0.1) < 1e-6)
+check("rewind ignores a negative ping", math.abs(MurderRules.stabRewind(-1, 0.1, 0.4) - 0.1) < 1e-6)
+
+-- Posição do golpe mandada pelo cliente: vale perto da do servidor.
+check("client origin close to the server one is trusted", MurderRules.originTrusted(2, 0.5, -2.5, 4))
+check("client origin far from the server one is not trusted", not MurderRules.originTrusted(5, 0, 0, 4))
+check("broken client origin is not trusted", not MurderRules.originTrusted(0 / 0, 0, 0, 4))
 
 -- Golpe pela mira: entre dois ao alcance, vale o que está mais perto da
 -- linha da mira (cosseno maior).

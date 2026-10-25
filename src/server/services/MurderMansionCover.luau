@@ -2,8 +2,9 @@
 
 -- Coberturas da Ala do Assassinato: móveis sólidos e altos para se
 -- esconder atrás e desviar de tiros e facas (bloqueiam passagem, raycast e
--- projéteis). Reaproveitam os móveis do Casarão (MansionWingDecor): estantes,
--- baús e móveis cobertos por lençol, mais biombos, caixotes e floreiras.
+-- projéteis). Estantes com livros de verdade (MurderAssets, Fase 5I), baús e
+-- móveis cobertos por lençol do Casarão (MansionWingDecor), mais biombos,
+-- caixotes e floreiras.
 --
 -- Cada cobertura ocupa uma das quatro vagas do cômodo (32 x 36), uma por
 -- quadrante, fora das rotas dos bots (MurderMansionPlan): longe do miolo
@@ -14,6 +15,8 @@
 local MurderMansionPlan = require(script.Parent.Parent.data.MurderMansionPlan)
 local MansionWingDecor = require(script.Parent.MansionWingDecor)
 local BuildingDecor = require(script.Parent.BuildingDecor)
+local MurderAssets = require(script.Parent.MurderAssets)
+local MysteryAssets = require(script.Parent.MysteryAssets)
 
 type Room = MurderMansionPlan.Room
 type Kind = "shelf" | "screen" | "covered" | "crates" | "planter"
@@ -28,6 +31,9 @@ local SLOT_Z = 5.5
 local WIDTH = 5
 local HEIGHT = 6.5
 local SHELF_HEIGHT = 7.5
+-- Estante com livros de verdade (MurderAssets "Bookshelf", 9.6 x 13.4 x
+-- 3.9): neste tamanho fica com 5.3 de largura e 7.4 de altura.
+local SHELF_SCALE = 0.55
 -- Moeda atrás de cada cobertura (do lado da parede): pegar exige sair do
 -- miolo do cômodo.
 local COIN_BEHIND = 3
@@ -89,6 +95,11 @@ local function screen(parent: Instance, base: Vector3, facing: Vector3)
 	model.Parent = parent
 end
 
+-- Biombo solto num cômodo (MurderMansionProps), fora das vagas de cobertura.
+function MurderMansionCover.foldingScreen(parent: Instance, base: Vector3, facing: Vector3)
+	screen(parent, base, facing)
+end
+
 -- Pilha de caixotes com um baú do Casarão por cima.
 local function crates(parent: Instance, base: Vector3, facing: Vector3, rng: Random)
 	local model = Instance.new("Model")
@@ -120,8 +131,16 @@ end
 
 local function build(parent: Instance, kind: Kind, base: Vector3, facing: Vector3, rng: Random)
 	if kind == "shelf" then
-		-- A estante tem 2 de fundo a partir da base: centraliza na vaga.
-		MansionWingDecor.bookshelf(parent, "CoverBookshelf", base - facing, facing, WIDTH, SHELF_HEIGHT, rng)
+		local shelf = MurderAssets.clone("Bookshelf")
+		if shelf ~= nil then
+			shelf.Name = "CoverBookshelf"
+			MysteryAssets.place(shelf, base, facing, SHELF_SCALE, parent)
+			local cframe, size = shelf:GetBoundingBox()
+			MysteryAssets.blocker(shelf, "Block", size, cframe)
+		else
+			-- A estante simples tem 2 de fundo a partir da base: centraliza na vaga.
+			MansionWingDecor.bookshelf(parent, "CoverBookshelf", base - facing, facing, WIDTH, SHELF_HEIGHT, rng)
+		end
 	elseif kind == "screen" then
 		screen(parent, base, facing)
 	elseif kind == "covered" then
