@@ -163,13 +163,6 @@ export type TelemetryConfig = {
 	PrintInStudio: boolean,
 }
 
-export type MusicConfig = {
-	SoundId: string,
-	LobbyVolume: number,
-	MatchVolume: number,
-	FadeTime: number,
-}
-
 export type GameConfig = {
 	GameName: string,
 	MinimumPlayers: number,
@@ -185,7 +178,6 @@ export type GameConfig = {
 	Palette: WorldPalette,
 	Puffador: PuffadorConfig,
 	EliminationZone: EliminationZoneConfig,
-	Music: MusicConfig,
 	SecretRoom: SecretRoomConfig,
 	Knockback: KnockbackConfig,
 	SecondChance: SecondChanceConfig,
@@ -301,16 +293,6 @@ local EliminationZone: EliminationZoneConfig = table.freeze({
 	DepthBelowArena = 30,
 	CheckInterval = 0.1,
 	VisualizeInStudio = false,
-})
-
--- Trilha de fundo tocada localmente em cada cliente, em loop. Fica baixa no
--- lobby e quase some enquanto o jogador está competindo, para não competir
--- com os sons da partida.
-local Music: MusicConfig = table.freeze({
-	SoundId = "rbxassetid://1846613120",
-	LobbyVolume = 0.06,
-	MatchVolume = 0.015,
-	FadeTime = 1.2,
 })
 
 -- Cofre do Barão, na parede oeste do andar de baixo. Destranca no instante
@@ -453,7 +435,6 @@ GameConfig.Building = Building
 GameConfig.Palette = Palette
 GameConfig.Puffador = Puffador
 GameConfig.EliminationZone = EliminationZone
-GameConfig.Music = Music
 GameConfig.SecretRoom = SecretRoom
 GameConfig.Knockback = Knockback
 GameConfig.SecondChance = SecondChance

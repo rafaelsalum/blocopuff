@@ -13,6 +13,7 @@
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
+local CastleExterior = require(script.Parent.CastleExterior)
 local ForestAssets = require(script.Parent.ForestAssets)
 local ForestPlan = require(script.Parent.Parent.data.ForestPlan)
 local GameConfig = require(ReplicatedStorage.Shared.config.GameConfig)
@@ -72,6 +73,8 @@ local TREES_PER_BATCH = 40
 local SLOPE_STEP = 4
 -- Nenhum poste no caminho da ponte da Torre (folga além da meia largura).
 local BRIDGE_LAMP_CLEARANCE = 6
+-- Distância mínima entre um lampião e a parede de uma torre do castelo.
+local TOWER_LAMP_CLEARANCE = 3
 -- Postes do portão da Torre: afastamento para cada lado da ponte e para
 -- fora da muralha.
 local GATE_LAMP_SIDE = 9
@@ -247,7 +250,23 @@ local function lampFeet(layout: Layout): { Vector3 }
 		end
 		travelled += length
 	end
-	return feet
+	-- Nenhum lampião dentro (ou colado) de uma torre do castelo.
+	local towers = CastleExterior.footprints()
+	local clear: { Vector3 } = {}
+	for _, foot in ipairs(feet) do
+		local blocked = false
+		for _, tower in ipairs(towers) do
+			local flat = Vector3.new(foot.X - tower.center.X, 0, foot.Z - tower.center.Z)
+			if flat.Magnitude < tower.radius + TOWER_LAMP_CLEARANCE then
+				blocked = true
+				break
+			end
+		end
+		if not blocked then
+			table.insert(clear, foot)
+		end
+	end
+	return clear
 end
 
 -- Tronco sólido (invisível) da árvore com o pé em `foot`.

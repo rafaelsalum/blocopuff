@@ -56,6 +56,7 @@ local MansionLifeService = require(script.services.MansionLifeService)
 local MansionAmbienceService = require(script.services.MansionAmbienceService)
 local OutdoorService = require(script.services.OutdoorService)
 local DayCycleService = require(script.services.DayCycleService)
+local CastleExterior = require(script.services.CastleExterior)
 
 local WORLD_NAME = "BlocoPuffWorld"
 local GENERATED_BY_ATTRIBUTE = "GeneratedBy"
@@ -108,6 +109,15 @@ print("[BlocoPuff] Mansion lobby built")
 -- todo (Fase 5F).
 TowerBuilder.get()
 print("[BlocoPuff] Clock tower island built")
+
+-- Casarão com cara de castelo por fora: pedra, janelas góticas, ameias e
+-- torres pontudas. Opcional: é só cenário.
+local castleOk, castleFailure = pcall(CastleExterior.build, world)
+if castleOk then
+	print("[BlocoPuff] Castle exterior built")
+else
+	warn(string.format("[BlocoPuff] Castle exterior unavailable: %s", tostring(castleFailure)))
+end
 
 -- Lado de fora: terreno, lago, montanhas e floresta em volta de tudo que já
 -- foi construído (monta em segundo plano), e o céu na hora de Brasília.
