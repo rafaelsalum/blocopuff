@@ -58,6 +58,8 @@ export type ForestConfig = {
 	FarRadius: number,
 	-- Largura do gramado sem árvores em volta de cada construção.
 	ClearingMargin: number,
+	-- Folga sem árvore dos dois lados dos caminhos de pedra.
+	PathMargin: number,
 	MinScale: number,
 	MaxScale: number,
 	-- Inclinação máxima (subida por stud) e altura máxima acima do chão.
@@ -83,6 +85,31 @@ export type LampConfig = {
 	OffHour: number,
 }
 
+-- Caminho de pedra do portão do jardim da Torre até a margem do lago, com
+-- lampiões ao longo dele.
+export type GardenPathConfig = {
+	-- Pontos (x, z) depois do portão, em ordem, até a margem.
+	Waypoints: { { number } },
+	HalfWidth: number,
+	-- Um lampião a cada LampSpacing studs, alternando os lados, a LampOffset
+	-- do meio do caminho.
+	LampSpacing: number,
+	LampOffset: number,
+}
+
+-- Limite do mapa: muralha invisível em volta, antes das montanhas, e uma
+-- cerca invisível em volta da Ala do Assassinato (ninguém de fora entra na
+-- partida).
+export type BoundsConfig = {
+	Radius: number,
+	Segments: number,
+	-- A muralha vai de Depth abaixo do chão até Height acima dele.
+	Depth: number,
+	Height: number,
+	WingMargin: number,
+	WingFenceHeight: number,
+}
+
 -- Um momento do dia: o céu passa de um para o outro aos poucos.
 export type LightKey = {
 	hour: number,
@@ -106,6 +133,8 @@ export type OutdoorConfig = {
 	Terrain: TerrainConfig,
 	Forest: ForestConfig,
 	Lamps: LampConfig,
+	GardenPath: GardenPathConfig,
+	Bounds: BoundsConfig,
 	DayCycle: DayCycleConfig,
 }
 
@@ -144,6 +173,7 @@ local OutdoorConfig: OutdoorConfig = {
 		FarChance = 0.16,
 		FarRadius = 760,
 		ClearingMargin = 45,
+		PathMargin = 7,
 		MinScale = 1.7,
 		MaxScale = 2.6,
 		MaxSlope = 0.75,
@@ -160,6 +190,25 @@ local OutdoorConfig: OutdoorConfig = {
 		LightColor = { 255, 168, 92 },
 		OnHour = 17.6,
 		OffHour = 6.4,
+	}),
+	GardenPath = table.freeze({
+		Waypoints = table.freeze({
+			table.freeze({ 330, -120 }),
+			table.freeze({ 400, 20 }),
+			table.freeze({ 425, 98 }),
+		}),
+		HalfWidth = 3.5,
+		LampSpacing = 32,
+		LampOffset = 6,
+	}),
+	-- Dentro do anel das montanhas (que começam a subir a 760 do centro).
+	Bounds = table.freeze({
+		Radius = 700,
+		Segments = 72,
+		Depth = 120,
+		Height = 400,
+		WingMargin = 4,
+		WingFenceHeight = 60,
 	}),
 	DayCycle = table.freeze({
 		UtcOffsetHours = -3,

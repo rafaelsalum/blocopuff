@@ -4,7 +4,7 @@
 -- cobre o terreno todo e cada célula sorteia no máximo uma árvore, mais
 -- fechada perto do Casarão e rala nas encostas das montanhas, com clareiras
 -- (ruído) e sem árvore no gramado das construções, na água, em encosta
--- íngreme ou acima da linha das árvores. O sorteio tem semente fixa: todo
+-- íngreme, em cima dos caminhos ou acima da linha das árvores. O sorteio tem semente fixa: todo
 -- servidor monta a mesma floresta. Sem dependências (os testes do Lune
 -- carregam este arquivo direto).
 
@@ -15,6 +15,8 @@ export type Settings = {
 	FarChance: number,
 	FarRadius: number,
 	ClearingMargin: number,
+	-- Folga sem árvore dos dois lados dos caminhos de pedra.
+	PathMargin: number,
 	MinScale: number,
 	MaxScale: number,
 	MaxSlope: number,
@@ -31,12 +33,13 @@ export type Settings = {
 	HomeZ: number,
 }
 
--- O chão num ponto: altura, inclinação, distância até a construção mais
--- perto, se é água e se está dentro do terreno.
+-- O chão num ponto: altura, inclinação, distância até a construção e até o
+-- caminho mais perto, se é água e se está dentro do terreno.
 export type Sample = {
 	height: number,
 	slope: number,
 	clearance: number,
+	path: number,
 	wet: boolean,
 	inside: boolean,
 }
@@ -103,6 +106,7 @@ function ForestPlan.plan(settings: Settings, sample: (x: number, z: number) -> S
 				local fits = ground.inside
 					and not ground.wet
 					and ground.clearance >= settings.ClearingMargin
+					and ground.path >= settings.PathMargin
 					and ground.slope <= settings.MaxSlope
 					and ground.height - settings.GroundY <= settings.TreeLine
 				if fits then

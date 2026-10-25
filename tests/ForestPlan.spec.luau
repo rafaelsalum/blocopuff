@@ -22,6 +22,7 @@ local SETTINGS: ForestPlan.Settings = {
 	FarChance = 0.2,
 	FarRadius = 300,
 	ClearingMargin = 30,
+	PathMargin = 6,
 	MinScale = 1.5,
 	MaxScale = 2.5,
 	MaxSlope = 0.7,
@@ -37,13 +38,15 @@ local SETTINGS: ForestPlan.Settings = {
 }
 
 -- Uma casa de raio 50 no meio, um lago a leste (x > 250), uma encosta
--- íngreme ao norte (z < -250) e montanha alta no sul (z > 300).
+-- íngreme ao norte (z < -250), montanha alta no sul (z > 300) e um caminho
+-- de pedra em x = -150 (meia largura 3).
 local function sample(x: number, z: number): ForestPlan.Sample
 	local fromHome = math.sqrt(x * x + z * z)
 	return {
 		height = if z > 300 then 100 + 200 else 100,
 		slope = if z < -250 then 1.2 else 0.1,
 		clearance = math.max(0, fromHome - 50),
+		path = math.max(0, math.abs(x + 150) - 3),
 		wet = x > 250,
 		inside = true,
 	}
@@ -52,7 +55,7 @@ end
 local trees = ForestPlan.plan(SETTINGS, sample, 5)
 check("forest has trees", #trees > 50)
 
-local inClearing, wet, steep, high, badVariant, badScale, dead = 0, 0, 0, 0, 0, 0, 0
+local inClearing, wet, steep, high, badVariant, badScale, dead, onPath = 0, 0, 0, 0, 0, 0, 0, 0
 for _, tree in ipairs(trees) do
 	if math.sqrt(tree.x * tree.x + tree.z * tree.z) < 50 + 30 then
 		inClearing += 1
@@ -76,11 +79,15 @@ for _, tree in ipairs(trees) do
 	if tree.kind == "Dead" then
 		dead += 1
 	end
+	if math.abs(tree.x + 150) < 3 + 6 then
+		onPath += 1
+	end
 end
 check("no tree on the home lawn", inClearing == 0)
 check("no tree in the water", wet == 0)
 check("no tree on steep slopes", steep == 0)
 check("no tree above the tree line", high == 0)
+check("no tree on or beside the stone path", onPath == 0)
 check("variants stay in range", badVariant == 0)
 check("scales stay in range", badScale == 0)
 check("a few trees are dead", dead > 0 and dead < #trees / 4)
@@ -116,7 +123,7 @@ check("forest is denser near the center", near > far)
 
 -- Fora do terreno não nasce nada.
 local outside = ForestPlan.plan(SETTINGS, function(_x: number, _z: number): ForestPlan.Sample
-	return { height = 100, slope = 0, clearance = 1000, wet = false, inside = false }
+	return { height = 100, slope = 0, clearance = 1000, path = 1000, wet = false, inside = false }
 end, 5)
 check("nothing grows outside the terrain", #outside == 0)
 

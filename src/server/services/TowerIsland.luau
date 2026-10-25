@@ -5,8 +5,9 @@
 -- muralha baixa com ameias, torrinhas de telhado pontudo azul e a ponte
 -- coberta, sobre pilares de pedra, que sobe até a porta do fundo do Saguão
 -- da Torre (TowerHallLayout), por onde quem está no lobby passeia em volta
--- da torre. A muralha e a ponte têm uma barreira invisível por cima
--- (ninguém pula para fora).
+-- da torre. O portão do jardim, virado para o lago, é a saída para o lado
+-- de fora. A muralha e a ponte têm uma barreira invisível por cima (só se
+-- sai pelo portão).
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
@@ -19,8 +20,11 @@ local COURTYARD_FRACTION = 0.76
 local RIM_SEGMENTS = 32
 local RIM_HEIGHT = 4
 local RIM_THICKNESS = 2
--- A muralha abre onde chega a ponte (ângulo do TowerHallLayout).
+-- A muralha abre onde chega a ponte (ângulo do TowerHallLayout) e no
+-- portão do jardim.
 local GATE_HALF_WIDTH = math.rad(7)
+local GARDEN_PILLAR = Vector3.new(3, 10, 3)
+local GARDEN_ARCH_THICKNESS = 0.8
 local TURRET_ANGLES = { math.rad(30), math.rad(150), math.rad(225), math.rad(315) }
 local TURRET_RADIUS = 6
 local TURRET_HEIGHT = 36
@@ -59,31 +63,67 @@ local function fence(model: Instance, from: Vector3, to: Vector3, height: number
 	wall.CanQuery = false
 end
 
--- Muralha em volta, com o vão do portão centrado em `gateAngle`. Os cantos
--- entre o fim da muralha e as grades da ponte também ficam fechados.
-local function buildRim(model: Instance, center: Vector3, radius: number, gateAngle: number, railEnds: { Vector3 })
+-- Vão na muralha, centrado em `angle`. Num vão com `railEnds` (o da ponte),
+-- os cantos entre o fim da muralha e as grades da ponte ficam fechados.
+type Gap = { angle: number, railEnds: { Vector3 }? }
+
+-- Muralha em volta, aberta nos vãos `gaps`.
+local function buildRim(model: Instance, center: Vector3, radius: number, gaps: { Gap })
 	local wallRadius = radius - RIM_THICKNESS
-	local segments = RIM_SEGMENTS - 1
-	local from = gateAngle + GATE_HALF_WIDTH
-	local step = (2 * math.pi - 2 * GATE_HALF_WIDTH) / segments
 	local lift = Vector3.new(0, RIM_HEIGHT, 0)
+	local turn = 2 * math.pi
 	local function ring(angle: number): Vector3
 		return center + Vector3.new(math.cos(angle), 0, math.sin(angle)) * wallRadius
 	end
-	for index = 1, segments do
-		local a, b = ring(from + (index - 1) * step), ring(from + index * step)
-		TowerKit.wall(model, a, b, RIM_HEIGHT, RIM_THICKNESS, COLORS.stoneDark, 2)
-		fence(model, a + lift, b + lift, FENCE_HEIGHT)
+	local sorted = table.clone(gaps)
+	table.sort(sorted, function(a: Gap, b: Gap): boolean
+		return a.angle % turn < b.angle % turn
+	end)
+	for index, gap in ipairs(sorted) do
+		local nextGap = sorted[index % #sorted + 1]
+		local from = gap.angle % turn + GATE_HALF_WIDTH
+		local to = nextGap.angle % turn - GATE_HALF_WIDTH
+		if to <= from then
+			to += turn
+		end
+		local segments = math.max(1, math.round(RIM_SEGMENTS * (to - from) / turn))
+		local step = (to - from) / segments
+		for segment = 1, segments do
+			local a, b = ring(from + (segment - 1) * step), ring(from + segment * step)
+			TowerKit.wall(model, a, b, RIM_HEIGHT, RIM_THICKNESS, COLORS.stoneDark, 2)
+			fence(model, a + lift, b + lift, FENCE_HEIGHT)
+		end
 	end
-	for _, rimEnd in ipairs({ ring(gateAngle + GATE_HALF_WIDTH), ring(gateAngle - GATE_HALF_WIDTH) }) do
-		local nearest = railEnds[1]
-		for _, railEnd in ipairs(railEnds) do
-			if (railEnd - rimEnd).Magnitude < (nearest - rimEnd).Magnitude then
-				nearest = railEnd
+	for _, gap in ipairs(gaps) do
+		local rails = gap.railEnds
+		if rails ~= nil then
+			for _, rimEnd in ipairs({ ring(gap.angle + GATE_HALF_WIDTH), ring(gap.angle - GATE_HALF_WIDTH) }) do
+				local nearest = rails[1]
+				for _, railEnd in ipairs(rails) do
+					if (railEnd - rimEnd).Magnitude < (nearest - rimEnd).Magnitude then
+						nearest = railEnd
+					end
+				end
+				fence(model, rimEnd, Vector3.new(nearest.X, rimEnd.Y, nearest.Z), RIM_HEIGHT + FENCE_HEIGHT)
 			end
 		end
-		fence(model, rimEnd, Vector3.new(nearest.X, rimEnd.Y, nearest.Z), RIM_HEIGHT + FENCE_HEIGHT)
 	end
+end
+
+-- Portão do jardim: dois pilares de pedra nas pontas da muralha e um arco
+-- de ferro por cima.
+local function buildGardenGate(model: Instance, center: Vector3, radius: number, angle: number)
+	local wallRadius = radius - RIM_THICKNESS
+	local tops: { Vector3 } = {}
+	for _, side in ipairs({ -1, 1 }) do
+		local edge = angle + side * GATE_HALF_WIDTH
+		local foot = center + Vector3.new(math.cos(edge), 0, math.sin(edge)) * wallRadius
+		part(model, "GardenGatePillar", GARDEN_PILLAR, CFrame.new(foot + Vector3.new(0, GARDEN_PILLAR.Y / 2, 0)), COLORS.stoneDark, Enum.Material.Cobblestone)
+		table.insert(tops, foot + Vector3.new(0, GARDEN_PILLAR.Y + GARDEN_ARCH_THICKNESS / 2, 0))
+	end
+	local span = (tops[2] - tops[1]).Magnitude + GARDEN_PILLAR.X
+	local arch = part(model, "GardenGateArch", Vector3.new(GARDEN_ARCH_THICKNESS, GARDEN_ARCH_THICKNESS, span), CFrame.lookAt((tops[1] + tops[2]) / 2, tops[2]), COLORS.stoneDark, Enum.Material.Metal)
+	TowerKit.decor(arch)
 end
 
 -- Pontas das grades da ponte do lado da ilha.
@@ -123,7 +163,7 @@ local function buildBridge(model: Instance, from: Vector3, to: Vector3)
 		if index > 0 and index < pillars - 1 then
 			local flat = Vector3.new(to.X - from.X, 0, to.Z - from.Z)
 			local pier = CFrame.lookAt(along, along + flat) * CFrame.new(0, -1.5 - BRIDGE_PIER_DEPTH / 2, 0)
-			TowerKit.decor(part(model, "BridgePier", Vector3.new(BRIDGE_WIDTH - 2, BRIDGE_PIER_DEPTH, BRIDGE_PIER_THICKNESS), pier, COLORS.stone, Enum.Material.Cobblestone))
+			part(model, "BridgePier", Vector3.new(BRIDGE_WIDTH - 2, BRIDGE_PIER_DEPTH, BRIDGE_PIER_THICKNESS), pier, COLORS.stone, Enum.Material.Cobblestone)
 		end
 	end
 	-- Telhado de duas águas de ardósia.
@@ -147,7 +187,12 @@ function TowerIsland.build(parent: Instance, center: Vector3)
 	model.Name = "TowerIsland"
 	buildGround(model, center, radius)
 	local hall = TowerHallLayout.get()
-	buildRim(model, center, radius, hall.gateAngle, railEnds(hall.bridgeTo, hall.bridgeFrom))
+	local gardenAngle = math.rad(RaceConfig.Tower.GardenGateDegrees)
+	buildRim(model, center, radius, {
+		{ angle = hall.gateAngle, railEnds = railEnds(hall.bridgeTo, hall.bridgeFrom) },
+		{ angle = gardenAngle },
+	})
+	buildGardenGate(model, center, radius, gardenAngle)
 	for _, angle in ipairs(TURRET_ANGLES) do
 		local base = center + Vector3.new(math.cos(angle), 0, math.sin(angle)) * (radius - TURRET_INSET)
 		buildTurret(model, base)

@@ -24,6 +24,9 @@ export type TowerConfig = {
 	TopBarrierHeight: number,
 	-- Raio da ilha de pedra em volta da torre.
 	IslandRadius: number,
+	-- Direção (graus, a partir de +X para +Z) do portão do jardim, a saída
+	-- da ilha para o lado de fora (virada para o lago).
+	GardenGateDegrees: number,
 }
 
 export type HazardConfig = {
@@ -116,6 +119,7 @@ local RaceConfig: RaceConfig = {
 		BarrierHeadroom = 1,
 		TopBarrierHeight = 14,
 		IslandRadius = 85,
+		GardenGateDegrees = 45,
 	}),
 	Hazards = table.freeze({
 		SlowInterval = 3,

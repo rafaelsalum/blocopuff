@@ -17,10 +17,12 @@ Avaliação no Studio em 24/10/2026:
 - **Lago** a leste do Casarão, visto das janelas da ala leste e da Torre.
 - **Montanhas** em anel em volta de tudo, com cristas irregulares e pedra no alto.
 - **Floresta de pinheiros** mais fechada perto do Casarão, rala nas encostas, com clareiras e algumas árvores secas, e sem árvore no gramado das construções, na água, em encosta íngreme ou acima da linha das árvores.
-- **Postes de lampião antigos** de ferro em volta do Casarão e no portão da Torre, acesos à noite.
+- **Postes de lampião antigos** de ferro em volta do Casarão e nos portões da Torre, acesos à noite.
+- **Sair para passear:** o portão do jardim, na muralha da ilha da Torre, abre para o lado de fora. Dele sai um caminho de pedra iluminado até o lago.
+- **Limite do mapa:** muralha invisível antes das montanhas, e cerca invisível em volta da Ala do Assassinato.
 - **Céu na hora de Brasília (UTC−3):** amanhecer rosado, dia claro, tarde dourada, pôr do sol e noite com luar, estrelas e névoa azulada. Todos no servidor veem a mesma hora. A luz de dentro do Casarão não muda: lá dentro quem ilumina são os lustres.
 
-Fora do escopo: a fachada do Casarão, que continua sendo a caixa de paredes de hoje.
+Fora do escopo: a fachada do Casarão, que continua sendo a caixa de paredes de hoje (sem porta de frente: o andar do lobby fica 16 studs acima do chão).
 
 ## Decisões
 
@@ -36,6 +38,7 @@ Fora do escopo: a fachada do Casarão, que continua sendo a caixa de paredes de 
   - `DayCycle`: a hora de Brasília e a luz de cada hora, passando aos poucos de um momento do dia para o outro.
 - Serviços:
   - `OutdoorService`: lê onde estão o prédio da Arena, o Casarão, o Saguão e a ponte da Torre, a ilha e a Ala do Assassinato, monta o terreno (`OutdoorTerrain`) e planta a floresta (`ForestAssets`). Roda em segundo plano depois que a Torre fica pronta. É só cenário: a partida não espera por ele.
+  - `OutdoorBounds`: a muralha do limite do mapa e a cerca da Ala do Assassinato.
   - `OutdoorLamps`: monta os postes e os acende e apaga pela hora (`LampLayout`, puro, diz onde ficam e quando acendem).
   - `DayCycleService`: a cada 5 s ajusta o sol (`ClockTime`), a luz do sol, a luz ambiente de fora e a névoa (`Atmosphere`). Para testar, o atributo `ClockOverride` (0 a 24) no `Lighting` fixa a hora.
 
@@ -53,11 +56,18 @@ Fora do escopo: a fachada do Casarão, que continua sendo a caixa de paredes de 
   - A noite agora tem luar mais forte (luz do sol 1,2 e luz ambiente de fora azulada, 140, 150, 185) e névoa mais clara, para as árvores e o chão aparecerem.
   - **Lampiões:** 41 postes antigos com base de pedra, poste de ferro preto e lanterna de vidro com chama. Ficam em volta do Casarão e da Arena, a 12 studs das paredes e a no máximo 30 entre si, menos no caminho da ponte. Há também um de cada lado do portão da Torre.
   - Cada lampião tem uma luz quente (alcance 30, sem sombra). Eles acendem às 17h36 e apagam às 6h24, pela hora de Brasília.
-- **Testes no Lune:** `TerrainShape` (24 checagens), `ForestPlan` (13), `DayCycle` (17) e `LampLayout` (12).
+- **Passeio do lado de fora (out/2026).**
+  - **Saída:** o portão do jardim fica na muralha da ilha da Torre, virado para o lago (`RaceConfig.Tower.GardenGateDegrees`, 45°), com pilares de pedra e arco de ferro. O caminho é Casarão → Saguão da Torre → ponte → ilha → portão do jardim.
+  - **Caminho do jardim:** de pedra (material Cobblestone do terreno, com beirada de terra, sem aplainar o chão), do portão até a margem do lago. Tem 2 lampiões no portão e outros 10 ao longo dele, alternando os lados.
+  - **Sólidos:** cada árvore dentro do limite ganhou um tronco invisível e sólido (832 no total). A base e o poste dos lampiões e os pilares da ponte também são sólidos.
+  - **Limite:** muralha invisível em anel com raio de 700 a partir do centro do mapa (antes das montanhas, que sobem a partir de 760), de 120 abaixo a 400 acima do chão. Ela tem 72 pedaços. A Ala do Assassinato tem uma cerca invisível a 4 studs das paredes, com 60 de altura, para quem passeia não entrar numa partida.
+  - **Recuperação do lobby:** só traz de volta quem cai abaixo de y ≈ 70. O chão de fora fica entre 98 (vale da Ala) e 120, então passear não dispara nada.
+  - **Studio:** o personagem saiu pelo portão andando. Indo para fora, parou a 698 studs do centro, colado na muralha, mesmo pulando. Também parou ao esbarrar num tronco. Sem erros no console.
+- **Testes no Lune:** `TerrainShape` (30 checagens), `ForestPlan` (14), `DayCycle` (17) e `LampLayout` (12).
 - **Studio:**
   - Vistas conferidas às 10h, 12h, 17h36 e 21h. Na noite nova dá para ver o chão, as árvores, a Torre e a ponte, com as poças de luz dos lampiões.
   - Os lampiões ficam apagados ao meio-dia e às 6h30, e acesos às 18h e na hora real (20h40).
   - Pela janela do Saguão da Torre se vê a floresta.
   - A leitura dos voxels não achou terreno dentro da Arena, do Casarão nem da área da Ala do Assassinato. Sem erros no console.
 
-**Pendências:** o desempenho em celular com a floresta inteira ainda precisa de um playtest, e ainda falta jogar uma partida de Assassino com o terreno em volta da Ala.
+**Pendências:** ainda precisam de um playtest o desempenho em celular com a floresta inteira e uma partida de Assassino com o terreno em volta da Ala. Também falta entrar na fila de uma partida estando do lado de fora.

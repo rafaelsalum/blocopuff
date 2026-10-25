@@ -75,6 +75,16 @@ local flat = TerrainShape.materialAt(shape, 200, 200, 101, 0.1)
 check("flat ground is grassy", flat == "Grass" or flat == "LeafyGrass" or flat == "Ground")
 check("flat slope is measured as gentle", TerrainShape.slopeAt(shape, 10, 10, 4) < 0.05)
 
+-- Caminho de pedra: muda só o material, com uma beirada de terra.
+local PATH: TerrainShape.Path = { ax = 200, az = -200, bx = 300, bz = -200, halfWidth = 3 }
+local withPath = TerrainShape.new(TERRAIN, { HOME }, {}, { PATH })
+check("on the path is stone", TerrainShape.materialAt(withPath, 250, -201, 101, 0.1) == "Cobblestone")
+check("path edge is dirt", TerrainShape.materialAt(withPath, 250, -204, 101, 0.1) == "Ground")
+check("path distance is zero on it", TerrainShape.pathDistance(withPath, 250, -198) == 0)
+check("path distance grows away from it", math.abs(TerrainShape.pathDistance(withPath, 250, -190) - 7) < 1e-6)
+check("path does not flatten the ground", TerrainShape.heightAt(withPath, 250, -200) == TerrainShape.heightAt(shape, 250, -200))
+check("no paths means no path nearby", TerrainShape.pathDistance(shape, 250, -200) == math.huge)
+
 print(`TerrainShape: {passed} passed, {failures} failed`)
 if failures > 0 then
 	error("TerrainShape tests failed")

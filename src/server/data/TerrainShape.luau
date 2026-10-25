@@ -54,10 +54,21 @@ export type Carve = {
 	maxZ: number,
 }
 
+-- Caminho de pedra de (ax, az) a (bx, bz), com meia largura `halfWidth`
+-- (não aplaina o chão: só troca o material).
+export type Path = {
+	ax: number,
+	az: number,
+	bx: number,
+	bz: number,
+	halfWidth: number,
+}
+
 export type Shape = {
 	terrain: Terrain,
 	zones: { Zone },
 	carves: { Carve },
+	paths: { Path },
 }
 
 -- Até onde a margem do lago desce suave até a água (fração do raio).
@@ -75,14 +86,21 @@ local DIRT_THRESHOLD = 0.42
 -- Inclinações (subida por stud) em que a encosta vira pedra.
 local SLATE_SLOPE = 0.7
 local ROCK_SLOPE = 1.1
+-- Faixa de terra na beira dos caminhos de pedra.
+local PATH_VERGE = 1.5
 -- Alturas acima do chão em que a montanha perde a grama.
 local HIGHLAND_HEIGHT = 120
 local SUMMIT_HEIGHT = 210
 
 local TerrainShape = {}
 
-function TerrainShape.new(terrain: Terrain, zones: { Zone }, carves: { Carve }): Shape
-	return table.freeze({ terrain = terrain, zones = table.freeze(table.clone(zones)), carves = table.freeze(table.clone(carves)) })
+function TerrainShape.new(terrain: Terrain, zones: { Zone }, carves: { Carve }, paths: { Path }?): Shape
+	return table.freeze({
+		terrain = terrain,
+		zones = table.freeze(table.clone(zones)),
+		carves = table.freeze(table.clone(carves)),
+		paths = table.freeze(table.clone(paths or {})),
+	})
 end
 
 local function ease(t: number): number
@@ -91,6 +109,15 @@ end
 
 local function mix(a: number, b: number, t: number): number
 	return a + (b - a) * t
+end
+
+-- Distância do ponto (x, z) até o segmento de (ax, az) a (bx, bz).
+local function distanceToSegment(x: number, z: number, ax: number, az: number, bx: number, bz: number): number
+	local sx, sz = bx - ax, bz - az
+	local lengthSquared = sx * sx + sz * sz
+	local t = if lengthSquared > 0 then math.clamp(((x - ax) * sx + (z - az) * sz) / lengthSquared, 0, 1) else 0
+	local dx, dz = x - (ax + sx * t), z - (az + sz * t)
+	return math.sqrt(dx * dx + dz * dz)
 end
 
 -- Distância do ponto até a zona (0 dentro dela).
@@ -103,11 +130,16 @@ local function distanceOutside(zone: Zone, x: number, z: number): number
 		local dx, dz = x - zone.ax, z - zone.az
 		return math.max(0, math.sqrt(dx * dx + dz * dz) - zone.radius)
 	end
-	local sx, sz = zone.bx - zone.ax, zone.bz - zone.az
-	local lengthSquared = sx * sx + sz * sz
-	local t = if lengthSquared > 0 then math.clamp(((x - zone.ax) * sx + (z - zone.az) * sz) / lengthSquared, 0, 1) else 0
-	local dx, dz = x - (zone.ax + sx * t), z - (zone.az + sz * t)
-	return math.max(0, math.sqrt(dx * dx + dz * dz) - zone.radius)
+	return math.max(0, distanceToSegment(x, z, zone.ax, zone.az, zone.bx, zone.bz) - zone.radius)
+end
+
+-- Distância do ponto até o caminho de pedra mais perto (0 em cima dele).
+function TerrainShape.pathDistance(shape: Shape, x: number, z: number): number
+	local nearest = math.huge
+	for _, path in ipairs(shape.paths) do
+		nearest = math.min(nearest, math.max(0, distanceToSegment(x, z, path.ax, path.az, path.bx, path.bz) - path.halfWidth))
+	end
+	return nearest
 end
 
 -- Distância até o centro do lago, em raios (com a margem irregular).
@@ -200,6 +232,12 @@ function TerrainShape.materialAt(shape: Shape, x: number, z: number, height: num
 	local lake = TerrainShape.lakeDistance(shape, x, z)
 	if lake < 1 + SHORE_WIDTH / 3 and height < terrain.Lake.WaterY + 1.5 then
 		return if lake < 1 then "Mud" else "Ground"
+	end
+	local path = TerrainShape.pathDistance(shape, x, z)
+	if path == 0 then
+		return "Cobblestone"
+	elseif path < PATH_VERGE then
+		return "Ground"
 	end
 	if slope > ROCK_SLOPE then
 		return "Rock"

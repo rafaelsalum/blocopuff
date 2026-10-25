@@ -3,7 +3,8 @@
 -- Postes de lampião antigos do lado de fora: base de pedra, poste de ferro
 -- preto e lanterna de vidro com uma chama dentro. Acendem ao entardecer e
 -- apagam de manhã, seguindo a hora do céu (Lighting.ClockTime, ajustada pelo
--- DayCycleService). Enfeite: não colidem.
+-- DayCycleService). A base e o poste são sólidos (quem passeia lá fora
+-- esbarra neles); a lanterna é enfeite.
 
 local Lighting = game:GetService("Lighting")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -63,10 +64,12 @@ local function build(parent: Instance, foot: Vector3): Lamp
 	local model = Instance.new("Model")
 	model.Name = "OutdoorLamp"
 	local height = settings.PostHeight
-	part(model, "Plinth", PLINTH_SIZE, CFrame.new(foot + Vector3.new(0, PLINTH_SIZE.Y / 2, 0)), STONE, Enum.Material.Cobblestone)
+	local plinth = part(model, "Plinth", PLINTH_SIZE, CFrame.new(foot + Vector3.new(0, PLINTH_SIZE.Y / 2, 0)), STONE, Enum.Material.Cobblestone)
+	plinth.CanCollide = true
 	local postBase = foot.Y + PLINTH_SIZE.Y
 	local post = part(model, "Post", Vector3.new(height, POST_WIDTH, POST_WIDTH), CFrame.new(foot.X, postBase + height / 2, foot.Z) * CFrame.Angles(0, 0, math.pi / 2), IRON, Enum.Material.Metal)
 	post.Shape = Enum.PartType.Cylinder
+	post.CanCollide = true
 	local collar = part(model, "Collar", Vector3.new(0.4, COLLAR_WIDTH, COLLAR_WIDTH), CFrame.new(foot.X, postBase + height, foot.Z) * CFrame.Angles(0, 0, math.pi / 2), IRON, Enum.Material.Metal)
 	collar.Shape = Enum.PartType.Cylinder
 
