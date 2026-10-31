@@ -111,11 +111,25 @@ local function boxZone(minX: number, minZ: number, maxX: number, maxZ: number, y
 	return { kind = "Box", ax = minX, az = minZ, bx = maxX, bz = maxZ, radius = 0, y = y, blend = blend }
 end
 
+-- Caixa alinhada aos eixos do mundo que contém uma caixa girada (a Sala do
+-- Cofre, por exemplo, é montada girada 90°: lida sem a rotação, o terreno
+-- era escavado no lugar errado e entrava pelas paredes dela).
+local function worldBox(frame: CFrame, size: Vector3): (CFrame, Vector3)
+	local right, up, back = frame.RightVector, frame.UpVector, frame.LookVector
+	local function reach(axis: number): number
+		local function component(vector: Vector3): number
+			return if axis == 1 then vector.X elseif axis == 2 then vector.Y else vector.Z
+		end
+		return math.abs(component(right)) * size.X + math.abs(component(up)) * size.Y + math.abs(component(back)) * size.Z
+	end
+	return CFrame.new(frame.Position), Vector3.new(reach(1), reach(2), reach(3))
+end
+
 local function modelBox(model: Instance?): (CFrame?, Vector3?)
 	if model == nil or not model:IsA("Model") then
 		return nil, nil
 	end
-	return model:GetBoundingBox()
+	return worldBox(model:GetBoundingBox())
 end
 
 -- Pontos do caminho da frente: do pé da escadaria da porta principal até a
@@ -152,8 +166,9 @@ local function buildingCarves(building: Instance?, groundY: number): { Carve }
 	end
 	local function partBox(part: Instance?, inset: number, top: number?)
 		if part ~= nil and part:IsA("BasePart") then
-			local low, high = part.Position - part.Size / 2, part.Position + part.Size / 2
-			table.insert(carves, { minX = low.X + inset, maxX = high.X - inset, minZ = low.Z + inset, maxZ = high.Z - inset, top = top })
+			local center, size = worldBox(part.CFrame, part.Size)
+			local low, high = center.Position - size / 2, center.Position + size / 2
+			table.insert(carves, { minX = low.X + inset, maxX = high.X - inset, minZ = low.Z + inset, maxZ = high.Z - inset, top = top, walled = true })
 		end
 	end
 	partBox(building:FindFirstChild("Ceiling"), GameConfig.Building.WallThickness, nil)
@@ -169,7 +184,10 @@ local function buildingCarves(building: Instance?, groundY: number): { Carve }
 				partBox(ceiling, 0, nil)
 			end
 			local low, high = center.Position - size / 2, center.Position + size / 2
-			table.insert(carves, { minX = low.X, maxX = high.X, minZ = low.Z, maxZ = high.Z, top = math.min(ceilingTop, groundY - BURIED_ROOF) })
+			-- O terreno por cima desce até meia célula abaixo da base dele:
+			-- a escavação vai meia célula acima do teto da sala.
+			local reach = ceilingTop + OutdoorConfig.Terrain.Resolution / 2
+			table.insert(carves, { minX = low.X, maxX = high.X, minZ = low.Z, maxZ = high.Z, top = math.min(reach, groundY - BURIED_ROOF), walled = true })
 		end
 	end
 	return carves
@@ -184,14 +202,16 @@ local function buildingAprons(building: Instance?, groundY: number): { { min: Ve
 	if building == nil or main == nil or not main:IsA("BasePart") then
 		return aprons
 	end
-	local mainMin = Vector2.new(main.Position.X - main.Size.X / 2, main.Position.Z - main.Size.Z / 2)
-	local mainMax = Vector2.new(main.Position.X + main.Size.X / 2, main.Position.Z + main.Size.Z / 2)
+	local mainCenter, mainSize = worldBox(main.CFrame, main.Size)
+	local mainMin = Vector2.new(mainCenter.X - mainSize.X / 2, mainCenter.Z - mainSize.Z / 2)
+	local mainMax = Vector2.new(mainCenter.X + mainSize.X / 2, mainCenter.Z + mainSize.Z / 2)
 	for _, roomName in ipairs(BUILDING_SIDE_ROOMS) do
 		local room = building:FindFirstChild(roomName)
 		local ceiling = if room ~= nil then room:FindFirstChild("Ceiling") else nil
 		if ceiling ~= nil and ceiling:IsA("BasePart") and ceiling.Position.Y + ceiling.Size.Y / 2 > groundY then
-			local low = Vector2.new(ceiling.Position.X - ceiling.Size.X / 2, ceiling.Position.Z - ceiling.Size.Z / 2)
-			local high = Vector2.new(ceiling.Position.X + ceiling.Size.X / 2, ceiling.Position.Z + ceiling.Size.Z / 2)
+			local center, size = worldBox(ceiling.CFrame, ceiling.Size)
+			local low = Vector2.new(center.X - size.X / 2, center.Z - size.Z / 2)
+			local high = Vector2.new(center.X + size.X / 2, center.Z + size.Z / 2)
 			local w = APRON_WIDTH
 			-- As faces em Z cobrem também os cantos.
 			local strips = {

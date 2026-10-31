@@ -55,6 +55,9 @@ export type Carve = {
 	minZ: number,
 	maxZ: number,
 	top: number?,
+	-- Sala fechada por paredes: o terreno em volta fica ralo para não furar
+	-- a parede (sem isto, um piso cobre a borda).
+	walled: boolean?,
 }
 
 -- Caminho de pedra de (ax, az) a (bx, bz), com meia largura `halfWidth`
@@ -208,6 +211,19 @@ function TerrainShape.carveTop(shape: Shape, x: number, z: number, half: number)
 	local top: number? = nil
 	for _, carve in ipairs(shape.carves) do
 		if x + half > carve.minX and x - half < carve.maxX and z + half > carve.minZ and z - half < carve.maxZ then
+			local reach = carve.top or math.huge
+			top = if top == nil then reach else math.max(top, reach)
+		end
+	end
+	return top
+end
+
+-- Até que altura a coluna em (x, z) encosta (com `half` de folga) numa
+-- escavação de sala fechada: nil se não encosta em nenhuma.
+function TerrainShape.edgeTop(shape: Shape, x: number, z: number, half: number): number?
+	local top: number? = nil
+	for _, carve in ipairs(shape.carves) do
+		if carve.walled and x + half > carve.minX and x - half < carve.maxX and z + half > carve.minZ and z - half < carve.maxZ then
 			local reach = carve.top or math.huge
 			top = if top == nil then reach else math.max(top, reach)
 		end

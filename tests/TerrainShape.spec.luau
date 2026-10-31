@@ -68,6 +68,15 @@ check("open pit empties the whole column", TerrainShape.carveTop(buried, 0, 0, 2
 check("outside every carve nothing is dug", TerrainShape.carveTop(buried, 200, 200, 2) == nil)
 check("column touching both keeps the deeper dig", TerrainShape.carveTop(TerrainShape.new(TERRAIN, { HOME }, { ROOM, { minX = 108, maxX = 120, minZ = 100, maxZ = 110 } }), 109, 105, 0) == math.huge)
 
+-- Vizinhas de sala com paredes: a coluna fica rala até o topo da escavação
+-- da vizinha; escavação sem paredes (piso que cobre a borda) não conta.
+local WALLED: TerrainShape.Carve = { minX = 100, maxX = 110, minZ = 100, maxZ = 110, top = 90, walled = true }
+local walls = TerrainShape.new(TERRAIN, { HOME }, { PIT, WALLED })
+check("next to a walled room the column thins up to its dig", TerrainShape.edgeTop(walls, 112, 105, 6) == 90)
+check("far from a walled room nothing thins", TerrainShape.edgeTop(walls, 120, 105, 6) == nil)
+check("a carve without walls does not thin its neighbors", TerrainShape.edgeTop(walls, 32, 0, 6) == nil)
+check("next to a walled pit the whole column thins", TerrainShape.edgeTop(TerrainShape.new(TERRAIN, { HOME }, { { minX = -30, maxX = 30, minZ = -30, maxZ = 30, walled = true } }), 32, 0, 6) == math.huge)
+
 -- Distância até a construção mais perto.
 check("clearance is zero on a building", TerrainShape.clearance(shape, 0, 0) == 0)
 check("clearance grows away from buildings", TerrainShape.clearance(shape, 100, 0) > 40)

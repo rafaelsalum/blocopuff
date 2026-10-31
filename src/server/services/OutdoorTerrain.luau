@@ -36,6 +36,10 @@ local WATER_WAVE_SPEED = 6
 local DEEP_DEPTH = 8
 -- Distância (studs) para medir a inclinação.
 local SLOPE_STEP = 4
+-- O terreno liso desenha uma célula cheia até meia célula dentro da vizinha
+-- vazia: encostado numa sala escavada, ele furava a parede e aparecia lá
+-- dentro. Com meia ocupação a superfície volta para a borda da célula.
+local EDGE_OCCUPANCY = 0.5
 
 local OutdoorTerrain = {}
 
@@ -51,18 +55,22 @@ local function setLook(terrain: Terrain)
 end
 
 -- `floor`: abaixo dela a coluna fica vazia (uma sala enterrada embaixo).
-type Column = { height: number, floor: number, material: Enum.Material, carved: boolean, wet: boolean }
+-- `edge`: abaixo dela uma coluna vizinha está escavada (a coluna fica com
+-- meia ocupação).
+type Column = { height: number, floor: number, edge: number, material: Enum.Material, carved: boolean, wet: boolean }
 
 local function sampleColumn(shape: Shape, x: number, z: number, half: number): Column
 	local carveTop = TerrainShape.carveTop(shape, x, z, half)
 	if carveTop == math.huge then
-		return { height = -math.huge, floor = -math.huge, material = Enum.Material.Air, carved = true, wet = false }
+		return { height = -math.huge, floor = -math.huge, edge = -math.huge, material = Enum.Material.Air, carved = true, wet = false }
 	end
+	-- Encosta numa coluna vizinha (inclusive na diagonal) escavada de sala?
+	local edge = TerrainShape.edgeTop(shape, x, z, 3 * half) or -math.huge
 	local height = TerrainShape.heightAt(shape, x, z)
 	local slope = TerrainShape.slopeAt(shape, x, z, SLOPE_STEP)
 	local name = TerrainShape.materialAt(shape, x, z, height, slope)
 	local wet = TerrainShape.inLake(shape, x, z) and height < shape.terrain.Lake.WaterY
-	return { height = height, floor = carveTop or -math.huge, material = (Enum.Material :: any)[name], carved = false, wet = wet }
+	return { height = height, floor = carveTop or -math.huge, edge = edge, material = (Enum.Material :: any)[name], carved = false, wet = wet }
 end
 
 -- Escreve o pedaço que começa em (x0, z0), com `cells` colunas de lado.
@@ -103,7 +111,7 @@ local function writeChunk(terrain: Terrain, shape: Shape, settings: Settings, x0
 					local solid = math.clamp((column.height - bottom) / resolution, 0, 1) - math.clamp((column.floor - bottom) / resolution, 0, 1)
 					if solid > 0 then
 						material = if column.height - bottom > DEEP_DEPTH + resolution then Enum.Material.Ground else column.material
-						occupancy = solid
+						occupancy = if bottom < column.edge then math.min(solid, EDGE_OCCUPANCY) else solid
 					elseif column.wet and bottom < waterY then
 						material = Enum.Material.Water
 						occupancy = math.clamp((waterY - bottom) / resolution, 0, 1)

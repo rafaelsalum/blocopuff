@@ -80,6 +80,12 @@ As fachadas são medidas com raios de fora para dentro, numa grade de 2 studs (`
 - **Escavação por sala.** O terreno não é mais escavado na caixa inteira do prédio da Arena, só sala por sala. Os nichos enterrados só tiram o terreno abaixo de 4 studs do chão (`Carve.top`, `TerrainShape.carveTop`).
 - **Calçada de pedra.** As pontas dos corredores secretos saem do chão. Como o terreno é escavado em células de 4 studs, ficava ali um vão sem fundo encostado na parede: quem caía voltava para dentro. Agora uma calçada de pedra sólida (`BuildingAprons`, no `OutdoorService`) cobre essas faces.
 - **Conferência no Studio.** Raios do céu em volta de todas as construções: 0 buracos em 23.622 pontos.
+- **Terra furando as paredes do andar de baixo.** O terreno liso desenha uma célula cheia até meia célula (2 studs) para dentro da vizinha vazia. Por isso a grama e a terra apareciam nas paredes do andar de baixo da Arena e da Sala do Cofre. Correções:
+  - as colunas encostadas numa sala com paredes (`Carve.walled`, `TerrainShape.edgeTop`) ficam com meia ocupação, e a superfície volta para dentro da parede;
+  - a escavação de sala enterrada vai meia célula acima do teto;
+  - as caixas das salas são lidas com a rotação (a Sala do Cofre é montada girada 90°).
+
+  A Ala do Assassinato não usa isso: o piso dela cobre a borda.
 - **Embasamento.** O embasamento de pedra das fachadas agora colide. Era só enfeite, e por isso dava para atravessar a parede.
 
 ### Janelas de verdade
